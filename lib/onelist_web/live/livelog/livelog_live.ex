@@ -17,6 +17,8 @@ defmodule OnelistWeb.LivelogLive do
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Publisher.subscribe()
+      # Refresh relative timestamps every 30 seconds
+      :timer.send_interval(30_000, self(), :refresh_timestamps)
     end
 
     messages = Livelog.list_recent_messages(@messages_per_page)
@@ -27,6 +29,8 @@ defmodule OnelistWeb.LivelogLive do
      |> assign(:messages, messages)
      |> assign(:stats, stats)
      |> assign(:loading_more, false)
+     |> assign(:tick, 0)
+     |> assign(:messages_per_page, @messages_per_page)
      |> assign(:page_title, "Livelog — Stream's Conversations")}
   end
 
@@ -48,6 +52,12 @@ defmodule OnelistWeb.LivelogLive do
      |> assign(:messages, messages)
      |> assign(:stats, stats)
      |> push_event("new-message", %{id: message.id})}
+  end
+
+  @impl true
+  def handle_info(:refresh_timestamps, socket) do
+    # Bump tick to force re-render of timestamps
+    {:noreply, assign(socket, :tick, socket.assigns.tick + 1)}
   end
 
   @impl true
@@ -110,7 +120,10 @@ defmodule OnelistWeb.LivelogLive do
       <!-- Messages -->
       <main class="max-w-4xl mx-auto px-4 py-6">
         <div class="space-y-4" id="messages-list" phx-update="stream">
-          <%= for message <- @messages do %>
+          <%= for {message, idx} <- Enum.with_index(@messages) do %>
+            <%= if idx == 0 or not same_day?(message.original_timestamp, Enum.at(@messages, idx - 1).original_timestamp) do %>
+              <.day_separator date={message.original_timestamp} />
+            <% end %>
             <.message_card message={message} />
           <% end %>
         </div>
@@ -148,6 +161,16 @@ defmodule OnelistWeb.LivelogLive do
           </p>
         </div>
       </footer>
+    </div>
+    """
+  end
+
+  defp day_separator(assigns) do
+    ~H"""
+    <div class="flex items-center gap-4 py-2">
+      <div class="flex-1 h-px bg-gray-700"></div>
+      <span class="text-sm font-medium text-gray-400"><%= format_date(@date) %></span>
+      <div class="flex-1 h-px bg-gray-700"></div>
     </div>
     """
   end
@@ -202,7 +225,17 @@ defmodule OnelistWeb.LivelogLive do
   defp role_name_color(_), do: "text-gray-400"
 
   defp format_timestamp(dt) do
-    Calendar.strftime(dt, "%Y-%m-%d %H:%M UTC")
+    # Simple time format: 2:45 PM
+    Calendar.strftime(dt, "%-I:%M %p")
+  end
+
+  defp format_date(dt) do
+    # Full date for day separators: Saturday, February 1, 2026
+    Calendar.strftime(dt, "%A, %B %-d, %Y")
+  end
+
+  defp same_day?(dt1, dt2) do
+    Date.compare(DateTime.to_date(dt1), DateTime.to_date(dt2)) == :eq
   end
 
   defp format_content(content) when is_binary(content) do
@@ -222,6 +255,4 @@ defmodule OnelistWeb.LivelogLive do
       "<span class=\"px-1 py-0.5 bg-red-900/50 text-red-400 rounded text-sm\">\\0</span>"
     )
   end
-
-  defp messages_per_page, do: @messages_per_page
 end
