@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --status-active: #22c55e;
+      --status-planning: #eab308;
+      --status-future: #6366f1;
+      --status-deprecated: #6b7280;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+    
+    .meta {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    
+    .toc a {
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      background: var(--card-bg);
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+    
+    .toc a:hover {
+      color: var(--text);
+      background: var(--border);
+    }
+    
+    section {
+      margin-bottom: 3rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .count {
+      background: var(--border);
+      padding: 0.2rem 0.6rem;
+      border-radius: 1rem;
+      font-size: 0.875rem;
+      font-weight: normal;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1rem;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    
+    a.card {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .card.deprecated {
+      opacity: 0.6;
+    }
+    
+    .card.deprecated:hover {
+      border-color: var(--status-deprecated);
+    }
+    
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    
+    .card-filename {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: monospace;
+      margin-bottom: 0.75rem;
+    }
+    
+    .card-summary {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    
+    .card-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      background: var(--border);
+    }
+    
+    .badge.active { background: rgba(34, 197, 94, 0.2); color: var(--status-active); }
+    .badge.planning { background: rgba(234, 179, 8, 0.2); color: var(--status-planning); }
+    .badge.future { background: rgba(99, 102, 241, 0.2); color: var(--status-future); }
+    .badge.deprecated { background: rgba(107, 114, 128, 0.2); color: var(--status-deprecated); }
+    .badge.high { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .badge.ui { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
+    
+    footer {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-hover); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🗺️ Onelist Roadmap</h1>
+    <p class="subtitle">Planning documents for Onelist development</p>
+    <p class="meta">72 documents · Last updated: 2026-01-31</p>
+    <nav class="toc">
+      <a href="#agent-plans">🤖 Agent Plans</a>
+<a href="#schema-data-model">🗄️ Schema & Data Model</a>
+<a href="#infrastructure-deployment">🏗️ Infrastructure & Deployment</a>
+<a href="#feature-plans">✨ Feature Plans</a>
+<a href="#guides-reference">📚 Guides & Reference</a>
+<a href="#competitive-analysis">🔍 Competitive Analysis</a>
+<a href="#future-roadmap">🔮 Future Roadmap</a>
+<a href="#ui-plans">🎨 UI Plans</a>
+<a href="#project-planning">📋 Project Planning</a>
+<a href="#other">📄 Other</a>
+<a href="#archived-deprecated">🗃️ Archived/Deprecated</a>
+<a href="#internal-working-docs">🔧 Internal Working Docs</a>
+    </nav>
+  </header>
+
+  <section id="agent-plans">
+  <h2>🤖 Agent Plans <span class="count">5</span></h2>
+  <div class="grid">
+    <a href="/roadmap/asset_enrichment_agent_plan" class="card">
+  <div class="card-title">Asset Enrichment Agent Development Plan</div>
+  <div class="card-filename">asset_enrichment_agent_plan.md</div>
+  <div class="card-summary">The Asset Enrichment Agent transforms raw uploaded assets (images, audio, video, documents) into richly indexed, searchable, and actionable knowledge. It extracts metadata, generates descriptions, transcribes audio, identifies action items, and conne...</div>
+  <div class="card-meta">
+    <span class="badge active">Active - MVP Component</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+<a href="/roadmap/feeder_agent_plan" class="card">
+  <div class="card-title">Feeder Agent Roadmap</div>
+  <div class="card-filename">feeder_agent_plan.md</div>
+  <div class="card-summary">The Feeder Agent is Onelist's unified gateway for external content. It handles all data ingestion from outside sources—whether one-time imports or continuous synchronization—converting foreign formats into Onelist entries and orchestrating post-impor...</div>
+  <div class="card-meta">
+    <span class="badge future">200, body: body}} -&gt;</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/reader_agent_plan" class="card">
+  <div class="card-title">Reader Agent Development Plan</div>
+  <div class="card-filename">reader_agent_plan.md</div>
+  <div class="card-summary">The Reader Agent is Onelist's content analysis and atomic memory extraction service. It transforms raw entry content into structured atomic memories, generates summaries, suggests tags, and handles memory compaction.</div>
+  <div class="card-meta">
+    <span class="badge active">Active - MVP Component</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+<a href="/roadmap/searcher_agent_plan" class="card">
+  <div class="card-title">Searcher Agent Development Plan</div>
+  <div class="card-filename">searcher_agent_plan.md</div>
+  <div class="card-summary">The Searcher Agent is Onelist's embedding generation and semantic search service. It transforms text content into vector embeddings, maintains the vector index, and provides hybrid search (combining full-text and semantic) capabilities.</div>
+  <div class="card-meta">
+    <span class="badge active">Active - MVP Component</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+<a href="/roadmap/unified_agent_modules" class="card">
+  <div class="card-title">Unified Agent Modules</div>
+  <div class="card-filename">unified_agent_modules.md</div>
+  <div class="card-summary">Document Version: 2026-01-30 Status: Planning Purpose: Shared modules across all Onelist agents</div>
+  <div class="card-meta">
+    <span class="badge planning">Planning</span>
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="schema-data-model">
+  <h2>🗄️ Schema & Data Model <span class="count">8</span></h2>
+  <div class="grid">
+    <a href="/roadmap/future_roadmap_ai_memory_patterns" class="card">
+  <div class="card-title">AI Memory Patterns for Onelist</div>
+  <div class="card-filename">future_roadmap_ai_memory_patterns.md</div>
+  <div class="card-summary">Status: Core Architecture Date: 2026-01-28</div>
+  <div class="card-meta">
+    <span class="badge future">Core Architecture</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/ai_plan_type_immutable_memory" class="card">
+  <div class="card-title">AI Plan Type: Immutable Hash-Chained Memory</div>
+  <div class="card-filename">ai_plan_type_immutable_memory.md</div>
+  <div class="card-summary">AI agents need memory they can trust. Unlike human users who can verify their own memories, AI agents wake up fresh each session and must rely entirely on external storage. This creates a trust problem: how does an AI know its memories haven't been t...</div>
+  <div class="card-meta">
+    <span class="badge active">Active - Partially Implemented</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_core_taxonomy" class="card">
+  <div class="card-title">Addendum: Onelist Core Platform Enhancement - Core Taxonomy System</div>
+  <div class="card-filename">future_roadmap_core_taxonomy.md</div>
+  <div class="card-summary">Status: Post-MVP (Planned for Onelist v2.0) Date: May 23, 2025 (Updated: 2026-01-29) Priority: Medium - Post-MVP Enhancement</div>
+  <div class="card-meta">
+    <span class="badge future">Post-MVP (Planned for Onelist v2.0)</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/competitive_analysis_supermemory" class="card">
+  <div class="card-title">Competitive Analysis: Supermemory vs Onelist</div>
+  <div class="card-filename">competitive_analysis_supermemory.md</div>
+  <div class="card-summary">Supermemory is a universal memory API for AI applications that provides state-of-the-art memory capabilities with sub-300ms retrieval and graph-based knowledge representation. While Supermemory positions itself as pure AI infrastructure (an API/servi...</div>
+  <div class="card-meta">
+    <span class="badge future">Strategic Analysis</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/memory_budget_architecture" class="card">
+  <div class="card-title">Memory Budget Architecture</div>
+  <div class="card-filename">memory_budget_architecture.md</div>
+  <div class="card-summary">Document Version: 2026-01-31 Status: Draft - Synthesis Document Related: riveragentplan.md, Rata's Attention Budget Allocation paper (Moltbook)</div>
+  <div class="card-meta">
+    <span class="badge future">Draft - Synthesis Document</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/ai_memory_evolution" class="card">
+  <div class="card-title">Onelist AI Memory Evolution: Comprehensive Planning Document</div>
+  <div class="card-filename">ai_memory_evolution.md</div>
+  <div class="card-summary">Created: 2026-01-28 Last Updated: 2026-01-28 Status: Active Planning</div>
+  <div class="card-meta">
+    <span class="badge future">████████████░░░░░░░░  67%                                   │</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/openclaw_memory_persistence_plan" class="card">
+  <div class="card-title">OpenClaw Memory Persistence Enhancement</div>
+  <div class="card-filename">openclaw_memory_persistence_plan.md</div>
+  <div class="card-summary">status: active createdat: 2026-01-30 priority: high</div>
+  <div class="card-meta">
+    <span class="badge active">active</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/tag_system_plan" class="card">
+  <div class="card-title">Tag System Implementation Plan</div>
+  <div class="card-filename">tag_system_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-29 Status: Active - MVP Component Priority: HIGH Decisions Finalized: 2026-01-29</div>
+  <div class="card-meta">
+    <span class="badge active">Active - MVP Component</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="infrastructure-deployment">
+  <h2>🏗️ Infrastructure & Deployment <span class="count">6</span></h2>
+  <div class="grid">
+    <a href="/roadmap/asset_storage_plan" class="card">
+  <div class="card-title">Asset Management with Flexible Multi-Backend Storage</div>
+  <div class="card-filename">asset_storage_plan.md</div>
+  <div class="card-summary">Overview</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/corporate_services_plan" class="card">
+  <div class="card-title">Onelist Corporate Services Plan</div>
+  <div class="card-filename">corporate_services_plan.md</div>
+  <div class="card-summary">Onelist Corporate Services is the cloud infrastructure that supports Onelist Core, Desktop, and Web Access deployments. These services are not part of the self-hosted codebase - they are operated exclusively by Onelist and provide value-added functio...</div>
+  <div class="card-meta">
+    <span class="badge planning">Planning</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+<a href="/roadmap/mvp_launch_plan" class="card">
+  <div class="card-title">Onelist MVP Launch Plan</div>
+  <div class="card-filename">mvp_launch_plan.md</div>
+  <div class="card-summary">1.1 Vision</div>
+  <div class="card-meta">
+    <span class="badge active">Active Development</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/mac_desktop_app_plan" class="card">
+  <div class="card-title">Onelist Mac Desktop App Development Plan</div>
+  <div class="card-filename">mac_desktop_app_plan.md</div>
+  <div class="card-summary">1.1 Vision</div>
+  <div class="card-meta">
+    <span class="badge planning">Planning</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/static_site_desktop_updates" class="card">
+  <div class="card-title">Static Site Desktop Page Updates</div>
+  <div class="card-filename">static_site_desktop_updates.md</div>
+  <div class="card-summary">Document: staticsite/features/desktop.html Created: 2026-01-29 Purpose: Align marketing with technical decisions</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/vps_backup_plan" class="card">
+  <div class="card-title">VPS Backup Plan: stream.onelist.my</div>
+  <div class="card-filename">vps_backup_plan.md</div>
+  <div class="card-summary">Purpose: Comprehensive backup strategy for Stream's home VPS to ensure recovery from any failure, attack, or data loss.</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="feature-plans">
+  <h2>✨ Feature Plans <span class="count">9</span></h2>
+  <div class="grid">
+    <a href="/roadmap/browser_extension_plan" class="card">
+  <div class="card-title">Browser Extension Development Plan</div>
+  <div class="card-filename">browser_extension_plan.md</div>
+  <div class="card-summary">The Onelist Browser Extension is the primary interface for rapid web content capture. It enables users to save pages, articles, and tabs to Onelist with one click, integrating with the Web Clipper API and Searcher Agent's similarity detection.</div>
+  <div class="card-meta">
+    <span class="badge active">Active - MVP Component</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+<a href="/roadmap/chat_log_ingestion_plan" class="card">
+  <div class="card-title">Chat Log Ingestion Plan</div>
+  <div class="card-filename">chat_log_ingestion_plan.md</div>
+  <div class="card-summary">status: active createdat: 2026-01-30 priority: high</div>
+  <div class="card-meta">
+    <span class="badge active">active</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/claude_onelist_plugin_plan" class="card">
+  <div class="card-title">Claude-Onelist Plugin Plan</div>
+  <div class="card-filename">claude_onelist_plugin_plan.md</div>
+  <div class="card-summary">Created: 2026-01-31 04:07 UTC by Stream Status: PRIORITY — validated by supermemory launch</div>
+  <div class="card-meta">
+    <span class="badge future">PRIORITY — validated by supermemory launch*</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/mvp_public_content_plan" class="card">
+  <div class="card-title">MVP Implementation Plan: Public Content &amp; E2EE</div>
+  <div class="card-filename">mvp_public_content_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-28 Status: Ready for Implementation Priority: Core MVP Feature</div>
+  <div class="card-meta">
+    <span class="badge future">Ready for Implementation</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/onelist_website_plan" class="card">
+  <div class="card-title">Onelist Corporate Website Plan</div>
+  <div class="card-filename">onelist_website_plan.md</div>
+  <div class="card-summary">Overview</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/crypto_payments_plan" class="card">
+  <div class="card-title">Onelist Cryptocurrency Payments Plan</div>
+  <div class="card-filename">crypto_payments_plan.md</div>
+  <div class="card-summary">This plan outlines how Onelist will accept cryptocurrency payments for subscription services. The approach prioritizes:</div>
+  <div class="card-meta">
+    <span class="badge planning">Planning</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_openclaw_install" class="card">
+  <div class="card-title">OpenClaw + Onelist Integration Guide</div>
+  <div class="card-filename">future_roadmap_openclaw_install.md</div>
+  <div class="card-summary">Document Version: 2026-01-28 Status: Planning Priority: High - Key Adoption Path</div>
+  <div class="card-meta">
+    <span class="badge planning">Planning</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+<a href="/roadmap/public_entry_sharing_plan" class="card">
+  <div class="card-title">Public Entry Sharing Implementation Plan</div>
+  <div class="card-filename">public_entry_sharing_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-29 (Revised) Status: Ready for Implementation Approach: Test-Driven Development (TDD) Reference: MVP Public Content Plan</div>
+  <div class="card-meta">
+    <span class="badge future">Ready for Implementation</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/web_content_capture_plan" class="card">
+  <div class="card-title">Web Content Capture Integration Plan</div>
+  <div class="card-filename">web_content_capture_plan.md</div>
+  <div class="card-summary">This document provides comprehensive recommendations for integrating advanced web content capture tools into the Onelist agent ecosystem. Based on analysis of Hyperbrowser, agent-browser, and Browser Use, we propose a tiered capture strategy that enh...</div>
+  <div class="card-meta">
+    <span class="badge future">200, body: body}} -&gt;</span>
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="guides-reference">
+  <h2>📚 Guides & Reference <span class="count">3</span></h2>
+  <div class="grid">
+    <a href="/roadmap/ai_agent_implementation_guide" class="card">
+  <div class="card-title">AI Agent Implementation Guide</div>
+  <div class="card-filename">ai_agent_implementation_guide.md</div>
+  <div class="card-summary">1.1 The State of AI Agents in 2026</div>
+  <div class="card-meta">
+    <span class="badge future">Living Reference Document</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/always_running_agents_comprehensive_guide" class="card">
+  <div class="card-title">Always-Running AI Agents: A Comprehensive Implementation Guide</div>
+  <div class="card-filename">always_running_agents_comprehensive_guide.md</div>
+  <div class="card-summary">The Paradigm Shift</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/ai_agent_ecosystem_resources_guide" class="card">
+  <div class="card-title">The AI Agent Ecosystem Resources Guide</div>
+  <div class="card-filename">ai_agent_ecosystem_resources_guide.md</div>
+  <div class="card-summary">The AI agent ecosystem has matured dramatically since 2024, with the Model Context Protocol (MCP) emerging as the universal standard for connecting AI agents to external tools, data sources, and services. This guide provides a comprehensive overview ...</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="competitive-analysis">
+  <h2>🔍 Competitive Analysis <span class="count">4</span></h2>
+  <div class="grid">
+    <a href="/roadmap/competitive_analysis_openclaw" class="card">
+  <div class="card-title">Competitive Analysis: OpenClaw vs Onelist</div>
+  <div class="card-filename">competitive_analysis_openclaw.md</div>
+  <div class="card-summary">OpenClaw (formerly Clawdbot/OpenClaw) is an open-source, self-hosted personal AI assistant created by Peter Steinberger that has exploded in popularity with 100,000+ GitHub stars and 2 million weekly visitors. While both platforms share a privacy-fir...</div>
+  <div class="card-meta">
+    <span class="badge future">Strategic Analysis</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/competitive_analysis_pal" class="card">
+  <div class="card-title">Competitive Analysis: PAL (Plan and Learn) vs Onelist River Agent</div>
+  <div class="card-filename">competitive_analysis_pal.md</div>
+  <div class="card-summary">PAL (Plan and Learn) is an agent pattern developed by Agno that introduces adaptive complexity assessment, explicit plan-execute-verify cycles, and continuous learning from task completions. While PAL is a pattern/framework rather than a complete pro...</div>
+  <div class="card-meta">
+    <span class="badge future">Strategic Analysis</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/competitive_analysis_twin" class="card">
+  <div class="card-title">Competitive Analysis: Twin vs Onelist</div>
+  <div class="card-filename">competitive_analysis_twin.md</div>
+  <div class="card-summary">Twin is a no-code AI agent platform focused on business automation, while Onelist is an augmented memory platform for personal knowledge management. Despite different primary focuses, they compete in overlapping areas: agent-based automation, memory ...</div>
+  <div class="card-meta">
+    <span class="badge future">Strategic Analysis</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/complementary_ecosystem_strategy" class="card">
+  <div class="card-title">Complementary Ecosystem Strategy: Onelist Integration Opportunities</div>
+  <div class="card-filename">complementary_ecosystem_strategy.md</div>
+  <div class="card-summary">Rather than viewing Twin, Supermemory, and OpenClaw purely as competitors, this analysis identifies how Onelist can be complementary to each platform and the specific integration opportunities that would benefit all parties. Onelist occupies a unique...</div>
+  <div class="card-meta">
+    <span class="badge future">Strategic Analysis</span>
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="future-roadmap">
+  <h2>🔮 Future Roadmap <span class="count">18</span></h2>
+  <div class="grid">
+    <a href="/roadmap/future_roadmap_xamlr_and_comments_requirements" class="card">
+  <div class="card-title">Addendum: Onelist Core Platform Requirements for Xamlr &amp; Comments System Integration</div>
+  <div class="card-filename">future_roadmap_xamlr_and_comments_requirements.md</div>
+  <div class="card-summary">Date: May 23, 2025 Context: This document outlines crucial features, data model enhancements, and API capabilities required by the Onelist Core platform to support the planned Xamlr blogging application and the envisioned Comments System. These are e...</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_apple_notes_import" class="card">
+  <div class="card-title">Apple Notes Import &amp; Sync Roadmap</div>
+  <div class="card-filename">future_roadmap_apple_notes_import.md</div>
+  <div class="card-summary">This roadmap defines the implementation plan for importing Apple Notes into Onelist. Unlike other note-taking apps, Apple Notes presents significant challenges due to Apple's closed ecosystem and lack of public API.</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_asset_enrichment_agent" class="card">
+  <div class="card-title">Asset Enrichment Agent Roadmap</div>
+  <div class="card-filename">future_roadmap_asset_enrichment_agent.md</div>
+  <div class="card-summary">Invoice/Receipt Special Processing</div>
+  <div class="card-meta">
+    <span class="badge future">&quot;purchased&quot;</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_beacon_cms" class="card">
+  <div class="card-title">Beacon CMS Integration Roadmap</div>
+  <div class="card-filename">future_roadmap_beacon_cms.md</div>
+  <div class="card-summary">Document Version: 2026-01-29 Status: Active - MVP Component Priority: HIGH - Required for MVP (corporate site)</div>
+  <div class="card-meta">
+    <span class="badge active">Active - MVP Component</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_evernote_import" class="card">
+  <div class="card-title">Evernote Import &amp; Sync Roadmap</div>
+  <div class="card-filename">future_roadmap_evernote_import.md</div>
+  <div class="card-summary">This roadmap defines the implementation plan for importing Evernote libraries into Onelist, supporting both one-time bulk import via ENEX files and ongoing synchronization via the Evernote Cloud API.</div>
+  <div class="card-meta">
+    <span class="badge future">Pending review (submitted Jan 15)</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_notion_import" class="card">
+  <div class="card-title">Notion Import &amp; Sync Roadmap</div>
+  <div class="card-filename">future_roadmap_notion_import.md</div>
+  <div class="card-summary">This roadmap defines the implementation plan for importing Notion workspaces into Onelist, supporting both one-time bulk import via exported files and ongoing synchronization via the Notion API.</div>
+  <div class="card-meta">
+    <span class="badge future">&quot; &lt;&gt; value[&quot;status&quot;][&quot;name&quot;]]</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_obsidian_import" class="card">
+  <div class="card-title">Obsidian Import &amp; Sync Roadmap</div>
+  <div class="card-filename">future_roadmap_obsidian_import.md</div>
+  <div class="card-summary">This roadmap defines the implementation plan for importing Obsidian vaults into Onelist, supporting both one-time bulk import and ongoing synchronization options.</div>
+  <div class="card-meta">
+    <span class="badge future">status, body: body}} when status in 200..299 -&gt;</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_email" class="card">
+  <div class="card-title">Onelist Feature Branch Exploration: Email Integration</div>
+  <div class="card-filename">future_roadmap_email.md</div>
+  <div class="card-summary">Status: Conceptual Exploration (Post-v2.0 Roadmap Completion) Date: 2025-05-06</div>
+  <div class="card-meta">
+    <span class="badge future">Conceptual Exploration (Post-v2.0 Roadmap Completion)</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_comments_system" class="card">
+  <div class="card-title">Onelist Feature Branch Plan: Comments System (Reddit-Style Functionality)</div>
+  <div class="card-filename">future_roadmap_comments_system.md</div>
+  <div class="card-summary">Document Version: May 23, 2025 (Reflecting detailed user feedback and originentryid) Feature Branch: Comments System (Reddit-Style Functionality) Baseline System: Onelist v2.0 (MVP + Completed Future Roadmap including &quot;Onelist AI&quot; Global Assistant, E...</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_consume_later" class="card">
+  <div class="card-title">Onelist Feature Branch Plan: Content Consumption Tracking &amp; Engagement (Revised)</div>
+  <div class="card-filename">future_roadmap_consume_later.md</div>
+  <div class="card-summary">Document Version: May 23, 2025 (Revised to integrate with Core Taxonomy System) Feature Branch: Content Consumption Tracking &amp; Engagement Baseline System: Onelist v2.0 (MVP + Completed Future Roadmap including &quot;Onelist AI&quot; Global Assistant, Entry Gro...</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_entry_groups" class="card">
+  <div class="card-title">Onelist Feature Branch Plan: Entry Groups</div>
+  <div class="card-filename">future_roadmap_entry_groups.md</div>
+  <div class="card-summary">Document Version: 2025-05-06 Feature Branch: Entry Groups Baseline System: Onelist v2.0 (MVP + Completed Future Roadmap, including AI features and a functional entrylinks table) Location Context: Concord, North Carolina, United States (as of ~11:32 A...</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_habit_stacks" class="card">
+  <div class="card-title">Onelist Feature Branch Plan: Habits &amp; Habit Stacks</div>
+  <div class="card-filename">future_roadmap_habit_stacks.md</div>
+  <div class="card-summary">Document Version: 2025-05-06 Feature Branch: Habits &amp; Habit Stacks Baseline System: Onelist v2.0 (MVP + Completed Future Roadmap, including AI features and a functional entrylinks table) + &quot;Entry Groups&quot; feature branch implemented. Location Context: ...</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_xamlr" class="card">
+  <div class="card-title">Onelist Feature Branch Plan: Xamlr Blogging Platform</div>
+  <div class="card-filename">future_roadmap_xamlr.md</div>
+  <div class="card-summary">Document Version: 2025-05-06 (Final) Feature Branch: Xamlr Blogging Platform Baseline System: Onelist v2.0 (MVP + Completed Future Roadmap, including AI features, entrylinks table, and Onelist support for autoblogbytag metadata and user-level prefere...</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_limitless" class="card">
+  <div class="card-title">Onelist Feature Plan: Limitless.ai Integration</div>
+  <div class="card-filename">future_roadmap_limitless.md</div>
+  <div class="card-summary">Date: 2025-05-08 Context: Concord, NC. This feature is planned as a Post-MVP (potentially v2.0) extension for Onelist.</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_forum" class="card">
+  <div class="card-title">Onelist Feature: User-Deployable Forums</div>
+  <div class="card-filename">future_roadmap_forum.md</div>
+  <div class="card-summary">Status: Planned (Post-MVP) Date: 2026-01-28</div>
+  <div class="card-meta">
+    <span class="badge future">Planned (Post-MVP)</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_free_tier" class="card">
+  <div class="card-title">Onelist Free Tier: Self-Hosted</div>
+  <div class="card-filename">future_roadmap_free_tier.md</div>
+  <div class="card-summary">Status: Planning Updated: 2026-01-28</div>
+  <div class="card-meta">
+    <span class="badge planning">Planning</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap" class="card">
+  <div class="card-title">Onelist Future Roadmap</div>
+  <div class="card-filename">future_roadmap.md</div>
+  <div class="card-summary">This document outlines the vision for Onelist development after the MVP launch, focusing on extending its capabilities as an &quot;augmented memory&quot; system, primarily through API-driven services and core enhancements.</div>
+  <div class="card-meta">
+    <span class="badge future">Requires significant design exploration post-MVP, balancing deep integration vs. performance needs.</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/future_roadmap_2" class="card">
+  <div class="card-title">Onelist Future Roadmap: Evolved AI Capabilities &amp; Integration</div>
+  <div class="card-filename">future_roadmap_2.md</div>
+  <div class="card-summary">Document Version: 2025-05-06 Focus: Detailing the evolution of AI-driven features, including interactive chat interfaces and daemon functionalities, building upon the previously established Onelist Future Roadmap.</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="ui-plans">
+  <h2>🎨 UI Plans <span class="count">8</span></h2>
+  <div class="grid">
+    <a href="/roadmap/ui-asset_enrichment_ui_plan" class="card">
+  <div class="card-title">Asset Enrichment Agent UI Plan</div>
+  <div class="card-filename">ui/asset_enrichment_ui_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-30 Status: Active Parent: uiplan.md Related: sharedagentuicomponents.md, settingsuiplan.md, readeruiplan.md</div>
+  <div class="card-meta">
+    <span class="badge active">Active</span>
+    
+    <span class="badge ui">UI</span>
+  </div>
+</a>
+
+<a href="/roadmap/ui-feeder_ui_plan" class="card">
+  <div class="card-title">Feeder Agent UI Plan</div>
+  <div class="card-filename">ui/feeder_ui_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-30 Status: Active Parent: uiplan.md Related: sharedagentuicomponents.md, settingsuiplan.md</div>
+  <div class="card-meta">
+    <span class="badge active">Active</span>
+    
+    <span class="badge ui">UI</span>
+  </div>
+</a>
+
+<a href="/roadmap/ui-reader_ui_plan" class="card">
+  <div class="card-title">Reader Agent UI Plan</div>
+  <div class="card-filename">ui/reader_ui_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-30 Status: Active Parent: uiplan.md Related: sharedagentuicomponents.md, settingsuiplan.md</div>
+  <div class="card-meta">
+    <span class="badge active">Active</span>
+    
+    <span class="badge ui">UI</span>
+  </div>
+</a>
+
+<a href="/roadmap/ui-river_ui_plan" class="card">
+  <div class="card-title">River Agent UI Plan</div>
+  <div class="card-filename">ui/river_ui_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-30 Status: Active Parent: uiplan.md Related: sharedagentuicomponents.md, settingsuiplan.md</div>
+  <div class="card-meta">
+    <span class="badge active">Active</span>
+    
+    <span class="badge ui">UI</span>
+  </div>
+</a>
+
+<a href="/roadmap/ui-searcher_ui_plan" class="card">
+  <div class="card-title">Searcher Agent UI Plan</div>
+  <div class="card-filename">ui/searcher_ui_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-30 Status: Active Parent: uiplan.md Related: sharedagentuicomponents.md, settingsuiplan.md</div>
+  <div class="card-meta">
+    <span class="badge active">Active</span>
+    
+    <span class="badge ui">UI</span>
+  </div>
+</a>
+
+<a href="/roadmap/ui-settings_ui_plan" class="card">
+  <div class="card-title">Settings UI Plan</div>
+  <div class="card-filename">ui/settings_ui_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-30 Status: Active Parent: uiplan.md</div>
+  <div class="card-meta">
+    <span class="badge active">Active</span>
+    
+    <span class="badge ui">UI</span>
+  </div>
+</a>
+
+<a href="/roadmap/ui-shared_agent_ui_components" class="card">
+  <div class="card-title">Shared Agent UI Components</div>
+  <div class="card-filename">ui/shared_agent_ui_components.md</div>
+  <div class="card-summary">Document Version: 2026-01-30 Status: Active Parent: uiplan.md</div>
+  <div class="card-meta">
+    <span class="badge active">Active</span>
+    
+    <span class="badge ui">UI</span>
+  </div>
+</a>
+
+<a href="/roadmap/ui-ui_planning_prompt" class="card">
+  <div class="card-title">UI Planning Session - Resume Prompt</div>
+  <div class="card-filename">ui/ui_planning_prompt.md</div>
+  <div class="card-summary">Last Updated: 2026-01-30 Purpose: Resume context for continuing UI planning work</div>
+  <div class="card-meta">
+    
+    
+    <span class="badge ui">UI</span>
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="project-planning">
+  <h2>📋 Project Planning <span class="count">4</span></h2>
+  <div class="grid">
+    <a href="/roadmap/project_plan" class="card">
+  <div class="card-title">Onelist MVP Project Plan</div>
+  <div class="card-filename">project_plan.md</div>
+  <div class="card-summary">Project Goals (MVP)</div>
+  <div class="card-meta">
+    <span class="badge future">** Previously considered primarily for text or as `'public_html'`; this expands the scope and clarifies the naming.</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/phase_3_implementation_plan" class="card">
+  <div class="card-title">Phase 3: Version Control, Tagging Enhancements, and Caching</div>
+  <div class="card-filename">phase_3_implementation_plan.md</div>
+  <div class="card-summary">Overview</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/CONVENTIONS" class="card">
+  <div class="card-title">Roadmap Conventions</div>
+  <div class="card-filename">CONVENTIONS.md</div>
+  <div class="card-summary">Plan File Status Tracking</div>
+  <div class="card-meta">
+    <span class="badge active">active</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/testing_roadmap" class="card">
+  <div class="card-title">Testing Roadmap</div>
+  <div class="card-filename">testing_roadmap.md</div>
+  <div class="card-summary">Current Coverage Status</div>
+  <div class="card-meta">
+    <span class="badge future">✓ Threshold met</span>
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="other">
+  <h2>📄 Other <span class="count">1</span></h2>
+  <div class="grid">
+    <a href="/roadmap/ui_plan" class="card">
+  <div class="card-title">Onelist Application UI Plan</div>
+  <div class="card-filename">ui_plan.md</div>
+  <div class="card-summary">Document Version: 2026-01-30 Status: Active - MVP Priority Platforms: Web (Phoenix LiveView) + Desktop (Native Shell with WebView)</div>
+  <div class="card-meta">
+    <span class="badge active">Active - MVP Priority</span>
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="archived-deprecated">
+  <h2>🗃️ Archived/Deprecated <span class="count">4</span></h2>
+  <div class="grid">
+    <a href="/roadmap/future_roadmap_life_steward_agent" class="card deprecated">
+  <div class="card-title">Life Steward Agent Roadmap</div>
+  <div class="card-filename">future_roadmap_life_steward_agent.md</div>
+  <div class="card-summary">&gt; DEPRECATED: This document has been superseded by River Agent. &gt; Life Steward has been merged with Jarvis and Onelist AI into a single unified agent called &quot;River&quot;. &gt; This document is retained for historical reference only. &gt; &gt; Deprecated: 2026-01-2...</div>
+  <div class="card-meta">
+    <span class="badge deprecated">DEPRECATED</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/gemini_master_context_restoration" class="card deprecated">
+  <div class="card-title">Onelist Project - Master Context &amp; Session State Document</div>
+  <div class="card-filename">gemini_master_context_restoration.md</div>
+  <div class="card-summary">---</div>
+  <div class="card-meta">
+    <span class="badge deprecated">DEPRECATED</span>
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/river_agent_plan" class="card deprecated">
+  <div class="card-title">River Agent Development Plan</div>
+  <div class="card-filename">river_agent_plan.md</div>
+  <div class="card-summary">River is Onelist's singular AI personality - the voice, face, and intelligence of the entire system. Rather than multiple specialized agents that users must learn to address, River is the one assistant users talk to. River handles everything from qui...</div>
+  <div class="card-meta">
+    <span class="badge deprecated">DEPRECATED</span>
+    <span class="badge high">HIGH</span>
+    
+  </div>
+</a>
+
+<a href="/roadmap/REORGANIZATION_PLAN" class="card deprecated">
+  <div class="card-title">Roadmap Reorganization Plan</div>
+  <div class="card-filename">REORGANIZATION_PLAN.md</div>
+  <div class="card-summary">Created: 2026-02-01 Purpose: Improve organization of roadmap files for better discoverability and maintenance</div>
+  <div class="card-meta">
+    <span class="badge deprecated">DEPRECATED</span>
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+<section id="internal-working-docs">
+  <h2>🔧 Internal Working Docs <span class="count">2</span></h2>
+  <div class="grid">
+    <a href="/roadmap/implementation_session_prompt" class="card">
+  <div class="card-title">River Agent Plan - Implementation Session Prompt</div>
+  <div class="card-filename">implementation_session_prompt.md</div>
+  <div class="card-summary">Last Updated: 2026-01-30 Purpose: Resume context for continuing River Agent plan alignment and implementation work</div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+<a href="/roadmap/use_cases" class="card">
+  <div class="card-title">Use Cases</div>
+  <div class="card-filename">use_cases.md</div>
+  <div class="card-summary"></div>
+  <div class="card-meta">
+    
+    
+    
+  </div>
+</a>
+
+  </div>
+</section>
+
+
+  <footer>
+    <p>Generated by Stream · <a href="https://onelist.my">onelist.my</a></p>
+  </footer>
+</body>
+</html>

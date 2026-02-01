@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Addendum: Onelist Core Platform Requirements for Xamlr &amp; Comments System Integration - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Addendum: Onelist Core Platform Requirements for Xamlr & Comments System Integration</h1>
+<strong>Date:</strong> May 23, 2025
+<strong>Context:</strong> This document outlines crucial features, data model enhancements, and API capabilities required by the Onelist Core platform to support the planned Xamlr blogging application and the envisioned Comments System. These are essential for enabling the desired functionality and integration of these future feature branches.
+<hr>
+<h2>I. Onelist Core Data Model Enhancements</h2>
+<p>1. <strong>New <code>entry_type</code> Definitions:</strong>
+    <em> Onelist must support the creation and management of new, distinct <code>entry_types</code>:
+        </em> <code>'blog_config'</code>: For Xamlr to store configurations of individual blogs (source tags, theme ID, visibility settings, per-blog blocked tags, language, timezone, queue rate, etc.) within an <code>entry</code>'s <code>metadata</code>.
+        <em> <code>'comment'</code>: For the Comments System. Comment entries will not have titles; their <code>origin_entry_id</code> will link them to the root of their thread.</p>
+<p>2. <strong>New Standard Field in <code>entries</code> Table: <code>origin_entry_id</code></strong>
+    </em> <strong>Requirement:</strong> Add a new, indexed, nullable Foreign Key column <code>origin_entry_id</code> to the <code>entries</code> table, self-referencing <code>entries.id</code>.
+    <em> <strong>Purpose:</strong> Stores the <code>id</code> of the ultimate root <code>entry</code> that spawned the current <code>entry</code> if it's part of a comment thread or a copy/reblog chain (like those created by Xamlr). For a new top-level entry, this is NULL or self-referential.
+    </em> <strong>Logic:</strong> Onelist Core needs logic during entry creation (especially for <code>'comment'</code> type or when API calls specify "copy existing entry") to correctly populate this field, tracing back to the original initiating entry.</p>
+<p>3. <strong>Standard Entry Metadata Field: <code>autoblog_by_tag</code></strong>
+    <em> <strong>Requirement:</strong> All Onelist <code>entries</code> must support a standard field within their <code>entries.metadata</code> JSONB structure: <code>autoblog_by_tag</code> (String values: <code>"yes"</code> or <code>"no"</code>).
+    </em> <strong>Purpose:</strong> Allows users and applications like Xamlr to control whether an entry is eligible for automatic content sourcing/publication based on its tags.
+    <em> <strong>Defaulting:</strong> Onelist will apply user-defined (or system) defaults for this field based on <code>entry_type</code> at creation if not explicitly set.</p>
+<p>4. <strong>Enhanced <code>representations</code> for Entries:</strong>
+    </em> <strong><code>'display_html'</code> Representation:</strong> Onelist should aim to generate and store a canonical HTML representation named <code>'display_html'</code> for <strong>all feasible <code>entry_types</code></strong> (not just textual ones), regardless of the <code>entry.public</code> flag's status. This serves as a standard web-renderable format for API consumers.
+    <em> <strong>Comment-Specific <code>representations</code>:</strong> For Onelist <code>entries</code> that are copies made by Xamlr for reblogs or posts with commentary, Onelist must support storing this Xamlr-added commentary as distinct <code>representations</code> (e.g., <code>type='reblog_comment'</code> or <code>type='post_commentary'</code>) on the new <code>entry</code> copy.
+    </em> <strong>Attribution Metadata on Comment <code>representations</code>:</strong> The <code>metadata</code> of these comment-related <code>representations</code> must support storing an identifier for the authoring Xamlr blog (specifically, the Onelist internal <code>id</code> of the authoring blog's <code>'blog_config'</code> <code>entry</code>).</p>
+<p>5. <strong>New Core Table: <code>user_entry_votes</code></strong>
+    <em> <strong>Purpose:</strong> To store user upvotes/downvotes on any Onelist <code>entry</code> (including those used as Xamlr posts or as comments).
+    </em> <strong>Schema:</strong> <code>id</code> (PK), <code>user_id</code> (FK), <code>entry_id</code> (FK), <code>vote_type</code> (e.g., +1/-1), <code>voted_at</code>. Unique on <code>(user_id, entry_id)</code>.
+    <em> <strong>Aggregation:</strong> Onelist may need to support efficient calculation or denormalization of aggregate vote scores (e.g., into <code>entries.metadata.vote_score</code>).</p>
+<p>6. <strong>New Core Table (Post-MVP for Comments): <code>user_comment_follows</code></strong>
+    </em> <strong>Purpose:</strong> To allow users to follow specific <code>'comment'</code> <code>entries</code> and receive notifications for replies.
+    <em> <strong>Schema:</strong> <code>id</code> (PK), <code>user_id</code> (FK), <code>comment_entry_id</code> (FK to <code>entries.id</code> where <code>entry_type='comment'</code>), <code>followed_at</code>.
+    </em> <strong>Dependency:</strong> Relies on a future Onelist Notifications System.</p>
+<p>7. <strong>System Taxonomy for "Consumption Status" (for Content Consumption Tracking):</strong>
+    <em> <strong>Requirement:</strong> Onelist Core needs to support a system-defined (initially) taxonomy for "Consumption Status" (e.g., terms: <code>'status_to_consume'</code>, <code>'status_in_progress'</code>, <code>'status_consumed'</code>, <code>'status_consumption_archived'</code>).
+    </em> The <code>user_entry_consumption_states.consumption_status_term_id</code> field (from the Content Consumption Tracking feature branch) will link to terms in this taxonomy.</p>
+<hr>
+<h2>II. Onelist User Account & Global Settings Enhancements</h2>
+<p>1. <strong>User-Configurable Defaults for <code>autoblog_by_tag</code> per <code>entry_type</code>:</strong>
+    <em> <strong>Requirement:</strong> A new section in Onelist global user settings where users can define the default <code>autoblog_by_tag</code> behavior (<code>"yes"</code> or <code>"no"</code>) for each <code>entry_type</code>.
+    </em> <strong>API Access:</strong> Onelist API must allow Xamlr (and Onelist's own UI) to read/manage these preferences.</p>
+<p>2. <strong>Storage for User's Global Blocked Tags List (for Xamlr context):</strong>
+    <em> <strong>Requirement:</strong> Onelist user profiles/settings must provide a place to store a user-specific list of "globally blocked tags" that Xamlr will use as a baseline filter across all that user's Xamlr blogs.
+    </em> <strong>Storage:</strong> E.g., in <code>users.metadata</code> or a dedicated <code>user_preferences</code> table.
+    <em> <strong>API Access:</strong> Onelist API must allow Xamlr to read/update this list for the authenticated user.
+    </em> <strong>Scope:</strong> This list affects Xamlr's content display, not Onelist's internal tag functionality.</p>
+<hr>
+<h2>III. Onelist API Capabilities & Enhancements</h2>
+<p>1. <strong>Authentication & Authorization:</strong>
+    <em> Robust OAuth2 (or similar) provider capabilities to allow first-party applications like Xamlr to authenticate users seamlessly (including facilitating Onelist account creation if one doesn't exist during Xamlr signup) and obtain authorized access to act on their behalf.</p>
+<p>2. <strong>Entry Management API:</strong>
+    </em> Full CRUD for <code>entries</code>, <code>representations</code>, and <code>assets</code>.
+    <em> <strong>Return Internal IDs:</strong> Must return the internal <code>entry.id</code> (UUID) to API clients like Xamlr upon creation/copy.
+    </em> <strong>Fetch by Internal ID:</strong> Allow authorized fetching of entry data using the internal <code>entry.id</code>.
+    <em> <strong>Entry Copying:</strong> Provide a robust API endpoint to create a new <code>entry</code> as a copy of an existing one. This endpoint must allow the client (Xamlr) to specify:
+        </em> The source <code>entry_id</code> to copy.
+        <em> Which existing <code>representations</code> (e.g., prior reblog comments) to also copy from the source.
+        </em> Which <code>tags</code> from the source to copy.
+        <em> Data for any </em>new<em> <code>representations</code> to be added to the copy (e.g., new reblog commentary, including its attribution metadata which contains the Onelist internal <code>id</code> of the authoring blog's <code>'blog_config'</code> <code>entry</code>).
+        </em> Initial <code>metadata</code> for the new copy (e.g., setting <code>autoblog_by_tag: "no"</code>).
+        <em> How to set the <code>origin_entry_id</code> for the new copy.
+    </em> <strong>Metadata Management:</strong> Granular read/write access to specific fields within <code>entry.metadata</code> (e.g., <code>autoblog_by_tag</code>, <code>'blog_config'</code> settings, per-blog blocked tags).
+    <em> <strong>Tag Management:</strong> API to add, remove, and query tags on entries.</p>
+<p>3. <strong>Asset Management API:</strong>
+    </em> Allow authorized applications to upload files, creating Onelist <code>assets</code> on behalf of users.
+    <em> Return stable, canonical URLs for these <code>assets</code>.</p>
+<p>4. <strong>Search & Query API:</strong>
+    </em> Efficiently query <code>entries</code> (especially public ones for Xamlr discovery, and user's own for Xamlr's "Your Content" pane).
+    <em> <strong>Required Filters:</strong> By <code>entry_type</code>, <code>public</code> status, tags (contains any of), <code>metadata.autoblog_by_tag</code>, <code>origin_entry_id</code>.
+    </em> Efficient querying of JSONB fields in <code>entries.metadata</code> if used for other flags/settings.
+    <em> Robust pagination (cursor-based preferred) for all list-returning endpoints.
+    </em> Flexible sorting options.</p>
+<p>5. <strong>Voting API (for Comments System):</strong>
+    <em> Endpoints to record <code>user_entry_votes</code> (up/down).
+    </em> Endpoints to retrieve aggregate vote scores for entries (or ensure scores are part of entry data).</p>
+<p>6. <strong>Consumption Tracking API (for Content Consumption Tracking):</strong>
+    <em> Endpoints to create/update <code>user_entry_consumption_states</code> records (log progress, status, etc.).
+    </em> Endpoints for fetching entries must optionally include the current user's consumption state/progress.
+    <em> API support for filtering entries by user-specific consumption status/progress.</p>
+<p>7. <strong>User Settings API:</strong>
+    </em> Endpoints to manage user-level global preferences like default <code>autoblog_by_tag</code> per <code>entry_type</code> and the user's global blocked tags list for Xamlr.</p>
+<hr>
+<h2>IV. Onelist Core Platform Enhancements (Post-Onelist v2.0, driven by external app needs)</h2>
+<p>1. <strong>Webhook System:</strong>
+    <em> Implement a webhook system to allow authenticated external applications (like Xamlr) to subscribe to events in Onelist (e.g., <code>entry</code> created/updated/deleted with specific tags/types, <code>autoblog_by_tag</code> status changed). This is crucial for efficient cache invalidation and real-time updates in connected applications.</p>
+<p>2. <strong>Advanced Asset Management:</strong>
+    </em> Develop capabilities for asset deduplication (e.g., by checksum).
+    <em> Implement internal reference counting for assets.
+    </em> Create robust garbage collection/orphan cleanup mechanisms for unreferenced assets.</p>
+<p>This addendum highlights that for Xamlr and the Comments System to achieve their full envisioned potential as integrated yet distinct feature branches, significant capabilities and corresponding API support must be present in or added to the Onelist Core platform.</p>
+  </article>
+</body>
+</html>

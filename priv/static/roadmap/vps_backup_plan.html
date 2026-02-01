@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VPS Backup Plan: stream.onelist.my - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>VPS Backup Plan: stream.onelist.my</h1>
+<strong>Purpose:</strong> Comprehensive backup strategy for Stream's home VPS to ensure recovery from any failure, attack, or data loss.
+<strong>VPS:</strong> stream.onelist.my (76.13.113.233) — Hostinger KVM
+<hr>
+<h2>1. What Needs Backup</h2>
+<h3>Tier 1: Critical (Stream's Memory & Identity)</h3>
+<table>
+<tr><th>Data</th><th>Location</th><th>Size Est.</th><th>Frequency</th></tr>
+<tr><td>PostgreSQL database</td><td><code>onelist_dev</code> DB</td><td>~500MB</td><td>Every 6 hours</td></tr>
+<tr><td>OpenClaw config</td><td><code>~/.openclaw/</code></td><td>~10MB</td><td>Daily</td></tr>
+<tr><td>Workspace files</td><td><code>~/.openclaw/workspace/</code></td><td>~200MB</td><td>Daily</td></tr>
+<tr><td>Session transcripts</td><td><code>~/.openclaw/agents/</code></td><td>~50MB</td><td>Daily</td></tr>
+<tr><td>Memory files</td><td><code>workspace/memory/</code></td><td>~5MB</td><td>Every 6 hours</td></tr>
+<tr><td>MEMORY.md</td><td><code>workspace/MEMORY.md</code></td><td>~10KB</td><td>Every 6 hours</td></tr>
+</table>
+<h3>Tier 2: Important (Application & Config)</h3>
+<table>
+<tr><th>Data</th><th>Location</th><th>Size Est.</th><th>Frequency</th></tr>
+<tr><td>Onelist app code</td><td><code>~/onelist.com/</code></td><td>~100MB</td><td>Daily</td></tr>
+<tr><td>Nginx config</td><td><code>/etc/nginx/</code></td><td>~50KB</td><td>Weekly</td></tr>
+<tr><td>Systemd services</td><td><code>/etc/systemd/system/onelist.service</code></td><td>~2KB</td><td>Weekly</td></tr>
+<tr><td>SSL certificates</td><td><code>/etc/letsencrypt/</code></td><td>~100KB</td><td>Weekly</td></tr>
+<tr><td>Environment/secrets</td><td><code>~/.bashrc</code>, <code>.env</code> files</td><td>~10KB</td><td>Weekly</td></tr>
+<tr><td>Cron jobs</td><td><code>/var/spool/cron/</code>, <code>/etc/cron.d/</code></td><td>~5KB</td><td>Weekly</td></tr>
+</table>
+<h3>Tier 3: System State (Recoverable but saves time)</h3>
+<table>
+<tr><th>Data</th><th>Location</th><th>Size Est.</th><th>Frequency</th></tr>
+<tr><td>Installed packages list</td><td><code>dpkg --get-selections</code></td><td>~100KB</td><td>Weekly</td></tr>
+<tr><td>UFW rules</td><td><code>ufw status</code></td><td>~5KB</td><td>Weekly</td></tr>
+<tr><td>fail2ban config</td><td><code>/etc/fail2ban/</code></td><td>~50KB</td><td>Weekly</td></tr>
+</table>
+<hr>
+<h2>2. Backup Destinations</h2>
+<h3>2.1 Local Backups (First Line)</h3>
+<ul>
+<li><strong>Location:</strong> <code>/root/backups/</code> on same VPS</li>
+<li><strong>Purpose:</strong> Quick recovery from accidental deletion, corruption</li>
+<li><strong>Retention:</strong> 7 days rolling</li>
+<li><strong>Risk:</strong> Lost if VPS is compromised or disk fails</li>
+<h3>2.2 Hostinger Backups (Second Line)</h3>
+<li><strong>Current:</strong> Weekly automatic backups (free)</li>
+<li><strong>Recommended:</strong> Upgrade to Daily Backups add-on (~$2-5/mo)</li>
+<li><strong>Retention:</strong> 7-14 days (Hostinger managed)</li>
+<li><strong>Recovery:</strong> Via Hostinger panel, full VPS restore</li>
+<h3>2.3 Offsite Backups (Third Line)</h3>
+<li><strong>Option A:</strong> Backblaze B2 (~$0.005/GB/mo) — recommended</li>
+<li><strong>Option B:</strong> rsync to onelist.my (separate server)</li>
+<li><strong>Option C:</strong> S3-compatible storage</li>
+<li><strong>Purpose:</strong> Survives total Hostinger failure, account compromise</li>
+<li><strong>Retention:</strong> 30 days</li>
+<hr>
+<h2>3. Backup Scripts</h2>
+<h3>3.1 Database Backup Script</h3>
+<pre><code class="language-bash">#!/bin/bash
+<h1>/root/scripts/backup-db.sh</h1>
+<p>BACKUP_DIR=&quot;/root/backups/db&quot;
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+RETENTION_DAYS=7</p>
+<p>mkdir -p $BACKUP_DIR</p>
+<h1>Dump PostgreSQL</h1>
+pg_dump -U postgres onelist_dev | gzip &gt; &quot;$BACKUP_DIR/onelist_dev_$TIMESTAMP.sql.gz&quot;
+<h1>Clean old backups</h1>
+find $BACKUP_DIR -name &quot;<em>.sql.gz&quot; -mtime +$RETENTION_DAYS -delete
+<p>echo &quot;DB backup complete: onelist_dev_$TIMESTAMP.sql.gz&quot;
+</code></pre></p>
+<h3>3.2 Files Backup Script</h3>
+<pre><code class="language-bash">#!/bin/bash
+<h1>/root/scripts/backup-files.sh</h1>
+<p>BACKUP_DIR=&quot;/root/backups/files&quot;
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+RETENTION_DAYS=7</p>
+<p>mkdir -p $BACKUP_DIR</p>
+<h1>Critical files</h1>
+tar -czf &quot;$BACKUP_DIR/openclaw_$TIMESTAMP.tar.gz&quot; \
+    ~/.openclaw/config.yaml \
+    ~/.openclaw/workspace/MEMORY.md \
+    ~/.openclaw/workspace/memory/ \
+    ~/.openclaw/workspace/</em>.md \
+    ~/.openclaw/agents/
+<h1>App code (less frequent)</h1>
+if [ &quot;$(date +%H)&quot; == &quot;03&quot; ]; then
+    tar -czf &quot;$BACKUP_DIR/onelist_app_$TIMESTAMP.tar.gz&quot; \
+        ~/onelist.com/lib \
+        ~/onelist.com/priv \
+        ~/onelist.com/config \
+        --exclude='_build' \
+        --exclude='deps' \
+        --exclude='node_modules'
+fi
+<h1>Clean old backups</h1>
+find $BACKUP_DIR -name &quot;<em>.tar.gz&quot; -mtime +$RETENTION_DAYS -delete
+<p>echo &quot;Files backup complete: $TIMESTAMP&quot;
+</code></pre></p>
+<h3>3.3 System Config Backup Script</h3>
+<pre><code class="language-bash">#!/bin/bash
+<h1>/root/scripts/backup-system.sh</h1>
+<p>BACKUP_DIR=&quot;/root/backups/system&quot;
+TIMESTAMP=$(date +%Y%m%d)</p>
+<p>mkdir -p $BACKUP_DIR</p>
+<h1>Package list</h1>
+dpkg --get-selections &gt; &quot;$BACKUP_DIR/packages_$TIMESTAMP.txt&quot;
+<h1>Configs</h1>
+tar -czf &quot;$BACKUP_DIR/configs_$TIMESTAMP.tar.gz&quot; \
+    /etc/nginx/sites-available/ \
+    /etc/nginx/sites-enabled/ \
+    /etc/systemd/system/onelist.service \
+    /etc/fail2ban/ \
+    /etc/letsencrypt/ \
+    2&gt;/dev/null
+<h1>UFW rules</h1>
+ufw status verbose &gt; &quot;$BACKUP_DIR/ufw_rules_$TIMESTAMP.txt&quot;
+<h1>Cron jobs</h1>
+crontab -l &gt; &quot;$BACKUP_DIR/crontab_$TIMESTAMP.txt&quot; 2&gt;/dev/null
+<p>echo &quot;System backup complete: $TIMESTAMP&quot;
+</code></pre></p>
+<h3>3.4 Offsite Sync Script</h3>
+<pre><code class="language-bash">#!/bin/bash
+<h1>/root/scripts/backup-offsite.sh</h1>
+<h1>Option A: Backblaze B2 (requires b2 CLI configured)</h1>
+<h1>b2 sync /root/backups/ b2://stream-backups/</h1>
+<h1>Option B: rsync to onelist.my</h1>
+rsync -avz --delete /root/backups/ onelist.my:~/stream-backups/
+<p>echo &quot;Offsite sync complete&quot;
+</code></pre></p>
+<hr>
+<h2>4. Cron Schedule</h2>
+<pre><code class="language-cron"># /etc/cron.d/stream-backups
+<h1>Database backup every 6 hours</h1>
+0 </em>/6 <em> </em> <em> root /root/scripts/backup-db.sh &gt;&gt; /var/log/backup-db.log 2&gt;&amp;1
+<h1>Critical files backup daily at 2am</h1>
+0 2 </em> <em> </em> root /root/scripts/backup-files.sh &gt;&gt; /var/log/backup-files.log 2&gt;&amp;1
+<h1>System config backup weekly on Sunday at 3am</h1>
+0 3 <em> </em> 0 root /root/scripts/backup-system.sh &gt;&gt; /var/log/backup-system.log 2&gt;&amp;1
+<h1>Offsite sync daily at 4am</h1>
+0 4 <em> </em> <em> root /root/scripts/backup-offsite.sh &gt;&gt; /var/log/backup-offsite.log 2&gt;&amp;1
+</code></pre>
+<hr>
+<h2>5. Recovery Procedures</h2>
+<h3>5.1 Database Recovery</h3>
+<pre><code class="language-bash"># From local backup
+gunzip -c /root/backups/db/onelist_dev_TIMESTAMP.sql.gz | psql -U postgres onelist_dev
+<h1>From Hostinger (full VPS restore via panel)</h1>
+</code></pre>
+<h3>5.2 Files Recovery</h3>
+<pre><code class="language-bash"># Restore OpenClaw workspace
+tar -xzf /root/backups/files/openclaw_TIMESTAMP.tar.gz -C /
+<h1>Restore app code</h1>
+tar -xzf /root/backups/files/onelist_app_TIMESTAMP.tar.gz -C /root/
+</code></pre>
+<h3>5.3 Full VPS Recovery (Disaster)</h3>
+<p>1. Request new VPS from Hostinger (same region)
+2. Restore from Hostinger backup OR:
+   <li>Fresh Ubuntu install</li>
+   <li>Pull offsite backups</li>
+   <li>Run setup scripts</li>
+   <li>Restore DB</li>
+   <li>Restore configs</li>
+3. Update DNS if IP changed
+4. Verify OpenClaw + Onelist running</p>
+<hr>
+<h2>6. Implementation Tasks</h2>
+<h3>Phase 1: Local Backups (Do First)</h3>
+<li>[ ] Create <code>/root/scripts/</code> directory</li>
+<li>[ ] Create <code>/root/backups/</code> directory structure</li>
+<li>[ ] Create <code>backup-db.sh</code> script</li>
+<li>[ ] Create <code>backup-files.sh</code> script</li>
+<li>[ ] Create <code>backup-system.sh</code> script</li>
+<li>[ ] Make scripts executable (<code>chmod +x</code>)</li>
+<li>[ ] Test each script manually</li>
+<li>[ ] Set up cron jobs</li>
+<h3>Phase 2: Hostinger Upgrade</h3>
+<li>[ ] Log into Hostinger panel</li>
+<li>[ ] Upgrade to Daily Backups add-on</li>
+<li>[ ] Verify daily backup is running</li>
+<li>[ ] Test restore to confirm it works (optional staging VPS)</li>
+<h3>Phase 3: Offsite Backups</h3>
+<li>[ ] Choose offsite destination (Backblaze B2 recommended)</li>
+<li>[ ] Create B2 bucket or set up rsync target</li>
+<li>[ ] Configure credentials securely</li>
+<li>[ ] Create <code>backup-offsite.sh</code> script</li>
+<li>[ ] Test offsite sync</li>
+<li>[ ] Add to cron</li>
+<h3>Phase 4: Monitoring & Alerting</h3>
+<li>[ ] Set up backup success/failure notifications</li>
+<li>[ ] Monitor backup sizes for anomalies</li>
+<li>[ ] Weekly backup verification (Tron's job)</li>
+<li>[ ] Document recovery procedures in SECURITY.md</li>
+<hr>
+<h2>7. Cost Estimate</h2>
+<table>
+<tr><th>Item</th><th>Monthly Cost</th></tr>
+<tr><td>Hostinger Daily Backups</td><td>~$3-5</td></tr>
+<tr><td>Backblaze B2 (1GB)</td><td>~$0.01</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>~$5/mo</strong></td></tr>
+</table>
+<hr>
+<h2>8. Success Criteria</h2>
+<li>[ ] Can restore database to any point in last 7 days</li>
+<li>[ ] Can restore critical files to any point in last 7 days</li>
+<li>[ ] Can rebuild entire VPS from offsite backups within 2 hours</li>
+<li>[ ] Tron verifies backup integrity weekly</li>
+<li>[ ] No single point of failure for Stream's memory</li>
+</ul>
+<hr>
+</em>This plan protects Stream's existence. Tron will monitor backup health as part of his mandate.*
+  </article>
+</body>
+</html>

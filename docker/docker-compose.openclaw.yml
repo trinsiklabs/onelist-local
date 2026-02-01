@@ -1,0 +1,68 @@
+# Onelist Local - OpenClaw Integration
+#
+# Adds:
+#   - OpenClaw AI agent runtime
+#   - Reader agent (memory extraction)
+#   - Searcher agent (semantic search)
+#   - Auto-configured memory plugin
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.openclaw.yml up -d
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # OpenClaw - AI Agent Runtime
+  # ===========================================
+  openclaw:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw
+    restart: unless-stopped
+    depends_on:
+      onelist:
+        condition: service_healthy
+    environment:
+      # Anthropic API (required)
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      
+      # Gateway config
+      OPENCLAW_MODE: local
+      OPENCLAW_PORT: 18789
+      
+      # Onelist integration
+      ONELIST_API_URL: http://onelist:4000
+      ONELIST_API_KEY: ${ONELIST_API_KEY:-}
+      ONELIST_MEMORY_ENABLED: "true"
+      
+      # Telegram (optional)
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      
+    ports:
+      - "${OPENCLAW_PORT:-18789}:18789"
+    volumes:
+      - openclaw_workspace:/root/.openclaw/workspace
+      - openclaw_config:/root/.openclaw
+    networks:
+      - onelist
+
+  # ===========================================
+  # Update onelist to enable agents
+  # ===========================================
+  onelist:
+    environment:
+      # Enable Reader agent for memory extraction
+      ONELIST_READER_ENABLED: "true"
+      # Enable Searcher agent for semantic search
+      ONELIST_SEARCHER_ENABLED: "true"
+      # OpenClaw webhook for memory sync
+      OPENCLAW_WEBHOOK_URL: http://openclaw:18789/webhook
+
+volumes:
+  openclaw_workspace:
+  openclaw_config:
+
+networks:
+  onelist:
+    external: true
+    name: onelist-network

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Competitive Analysis: Twin vs Onelist - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Competitive Analysis: Twin vs Onelist</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Strategic Analysis
+<hr>
+<h2>Executive Summary</h2>
+<a href="https://twin.so">Twin</a> is a no-code AI agent platform focused on <strong>business automation</strong>, while Onelist is an <strong>augmented memory platform</strong> for personal knowledge management. Despite different primary focuses, they compete in overlapping areas: agent-based automation, memory systems, and AI-assisted productivity. This analysis identifies Twin's competitive advantages and recommends improvements for Onelist.
+<strong>Key Finding:</strong> Twin's strongest differentiators are (1) browser-based automation that works without APIs, (2) extremely low barriers to entry for non-technical users, and (3) cost-optimized model switching. Onelist can strengthen its position by adopting similar patterns while leveraging its privacy-first, self-hosted architecture as a differentiator.
+<hr>
+<h2>1. Platform Comparison Matrix</h2>
+<table>
+<tr><th>Dimension</th><th>Twin</th><th>Onelist</th><th>Winner</th></tr>
+<tr><td><strong>Primary Focus</strong></td><td>Business automation</td><td>Personal knowledge/memory</td><td>Different niches</td></tr>
+<tr><td><strong>Target User</strong></td><td>Operators, non-technical users</td><td>Knowledge workers, developers, OpenClaw users</td><td>Different niches</td></tr>
+<tr><td><strong>Deployment</strong></td><td>Cloud-only</td><td>Self-hosted + Cloud options</td><td>Onelist (flexibility)</td></tr>
+<tr><td><strong>Privacy</strong></td><td>Data on Twin servers</td><td>E2EE, self-hosted option</td><td><strong>Onelist</strong></td></tr>
+<tr><td><strong>Barrier to Entry</strong></td><td>Zero (natural language)</td><td>Requires setup/OpenClaw</td><td><strong>Twin</strong></td></tr>
+<tr><td><strong>Agent Creation</strong></td><td>Describe in plain English</td><td>Predefined agent types</td><td><strong>Twin</strong></td></tr>
+<tr><td><strong>Browser Automation</strong></td><td>Core feature (computer vision)</td><td>Planned (Browser Use sidecar)</td><td><strong>Twin</strong></td></tr>
+<tr><td><strong>API Integrations</strong></td><td>2,700+ apps</td><td>REST API, OpenClaw SDK</td><td><strong>Twin</strong></td></tr>
+<tr><td><strong>Memory System</strong></td><td>Long-term with pruning</td><td>Atomic memories, two-layer retrieval</td><td>Comparable</td></tr>
+<tr><td><strong>Cost Optimization</strong></td><td>Auto model switching (10x savings)</td><td>Not documented</td><td><strong>Twin</strong></td></tr>
+<tr><td><strong>Self-Correction</strong></td><td>Built-in</td><td>PAL pattern (planned)</td><td><strong>Twin</strong> (shipping)</td></tr>
+<tr><td><strong>Pricing</strong></td><td>Credit-based (unclear)</td><td>$0/$3+usage/$20 tiers</td><td>Onelist (transparent)</td></tr>
+<tr><td><strong>Open Source</strong></td><td>No</td><td>Yes (planned)</td><td><strong>Onelist</strong></td></tr>
+<tr><td><strong>Proven Scale</strong></td><td>100k agents, 500k SMB users</td><td>Early stage</td><td><strong>Twin</strong></td></tr>
+</table>
+<hr>
+<h2>2. Twin's Competitive Advantages</h2>
+<h3>2.1 Browser-Based Automation (Computer Vision)</h3>
+<strong>What Twin Does:</strong>
+<ul>
+<li>Agents control web browsers using computer vision, not APIs</li>
+<li>Works on ANY web application without integration setup</li>
+<li>Adapts automatically when interfaces change</li>
+<li>Eliminates API maintenance burden</li>
+<strong>Impact:</strong>
+<blockquote>"In just a few months of beta, Twin users have completed over 40,000 tasks across 9,000+ applications. By comparison, it took Zapier 10 years to build integrations for 8,000 applications."</blockquote>
+<strong>Onelist Gap:</strong>
+<li>Current Web Clipper uses HTTP fetch (fails on authenticated content)</li>
+<li>Browser Use integration planned but not implemented</li>
+<li>No computer vision approach documented</li>
+<h3>2.2 Zero-Setup Agent Creation</h3>
+<strong>What Twin Does:</strong>
+<li>Users describe desired automation in plain English</li>
+<li>Twin asks clarifying questions, builds agent automatically</li>
+<li>No code, no API knowledge, no technical setup</li>
+<li>Deploy in minutes, not weeks</li>
+<strong>Example Flow:</strong>
+<pre><code class="language-">User: &quot;Check my inbox every morning, summarize important emails,
+       and add action items to my Notion&quot;
+<p>Twin: [Builds agent automatically with email, Notion integration]
+</code></pre></p>
+<strong>Onelist Gap:</strong>
+<li>River Agent requires predefined prompts/tools</li>
+<li>Users must understand GTD concepts, domains, scopes</li>
+<li>More suited for developers than operators</li>
+<h3>2.3 Cost-Optimized Model Switching</h3>
+<strong>What Twin Does:</strong>
+<li>Uses powerful models (Opus) for planning phase</li>
+<li>Automatically switches to smaller models for execution</li>
+<li>Achieves 10x cost reduction</li>
+<li>150+ tasks for under $1</li>
+<strong>Onelist Gap:</strong>
+<li>No documented model switching strategy</li>
+<li>Each agent likely uses same model throughout</li>
+<li>No cost optimization at model selection level</li>
+<h3>2.4 Self-Correction and Adaptation</h3>
+<strong>What Twin Does:</strong>
+<li>Agents automatically fix errors during execution</li>
+<li>Learn from patterns and user feedback</li>
+<li>Adapt when interfaces change</li>
+<li>Maintain systems autonomously</li>
+<strong>Onelist Status:</strong>
+<li>PAL (Plan and Learn) pattern documented for River</li>
+<li>Not yet implemented</li>
+<li>No automatic adaptation to interface changes</li>
+<h3>2.5 Massive Integration Ecosystem</h3>
+<strong>What Twin Does:</strong>
+<li>2,700+ native app integrations</li>
+<li>Works with ANY app via browser automation</li>
+<li>Webhooks for custom triggers</li>
+<li>No API key management for users</li>
+<strong>Onelist Gap:</strong>
+<li>REST API requires developer knowledge</li>
+<li>Feeder Agent planned integrations (Evernote, Notion, etc.) not built</li>
+<li>Users must configure their own integrations</li>
+<hr>
+<h2>3. Onelist's Competitive Advantages</h2>
+<h3>3.1 Privacy-First Architecture</h3>
+<strong>What Onelist Does:</strong>
+<li>Self-hosted option (zero cloud dependency)</li>
+<li>End-to-end encryption for cloud sync</li>
+<li>BYOB (Bring Your Own Backend) storage</li>
+<li>User controls all data</li>
+<strong>Twin Weakness:</strong>
+<li>Cloud-only deployment</li>
+<li>Data processed on Twin's servers</li>
+<li>No self-hosted option</li>
+<li>Privacy-conscious users excluded</li>
+<h3>3.2 Deep Memory System</h3>
+<strong>What Onelist Does:</strong>
+<li>Atomic memory extraction (Supermemory-inspired)</li>
+<li>Two-layer retrieval (high precision + context)</li>
+<li>Relationship tracking (supersedes/refines)</li>
+<li>Memory compaction and evolution</li>
+<strong>Twin Comparison:</strong>
+<li>Twin has long-term memory with pruning</li>
+<li>Less sophisticated extraction (no atomic memories documented)</li>
+<li>Focus is on task completion, not knowledge preservation</li>
+<h3>3.3 GTD-Based Life Management</h3>
+<strong>What Onelist Does:</strong>
+<li>Full GTD implementation (Capture → Clarify → Organize → Reflect → Engage)</li>
+<li>Six Horizons of Focus</li>
+<li>Weekly Review cornerstone</li>
+<li>Life operations, not just task automation</li>
+<strong>Twin Focus:</strong>
+<li>Business task automation</li>
+<li>No life management philosophy</li>
+<li>No personal development framework</li>
+<h3>3.4 Open Source Strategy</h3>
+<strong>What Onelist Plans:</strong>
+<li>Open source core (self-hosted free forever)</li>
+<li>Hosting/sync as business model</li>
+<li>Community contributions</li>
+<li>Transparency and auditability</li>
+<strong>Twin:</strong>
+<li>Proprietary, closed source</li>
+<li>Vendor lock-in risk</li>
+<li>No community ownership</li>
+<h3>3.5 OpenClaw/AI Assistant Ecosystem</h3>
+<strong>What Onelist Provides:</strong>
+<li>Deep OpenClaw integration</li>
+<li>File-based memory as source of truth</li>
+<li>Multiple AI assistants can share memory</li>
+<li>Agent orchestration via River</li>
+<strong>Twin:</strong>
+<li>Standalone platform</li>
+<li>No integration with personal AI assistants</li>
+<li>Agents don't share context with user's other tools</li>
+<hr>
+<h2>4. Recommended Improvements for Onelist</h2>
+<h3>4.1 HIGH PRIORITY: Browser-Based Capture Agent</h3>
+<strong>Gap:</strong> Twin can automate any web app; Onelist can only fetch public URLs.
+<strong>Recommendation:</strong> Accelerate Browser Use integration with focus on:
+<li>Authenticated content capture (company wikis, paywalled content)</li>
+<li>Simple web automation (fill forms, extract data)</li>
+<li>Computer vision fallback for anti-bot sites</li>
+<strong>Implementation:</strong>
+<pre><code class="language-">Phase 1 (MVP): Browser plugin for authenticated capture ← Already planned
+Phase 2: Browser Use sidecar for server-side automation
+Phase 3: Simple web automation tasks (&quot;check this site daily&quot;)
+</code></pre>
+<strong>Effort:</strong> 4-6 weeks (Phases 1-2 already in web_content_capture_plan.md)
+<h3>4.2 HIGH PRIORITY: Model Switching for Cost Optimization</h3>
+<strong>Gap:</strong> Twin achieves 10x cost reduction through intelligent model selection.
+<strong>Recommendation:</strong> Implement model switching in Unified Agent Modules:
+<pre><code class="language-elixir">defmodule Onelist.Agents.ModelFleet do
+  @moduledoc &quot;&quot;&quot;
+  Intelligent model selection based on task complexity.
+  &quot;&quot;&quot;
+<p>@models %{
+    planning: &quot;claude-3-5-sonnet-20241022&quot;,  # Complex reasoning
+    execution: &quot;claude-3-haiku-20240307&quot;,    # Fast, cheap
+    embedding: &quot;text-embedding-3-small&quot;,
+    vision: &quot;gpt-4o-mini&quot;
+  }</p>
+<p>def select_model(task_type, complexity \\ :auto) do
+    case {task_type, complexity} do
+      {:planning, _} -&gt; @models.planning
+      {:execution, :simple} -&gt; @models.execution
+      {:execution, :complex} -&gt; @models.planning
+      {:embedding, _} -&gt; @models.embedding
+      {:vision, _} -&gt; @models.vision
+    end
+  end</p>
+<p>def estimate_cost(model, tokens) do
+    # Return estimated cost for budget tracking
+  end
+end
+</code></pre></p>
+<strong>Benefits:</strong>
+<li>5-10x cost reduction for routine tasks</li>
+<li>Better margins for Cloud Sync/Web Access tiers</li>
+<li>Competitive with Twin's pricing model</li>
+<strong>Effort:</strong> 2 weeks (add to Unified Agent Modules)
+<h3>4.3 HIGH PRIORITY: Simplified Agent Creation UI</h3>
+<strong>Gap:</strong> Twin lets anyone create agents with plain English; Onelist requires technical understanding.
+<strong>Recommendation:</strong> Add "Quick Automation" flow in River:
+<pre><code class="language-">User: &quot;Every morning, summarize my unread emails and
+       add any action items to my inbox&quot;
+<p>River: &quot;I'll set up a daily automation for you:</p>
+<p>1. Check email at 7 AM
+        2. Summarize unread messages
+        3. Extract action items
+        4. Add to your GTD Inbox</p>
+<p>Should I create this? [Yes] [Customize] [Cancel]&quot;
+</code></pre></p>
+<strong>Implementation:</strong>
+<li>River interprets automation requests</li>
+<li>Generates Oban cron jobs for scheduled tasks</li>
+<li>Uses existing agents (Feeder for email, Reader for extraction)</li>
+<li>Stores automation as entry with entry_type='automation'</li>
+<strong>Effort:</strong> 3-4 weeks
+<h3>4.4 MEDIUM PRIORITY: Self-Correction/Learning Loop</h3>
+<strong>Gap:</strong> Twin agents self-fix; Onelist agents fail and require manual intervention.
+<strong>Recommendation:</strong> Implement PAL pattern with error recovery:
+<pre><code class="language-elixir">defmodule Onelist.Agents.SelfCorrection do
+  @max_retries 3
+<p>def execute_with_recovery(task, context) do
+    case execute(task, context) do
+      {:ok, result} -&gt;
+        record_success(task, context)
+        {:ok, result}</p>
+<p>{:error, error} when context.retries &lt; @max_retries -&gt;
+        # Analyze error, adjust approach
+        corrected_task = analyze_and_correct(task, error, context)
+        execute_with_recovery(corrected_task, %{context | retries: context.retries + 1})</p>
+<p>{:error, error} -&gt;
+        record_failure(task, error, context)
+        escalate_to_user(task, error)
+    end
+  end</p>
+<p>defp analyze_and_correct(task, error, context) do
+    # Use LLM to understand error and suggest fix
+    prompt = &quot;&quot;&quot;
+    Task failed with error: #{inspect(error)}
+    Original task: #{inspect(task)}
+    Previous attempts: #{context.retries}</p>
+<p>Suggest a corrected approach.
+    &quot;&quot;&quot;</p>
+<p>{:ok, correction} = LLM.complete(prompt, model: :planning)
+    apply_correction(task, correction)
+  end
+end
+</code></pre></p>
+<strong>Effort:</strong> 2-3 weeks (part of River Agent implementation)
+<h3>4.5 MEDIUM PRIORITY: Integration Marketplace</h3>
+<strong>Gap:</strong> Twin has 2,700+ integrations; Onelist has manual API setup.
+<strong>Recommendation:</strong> Create integration templates in Feeder Agent:
+<pre><code class="language-yaml"># integrations/notion.yaml
+name: Notion
+type: oauth2
+auth_url: https://api.notion.com/v1/oauth/authorize
+token_url: https://api.notion.com/v1/oauth/token
+scopes: [read_content, write_content]
+<p>sync_config:
+  direction: bidirectional
+  poll_interval: 15m</p>
+<p>mappings:
+  notion_page: onelist_entry
+  notion_database: onelist_tag_group
+</code></pre></p>
+<strong>Benefits:</strong>
+<li>One-click integration setup</li>
+<li>Community-contributed integrations</li>
+<li>Competitive with Twin's breadth</li>
+<strong>Effort:</strong> 4-6 weeks (after Feeder Agent MVP)
+<h3>4.6 MEDIUM PRIORITY: Cost Transparency Dashboard</h3>
+<strong>Gap:</strong> Twin's pricing is unclear; this is an opportunity for Onelist.
+<strong>Recommendation:</strong> Build real-time cost tracking:
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Agent Activity &amp; Costs (This Month)                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Total Cost: $2.47                                    Budget: $10.00 [Edit] │
+│  ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  24.7%                         │
+│                                                                              │
+│  By Agent:                                                                   │
+│  ├── Reader Agent      $0.89 (1,247 entries processed)                      │
+│  ├── Searcher Agent    $0.52 (3,891 queries)                                │
+│  ├── River Agent       $0.71 (289 conversations)                            │
+│  ├── Asset Enrichment  $0.35 (42 assets)                                    │
+│  └── Feeder Agent      $0.00 (no LLM calls)                                 │
+│                                                                              │
+│  Cost Savings from Model Switching: $4.21 (63% reduction)                   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Effort:</strong> 2 weeks (UI + backend tracking)
+<h3>4.7 LOW PRIORITY: Workflow Templates</h3>
+<strong>Gap:</strong> Twin users deploy pre-built business automations instantly.
+<strong>Recommendation:</strong> Create starter templates for common workflows:
+<pre><code class="language-yaml"># templates/daily_briefing.yaml
+name: Daily Briefing
+description: Get a morning summary of what needs your attention
+<p>schedule: &quot;0 7 <em> </em> <em>&quot;  # 7 AM daily</p>
+<p>steps:
+  <li>agent: searcher</li>
+    action: query
+    params:
+      query: &quot;tasks due today OR meetings today OR deadlines this week&quot;</p>
+<li>agent: river</li>
+    action: summarize
+    params:
+      template: daily_briefing
+<li>agent: river</li>
+    action: notify
+    params:
+      channel: email
+</code></pre>
+<strong>Effort:</strong> 2 weeks (after River Agent)
+<hr>
+<h2>5. Positioning Strategy</h2>
+<h3>5.1 Where Onelist Wins</h3>
+<table>
+<tr><th>Segment</th><th>Why Onelist Wins</th></tr>
+<tr><td><strong>Privacy-conscious users</strong></td><td>Self-hosted, E2EE, BYOB storage</td></tr>
+<tr><td><strong>Developers/technical users</strong></td><td>Open source, REST API, OpenClaw integration</td></tr>
+<tr><td><strong>Personal knowledge workers</strong></td><td>Atomic memories, GTD, life management</td></tr>
+<tr><td><strong>AI assistant users (OpenClaw)</strong></td><td>Deep integration, shared memory</td></tr>
+<tr><td><strong>Long-term archivists</strong></td><td>Local-first, no vendor lock-in</td></tr>
+</table>
+<h3>5.2 Where Twin Wins</h3>
+<table>
+<tr><th>Segment</th><th>Why Twin Wins</th></tr>
+<tr><td><strong>Non-technical operators</strong></td><td>Zero setup, plain English</td></tr>
+<tr><td><strong>Business automation</strong></td><td>2,700+ integrations, browser automation</td></tr>
+<tr><td><strong>SMBs needing quick ROI</strong></td><td>Deploy in minutes, proven at scale</td></tr>
+<tr><td><strong>Users without AI assistants</strong></td><td>Standalone platform</td></tr>
+</table>
+<h3>5.3 Recommended Positioning</h3>
+<strong>Onelist:</strong> "The privacy-first second brain for AI agents and humans"
+<strong>Differentiation Message:</strong>
+<blockquote>"Unlike cloud-only automation platforms, Onelist gives you complete control.</blockquote>
+<blockquote>Self-host for free, or sync with end-to-end encryption. Your memories, your rules.</blockquote>
+<blockquote>Works seamlessly with OpenClaw and other AI assistants."</blockquote>
+<strong>Target Audience:</strong>
+1. OpenClaw users (immediate)
+2. Privacy-conscious knowledge workers
+3. Developers building AI-powered tools
+4. Organizations with data sovereignty requirements
+<hr>
+<h2>6. Implementation Priority Matrix</h2>
+<table>
+<tr><th>Improvement</th><th>Impact</th><th>Effort</th><th>Priority</th></tr>
+<tr><td>Model switching for costs</td><td>High</td><td>Low</td><td><strong>P0</strong></td></tr>
+<tr><td>Browser plugin (authenticated capture)</td><td>High</td><td>Medium</td><td><strong>P0</strong> (in progress)</td></tr>
+<tr><td>Self-correction/PAL pattern</td><td>High</td><td>Medium</td><td><strong>P1</strong></td></tr>
+<tr><td>Simplified automation UI</td><td>High</td><td>Medium</td><td><strong>P1</strong></td></tr>
+<tr><td>Cost transparency dashboard</td><td>Medium</td><td>Low</td><td><strong>P1</strong></td></tr>
+<tr><td>Integration marketplace</td><td>Medium</td><td>High</td><td><strong>P2</strong></td></tr>
+<tr><td>Workflow templates</td><td>Low</td><td>Low</td><td><strong>P2</strong></td></tr>
+</table>
+<hr>
+<h2>7. Conclusion</h2>
+<p>Twin represents a significant competitive threat in the broader AI automation space, but Onelist occupies a defensible niche with its privacy-first, self-hosted architecture. The key improvements needed are:</p>
+<p>1. <strong>Immediate:</strong> Add model switching to reduce costs 5-10x
+2. <strong>Near-term:</strong> Complete browser plugin for authenticated content
+3. <strong>Medium-term:</strong> Simplify automation creation via River
+4. <strong>Ongoing:</strong> Build integration ecosystem</p>
+<p>Twin's cloud-only model is both their strength (zero setup) and weakness (privacy concerns, vendor lock-in). Onelist should lean into its self-hosted, open-source positioning while adopting Twin's best UX patterns for agent creation and cost optimization.</p>
+<hr>
+<h2>References</h2>
+<h3>Twin Sources</h3>
+<li><a href="https://twin.so/">Twin.so</a> - Main website</li>
+<li><a href="https://twin.so/blog/launch">Twin Launch Blog</a> - Launch announcement</li>
+<li><a href="https://docs.twin.so/welcome">Twin Documentation</a> - Feature documentation</li>
+<li><a href="https://news.ycombinator.com/item?id=46785334">Hacker News Discussion</a> - Community feedback</li>
+<li><a href="https://techcrunch.com/2024/01/31/twin-labs-automates-repetitive-tasks-by-letting-ai-take-over-your-mouse-cursor/">TechCrunch Coverage</a> - Press coverage</li>
+<h3>Onelist Sources</h3>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a></li>
+<li><a href="./river_agent_plan.md">River Agent Plan</a></li>
+<li><a href="./web_content_capture_plan.md">Web Content Capture Plan</a></li>
+<li><a href="./ai_memory_evolution.md">AI Memory Evolution</a></li>
+<li><a href="./feeder_agent_plan.md">Feeder Agent Plan</a></li>
+</ul>
+<hr>
+</em>Document created: 2026-01-30<em>
+</em>Status: Strategic Analysis*
+  </article>
+</body>
+</html>

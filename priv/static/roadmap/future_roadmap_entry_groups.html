@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Feature Branch Plan: Entry Groups - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Feature Branch Plan: Entry Groups</h1>
+<strong>Document Version:</strong> 2025-05-06
+<strong>Feature Branch:</strong> Entry Groups
+<strong>Baseline System:</strong> Onelist v2.0 (MVP + Completed Future Roadmap, including AI features and a functional <code>entry_links</code> table)
+<strong>Location Context:</strong> Concord, North Carolina, United States (as of ~11:32 AM EDT)
+<h2>1. Feature Branch Goal & Vision</h2>
+<p>The "Entry Groups" feature aims to provide users with a flexible and powerful way to manually curate, organize, and visualize collections of their Onelist <code>entries</code>. It goes beyond simple tagging by allowing arbitrary named sets, user-defined sequencing, optional hierarchical structuring, and multiple distinct visual representations for these collections. This feature is designed to support diverse use cases, from project management and outlining to creating portfolios, photo albums, mindmaps, and traditional notebooks, transforming Onelist into a more versatile information workspace and enhancing its "augmented memory" capabilities with user-driven structure.</p>
+<h2>2. Core Entities & Data Model Changes/Additions</h2>
+<p>This feature primarily leverages and extends the existing <code>entries</code> and <code>representations</code> tables, and critically relies on the implemented <code>entry_links</code> table.</p>
+<em> <strong>Entry Group as an <code>entry</code>:</strong>
+  </em> An "Entry Group" itself will be stored as a standard Onelist <code>entry</code> in the <code>entries</code> table.
+  <em> <code>entry_type</code>: A new type, e.g., <code>'group'</code>.
+  </em> <code>entries.title</code>: Will store the user-defined name of the group.
+  <em> <code>entries.metadata</code> (JSONB): Can store group-level settings, such as the <code>public_id</code> of its default <code>representation</code> view to load, or global preferences.
+</em> <strong>Group Membership, Sequencing, and Hierarchy (via <code>entry_links</code>):</strong>
+  <em> The <code>entry_links</code> table establishes membership and defines the </em>default/primary<em> sequence and hierarchy.
+  </em> For each member <code>entry</code> within a group <code>entry</code>:
+    <em> An <code>entry_links</code> record links the group to the member:
+      </em> <code>source_entry_id</code>: The <code>id</code> of the <code>'group'</code> entry.
+      <em> <code>target_entry_id</code>: The <code>id</code> of the member <code>entry</code>.
+      </em> <code>link_type</code>: e.g., <code>'group_member'</code>.
+      <em> <code>metadata</code> (JSONB on <code>entry_links</code>): Stores essential structural information:
+        </em> <code>sequence</code> (Integer): Default sort order of this member within the group's flat list or within its hierarchy level.
+        <em> <code>parent_member_link_id</code> (UUID, Nullable): References the <code>id</code> of the </em><code>entry_links</code> record<em> representing the parent item within the same group, enabling hierarchical structures (outlines, mindmaps). Null for top-level items.
+</em> <strong>Group <code>Representations</code> (Defining Views and View-Specific State):</strong>
+  <em> Each <code>'group'</code> entry can have multiple associated <code>representations</code> records, each defining a distinct view.
+  </em> <code>representations.type</code> (String): Defines the view type (e.g., <code>'group_list_view'</code>, <code>'group_notebook_view'</code>, <code>'group_kanban_board_view'</code>, <code>'group_mindmap_view'</code>, etc.).
+  <em> <code>representations.content</code> (Text, Nullable) or <code>representations.metadata</code> (JSONB): Stores <strong>view-specific settings and state</strong>, such as:
+    </em> <strong>View Settings:</strong> Definitions needed for the view itself (e.g., Kanban column names/IDs/order, mindmap layout preferences, photo album display style).
+    <em> <strong>Representation-Specific Member State & Order:</strong> If a view requires its own manual sort order different from the default sequence in <code>entry_links</code>, or needs to track state per member (like Kanban column or mindmap position), this information is stored here, keyed by the member's <code>target_entry_id</code> or <code>public_id</code>. Examples:
+      </em> Kanban <code>metadata</code>: <code>{"columns": [...], "item_states": {"<entry_id_A>": {"column_id": "col1", "sequence_in_column": 1}, ...}}</code>
+      <em> Mindmap <code>metadata</code>: <code>{"node_positions": {"<entry_id_A>": {"x": 10, "y": 20}, ...}}</code>
+      </em> List/Notebook/Board <code>metadata</code> might include: <code>{"view_specific_sequence": ["<entry_id_C>", "<entry_id_A>", ...]}</code>
+<h2>3. Key Functionalities</h2>
+<em> <strong>Group Management:</strong> Create, rename, delete groups. Set a default view/representation.
+</em> <strong>Member Management:</strong> Add existing <code>entries</code> to groups (creating <code>entry_links</code> record). Remove entries from groups (deleting <code>entry_links</code> record). An entry can belong to multiple groups.
+<em> <strong>Ordering & Hierarchy:</strong> Define/modify default sequence (via <code>entry_links.metadata.sequence</code>). Create/manage hierarchy (via <code>entry_links.metadata.parent_member_link_id</code>).
+</em> <strong>Representation Switching:</strong> Easily switch between available views (<code>representations</code>) for a group. Remember the last used or default view.
+<em> <strong>Interaction within Representations:</strong>
+  </em> <strong>View-Specific Ordering:</strong> Define manual sort orders specific to certain views, overriding the default sequence for that view only (stored in the view's <code>representation.metadata</code>).
+  <em> <strong>View-Specific State Management:</strong> Modify state within views like Kanban (moving items between columns) or Mindmap (positioning nodes), with state saved in the view's <code>representation.metadata</code>.
+  </em> <strong>Interactive Manipulation:</strong> Support drag-and-drop for ordering, hierarchy changes, and state changes within relevant views.
+<h2>4. Group <code>Representations</code> (Planned Initial Types & Considerations)</h2>
+<em>(List of potential views, specific set for initial release TBD)</em>
+<em> <strong><code>group_list_view</code>:</strong>
+  </em> Simple filterable list display. Uses default sequence, optionally view-specific manual sort.
+  <em> Settings: Visible columns (title, dates, tags, etc.).
+</em> <strong><code>group_notebook_view</code>:</strong>
+  <em> Familiar notebook interface, optimized for notes/documents.
+  </em> List or grid display showing titles, snippets, dates, tags, thumbnails.
+  <em> Uses default sequence or standard sorting (title, dates), optionally view-specific manual sort.
+  </em> Can optionally leverage hierarchy for sections.
+<em> <strong><code>group_outline_view</code>:</strong>
+  </em> Hierarchical display based on <code>entry_links</code> parent relationships.
+  <em> Supports collapse/expand. Order within levels respects default sequence.
+</em> <strong><code>group_kanban_board_view</code>:</strong>
+  <em> Displays members as cards in configurable columns.
+  </em> Settings: Column definitions stored in <code>representation.metadata</code>.
+  <em> State: Card positions (column, sequence within column) stored in <code>representation.metadata</code>. Drag-and-drop interaction.
+</em> <strong><code>group_pinterest_board_view</code>:</strong>
+  <em> Visual grid of cards (using primary image <code>asset</code> or preview).
+  </em> Settings: Card appearance. State: View-specific manual sort order.
+<em> <strong><code>group_mindmap_view</code>:</strong>
+  </em> Hierarchical display in a mindmap layout using <code>entry_links</code>.
+  <em> State (<code>representation.metadata</code>): Stores node positions, branch colors/styles, possibly layout preferences. Interactive node manipulation.
+</em> <strong><code>group_photo_album_view</code>:</strong>
+  <em> <strong>Purpose:</strong> Optimized for viewing and presenting collections of entries that are primarily images or videos.
+  </em> <strong>Display:</strong> Presents media entries in various layouts suitable for visual Browse.
+  <em> <strong>Settings (<code>representation.metadata</code>):</strong>
+    </em> <strong>Layout Style:</strong> User choice for display (e.g., justified grid, masonry grid, single column scroll, slideshow).
+    <em> <strong>Sort Options:</strong> Controls the initial/default ordering within this view. Options include: using the group's default sequence (<code>entry_links</code>), sorting by member entry attributes (<code>content_created_at</code>, <code>inserted_at</code>, <code>title</code>), or using a <strong>view-specific manual sequence</strong>.
+    </em> <strong>Slideshow Configuration:</strong> If 'slideshow' layout is chosen:
+      <em> <code>slide_duration_seconds</code> (Integer): Time each item is displayed.
+      </em> <code>transition_effect</code> (String): Effect used between slides (e.g., 'fade', 'slide_left', 'zoom', 'none').
+    <em> <strong>Caption Configuration:</strong>
+      </em> <code>show_captions</code> (Boolean): Toggle display of captions.
+      <em> <code>caption_source_field</code> (String): Which field from the member <code>entry</code> to use as a caption (e.g., 'title', 'metadata.description').
+      </em> <code>caption_position</code> (String): Where to display the caption relative to the media (e.g., 'overlay_bottom', 'below_media', 'beside_media').
+  <em> <strong>State (<code>representation.metadata</code>):</strong>
+    </em> <strong>View-Specific Manual Sequence:</strong> Stores the user-defined manual order of media entries <em>specifically for this album view</em>, if that sort option is selected. (e.g., <code>{"view_specific_sequence": ["<entry_id_C>", "<entry_id_A>", ...]}</code>)
+  <em> <strong>Interaction:</strong> Browse media, potentially launching a full-screen viewer or slideshow mode, reordering if manual sequence is enabled for the view.
+<h2>5. UI/UX Considerations</h2>
+</em> Dedicated section or clear entry points for managing Entry Groups.
+<em> Intuitive methods for adding/removing entries (drag-and-drop, menus).
+</em> Fluid drag-and-drop for ordering, hierarchy manipulation, Kanban card movement, etc.
+<em> Simple mechanism for switching between group representations (views).
+</em> Contextual actions for managing members within a group view.
+<em> Clear settings interface for each group representation type.
+<h2>6. Impact on Existing System (Onelist v2.0)</h2>
+</em> <strong>Leverages Core Primitives:</strong> Builds directly on <code>entries</code>, <code>representations</code>, and requires the implemented <code>entry_links</code> table.
+<em> <strong>Search:</strong> Groups (as <code>entries</code>) are searchable by title. Filtering/searching </em>within<em> a group view will operate on its members.
+</em> <strong>Tagging:</strong> Groups themselves can be tagged. Members retain their own tags. Tags and Groups offer complementary organization methods.
+<em> <strong>API:</strong> Requires new API endpoints for all group management functions (CRUD for groups, members, representations, view states).
+</em> <strong>AI Features:</strong>
+  <em> Contextual AI Chat Pane could use a selected group as its context.
+  </em> "Onelist AI" (Global Assistant) could create/manage groups and members via natural language.
+<h2>7. MVP for "Entry Groups" Feature Branch</h2>
+<p>To validate the core concept efficiently:</p>
+<em> Implement the <code>'group'</code> <code>entry_type</code>.
+</em> Implement basic membership management via <code>entry_links</code>, including the <code>metadata.sequence</code> for a default manual order. (Hierarchy support deferred initially).
+<em> Implement <strong>two</strong> initial representations:
+  </em> <strong><code>group_notebook_view</code>:</strong> Provides a familiar list/grid optimized for notes, using the default sequence. Allows opening member entries. Basic reordering of default sequence via drag-and-drop. (Chosen over simple list for better thematic fit).
+  <em> <strong><code>group_kanban_board_view</code>:</strong> Demonstrates a stateful view. Allows defining columns (in <code>representation.metadata</code>), moving member entries between columns via drag-and-drop (updating state in <code>representation.metadata</code>). Uses default sequence within columns initially.
+</em> Basic UI for creating groups, adding/removing members, switching between the two views, and interacting within them (reordering in notebook, moving cards in Kanban).
+<h2>8. Future Evolution within this Branch</h2>
+<em> Introduce remaining representation types (Outline, Mindmap, Pinterest Board, Photo Album, List View etc.).
+</em> Implement full hierarchical support (parent/child relationships via <code>entry_links.metadata.parent_member_link_id</code>) and views that utilize it (Outline, Mindmap).
+<em> Add advanced configuration options for each representation type.
+</em> Develop "Smart Groups" / "Dynamic Collections" (visualizing saved queries).
+<em> Build collaboration features for shared groups (requires careful state management).
+</em> Introduce templates for common group structures (e.g., Project Kanban, Meeting Notes Outline).
+<em> Allow nesting groups within other groups.
+<h2>9. Risks/Challenges</h2>
+</em> <strong>Data Model Complexity:</strong> Managing default sequence, hierarchy, and multiple view-specific sequences/states efficiently requires careful database design and querying (the proposed model aims to separate concerns but needs validation).
+<em> <strong>UI/UX Complexity:</strong> Creating intuitive interfaces for diverse views, drag-and-drop across different contexts (structure vs. view-specific state), and hierarchy management is demanding.
+</em> <strong>Performance:</strong> Efficiently loading and rendering groups with potentially hundreds or thousands of members, especially in complex views like mindmaps, is critical. Query optimization for <code>entry_links</code> and representation metadata will be essential.
+<em> <strong>Synchronization & Consistency:</strong> Ensuring that changes made in one view (e.g., hierarchy in Outline) are reflected appropriately or handled predictably in other views or in the underlying default sequence/hierarchy stored in <code>entry_links</code>.
+</em> <strong>Scope Management:</strong> The potential number of views and features is large; disciplined scoping is needed for iterative delivery.
+  </article>
+</body>
+</html>

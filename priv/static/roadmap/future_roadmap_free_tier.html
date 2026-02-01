@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Free Tier: Self-Hosted - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Free Tier: Self-Hosted</h1>
+<strong>Status:</strong> Planning
+<strong>Updated:</strong> 2026-01-28
+<h2>1. Vision & Goal</h2>
+<p>Onelist offers a <strong>completely free tier</strong> that requires no monthly payment and no cloud storage dependency. Users run their own Onelist infrastructure and sync between their endpoints using peer-to-peer protocols.</p>
+<strong>Goals:</strong>
+<ul>
+<li>Lower barrier to entry for technical users</li>
+<li>Attract privacy-conscious users who prefer self-hosting</li>
+<li>Build user base for community features (forums)</li>
+<li>Entry into ecosystem (account, identity, email communications)</li>
+<li>Natural upgrade path to paid tiers</li>
+<h2>2. Tier Comparison</h2>
+<table>
+<tr><th>Feature</th><th>Free (Self-Hosted)</th><th>Cloud Sync ($3/mo)</th><th>VM ($20/mo)</th></tr>
+<tr><td>Price</td><td>$0</td><td>$3/mo + storage</td><td>$20/mo + storage</td></tr>
+<tr><td>Hosting</td><td>You host everything</td><td>You host endpoints; Onelist provides E2EE cloud DB</td><td>Onelist hosts everything</td></tr>
+<tr><td>Required components</td><td>Core + PostgreSQL</td><td>Core + PostgreSQL</td><td>Onelist manages</td></tr>
+<tr><td>Optional components</td><td>Web, Agents</td><td>Web, Agents</td><td>All included</td></tr>
+<tr><td>Sync method</td><td>P2P only</td><td>P2P (LAN) + Cloud (WAN)</td><td>Cloud</td></tr>
+<tr><td>Mobile access</td><td>Need your own endpoint</td><td>Need your own endpoint</td><td>Yes (Onelist endpoint)</td></tr>
+<tr><td>Cloud backup</td><td>No</td><td>Yes (E2EE)</td><td>Yes</td></tr>
+<tr><td>Public pages (onelist.my)</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Forum posts in your Onelist</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Server-side search/agents</td><td>Run locally</td><td>Run locally</td><td>Onelist runs for you</td></tr>
+<tr><td>Asset storage</td><td>BYOB</td><td>R2 or R2+B2</td><td>R2 or R2+B2</td></tr>
+<tr><td>Discovery service</td><td>Yes (Onelist-operated)</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Account/identity</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+</table>
+<h2>3. What Free Tier Includes</h2>
+<h3>3.1 From Onelist</h3>
+<table>
+<tr><th>Component</th><th>Provided</th><th>Notes</th></tr>
+<tr><td>Account/identity</td><td>Yes</td><td>Created at onelist.my</td></tr>
+<tr><td>Discovery service</td><td>Yes</td><td>P2P device finding, NAT hole punching</td></tr>
+<tr><td>Forum participation</td><td>Yes</td><td>Posts stored on forum host, not in your Onelist</td></tr>
+<tr><td>Email communications</td><td>Yes</td><td>Feature updates, promotions</td></tr>
+<tr><td>Relay service</td><td><strong>No</strong></td><td>Use Tailscale/VPN if P2P fails</td></tr>
+<tr><td>Public pages</td><td><strong>No</strong></td><td>Requires Cloud Sync or VM tier</td></tr>
+<tr><td>Cloud storage</td><td><strong>No</strong></td><td>BYOB required</td></tr>
+</table>
+<h3>3.2 Self-Hosted (User Provides)</h3>
+<table>
+<tr><th>Component</th><th>Required</th><th>Notes</th></tr>
+<tr><td>Onelist Core</td><td>Yes</td><td>Phoenix API server</td></tr>
+<tr><td>PostgreSQL</td><td>Yes</td><td>With pgvector extension</td></tr>
+<tr><td>Onelist Web</td><td>Optional</td><td>LiveView UI</td></tr>
+<tr><td>Agents (River, etc.)</td><td>Optional</td><td>User chooses which to run</td></tr>
+<tr><td>VPS/Server</td><td>Yes</td><td>Or desktop with always-on capability</td></tr>
+<tr><td>Object storage</td><td>Yes</td><td>BYOB (R2, B2, S3, etc.)</td></tr>
+<tr><td>Domain</td><td>Optional</td><td>For running Onelist Web</td></tr>
+</table>
+<h3>3.3 Unlimited</h3>
+<li>Entries, tags, assets (limited only by your infrastructure)</li>
+<li>Devices (registered for P2P discovery)</li>
+<li>API calls (to your own instance)</li>
+<li>Local storage</li>
+<h2>4. What Free Tier Does NOT Include</h2>
+<li>Cloud storage/sync</li>
+<li>Public pages on onelist.my</li>
+<li>Forum posts synced to your Onelist</li>
+<li>Mobile access (unless you run your own endpoint)</li>
+<li>Onelist-hosted anything (except discovery + account)</li>
+<li>Relay service for P2P</li>
+<h2>5. Account & Identity</h2>
+<blockquote><strong>See:</strong> <a href="./corporate_services_plan.md#3-auth-service-account--identity">Corporate Services Plan - Section 3: Auth Service</a> for full account/identity details.</blockquote>
+<strong>Summary for Free Tier:</strong>
+<li>Accounts are <strong>always created at onelist.my</strong> (central identity)</li>
+<li>Even self-hosted users need an account for device registry and P2P discovery</li>
+<li>Account provides: identity, device registry, forum participation, upgrade path</li>
+<h2>6. Forum Participation</h2>
+<p>Free tier users can participate in forums, but with limitations:</p>
+<h3>6.1 How It Works</h3>
+<pre><code class="language-">Free tier user posts in forum
+         │
+         ▼
+Post stored in ONE of:
+├── Onelist corporate forum (general discussions)
+├── Another user's Onelist-hosted forum (comments on their content)
+         │
+         ▼
+Post is:
+├── Tied to their account as originator
+├── Stored UNENCRYPTED (forums are public/readable)
+├── NOT synced to their personal Onelist (no cloud connection)
+         │
+         ▼
+If user upgrades to Cloud Sync later:
+└── Historical posts can be copied to their Onelist
+</code></pre>
+<h3>6.2 Forum Hosting Model</h3>
+<p>Users with Cloud Sync or VM tier can run their own forums on their Onelist-hosted sites. Other users (including free tier) can participate:
+<li>Using their Onelist account</li>
+<li>Or anonymously</li></p>
+<p>Forum content is stored on the <strong>forum host's</strong> Onelist, creating a federated/decentralized forum system.</p>
+<h2>7. Mobile Access</h2>
+<strong>Mobile apps cannot run full Onelist stack.</strong> Mobile devices function as remote clients only.
+<h3>7.1 Mobile Requirements</h3>
+<table>
+<tr><th>Tier</th><th>Mobile Access</th><th>How</th></tr>
+<tr><td>Free</td><td>Only with your own endpoint</td><td>Mobile connects to your VPS or desktop</td></tr>
+<tr><td>Cloud Sync</td><td>Only with your own endpoint</td><td>E2EE cloud can't serve mobile (encrypted)</td></tr>
+<tr><td>VM</td><td>Yes</td><td>Mobile connects to Onelist-hosted endpoint</td></tr>
+</table>
+<h3>7.2 Options for Free Tier Mobile</h3>
+<p>1. <strong>Run VPS endpoint</strong> - Mobile connects to your always-on VPS
+2. <strong>Desktop as endpoint</strong> - Mobile connects to your desktop (when online)
+3. <strong>No mobile</strong> - Use desktop/web only</p>
+<h2>8. P2P Sync Architecture</h2>
+<h3>8.1 Overview</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         FREE TIER: P2P SYNC                                  │
+│                                                                              │
+│   ┌─────────────┐         ┌─────────────┐         ┌─────────────┐          │
+│   │  VPS w/     │◄──P2P──►│  Desktop    │◄──P2P──►│  VPS w/     │          │
+│   │  OpenClaw    │         │  (Mac/Linux)│         │  Onelist    │          │
+│   └──────┬──────┘         └─────────────┘         └─────────────┘          │
+│          │                                                                   │
+│          │ Remote client (API)                                              │
+│          ▼                                                                   │
+│   ┌─────────────┐                                                           │
+│   │  Mobile App │  (connects to endpoint, not P2P participant)              │
+│   └─────────────┘                                                           │
+│                                                                              │
+│   Each endpoint has:                                                        │
+│   ├── Own PostgreSQL database                                               │
+│   ├── Own local asset storage                                               │
+│   └── Optional connection to BYOB cloud bucket                              │
+│                                                                              │
+│   NO cloud PostgreSQL. NO central database.                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>8.2 What Syncs</h3>
+<table>
+<tr><th>Data Type</th><th>Storage</th><th>Sync Priority</th></tr>
+<tr><td>Entries</td><td>PostgreSQL → PostgreSQL</td><td>High</td></tr>
+<tr><td>Representations</td><td>PostgreSQL → PostgreSQL</td><td>High</td></tr>
+<tr><td>Tags</td><td>PostgreSQL → PostgreSQL</td><td>High</td></tr>
+<tr><td>Entry Links</td><td>PostgreSQL → PostgreSQL</td><td>High</td></tr>
+<tr><td>Assets (metadata)</td><td>PostgreSQL → PostgreSQL</td><td>High</td></tr>
+<tr><td>Assets (files)</td><td>Filesystem ↔ Filesystem</td><td>Medium</td></tr>
+<tr><td>User settings</td><td>PostgreSQL → PostgreSQL</td><td>Low</td></tr>
+</table>
+<h3>8.3 LAN vs WAN Sync</h3>
+<table>
+<tr><th>Method</th><th>MVP</th><th>Post-MVP</th><th>Notes</th></tr>
+<tr><td>LAN (mDNS)</td><td>Yes</td><td>Yes</td><td>Same network, zero config</td></tr>
+<tr><td>WAN (discovery)</td><td>No</td><td>Yes</td><td>Requires Onelist discovery server</td></tr>
+</table>
+<h2>9. P2P Sync Technical Specification</h2>
+<h3>9.1 Change Tracking</h3>
+<p>Each syncable record includes:</p>
+<pre><code class="language-sql">-- Added to all synced tables
+sync_version bigint NOT NULL DEFAULT 0;
+sync_clock jsonb NOT NULL DEFAULT '{}';      -- Vector clock
+sync_deleted boolean NOT NULL DEFAULT false;  -- Soft delete for sync
+sync_origin_device_id uuid;                   -- Which device created this
+</code></pre>
+<strong>Vector Clock Format:</strong>
+<pre><code class="language-json">{&quot;device_a_id&quot;: 42, &quot;device_b_id&quot;: 37, &quot;device_c_id&quot;: 15}
+</code></pre>
+<h3>9.2 Database Schema</h3>
+<pre><code class="language-sql">-- Device registry (synced between devices)
+CREATE TABLE devices (
+  id uuid PRIMARY KEY,
+  account_id uuid NOT NULL REFERENCES users(id),
+  name text NOT NULL,
+  public_key bytea NOT NULL,           -- Ed25519 public key
+  device_type text,                     -- desktop, server
+  os_info text,
+  last_seen_at timestamptz,
+  registered_at timestamptz NOT NULL,
+  sync_deleted boolean DEFAULT false
+);
+<p>-- Sync state per peer (local to each device)
+CREATE TABLE sync_peers (
+  id uuid PRIMARY KEY,
+  local_device_id uuid NOT NULL REFERENCES devices(id),
+  peer_device_id uuid NOT NULL REFERENCES devices(id),
+  last_sync_at timestamptz,
+  last_sync_version bigint DEFAULT 0,
+  connection_hints jsonb,               -- [{type, ip, port}, ...]
+  status text DEFAULT 'unknown',
+  UNIQUE(local_device_id, peer_device_id)
+);</p>
+<p>-- Pending sync operations (local to each device)
+CREATE TABLE sync_outbox (
+  id uuid PRIMARY KEY,
+  table_name text NOT NULL,
+  record_id uuid NOT NULL,
+  operation text NOT NULL,              -- insert, update, delete
+  payload jsonb NOT NULL,
+  sync_version bigint NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  synced_to jsonb DEFAULT '{}'          -- {peer_id: timestamp, ...}
+);</p>
+<p>-- Unresolved conflicts (local to each device)
+CREATE TABLE sync_conflicts (
+  id uuid PRIMARY KEY,
+  table_name text NOT NULL,
+  record_id uuid NOT NULL,
+  local_version jsonb NOT NULL,
+  remote_version jsonb NOT NULL,
+  local_clock jsonb NOT NULL,
+  remote_clock jsonb NOT NULL,
+  conflict_type text NOT NULL,
+  resolved boolean DEFAULT false,
+  resolution text,
+  resolved_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);</p>
+<p>-- Asset mirror status (local to each device)
+CREATE TABLE asset_mirrors (
+  id uuid PRIMARY KEY,
+  asset_id uuid NOT NULL REFERENCES assets(id),
+  location text NOT NULL,               -- 'local', 'cloud:r2', 'peer:device_id'
+  status text NOT NULL,                 -- pending, syncing, synced, failed
+  storage_path text,
+  checksum text,
+  synced_at timestamptz,
+  error_message text,
+  retry_count integer DEFAULT 0,
+  UNIQUE(asset_id, location)
+);
+</code></pre></p>
+<h3>9.3 Sync Protocol Flow</h3>
+<pre><code class="language-">INITIATOR (Device A)                         RESPONDER (Device B)
+─────────────────────                        ─────────────────────
+<p>1. HELLO
+   {device_id, account_id,
+    protocol_version, auth_challenge}
+                                    ────────►
+                                              2. Verify account ownership
+                                                 Sign challenge with device key
+                                    ◄────────
+   {auth_response, peer_sync_version}</p>
+<p>3. SYNC REQUEST
+   {since_version: 42,
+    tables: [&quot;entries&quot;, &quot;tags&quot;, ...]}
+                                    ────────►
+                                              4. Gather changes since version 42
+                                    ◄────────
+   {changes: [...],
+    current_version: 67,
+    has_more: false}</p>
+<p>5. Apply changes locally
+   Detect conflicts via vector clocks</p>
+<p>6. SYNC RESPONSE (our changes)
+   {changes: [...],
+    current_version: 58}
+                                    ────────►
+                                              7. Apply changes
+                                                 Detect conflicts</p>
+<p>8. CONFLICT RESOLUTION (if any)
+   {conflicts: [...],
+    resolutions: [...]}
+                                    ◄───────►
+                                              Bidirectional until resolved</p>
+<p>9. SYNC COMPLETE
+   {final_version: 70}
+                                    ────────►
+                                    ◄────────
+   {ack}
+</code></pre></p>
+<h3>9.4 Conflict Resolution</h3>
+<table>
+<tr><th>Conflict Type</th><th>Strategy</th></tr>
+<tr><td>Concurrent edit (trivial)</td><td>Last-Write-Wins (LWW)</td></tr>
+<tr><td>Concurrent edit (significant)</td><td>Flag for user resolution</td></tr>
+<tr><td>Delete vs Edit</td><td>Prefer edit unless delete is newer</td></tr>
+<tr><td>Tag changes</td><td>Merge sets</td></tr>
+</table>
+<h3>9.5 Security</h3>
+<strong>Device Authentication:</strong>
+<li>Each device has Ed25519 keypair</li>
+<li>Public key registered with account</li>
+<li>Challenge-response authentication between peers</li>
+<strong>Transport Encryption:</strong>
+<li>X25519 key exchange for session key</li>
+<li>ChaCha20-Poly1305 authenticated encryption</li>
+<li>All P2P traffic encrypted</li>
+<strong>Key Exchange Flow:</strong>
+<pre><code class="language-">1. Devices exchange ephemeral X25519 public keys
+2. Derive shared secret via ECDH
+3. Derive session keys using HKDF
+4. All subsequent frames encrypted with session key
+</code></pre>
+<h3>9.6 Asset Sync</h3>
+<strong>Storage Options (per device):</strong>
+<li><code>local_only</code> - Assets on local filesystem only</li>
+<li><code>cloud_only</code> - Assets in BYOB bucket only</li>
+<li><code>local_and_cloud</code> - Mirrored to both</li>
+<strong>Asset Transfer:</strong>
+<li>Chunked streaming (256 KB chunks)</li>
+<li>Checksums for integrity verification</li>
+<li>Resume capability for interrupted transfers</li>
+<strong>Sync Priority:</strong>
+<pre><code class="language-">1. Metadata always syncs (small, fast)
+2. Full assets sync based on device config:
+   <li>If peer has file + I want local → P2P transfer</li>
+   <li>If peer has no file + cloud has file → Fetch from cloud</li>
+   <li>If I don't want local → Just metadata (fetch on demand)</li>
+</code></pre>
+<h2>10. WAN Discovery Service (Post-MVP)</h2>
+<blockquote><strong>See:</strong> <a href="./corporate_services_plan.md#4-discovery-service">Corporate Services Plan - Section 4: Discovery Service</a> for full implementation details including API, schema, and NAT traversal.</blockquote>
+<strong>Summary for Free Tier:</strong>
+<li>Discovery service is operated by Onelist (part of Corporate Services)</li>
+<li>Enables P2P sync across the internet (WAN), not just LAN</li>
+<li>Coordinates NAT hole punching between devices</li>
+<li>Does NOT relay traffic - only coordinates device finding</li>
+<li>If hole punch fails, users must use Tailscale/VPN or upgrade to Cloud Sync for relay access</li>
+<h2>11. Upgrade Path</h2>
+<blockquote><strong>See:</strong> <a href="./corporate_services_plan.md#9-billing-service">Corporate Services Plan - Section 9: Billing Service</a> for full upgrade/downgrade flows and implementation.</blockquote>
+<h3>11.1 Upgrade Triggers</h3>
+<table>
+<tr><th>Situation</th><th>Solution</th></tr>
+<tr><td>Want sync when endpoints can't P2P</td><td>Cloud Sync ($3/mo)</td></tr>
+<tr><td>Want public pages on onelist.my</td><td>Cloud Sync ($3/mo)</td></tr>
+<tr><td>Want forum posts in your Onelist</td><td>Cloud Sync ($3/mo)</td></tr>
+<tr><td>Don't want to manage infrastructure</td><td>Web Access ($7-60/mo)</td></tr>
+<tr><td>Need mobile without running own endpoint</td><td>Web Access ($7-60/mo)</td></tr>
+</table>
+<h3>11.2 Key Points</h3>
+<li>Upgrade/downgrade managed via onelist.my</li>
+<li>Stripe integration for payments</li>
+<li>30-day grace period on downgrades (data retained)</li>
+<li>Account/identity always preserved (even after downgrade to free)</li>
+<h2>12. MVP Scope</h2>
+<h3>12.1 MVP Features</h3>
+<li>[x] Account creation at onelist.my</li>
+<li>[ ] Self-hosted installation (Docker Compose)</li>
+<li>[ ] Device registration with account</li>
+<li>[ ] LAN P2P sync (mDNS discovery)</li>
+<li>[ ] Basic sync protocol (entries, tags, assets)</li>
+<li>[ ] BYOB asset storage configuration</li>
+<h3>12.2 Post-MVP Features</h3>
+<li>[ ] Mac desktop app</li>
+<li>[ ] WAN P2P sync (discovery server)</li>
+<li>[ ] NAT hole punching</li>
+<li>[ ] Mobile app (client mode)</li>
+<li>[ ] Forum participation</li>
+<h2>13. Onelist Infrastructure Costs (Free Tier)</h2>
+<blockquote><strong>See:</strong> <a href="./corporate_services_plan.md#13-cost-estimates">Corporate Services Plan - Section 13: Cost Estimates</a> for full infrastructure cost breakdown.</blockquote>
+<strong>Estimated cost per free user:</strong> $0.01-0.05/month (mostly email and minimal Discovery service usage)
+<h2>14. Security Model</h2>
+<h3>14.1 Free Tier Security</h3>
+<table>
+<tr><th>Aspect</th><th>Model</th></tr>
+<tr><td>Data at rest</td><td>Your encryption, your control</td></tr>
+<tr><td>Data in transit (P2P)</td><td>ChaCha20-Poly1305 encrypted</td></tr>
+<tr><td>Data in transit (to cloud)</td><td>N/A (no cloud for free tier)</td></tr>
+<tr><td>Key management</td><td>Your responsibility</td></tr>
+<tr><td>Trust model</td><td>Trust yourself</td></tr>
+</table>
+<h3>14.2 Comparison with Paid Tiers</h3>
+<table>
+<tr><th>Tier</th><th>Data at Rest</th><th>Data in Use</th><th>Trust Model</th></tr>
+<tr><td>Free</td><td>Your encryption</td><td>Your control</td><td>Trust yourself</td></tr>
+<tr><td>Cloud Sync</td><td>E2EE in cloud</td><td>Decrypted on your endpoints only</td><td>Zero-knowledge cloud</td></tr>
+<tr><td>VM</td><td>Encrypted filesystem</td><td>Decrypted on Onelist VPS</td><td>Trust Onelist</td></tr>
+</table>
+<strong>VM Tier Disclosure:</strong>
+<blockquote>Your Onelist VM runs on infrastructure managed by Onelist. While the filesystem is encrypted at rest, your content is decrypted while the server is running to enable full functionality including AI agents, search, and API access. This means Onelist technically has access to your content. If you require zero-knowledge privacy, use Cloud Sync tier with your own endpoint.</blockquote>
+<h2>15. Open Questions</h2>
+<li>[ ] <strong>Q1</strong>: Which P2P protocol library? (Custom, libp2p, or adapt existing)</li>
+<li>[ ] <strong>Q2</strong>: Should discovery server be optional for users who only want LAN sync?</li>
+<li>[ ] <strong>Q3</strong>: Desktop-as-endpoint for mobile - feasible? Worth supporting?</li>
+<li>[ ] <strong>Q4</strong>: Rate limits on discovery service to prevent abuse?</li>
+<h2>16. Related Documents</h2>
+<li><a href="./corporate_services_plan.md">Corporate Services Plan</a> - Auth, Discovery, Relay, Billing, Sync services</li>
+<li><a href="./launch_plan.md">Launch Plan</a> - Pricing and infrastructure</li>
+<li><a href="./asset_storage_plan.md">Asset Storage Plan</a> - BYOB and cloud storage</li>
+<li><a href="./future_roadmap_openclaw_install.md">OpenClaw Integration</a> - Full stack setup</li>
+<li><a href="./river_agent_plan.md">River Agent</a> - AI assistant (optional for free tier)</li>
+<li><a href="./mvp_public_content_plan.md">MVP Public Content</a> - Public pages (paid tiers only)</li>
+</ul>
+  </article>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>River Agent UI Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>River Agent UI Plan</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Active
+<strong>Parent:</strong> ui_plan.md
+<strong>Related:</strong> shared_agent_ui_components.md, settings_ui_plan.md
+<hr>
+<h2>1. Overview</h2>
+<p>This document defines UI components specific to the River Agent. For shared agent UI patterns (processing status, activity items, cost display), see <code>shared_agent_ui_components.md</code>.</p>
+<strong>River Responsibilities:</strong>
+<ul>
+<li>Natural language queries over user's knowledge base</li>
+<li>GTD-based task and project management</li>
+<li>Intelligent entry filing and classification</li>
+<li>Proactive reminders and coaching</li>
+<li>Review workflows (Daily, Weekly)</li>
+<li>Orchestration of other agents</li>
+</ul>
+<strong>Key Design Principle:</strong> River is the ONE assistant users talk to - a unified conversational interface, not multiple agents.
+<strong>GTD Foundation:</strong>
+River implements Getting Things Done methodology:
+<table>
+<tr><th>GTD Step</th><th>River Implementation</th></tr>
+<tr><td><strong>Capture</strong></td><td>Inbox for all incoming entries</td></tr>
+<tr><td><strong>Clarify</strong></td><td>Process entries, identify next actions</td></tr>
+<tr><td><strong>Organize</strong></td><td>Domain/Scope/Project hierarchy + GTD buckets</td></tr>
+<tr><td><strong>Reflect</strong></td><td>Daily, Weekly, Monthly reviews</td></tr>
+<tr><td><strong>Engage</strong></td><td>Context-based views, focus modes</td></tr>
+</table>
+<hr>
+<h2>2. Chat Interface</h2>
+<p>Primary interaction surface for River. All River interactions (user-initiated and proactive) flow through a unified conversation.</p>
+<h3>2.1 Chat Window Layout</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  River                                                      [−] [□] [×]     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─ Conversation ───────────────────────────────────────────────────────────┐
+│  │                                                                          │
+│  │  [Message history - scrollable]                                          │
+│  │                                                                          │
+│  └──────────────────────────────────────────────────────────────────────────┘
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │ 🎤  Type a message...                                             [→] │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  Suggestions: [Daily Review]  [What's due today?]  [Process inbox]          │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.2 Message Types</h3>
+<table>
+<tr><th>Type</th><th>Alignment</th><th>Style</th><th>Example</th></tr>
+<tr><td><strong>User Message</strong></td><td>Right</td><td>Blue background</td><td>Questions, commands</td></tr>
+<tr><td><strong>River Response</strong></td><td>Left</td><td>Gray background</td><td>Answers, suggestions</td></tr>
+<tr><td><strong>Proactive Alert</strong></td><td>Left</td><td>🔔 badge</td><td>Morning briefing, reminders</td></tr>
+<tr><td><strong>Action Confirmation</strong></td><td>Left</td><td>Green accent</td><td>"Task created", "Entry filed"</td></tr>
+</table>
+<h3>2.3 Proactive Message with Actions</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  🔔 9:00 AM                                                                 │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │ Good morning! Here's your briefing:                                   │  │
+│  │                                                                        │  │
+│  │ • 3 tasks due today                                                   │  │
+│  │ • Meeting with John at 2pm                                            │  │
+│  │ • Inbox: 8 items to process                                           │  │
+│  │                                                                        │  │
+│  │ [Process Inbox]  [Show Tasks]  [Snooze 1hr]                           │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│  River                                                                      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.4 Task List in Chat - Scenario A: Inline List</h3>
+<p>When River shows a short task list in response:</p>
+<pre><code class="language-">│  9:15 AM                                                                    │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │ Here are your 3 tasks due today:                                      │  │
+│  │                                                                        │  │
+│  │ □ Send proposal to Acme                                    @computer  │  │
+│  │ □ Review Sarah's budget analysis                           @computer  │  │
+│  │ □ Call dentist                                             @phone     │  │
+│  │                                                                        │  │
+│  │ [View All Tasks]                                                      │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│  River                                                                      │
+</code></pre>
+<h3>2.5 Task List in Chat - Scenario B: Embedded List View</h3>
+<p>For longer lists or when more detail is needed:</p>
+<pre><code class="language-">│  9:15 AM                                                                    │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │ Here are your tasks due today:                                        │  │
+│  │                                                                        │  │
+│  │ │ ☐ │ Task                          │ Project      │ Context   │ Due  │  │
+│  │ ├───┼───────────────────────────────┼──────────────┼───────────┼──────┤  │
+│  │ │ ☐ │ Send proposal to Acme         │ Acme Deal    │ @computer │ Today│  │
+│  │ │ ☐ │ Review Sarah's budget         │ Q2 Planning  │ @computer │ Today│  │
+│  │ │ ☐ │ Call dentist                  │ Personal     │ @phone    │ Today│  │
+│  │ │ ☐ │ Prepare for John meeting      │ —            │ @office   │ 2pm  │  │
+│  │ │ ☐ │ Follow up with vendor         │ Website      │ @phone    │ Today│  │
+│  │ └───┴───────────────────────────────┴──────────────┴───────────┴──────┘  │
+│  │                                                                        │  │
+│  │ Click any task to see details or mark complete.                       │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│  River                                                                      │
+</code></pre>
+<h3>2.6 Search Results in Chat - Scenario A: Summary Response</h3>
+<p>For synthesized answers:</p>
+<pre><code class="language-">│  You: What did Sarah say about the Q2 budget?                               │
+│                                                                    9:20 AM  │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │ In your January 15th meeting notes, Sarah expressed concern about     │  │
+│  │ the marketing budget being 20% over projection. She suggested         │  │
+│  │ reallocating from the conference budget.                              │  │
+│  │                                                                        │  │
+│  │ 📎 Source: &quot;Q2 Planning Meeting&quot; (Jan 15)                             │  │
+│  │                                                                        │  │
+│  │ Want me to create a task to follow up on this?                        │  │
+│  │                                                                        │  │
+│  │ [Yes, create task]  [View full entry]                                 │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│  River                                                         9:20 AM     │
+</code></pre>
+<h3>2.7 Search Results in Chat - Scenario B: List View Results</h3>
+<p>For queries returning multiple entries:</p>
+<pre><code class="language-">│  You: What do I know about machine learning?                                │
+│                                                                    9:25 AM  │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │ You have 47 entries about machine learning:                           │  │
+│  │                                                                        │  │
+│  │ │ Type    │ Title                          │ Source      │ Date       │  │
+│  │ ├─────────┼────────────────────────────────┼─────────────┼────────────┤  │
+│  │ │ Article │ Neural Networks Explained      │ ML Project  │ Jan 28     │  │
+│  │ │ Note    │ Meeting: AI Strategy Session   │ Acme        │ Jan 25     │  │
+│  │ │ Idea    │ Use ML for customer churn      │ Ideas       │ Jan 22     │  │
+│  │ │ Article │ Introduction to Transformers   │ ML Project  │ Jan 20     │  │
+│  │ │ Podcast │ AI in Production               │ Podcasts    │ Jan 18     │  │
+│  │ └─────────┴────────────────────────────────┴─────────────┴────────────┘  │
+│  │                                                                        │  │
+│  │ Showing top 5 of 47 results.                [Show All]  [Summarize]   │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│  River                                                         9:25 AM     │
+</code></pre>
+<h3>2.8 Project Status in Chat</h3>
+<pre><code class="language-">│  You: Give me a briefing on the Acme website redesign project               │
+│                                                                    9:30 AM  │
+│                                                                              │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │ Website Redesign                                         60% complete │  │
+│  │ ══════════════════════════════════════════════════════════════════════│  │
+│  │                                                                        │  │
+│  │ Status: ⚠️ At Risk (Critical Path Blocked)                            │  │
+│  │                                                                        │  │
+│  │ │ Status      │ Task                        │ Owner   │ Due           │  │
+│  │ ├─────────────┼─────────────────────────────┼─────────┼───────────────┤  │
+│  │ │ ✅ Complete  │ Initial wireframes          │ You     │ Jan 15        │  │
+│  │ │ ✅ Complete  │ Stakeholder interviews      │ You     │ Jan 18        │  │
+│  │ │ ⏳ Waiting   │ Brand guidelines            │ Sarah   │ Jan 25 ⚠️ 5d  │  │
+│  │ │ ○ Blocked   │ Design mockups              │ John    │ —             │  │
+│  │ │ ○ Blocked   │ Development                 │ You     │ —             │  │
+│  │ └─────────────┴─────────────────────────────┴─────────┴───────────────┘  │
+│  │                                                                        │  │
+│  │ Blocking Chain:                                                        │  │
+│  │ Brand guidelines (Sarah, 5 days overdue) → Design mockups → Dev       │  │
+│  │                                                                        │  │
+│  │ [Follow up with Sarah]  [View Project]  [Reschedule]                  │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│  River                                                         9:30 AM     │
+</code></pre>
+<h3>2.9 Action Buttons Behavior</h3>
+<table>
+<tr><th>Button</th><th>Sends Command</th><th>Result</th></tr>
+<tr><td>[Mark Complete]</td><td>"mark 'Task Name' complete"</td><td>Task marked done</td></tr>
+<tr><td>[Reschedule]</td><td>Opens date picker inline</td><td>Task rescheduled</td></tr>
+<tr><td>[Process Inbox]</td><td>"let's process my inbox"</td><td>Starts inbox processing</td></tr>
+<tr><td>[Snooze 1hr]</td><td>"snooze this for 1 hour"</td><td>Alert snoozed</td></tr>
+<tr><td>[Create Task]</td><td>"create task: {context}"</td><td>Task created</td></tr>
+<tr><td>[View Entry]</td><td>Opens entry detail</td><td>Navigate to entry</td></tr>
+</table>
+<hr>
+<h2>3. Quick Command Palette</h2>
+<p>Keyboard shortcut (⌘K / Ctrl+K) for fast capture and queries without opening full chat.</p>
+<h3>3.1 Quick Command Layout</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  🔍 Ask River or quick capture...                                    [ESC] │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Recent                                                                     │
+│  ├── What's due today?                                                      │
+│  ├── Process inbox                                                          │
+│  └── Show waiting for items                                                 │
+│                                                                              │
+│  Quick Actions                                                              │
+│  ├── + New task                                                             │
+│  ├── + Quick note                                                           │
+│  └── + Capture idea                                                         │
+│                                                                              │
+│  Press Enter to send, ↑↓ to navigate                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.2 Quick Capture Result</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  🔍 Call Sarah about project timeline                                [ESC] │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ✓ Added to Inbox                                                          │
+│                                                                              │
+│  River suggests: Task with @phone context?                                  │
+│                                                                              │
+│  [Yes, add as task]  [Keep in inbox]  [Add to project...]                  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<em>Sections 4-12 to be added as we review together</em>
+<hr>
+<em>Last updated: 2026-01-30</em>
+  </article>
+</body>
+</html>

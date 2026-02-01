@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Enrichment Agent Development Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Asset Enrichment Agent Development Plan</h1>
+<strong>Document Version:</strong> 2026-01-29 (Updated)
+<strong>Status:</strong> Active - MVP Component
+<strong>Priority:</strong> HIGH - Critical for OpenClaw Value
+<hr>
+<h2>1. Executive Summary</h2>
+<p>The Asset Enrichment Agent transforms raw uploaded assets (images, audio, video, documents) into richly indexed, searchable, and actionable knowledge. It extracts metadata, generates descriptions, transcribes audio, identifies action items, and connects assets to the user's knowledge graph.</p>
+<h3>1.1 Core Value Proposition</h3>
+<strong>Without Asset Enrichment:</strong>
+<ul>
+<li>Images are opaque blobs (can't search "dog in park")</li>
+<li>Audio files require manual transcription</li>
+<li>Meeting recordings don't yield action items</li>
+<li>Documents aren't searchable by content</li>
+<strong>With Asset Enrichment:</strong>
+<li>Images: searchable by content, people, objects, text (OCR)</li>
+<li>Audio: transcribed, speaker-separated, action items extracted</li>
+<li>Video: keyframes analyzed, audio transcribed, chapters generated</li>
+<li>Documents: text extracted, structure understood, data parsed</li>
+<h3>1.2 OpenClaw Integration</h3>
+<p>Asset Enrichment is critical for OpenClaw because:
+1. <strong>Voice memos</strong> → Transcribed, action items extracted, filed automatically
+2. <strong>Screenshots</strong> → OCR'd, conversation reconstructed, searchable
+3. <strong>Meeting recordings</strong> → Full intelligence extraction
+4. <strong>Life recording devices</strong> → Continuous audio processed into discrete memories</p>
+<hr>
+<h2>2. Architecture</h2>
+<h3>2.1 Design Philosophy: Zero New Tables</h3>
+<p>This implementation <strong>reuses existing schemas</strong> to minimize database complexity:</p>
+<table>
+<tr><th>Need</th><th>Existing Table</th><th>How Used</th></tr>
+<tr><td>Transcripts, descriptions, OCR</td><td><code>representations</code></td><td>New types + metadata for job tracking</td></tr>
+<tr><td>Action items, decisions</td><td><code>entries</code> + <code>entry_links</code></td><td>Create as entries, link to source</td></tr>
+<tr><td>Job tracking</td><td><code>representations.metadata</code></td><td>Status embedded in enrichment result</td></tr>
+<tr><td>User config</td><td><code>search_configs</code></td><td>Extended with enrichment fields</td></tr>
+</table>
+<h3>2.2 System Overview</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ASSET ENRICHMENT FLOW                                │
+│                                                                              │
+│  ASSET UPLOADED                                                             │
+│       │                                                                      │
+│       ▼                                                                      │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    ONELIST CORE (Phoenix API)                         │   │
+│  │                                                                       │   │
+│  │  1. Asset stored (local/R2/BYOB)                                     │   │
+│  │  2. Asset record created in PostgreSQL                                │   │
+│  │  3. Enrichment job enqueued (Oban)                                   │   │
+│  └───────────────────────────────┬──────────────────────────────────────┘   │
+│                                  │                                           │
+│                                  ▼                                           │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    ASSET ENRICHMENT AGENT                             │   │
+│  │                         (Oban Workers)                                │   │
+│  │                                                                       │   │
+│  │  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐          │   │
+│  │  │  Image Worker  │  │  Audio Worker  │  │  Video Worker  │          │   │
+│  │  │                │  │                │  │                │          │   │
+│  │  │ • Description  │  │ • Transcribe   │  │ • Keyframes    │          │   │
+│  │  │ • OCR          │  │ • Diarize      │  │ • Audio extract│          │   │
+│  │  │ • Tag suggest  │  │ • Action items │  │ • Scene detect │          │   │
+│  │  └────────────────┘  └────────────────┘  └────────────────┘          │   │
+│  │                                                                       │   │
+│  │  ┌────────────────┐  ┌────────────────┐                              │   │
+│  │  │ Document Worker│  │ Orchestrator   │                              │   │
+│  │  │                │  │                │                              │   │
+│  │  │ • PDF extract  │  │ • Priority     │                              │   │
+│  │  │ • Table parse  │  │ • Cost control │                              │   │
+│  │  └────────────────┘  └────────────────┘                              │   │
+│  └───────────────────────────────┬──────────────────────────────────────┘   │
+│                                  │                                           │
+│                                  ▼                                           │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    OUTPUTS (Using Existing Schemas)                   │   │
+│  │                                                                       │   │
+│  │  • Transcripts → representations (type: &quot;transcript&quot;)                │   │
+│  │  • Descriptions → representations (type: &quot;description&quot;)              │   │
+│  │  • OCR text → representations (type: &quot;ocr&quot;)                          │   │
+│  │  • Action items → entries (entry_type: &quot;task&quot;) + entry_links         │   │
+│  │  • Decisions → entries (entry_type: &quot;decision&quot;) + entry_links        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.3 Tiered Processing</h3>
+<p>Not all enrichments are equal in cost and value. Process in tiers:</p>
+<table>
+<tr><th>Tier</th><th>Name</th><th>Examples</th><th>Cost</th></tr>
+<tr><td>0</td><td>Instant</td><td>File type, dimensions, EXIF, duration</td><td>Free</td></tr>
+<tr><td>1</td><td>Accessibility</td><td>Alt text, transcription, OCR</td><td>Low</td></tr>
+<tr><td>2</td><td>Standard</td><td>Full description, tags, summary</td><td>Moderate</td></tr>
+<tr><td>3</td><td>Deep Analysis</td><td>Action items, decisions, entities</td><td>Higher</td></tr>
+<tr><td>4</td><td>Advanced</td><td>Video scenes, face recognition</td><td>Optional</td></tr>
+</table>
+<hr>
+<h2>3. Data Model (Using Existing Tables)</h2>
+<h3>3.1 Representations for Enrichment Results</h3>
+<p>Enrichment outputs are stored as <code>representations</code> with new types:</p>
+<pre><code class="language-elixir"># New representation types
+~w(transcript description ocr summary tags)
+<h1>Example: Transcript representation</h1>
+%Representation{
+  entry_id: entry_id,
+  type: &quot;transcript&quot;,
+  content: &quot;Full transcript text here...&quot;,
+  metadata: %{
+    &quot;asset_id&quot; =&gt; &quot;uuid-of-source-asset&quot;,
+    &quot;enrichment&quot; =&gt; %{
+      &quot;status&quot; =&gt; &quot;completed&quot;,        # pending | processing | completed | failed
+      &quot;provider&quot; =&gt; &quot;openai&quot;,
+      &quot;model&quot; =&gt; &quot;whisper-1&quot;,
+      &quot;tier&quot; =&gt; 1,
+      &quot;started_at&quot; =&gt; &quot;2026-01-29T10:00:00Z&quot;,
+      &quot;completed_at&quot; =&gt; &quot;2026-01-29T10:00:15Z&quot;,
+      &quot;processing_time_ms&quot; =&gt; 15000,
+      &quot;error&quot; =&gt; nil,
+      &quot;cost_cents&quot; =&gt; 6,
+      &quot;input_tokens&quot; =&gt; nil,
+      &quot;output_tokens&quot; =&gt; nil,
+      &quot;confidence&quot; =&gt; 0.95
+    },
+    # Type-specific metadata
+    &quot;language&quot; =&gt; &quot;en&quot;,
+    &quot;duration_seconds&quot; =&gt; 180,
+    &quot;word_count&quot; =&gt; 450,
+    &quot;segments&quot; =&gt; [
+      %{&quot;start&quot; =&gt; 0.0, &quot;end&quot; =&gt; 5.2, &quot;text&quot; =&gt; &quot;Hello everyone...&quot;},
+      %{&quot;start&quot; =&gt; 5.2, &quot;end&quot; =&gt; 12.1, &quot;text&quot; =&gt; &quot;Today we're discussing...&quot;}
+    ]
+  }
+}
+</code></pre>
+<h3>3.2 Entries for Extracted Items</h3>
+<p>Action items, decisions, and quotes become first-class entries:</p>
+<pre><code class="language-elixir"># Action item as an entry
+%Entry{
+  user_id: user_id,
+  entry_type: &quot;task&quot;,
+  title: &quot;Follow up with Sarah about Q2 budget&quot;,
+  metadata: %{
+    &quot;extracted_from&quot; =&gt; %{
+      &quot;asset_id&quot; =&gt; &quot;uuid-of-audio-file&quot;,
+      &quot;entry_id&quot; =&gt; &quot;uuid-of-source-entry&quot;,
+      &quot;representation_id&quot; =&gt; &quot;uuid-of-transcript&quot;,
+      &quot;speaker&quot; =&gt; &quot;John&quot;,
+      &quot;timestamp_start&quot; =&gt; 125,
+      &quot;timestamp_end&quot; =&gt; 132,
+      &quot;confidence&quot; =&gt; 0.85,
+      &quot;source_quote&quot; =&gt; &quot;John, can you follow up with Sarah about the Q2 budget?&quot;
+    }
+  }
+}
+<h1>Linked via entry_links</h1>
+%EntryLink{
+  source_entry_id: original_entry_id,   # Entry with the audio asset
+  target_entry_id: extracted_task_id,   # The new task entry
+  link_type: &quot;has_extracted_item&quot;,
+  metadata: %{&quot;item_type&quot; =&gt; &quot;action_item&quot;}
+}
+</code></pre>
+<h3>3.3 Extended Search Config</h3>
+<p>Add enrichment settings to existing <code>search_configs</code> table:</p>
+<pre><code class="language-elixir"># Additional fields in search_configs
+%SearchConfig{
+  # ... existing fields ...
+<p># Enrichment settings (new)
+  auto_enrich_enabled: true,
+  max_enrichment_tier: 2,
+  enrichment_settings: %{
+    &quot;image&quot; =&gt; %{
+      &quot;enabled&quot; =&gt; true,
+      &quot;ocr&quot; =&gt; true,
+      &quot;description&quot; =&gt; true,
+      &quot;max_dimension&quot; =&gt; 4096
+    },
+    &quot;audio&quot; =&gt; %{
+      &quot;enabled&quot; =&gt; true,
+      &quot;transcribe&quot; =&gt; true,
+      &quot;extract_actions&quot; =&gt; true,
+      &quot;max_duration_minutes&quot; =&gt; 120
+    },
+    &quot;video&quot; =&gt; %{
+      &quot;enabled&quot; =&gt; true,
+      &quot;extract_audio&quot; =&gt; true,
+      &quot;max_duration_minutes&quot; =&gt; 60
+    },
+    &quot;document&quot; =&gt; %{
+      &quot;enabled&quot; =&gt; true,
+      &quot;ocr&quot; =&gt; true
+    }
+  },
+  daily_enrichment_budget_cents: nil,      # nil = unlimited
+  spent_enrichment_today_cents: 0,
+  enrichment_budget_reset_at: nil
+}
+</code></pre></p>
+<hr>
+<h2>4. Module Structure</h2>
+<pre><code class="language-">lib/onelist/
+├── asset_enrichment.ex                    # Main context (functions only, no schema)
+├── asset_enrichment/
+│   ├── workers/
+│   │   ├── orchestrator_worker.ex         # Determines what to enrich
+│   │   ├── image_worker.ex                # Description, OCR
+│   │   ├── audio_worker.ex                # Transcription
+│   │   └── document_worker.ex             # PDF text extraction
+│   ├── providers/
+│   │   ├── provider.ex                    # Behaviour definition
+│   │   ├── openai_whisper.ex              # Audio transcription
+│   │   ├── openai_vision.ex               # Image description/OCR
+│   │   └── anthropic_vision.ex            # Alternative vision (future)
+│   └── extractors/
+│       ├── action_item_extractor.ex       # Extract action items from text
+│       └── decision_extractor.ex          # Extract decisions from text
+</code></pre>
+<hr>
+<h2>5. Implementation</h2>
+<h3>5.1 Main Context Module</h3>
+<pre><code class="language-elixir">defmodule Onelist.AssetEnrichment do
+  @moduledoc &quot;&quot;&quot;
+  Asset Enrichment Agent - transforms raw assets into searchable knowledge.
+<p>Uses existing schemas:
+  <li>Representations for enrichment results (transcripts, descriptions, OCR)</li>
+  <li>Entries for extracted items (action items, decisions)</li>
+  <li>Entry links to connect extracted items to sources</li>
+  <li>Search configs for user preferences</li>
+  &quot;&quot;&quot;</p>
+<p>alias Onelist.Repo
+  alias Onelist.Entries
+  alias Onelist.Entries.{Entry, Representation, Asset}
+  alias Onelist.AssetEnrichment.Workers.OrchestratorWorker</p>
+<p>@enrichment_types ~w(transcript description ocr summary tags)</p>
+<p># ============================================
+  # ENRICHMENT OPERATIONS
+  # ============================================</p>
+<p>@doc &quot;&quot;&quot;
+  Enqueue asset for enrichment processing.
+  &quot;&quot;&quot;
+  def enqueue_enrichment(asset_id, opts \\ []) do
+    %{asset_id: asset_id, max_tier: Keyword.get(opts, :max_tier)}
+    |&gt; OrchestratorWorker.new(priority: Keyword.get(opts, :priority, 0))
+    |&gt; Oban.insert()
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get enrichment result for an asset.
+  Returns the representation with enrichment metadata.
+  &quot;&quot;&quot;
+  def get_enrichment(entry_id, enrichment_type, asset_id) do
+    Repo.one(
+      from r in Representation,
+        where: r.entry_id == ^entry_id,
+        where: r.type == ^enrichment_type,
+        where: fragment(&quot;?-&gt;&gt;'asset_id' = ?&quot;, r.metadata, ^asset_id)
+    )
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get all enrichments for an asset.
+  &quot;&quot;&quot;
+  def get_enrichments(entry_id, asset_id) do
+    Repo.all(
+      from r in Representation,
+        where: r.entry_id == ^entry_id,
+        where: r.type in ^@enrichment_types,
+        where: fragment(&quot;?-&gt;&gt;'asset_id' = ?&quot;, r.metadata, ^asset_id),
+        order_by: r.type
+    )
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get enrichment status for an asset.
+  &quot;&quot;&quot;
+  def get_enrichment_status(entry_id, asset_id) do
+    enrichments = get_enrichments(entry_id, asset_id)</p>
+<p>Enum.map(enrichments, fn rep -&gt;
+      enrichment_meta = rep.metadata[&quot;enrichment&quot;] || %{}
+      %{
+        type: rep.type,
+        status: enrichment_meta[&quot;status&quot;] || &quot;unknown&quot;,
+        completed_at: enrichment_meta[&quot;completed_at&quot;],
+        error: enrichment_meta[&quot;error&quot;]
+      }
+    end)
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Check if transcription exists and is completed.
+  &quot;&quot;&quot;
+  def transcription_ready?(entry_id, asset_id) do
+    case get_enrichment(entry_id, &quot;transcript&quot;, asset_id) do
+      %{metadata: %{&quot;enrichment&quot; =&gt; %{&quot;status&quot; =&gt; &quot;completed&quot;}}} -&gt; true
+      _ -&gt; false
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get transcript text for an asset.
+  &quot;&quot;&quot;
+  def get_transcript(entry_id, asset_id) do
+    case get_enrichment(entry_id, &quot;transcript&quot;, asset_id) do
+      %{content: content, metadata: meta} when not is_nil(content) -&gt;
+        {:ok, %{
+          text: content,
+          language: meta[&quot;language&quot;],
+          segments: meta[&quot;segments&quot;] || [],
+          duration: meta[&quot;duration_seconds&quot;]
+        }}
+      %{metadata: %{&quot;enrichment&quot; =&gt; %{&quot;status&quot; =&gt; &quot;processing&quot;}}} -&gt;
+        {:pending, :processing}
+      %{metadata: %{&quot;enrichment&quot; =&gt; %{&quot;status&quot; =&gt; &quot;failed&quot;, &quot;error&quot; =&gt; error}}} -&gt;
+        {:error, error}
+      nil -&gt;
+        {:error, :not_found}
+    end
+  end</p>
+<p># ============================================
+  # EXTRACTED ITEMS
+  # ============================================</p>
+<p>@doc &quot;&quot;&quot;
+  Get extracted items for an asset (action items, decisions, etc.)
+  These are entries linked via entry_links.
+  &quot;&quot;&quot;
+  def get_extracted_items(entry_id, opts \\ []) do
+    item_type = Keyword.get(opts, :item_type)</p>
+<p>query =
+      from e in Entry,
+        join: link in assoc(e, :incoming_links),
+        where: link.source_entry_id == ^entry_id,
+        where: link.link_type == &quot;has_extracted_item&quot;,
+        order_by: [asc: e.inserted_at]</p>
+<p>query = if item_type do
+      from e in query,
+        where: fragment(&quot;?-&gt;'extracted_from'-&gt;&gt;'item_type' = ?&quot;, e.metadata, ^item_type)
+    else
+      query
+    end</p>
+<p>Repo.all(query)
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get action items extracted from an asset.
+  &quot;&quot;&quot;
+  def get_action_items(entry_id) do
+    get_extracted_items(entry_id, item_type: &quot;action_item&quot;)
+  end</p>
+<p># ============================================
+  # INTERNAL: CREATE ENRICHMENT RESULT
+  # ============================================</p>
+<p>@doc false
+  def create_enrichment_representation(entry_id, type, asset_id, content, metadata) do
+    enrichment_meta = %{
+      &quot;status&quot; =&gt; &quot;completed&quot;,
+      &quot;completed_at&quot; =&gt; DateTime.utc_now() |&gt; DateTime.to_iso8601()
+    }</p>
+<p>full_metadata = Map.merge(metadata, %{
+      &quot;asset_id&quot; =&gt; asset_id,
+      &quot;enrichment&quot; =&gt; Map.merge(metadata[&quot;enrichment&quot;] || %{}, enrichment_meta)
+    })</p>
+<p>Entries.create_or_update_representation(entry_id, type, content, full_metadata)
+  end</p>
+<p>@doc false
+  def mark_enrichment_processing(entry_id, type, asset_id) do
+    metadata = %{
+      &quot;asset_id&quot; =&gt; asset_id,
+      &quot;enrichment&quot; =&gt; %{
+        &quot;status&quot; =&gt; &quot;processing&quot;,
+        &quot;started_at&quot; =&gt; DateTime.utc_now() |&gt; DateTime.to_iso8601()
+      }
+    }</p>
+<p>Entries.create_or_update_representation(entry_id, type, nil, metadata)
+  end</p>
+<p>@doc false
+  def mark_enrichment_failed(entry_id, type, asset_id, error) do
+    # Get existing representation to preserve metadata
+    case get_enrichment(entry_id, type, asset_id) do
+      %Representation{} = rep -&gt;
+        updated_meta = put_in(rep.metadata, [&quot;enrichment&quot;, &quot;status&quot;], &quot;failed&quot;)
+        updated_meta = put_in(updated_meta, [&quot;enrichment&quot;, &quot;error&quot;], error)
+        updated_meta = put_in(updated_meta, [&quot;enrichment&quot;, &quot;completed_at&quot;],
+          DateTime.utc_now() |&gt; DateTime.to_iso8601())</p>
+<p>rep
+        |&gt; Representation.update_changeset(%{metadata: updated_meta})
+        |&gt; Repo.update()
+      nil -&gt;
+        {:error, :not_found}
+    end
+  end</p>
+<p># ============================================
+  # CONFIGURATION
+  # ============================================</p>
+<p>@doc &quot;&quot;&quot;
+  Check if auto-enrichment is enabled for user.
+  &quot;&quot;&quot;
+  def auto_enrich_enabled?(user_id) do
+    config = Onelist.Searcher.get_search_config!(user_id)
+    Map.get(config, :auto_enrich_enabled, true)
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get max enrichment tier for user.
+  &quot;&quot;&quot;
+  def max_tier(user_id) do
+    config = Onelist.Searcher.get_search_config!(user_id)
+    Map.get(config, :max_enrichment_tier, 2)
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get enrichment settings for a specific asset type.
+  &quot;&quot;&quot;
+  def get_settings(user_id, asset_type) when asset_type in ~w(image audio video document) do
+    config = Onelist.Searcher.get_search_config!(user_id)
+    settings = Map.get(config, :enrichment_settings, %{})
+    Map.get(settings, asset_type, default_settings(asset_type))
+  end</p>
+<p>defp default_settings(&quot;image&quot;), do: %{&quot;enabled&quot; =&gt; true, &quot;ocr&quot; =&gt; true, &quot;description&quot; =&gt; true}
+  defp default_settings(&quot;audio&quot;), do: %{&quot;enabled&quot; =&gt; true, &quot;transcribe&quot; =&gt; true, &quot;extract_actions&quot; =&gt; true}
+  defp default_settings(&quot;video&quot;), do: %{&quot;enabled&quot; =&gt; true, &quot;extract_audio&quot; =&gt; true}
+  defp default_settings(&quot;document&quot;), do: %{&quot;enabled&quot; =&gt; true, &quot;ocr&quot; =&gt; true}
+  defp default_settings(_), do: %{&quot;enabled&quot; =&gt; false}
+end
+</code></pre></p>
+<h3>5.2 Orchestrator Worker</h3>
+<pre><code class="language-elixir">defmodule Onelist.AssetEnrichment.Workers.OrchestratorWorker do
+  @moduledoc &quot;&quot;&quot;
+  Coordinates enrichment processing for an asset.
+  Determines which enrichments to run based on asset type and user config.
+  &quot;&quot;&quot;
+<p>use Oban.Worker, queue: :enrichment, max_attempts: 3</p>
+<p>alias Onelist.{Repo, Entries}
+  alias Onelist.AssetEnrichment
+  alias Onelist.AssetEnrichment.Workers.{ImageWorker, AudioWorker, DocumentWorker}</p>
+<p>require Logger</p>
+<p>@impl Oban.Worker
+  def perform(%Oban.Job{args: %{&quot;asset_id&quot; =&gt; asset_id} = args}) do
+    max_tier = args[&quot;max_tier&quot;]</p>
+<p>with {:ok, asset} &lt;- get_asset(asset_id),
+         {:ok, entry} &lt;- get_entry(asset.entry_id),
+         true &lt;- AssetEnrichment.auto_enrich_enabled?(entry.user_id),
+         {:ok, jobs} &lt;- schedule_enrichments(asset, entry, max_tier) do
+      Logger.info(&quot;Scheduled #{length(jobs)} enrichment jobs for asset #{asset_id}&quot;)
+      :ok
+    else
+      false -&gt;
+        Logger.debug(&quot;Auto-enrichment disabled for asset #{asset_id}&quot;)
+        :ok</p>
+<p>{:error, :asset_not_found} -&gt;
+        Logger.warning(&quot;Asset #{asset_id} not found, skipping enrichment&quot;)
+        :ok</p>
+<p>{:error, reason} -&gt;
+        Logger.error(&quot;Orchestrator failed for asset #{asset_id}: #{inspect(reason)}&quot;)
+        {:error, reason}
+    end
+  end</p>
+<p>defp get_asset(asset_id) do
+    case Entries.get_asset(asset_id) do
+      nil -&gt; {:error, :asset_not_found}
+      asset -&gt; {:ok, asset}
+    end
+  end</p>
+<p>defp get_entry(entry_id) do
+    case Entries.get_entry(entry_id) do
+      nil -&gt; {:error, :entry_not_found}
+      entry -&gt; {:ok, entry}
+    end
+  end</p>
+<p>defp schedule_enrichments(asset, entry, max_tier) do
+    max_tier = max_tier || AssetEnrichment.max_tier(entry.user_id)
+    category = get_asset_category(asset.mime_type)
+    settings = AssetEnrichment.get_settings(entry.user_id, to_string(category))</p>
+<p>if settings[&quot;enabled&quot;] do
+      jobs = schedule_for_category(category, asset, entry, max_tier, settings)
+      {:ok, jobs}
+    else
+      {:ok, []}
+    end
+  end</p>
+<p>defp schedule_for_category(:image, asset, entry, _max_tier, settings) do
+    jobs = []</p>
+<p>jobs = if settings[&quot;description&quot;] do
+      job = ImageWorker.new(%{
+        asset_id: asset.id,
+        entry_id: entry.id,
+        enrichment_type: &quot;description&quot;
+      })
+      [Oban.insert!(job) | jobs]
+    else
+      jobs
+    end</p>
+<p>jobs = if settings[&quot;ocr&quot;] do
+      job = ImageWorker.new(%{
+        asset_id: asset.id,
+        entry_id: entry.id,
+        enrichment_type: &quot;ocr&quot;
+      })
+      [Oban.insert!(job) | jobs]
+    else
+      jobs
+    end</p>
+<p>jobs
+  end</p>
+<p>defp schedule_for_category(:audio, asset, entry, max_tier, settings) do
+    jobs = []</p>
+<p>jobs = if settings[&quot;transcribe&quot;] do
+      job = AudioWorker.new(%{
+        asset_id: asset.id,
+        entry_id: entry.id,
+        enrichment_type: &quot;transcript&quot;
+      })
+      [Oban.insert!(job) | jobs]
+    else
+      jobs
+    end</p>
+<p># Action extraction is tier 3, only schedule if max_tier &gt;= 3
+    jobs = if settings[&quot;extract_actions&quot;] &amp;&amp; max_tier &gt;= 3 do
+      job = AudioWorker.new(%{
+        asset_id: asset.id,
+        entry_id: entry.id,
+        enrichment_type: &quot;action_items&quot;
+      })
+      [Oban.insert!(job) | jobs]
+    else
+      jobs
+    end</p>
+<p>jobs
+  end</p>
+<p>defp schedule_for_category(:document, asset, entry, _max_tier, settings) do
+    if settings[&quot;ocr&quot;] do
+      job = DocumentWorker.new(%{
+        asset_id: asset.id,
+        entry_id: entry.id,
+        enrichment_type: &quot;ocr&quot;
+      })
+      [Oban.insert!(job)]
+    else
+      []
+    end
+  end</p>
+<p>defp schedule_for_category(:video, _asset, _entry, _max_tier, _settings) do
+    # Video processing not in MVP
+    []
+  end</p>
+<p>defp schedule_for_category(_, _, _, _, _), do: []</p>
+<p>defp get_asset_category(mime_type) do
+    cond do
+      String.starts_with?(mime_type || &quot;&quot;, &quot;image/&quot;) -&gt; :image
+      String.starts_with?(mime_type || &quot;&quot;, &quot;audio/&quot;) -&gt; :audio
+      String.starts_with?(mime_type || &quot;&quot;, &quot;video/&quot;) -&gt; :video
+      mime_type in ~w(application/pdf text/plain text/markdown) -&gt; :document
+      true -&gt; :unknown
+    end
+  end
+end
+</code></pre></p>
+<h3>5.3 Audio Worker</h3>
+<pre><code class="language-elixir">defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
+  @moduledoc &quot;&quot;&quot;
+  Processes audio assets: transcription and action item extraction.
+  &quot;&quot;&quot;
+<p>use Oban.Worker, queue: :enrichment_audio, max_attempts: 3</p>
+<p>alias Onelist.{Repo, Entries}
+  alias Onelist.AssetEnrichment
+  alias Onelist.AssetEnrichment.Providers.OpenAIWhisper
+  alias Onelist.AssetEnrichment.Extractors.ActionItemExtractor</p>
+<p>require Logger</p>
+<p>@impl Oban.Worker
+  def perform(%Oban.Job{args: %{&quot;asset_id&quot; =&gt; asset_id, &quot;entry_id&quot; =&gt; entry_id, &quot;enrichment_type&quot; =&gt; type}}) do
+    with {:ok, asset} &lt;- get_asset(asset_id) do
+      process_enrichment(asset, entry_id, type)
+    end
+  end</p>
+<p>defp get_asset(asset_id) do
+    case Entries.get_asset(asset_id) do
+      nil -&gt; {:error, :asset_not_found}
+      asset -&gt; {:ok, asset}
+    end
+  end</p>
+<p>defp process_enrichment(asset, entry_id, &quot;transcript&quot;) do
+    # Mark as processing
+    AssetEnrichment.mark_enrichment_processing(entry_id, &quot;transcript&quot;, asset.id)</p>
+<p># Get audio file path
+    case Entries.get_asset_path(asset) do
+      {:ok, audio_path} -&gt;
+        case OpenAIWhisper.transcribe(audio_path) do
+          {:ok, result} -&gt;
+            metadata = %{
+              &quot;enrichment&quot; =&gt; %{
+                &quot;provider&quot; =&gt; &quot;openai&quot;,
+                &quot;model&quot; =&gt; &quot;whisper-1&quot;,
+                &quot;tier&quot; =&gt; 1,
+                &quot;cost_cents&quot; =&gt; estimate_whisper_cost(result.duration)
+              },
+              &quot;language&quot; =&gt; result.language,
+              &quot;duration_seconds&quot; =&gt; result.duration,
+              &quot;word_count&quot; =&gt; word_count(result.text),
+              &quot;segments&quot; =&gt; result.segments
+            }</p>
+<p>AssetEnrichment.create_enrichment_representation(
+              entry_id, &quot;transcript&quot;, asset.id, result.text, metadata
+            )</p>
+<p>Logger.info(&quot;Completed transcription for asset #{asset.id}&quot;)
+            :ok</p>
+<p>{:error, reason} -&gt;
+            AssetEnrichment.mark_enrichment_failed(entry_id, &quot;transcript&quot;, asset.id, inspect(reason))
+            {:error, reason}
+        end</p>
+<p>{:error, reason} -&gt;
+        AssetEnrichment.mark_enrichment_failed(entry_id, &quot;transcript&quot;, asset.id, &quot;File not found&quot;)
+        {:error, reason}
+    end
+  end</p>
+<p>defp process_enrichment(asset, entry_id, &quot;action_items&quot;) do
+    # Need transcript first
+    case AssetEnrichment.get_transcript(entry_id, asset.id) do
+      {:ok, %{text: text, segments: segments}} -&gt;
+        case ActionItemExtractor.extract(text, segments) do
+          {:ok, items} -&gt;
+            # Create entries for each action item
+            entry = Entries.get_entry!(entry_id)</p>
+<p>Enum.each(items, fn item -&gt;
+              create_extracted_entry(entry, asset, item, &quot;action_item&quot;)
+            end)</p>
+<p>Logger.info(&quot;Extracted #{length(items)} action items from asset #{asset.id}&quot;)
+            :ok</p>
+<p>{:error, reason} -&gt;
+            Logger.error(&quot;Action item extraction failed: #{inspect(reason)}&quot;)
+            {:error, reason}
+        end</p>
+<p>{:pending, _} -&gt;
+        # Transcript not ready, snooze and retry
+        {:snooze, 30}</p>
+<p>{:error, reason} -&gt;
+        Logger.error(&quot;Cannot extract action items, transcript error: #{inspect(reason)}&quot;)
+        {:error, {:missing_transcript, reason}}
+    end
+  end</p>
+<p>defp process_enrichment(_asset, _entry_id, type) do
+    Logger.warning(&quot;Unknown audio enrichment type: #{type}&quot;)
+    :ok
+  end</p>
+<p>defp create_extracted_entry(source_entry, asset, item, item_type) do
+    entry_type = case item_type do
+      &quot;action_item&quot; -&gt; &quot;task&quot;
+      &quot;decision&quot; -&gt; &quot;note&quot;
+      _ -&gt; &quot;note&quot;
+    end</p>
+<p>attrs = %{
+      entry_type: entry_type,
+      title: item.text,
+      metadata: %{
+        &quot;extracted_from&quot; =&gt; %{
+          &quot;asset_id&quot; =&gt; asset.id,
+          &quot;entry_id&quot; =&gt; source_entry.id,
+          &quot;item_type&quot; =&gt; item_type,
+          &quot;speaker&quot; =&gt; item[:speaker],
+          &quot;timestamp_start&quot; =&gt; item[:start_time],
+          &quot;timestamp_end&quot; =&gt; item[:end_time],
+          &quot;confidence&quot; =&gt; item[:confidence],
+          &quot;source_quote&quot; =&gt; item[:source_quote]
+        }
+      }
+    }</p>
+<p>case Entries.create_entry(source_entry.user_id, attrs) do
+      {:ok, new_entry} -&gt;
+        # Link back to source
+        Entries.create_link(source_entry, new_entry, &quot;has_extracted_item&quot;, %{
+          &quot;item_type&quot; =&gt; item_type
+        })
+        {:ok, new_entry}</p>
+<p>error -&gt;
+        error
+    end
+  end</p>
+<p>defp estimate_whisper_cost(duration_seconds) do
+    # Whisper costs ~$0.006 per minute
+    minutes = (duration_seconds || 0) / 60
+    round(minutes <em> 0.6)  # cents
+  end</p>
+<p>defp word_count(nil), do: 0
+  defp word_count(text), do: text |&gt; String.split() |&gt; length()
+end
+</code></pre></p>
+<h3>5.4 OpenAI Whisper Provider</h3>
+<pre><code class="language-elixir">defmodule Onelist.AssetEnrichment.Providers.OpenAIWhisper do
+  @moduledoc &quot;&quot;&quot;
+  OpenAI Whisper API for audio transcription.
+  &quot;&quot;&quot;
+<p>require Logger</p>
+<p>@api_url &quot;https://api.openai.com/v1/audio/transcriptions&quot;</p>
+<p>@doc &quot;&quot;&quot;
+  Transcribe audio file using Whisper API.
+  &quot;&quot;&quot;
+  def transcribe(file_path, opts \\ []) do
+    api_key = get_api_key()
+    language = Keyword.get(opts, :language)</p>
+<p>form_data =
+      {:multipart,
+       [
+         {:file, file_path, {&quot;form-data&quot;, [name: &quot;file&quot;, filename: Path.basename(file_path)]}, []},
+         {&quot;model&quot;, &quot;whisper-1&quot;},
+         {&quot;response_format&quot;, &quot;verbose_json&quot;},
+         {&quot;timestamp_granularities[]&quot;, &quot;segment&quot;}
+       ] ++ if(language, do: [{&quot;language&quot;, language}], else: [])}</p>
+<p>headers = [
+      {&quot;Authorization&quot;, &quot;Bearer #{api_key}&quot;}
+    ]</p>
+<p>case Req.post(@api_url, body: form_data, headers: headers, receive_timeout: 300_000) do
+      {:ok, %{status: 200, body: body}} -&gt;
+        {:ok,
+         %{
+           text: body[&quot;text&quot;],
+           language: body[&quot;language&quot;],
+           duration: body[&quot;duration&quot;],
+           segments: parse_segments(body[&quot;segments&quot;])
+         }}</p>
+<p>{:ok, %{status: status, body: body}} -&gt;
+        Logger.error(&quot;Whisper API error: #{status} - #{inspect(body)}&quot;)
+        {:error, {:api_error, status, body}}</p>
+<p>{:error, reason} -&gt;
+        Logger.error(&quot;Whisper request failed: #{inspect(reason)}&quot;)
+        {:error, {:request_failed, reason}}
+    end
+  end</p>
+<p>defp parse_segments(nil), do: []</p>
+<p>defp parse_segments(segments) do
+    Enum.map(segments, fn seg -&gt;
+      %{
+        &quot;start&quot; =&gt; seg[&quot;start&quot;],
+        &quot;end&quot; =&gt; seg[&quot;end&quot;],
+        &quot;text&quot; =&gt; seg[&quot;text&quot;]
+      }
+    end)
+  end</p>
+<p>defp get_api_key do
+    Application.get_env(:onelist, :openai_api_key) ||
+      System.get_env(&quot;OPENAI_API_KEY&quot;) ||
+      raise &quot;OpenAI API key not configured&quot;
+  end
+end
+</code></pre></p>
+<h3>5.5 Action Item Extractor</h3>
+<pre><code class="language-elixir">defmodule Onelist.AssetEnrichment.Extractors.ActionItemExtractor do
+  @moduledoc &quot;&quot;&quot;
+  Extract action items from transcribed text using LLM.
+  &quot;&quot;&quot;
+<p>require Logger</p>
+<p>@system_prompt &quot;&quot;&quot;
+  You are an expert at identifying action items from meeting transcripts.
+  Extract specific, actionable tasks with clear ownership when mentioned.
+  Be conservative - only extract clear action items, not general discussion.
+  &quot;&quot;&quot;</p>
+<p>@doc &quot;&quot;&quot;
+  Extract action items from transcript text and segments.
+  &quot;&quot;&quot;
+  def extract(text, segments \\ []) do
+    prompt = &quot;&quot;&quot;
+    Extract action items from this transcript. Only include clear, specific tasks.</p>
+<p>Transcript:
+    #{text}</p>
+<p>Return JSON:
+    {
+      &quot;action_items&quot;: [
+        {
+          &quot;text&quot;: &quot;Clear action description&quot;,
+          &quot;owner&quot;: &quot;Person name or null&quot;,
+          &quot;deadline&quot;: &quot;Mentioned deadline or null&quot;,
+          &quot;confidence&quot;: &quot;high|medium|low&quot;,
+          &quot;source_quote&quot;: &quot;Relevant quote from transcript&quot;
+        }
+      ]
+    }
+    &quot;&quot;&quot;</p>
+<p>case call_llm(prompt) do
+      {:ok, %{&quot;action_items&quot; =&gt; items}} -&gt;
+        parsed = Enum.map(items, fn item -&gt;
+          {start_time, end_time} = find_timestamp(item[&quot;source_quote&quot;], segments)</p>
+<p>%{
+            text: item[&quot;text&quot;],
+            owner: item[&quot;owner&quot;],
+            deadline: item[&quot;deadline&quot;],
+            confidence: confidence_to_float(item[&quot;confidence&quot;]),
+            source_quote: item[&quot;source_quote&quot;],
+            start_time: start_time,
+            end_time: end_time
+          }
+        end)
+        {:ok, parsed}</p>
+<p>{:ok, _} -&gt;
+        {:ok, []}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>defp call_llm(prompt) do
+    api_key = Application.get_env(:onelist, :openai_api_key)</p>
+<p>body =
+      Jason.encode!(%{
+        model: &quot;gpt-4o-mini&quot;,
+        messages: [
+          %{role: &quot;system&quot;, content: @system_prompt},
+          %{role: &quot;user&quot;, content: prompt}
+        ],
+        response_format: %{type: &quot;json_object&quot;},
+        temperature: 0.1
+      })</p>
+<p>headers = [
+      {&quot;Authorization&quot;, &quot;Bearer #{api_key}&quot;},
+      {&quot;Content-Type&quot;, &quot;application/json&quot;}
+    ]</p>
+<p>case Req.post(&quot;https://api.openai.com/v1/chat/completions&quot;, body: body, headers: headers) do
+      {:ok, %{status: 200, body: response}} -&gt;
+        content = get_in(response, [&quot;choices&quot;, Access.at(0), &quot;message&quot;, &quot;content&quot;])
+        {:ok, Jason.decode!(content)}</p>
+<p>{:ok, %{status: status, body: body}} -&gt;
+        {:error, {:api_error, status, body}}</p>
+<p>{:error, reason} -&gt;
+        {:error, {:request_failed, reason}}
+    end
+  end</p>
+<p>defp find_timestamp(nil, _), do: {nil, nil}
+  defp find_timestamp(quote, segments) when is_list(segments) do
+    quote_lower = String.downcase(quote || &quot;&quot;)</p>
+<p>segment = Enum.find(segments, fn seg -&gt;
+      seg_text = String.downcase(seg[&quot;text&quot;] || &quot;&quot;)
+      String.contains?(seg_text, String.slice(quote_lower, 0..30))
+    end)</p>
+<p>case segment do
+      %{&quot;start&quot; =&gt; start, &quot;end&quot; =&gt; end_time} -&gt; {trunc(start), trunc(end_time)}
+      _ -&gt; {nil, nil}
+    end
+  end
+  defp find_timestamp(_, _), do: {nil, nil}</p>
+<p>defp confidence_to_float(&quot;high&quot;), do: 0.9
+  defp confidence_to_float(&quot;medium&quot;), do: 0.7
+  defp confidence_to_float(&quot;low&quot;), do: 0.5
+  defp confidence_to_float(_), do: 0.7
+end
+</code></pre></p>
+<hr>
+<h2>6. Migration</h2>
+<p>Single migration to extend <code>search_configs</code> and add new representation types:</p>
+<pre><code class="language-elixir">defmodule Onelist.Repo.Migrations.AddEnrichmentSupport do
+  use Ecto.Migration
+<p>def change do
+    # Extend search_configs with enrichment settings
+    alter table(:search_configs) do
+      add :auto_enrich_enabled, :boolean, default: true
+      add :max_enrichment_tier, :integer, default: 2
+      add :enrichment_settings, :map, default: %{}
+      add :daily_enrichment_budget_cents, :integer
+      add :spent_enrichment_today_cents, :integer, default: 0
+      add :enrichment_budget_reset_at, :utc_datetime_usec
+    end
+  end
+end
+</code></pre></p>
+<p>Note: Representation types are validated in the schema, so we also need to update the <code>Representation</code> module to accept new types.</p>
+<hr>
+<h2>7. Required Schema Updates</h2>
+<h3>7.1 Update Representation Types</h3>
+<pre><code class="language-elixir"># In lib/onelist/entries/representation.ex
+@representation_types ~w(markdown plaintext html html_public editor_json transcript description ocr summary tags)
+</code></pre>
+<h3>7.2 Update Entry Types (if needed)</h3>
+<pre><code class="language-elixir"># Ensure entry_type can be &quot;task&quot;, &quot;decision&quot;
+<h1>In lib/onelist/entries/entry.ex - verify these are valid</h1>
+</code></pre>
+<hr>
+<h2>8. API Endpoints</h2>
+<h3>8.1 Get Enrichment Status</h3>
+<pre><code class="language-elixir"># GET /api/v1/entries/:entry_id/assets/:asset_id/enrichments
+def index(conn, %{&quot;entry_id&quot; =&gt; entry_id, &quot;asset_id&quot; =&gt; asset_id}) do
+  status = AssetEnrichment.get_enrichment_status(entry_id, asset_id)
+  json(conn, %{success: true, data: status})
+end
+</code></pre>
+<h3>8.2 Trigger Enrichment</h3>
+<pre><code class="language-elixir"># POST /api/v1/assets/:asset_id/enrich
+def create(conn, %{&quot;asset_id&quot; =&gt; asset_id} = params) do
+  case AssetEnrichment.enqueue_enrichment(asset_id, max_tier: params[&quot;max_tier&quot;]) do
+    {:ok, job} -&gt; json(conn, %{success: true, job_id: job.id})
+    {:error, reason} -&gt; error_response(conn, reason)
+  end
+end
+</code></pre>
+<h3>8.3 Get Extracted Items</h3>
+<pre><code class="language-elixir"># GET /api/v1/entries/:entry_id/extracted-items
+def index(conn, %{&quot;entry_id&quot; =&gt; entry_id} = params) do
+  items = AssetEnrichment.get_extracted_items(entry_id, item_type: params[&quot;type&quot;])
+  json(conn, %{success: true, data: serialize_entries(items)})
+end
+</code></pre>
+<hr>
+<h2>9. MVP Scope</h2>
+<table>
+<tr><th>Feature</th><th>Priority</th><th>Status</th></tr>
+<tr><td>Audio transcription (Whisper)</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Image description (OpenAI Vision)</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Image OCR</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Action item extraction</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Store results in representations</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Store extracted items as entries</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Enrichment status API</td><td>MEDIUM</td><td>Required</td></tr>
+<tr><td>User enrichment config</td><td>MEDIUM</td><td>Required</td></tr>
+<tr><td>Cost tracking</td><td>LOW</td><td>Nice to have</td></tr>
+</table>
+<hr>
+<h2>10. Implementation Sequence</h2>
+<p>1. <strong>Migration</strong>: Add enrichment fields to search_configs
+2. <strong>Update schemas</strong>: Add new representation types, verify entry types
+3. <strong>Create context</strong>: <code>Onelist.AssetEnrichment</code> module
+4. <strong>Create workers</strong>: Orchestrator, AudioWorker, ImageWorker
+5. <strong>Create providers</strong>: OpenAIWhisper, OpenAIVision
+6. <strong>Create extractors</strong>: ActionItemExtractor
+7. <strong>Add API endpoints</strong>: Status, trigger, extracted items
+8. <strong>Write tests</strong>: Unit tests for each component</p>
+<hr>
+<h2>11. AI Agent Best Practices Recommendations</h2>
+<p>Based on analysis of the <a href="./ai_agent_implementation_guide.md">AI Agent Implementation Guide</a> and <a href="./ai_agent_ecosystem_resources_guide.md">AI Agent Ecosystem Resources Guide</a>, the following enhancements should be implemented.</p>
+<h3>11.1 Enhanced Budget Management</h3>
+<p>Implement sophisticated budget tracking with forecasting and alerts.</p>
+<pre><code class="language-elixir">defmodule Onelist.AssetEnrichment.BudgetManager do
+  @moduledoc &quot;&quot;&quot;
+  Budget management with forecasting and alerts.
+  Tracks spending across all enrichment operations.
+  &quot;&quot;&quot;
+<p>require Logger
+  alias Onelist.Repo
+  alias Onelist.Searcher.SearchConfig</p>
+<p>@alert_thresholds [0.5, 0.8, 0.95]</p>
+<p>def check_budget(user_id, estimated_cost_cents) do
+    config = get_config(user_id)
+    daily_budget = config.daily_enrichment_budget_cents
+    spent_today = config.spent_enrichment_today_cents || 0</p>
+<p>cond do
+      is_nil(daily_budget) -&gt;
+        {:ok, :unlimited}</p>
+<p>spent_today + estimated_cost_cents &gt; daily_budget -&gt;
+        {:error, :budget_exceeded, %{
+          budget: daily_budget,
+          spent: spent_today,
+          requested: estimated_cost_cents
+        }}</p>
+<p>true -&gt;
+        check_and_send_alerts(user_id, spent_today + estimated_cost_cents, daily_budget)
+        {:ok, :within_budget}
+    end
+  end</p>
+<p>def record_spending(user_id, cost_cents, operation, metadata \\ %{}) do
+    config = get_config(user_id)
+    new_spent = (config.spent_enrichment_today_cents || 0) + cost_cents</p>
+<p>Repo.update_all(
+      from(c in SearchConfig, where: c.user_id == ^user_id),
+      set: [spent_enrichment_today_cents: new_spent]
+    )</p>
+<p>:telemetry.execute(
+      [:asset_enrichment, :cost, :recorded],
+      %{cost_cents: cost_cents, total_today: new_spent},
+      %{user_id: user_id, operation: operation, metadata: metadata}
+    )</p>
+<p>{:ok, new_spent}
+  end</p>
+<p>def forecast_daily_spend(user_id) do
+    # Analyze recent patterns to forecast
+    recent_costs = get_recent_costs(user_id, days: 7)
+    avg_daily = if length(recent_costs) &gt; 0 do
+      Enum.sum(recent_costs) / length(recent_costs)
+    else
+      0
+    end</p>
+<p>%{
+      average_daily: avg_daily,
+      projected_monthly: avg_daily </em> 30,
+      trend: calculate_trend(recent_costs)
+    }
+  end</p>
+<p>defp check_and_send_alerts(user_id, current, budget) do
+    ratio = current / budget</p>
+<p>Enum.each(@alert_thresholds, fn threshold -&gt;
+      if ratio &gt;= threshold do
+        send_budget_alert(user_id, threshold, current, budget)
+      end
+    end)
+  end</p>
+<p>defp send_budget_alert(user_id, threshold, current, budget) do
+    Logger.info(&quot;Budget alert: user #{user_id} at #{threshold <em> 100}% (#{current}/#{budget})&quot;)
+    # Emit telemetry for notification system to pick up
+    :telemetry.execute(
+      [:asset_enrichment, :budget, :alert],
+      %{threshold: threshold, current: current, budget: budget},
+      %{user_id: user_id}
+    )
+  end
+end
+</code></pre></p>
+<strong>Implementation Priority:</strong> HIGH
+<strong>Effort:</strong> 2-3 days
+<strong>Impact:</strong> Cost control, user transparency
+<h3>11.2 Quality Assessment Integration</h3>
+<p>Assess enrichment output quality and flag low-confidence results.</p>
+<pre><code class="language-elixir">defmodule Onelist.AssetEnrichment.QualityAssessor do
+  @moduledoc &quot;&quot;&quot;
+  Assesses quality of enrichment outputs.
+  Flags low-confidence results for human review.
+  &quot;&quot;&quot;
+<p>@confidence_threshold 0.7</p>
+<p>def assess_transcription(result) do
+    scores = %{
+      word_confidence: result[:avg_word_confidence] || 0.9,
+      segment_coherence: calculate_coherence(result[:segments]),
+      language_detection: if(result[:language], do: 1.0, else: 0.5),
+      duration_reasonable: if(result[:duration] &amp;&amp; result[:duration] &gt; 0, do: 1.0, else: 0.3)
+    }</p>
+<p>overall = weighted_average(scores, %{
+      word_confidence: 0.4,
+      segment_coherence: 0.3,
+      language_detection: 0.15,
+      duration_reasonable: 0.15
+    })</p>
+<p>%{
+      overall: overall,
+      scores: scores,
+      needs_review: overall &lt; @confidence_threshold,
+      issues: identify_issues(scores)
+    }
+  end</p>
+<p>def assess_description(result) do
+    scores = %{
+      length_appropriate: assess_length(result[:text]),
+      specific_details: has_specific_details?(result[:text]),
+      no_hallucination_markers: no_uncertainty_markers?(result[:text])
+    }</p>
+<p>overall = weighted_average(scores, %{
+      length_appropriate: 0.3,
+      specific_details: 0.4,
+      no_hallucination_markers: 0.3
+    })</p>
+<p>%{
+      overall: overall,
+      scores: scores,
+      needs_review: overall &lt; @confidence_threshold,
+      issues: identify_issues(scores)
+    }
+  end</p>
+<p>def assess_action_items(items) do
+    if Enum.empty?(items) do
+      %{overall: 1.0, scores: %{}, needs_review: false, issues: []}
+    else
+      item_scores = Enum.map(items, fn item -&gt;
+        %{
+          has_verb: starts_with_verb?(item.text),
+          specific: is_specific?(item.text),
+          confidence: item[:confidence] || 0.7
+        }
+      end)</p>
+<p>avg_scores = %{
+        actionable: Enum.count(item_scores, &amp; &amp;1.has_verb) / length(item_scores),
+        specific: Enum.count(item_scores, &amp; &amp;1.specific) / length(item_scores),
+        confidence: Enum.sum(Enum.map(item_scores, &amp; &amp;1.confidence)) / length(item_scores)
+      }</p>
+<p>overall = weighted_average(avg_scores, %{
+        actionable: 0.4,
+        specific: 0.3,
+        confidence: 0.3
+      })</p>
+<p>%{
+        overall: overall,
+        scores: avg_scores,
+        item_count: length(items),
+        needs_review: overall &lt; @confidence_threshold,
+        issues: identify_issues(avg_scores)
+      }
+    end
+  end</p>
+<p>defp weighted_average(scores, weights) do
+    total_weight = Enum.sum(Map.values(weights))</p>
+<p>scores
+    |&gt; Enum.map(fn {key, score} -&gt;
+      weight = Map.get(weights, key, 1.0)
+      score </em> weight
+    end)
+    |&gt; Enum.sum()
+    |&gt; Kernel./(total_weight)
+  end</p>
+<p>defp identify_issues(scores) do
+    scores
+    |&gt; Enum.filter(fn {_key, score} -&gt; score &lt; @confidence_threshold end)
+    |&gt; Enum.map(fn {key, score} -&gt; {key, score} end)
+  end
+end
+</code></pre></p>
+<strong>Implementation Priority:</strong> MEDIUM
+<strong>Effort:</strong> 3-4 days
+<strong>Impact:</strong> Higher quality outputs, user trust
+<h3>11.3 Tiered Processing with Fallbacks</h3>
+<p>Implement intelligent fallback chains when primary enrichment fails.</p>
+<pre><code class="language-elixir">defmodule Onelist.AssetEnrichment.ProcessingChain do
+  @moduledoc &quot;&quot;&quot;
+  Tiered processing with automatic fallbacks.
+  &quot;&quot;&quot;
+<p>require Logger</p>
+<p>@transcription_chain [
+    {:openai_whisper, Onelist.AssetEnrichment.Providers.OpenAIWhisper},
+    {:assemblyai, Onelist.AssetEnrichment.Providers.AssemblyAI},  # Fallback
+    {:local_whisper, Onelist.AssetEnrichment.Providers.LocalWhisper}  # Last resort
+  ]</p>
+<p>@vision_chain [
+    {:openai_vision, Onelist.AssetEnrichment.Providers.OpenAIVision},
+    {:claude_vision, Onelist.AssetEnrichment.Providers.ClaudeVision},  # Fallback
+    {:basic_ocr, Onelist.AssetEnrichment.Providers.TesseractOCR}  # Last resort
+  ]</p>
+<p>def process_with_fallbacks(chain_type, input, opts \\ []) do
+    chain = get_chain(chain_type)
+    max_attempts = Keyword.get(opts, :max_attempts, length(chain))</p>
+<p>try_chain(chain, input, opts, [], max_attempts)
+  end</p>
+<p>defp try_chain([], _input, _opts, errors, _max) do
+    Logger.error(&quot;All providers failed: #{inspect(errors)}&quot;)
+    {:error, :all_providers_failed, errors}
+  end</p>
+<p>defp try_chain(_chain, _input, _opts, errors, max) when length(errors) &gt;= max do
+    {:error, :max_attempts_reached, errors}
+  end</p>
+<p>defp try_chain([{name, provider} | rest], input, opts, errors, max) do
+    Logger.info(&quot;Trying provider: #{name}&quot;)</p>
+<p>case apply(provider, :process, [input, opts]) do
+      {:ok, result} -&gt;
+        if length(errors) &gt; 0 do
+          Logger.info(&quot;Provider #{name} succeeded after #{length(errors)} failures&quot;)
+        end
+        {:ok, result, %{provider: name, fallback_count: length(errors)}}</p>
+<p>{:error, reason} -&gt;
+        Logger.warning(&quot;Provider #{name} failed: #{inspect(reason)}&quot;)
+        try_chain(rest, input, opts, [{name, reason} | errors], max)
+    end
+  end</p>
+<p>defp get_chain(:transcription), do: @transcription_chain
+  defp get_chain(:vision), do: @vision_chain
+  defp get_chain(type), do: raise &quot;Unknown chain type: #{type}&quot;
+end
+</code></pre></p>
+<strong>Implementation Priority:</strong> MEDIUM
+<strong>Effort:</strong> 2-3 days
+<strong>Impact:</strong> Increased reliability, graceful degradation
+<h3>11.4 OpenTelemetry Integration</h3>
+<p>Comprehensive tracing for all enrichment operations.</p>
+<pre><code class="language-elixir">defmodule Onelist.AssetEnrichment.Telemetry do
+  @moduledoc &quot;&quot;&quot;
+  OpenTelemetry instrumentation for Asset Enrichment Agent.
+  &quot;&quot;&quot;
+<p>require OpenTelemetry.Tracer, as: Tracer</p>
+<p>def trace_enrichment(asset_id, enrichment_type, fun) do
+    Tracer.with_span &quot;asset_enrichment.#{enrichment_type}&quot; do
+      Tracer.set_attributes([
+        {&quot;gen_ai.system&quot;, &quot;asset_enrichment&quot;},
+        {&quot;gen_ai.operation.name&quot;, enrichment_type},
+        {&quot;asset.id&quot;, asset_id}
+      ])</p>
+<p>start_time = System.monotonic_time(:millisecond)
+      result = fun.()
+      duration = System.monotonic_time(:millisecond) - start_time</p>
+<p>{status, cost} = case result do
+        {:ok, r} -&gt; {&quot;success&quot;, r[:cost_cents] || 0}
+        {:error, _} -&gt; {&quot;error&quot;, 0}
+      end</p>
+<p>Tracer.set_attributes([
+        {&quot;gen_ai.response.duration_ms&quot;, duration},
+        {&quot;gen_ai.usage.cost_cents&quot;, cost},
+        {&quot;enrichment.status&quot;, status}
+      ])</p>
+<p>:telemetry.execute(
+        [:asset_enrichment, enrichment_type, :complete],
+        %{duration_ms: duration, cost_cents: cost},
+        %{asset_id: asset_id, status: status}
+      )</p>
+<p>result
+    end
+  end</p>
+<p>def trace_provider_call(provider, operation, fun) do
+    Tracer.with_span &quot;asset_enrichment.provider.#{provider}&quot; do
+      Tracer.set_attributes([
+        {&quot;gen_ai.request.model&quot;, to_string(provider)},
+        {&quot;gen_ai.operation.name&quot;, operation}
+      ])</p>
+<p>start_time = System.monotonic_time(:millisecond)
+      result = fun.()
+      duration = System.monotonic_time(:millisecond) - start_time</p>
+<p>Tracer.set_attributes([
+        {&quot;gen_ai.response.latency_ms&quot;, duration}
+      ])</p>
+<p>result
+    end
+  end
+end
+</code></pre></p>
+<strong>Implementation Priority:</strong> HIGH
+<strong>Effort:</strong> 2-3 days
+<strong>Impact:</strong> Full observability, cost tracking, debugging
+<h3>11.5 Implementation Priority Matrix</h3>
+<table>
+<tr><th>Enhancement</th><th>Priority</th><th>Effort</th><th>Impact</th><th>MVP/Post-MVP</th></tr>
+<tr><td>Enhanced Budget Management</td><td>HIGH</td><td>2-3 days</td><td>High</td><td>MVP</td></tr>
+<tr><td>OpenTelemetry Integration</td><td>HIGH</td><td>2-3 days</td><td>High</td><td>MVP</td></tr>
+<tr><td>Tiered Processing with Fallbacks</td><td>MEDIUM</td><td>2-3 days</td><td>Medium</td><td>Post-MVP</td></tr>
+<tr><td>Quality Assessment Integration</td><td>MEDIUM</td><td>3-4 days</td><td>Medium</td><td>Post-MVP</td></tr>
+</table>
+<h3>11.6 References</h3>
+<li><a href="./ai_agent_implementation_guide.md">AI Agent Implementation Guide</a></li>
+<li><a href="./ai_agent_ecosystem_resources_guide.md">AI Agent Ecosystem Resources Guide</a></li>
+<li><a href="./unified_agent_modules.md">Unified Agent Modules</a></li>
+</ul>
+<hr>
+<em>Last updated: 2026-01-30</em>
+<em>Status: Active - MVP Component</em>
+<em>Approach: Zero new tables - uses representations, entries, entry_links</em>
+  </article>
+</body>
+</html>

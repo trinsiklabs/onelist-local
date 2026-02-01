@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion Import &amp; Sync Roadmap - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Notion Import & Sync Roadmap</h1>
+<h2>Executive Summary</h2>
+<p>This roadmap defines the implementation plan for importing Notion workspaces into Onelist, supporting both one-time bulk import via exported files and ongoing synchronization via the Notion API.</p>
+<h3>Import Methods</h3>
+<table>
+<tr><th>Method</th><th>Use Case</th><th>Real-time</th><th>Complexity</th></tr>
+<tr><td>Export File Import</td><td>One-time migration, offline backup</td><td>No</td><td>Low</td></tr>
+<tr><td>API Sync</td><td>Ongoing sync, live updates</td><td>Yes (webhooks)</td><td>High</td></tr>
+</table>
+<h3>Key Outcomes</h3>
+<ul>
+<li><strong>Complete data migration</strong> from Notion to Onelist</li>
+<li><strong>Preserve structure</strong> (pages, databases, blocks, relations)</li>
+<li><strong>Convert blocks to Markdown</strong> for native editing</li>
+<li><strong>Optional ongoing sync</strong> for users transitioning gradually</li>
+<hr>
+<h2>Table of Contents</h2>
+<p>1. <a href="#notion-data-model">Notion Data Model</a>
+2. <a href="#export-file-import">Export File Import</a>
+3. <a href="#api-based-sync">API-Based Sync</a>
+4. <a href="#data-mapping">Data Mapping</a>
+5. <a href="#content-conversion">Content Conversion</a>
+6. <a href="#implementation-phases">Implementation Phases</a>
+7. <a href="#technical-considerations">Technical Considerations</a>
+8. <a href="#user-experience">User Experience</a></p>
+<hr>
+<h2>Notion Data Model</h2>
+<p>Understanding Notion's structure is essential for accurate import.</p>
+<h3>Core Entities</h3>
+<pre><code class="language-">Workspace
+├── Pages (can be standalone or in databases)
+│   ├── Blocks (content units)
+│   │   ├── Text blocks (paragraph, headings, lists)
+│   │   ├── Media blocks (image, video, audio, file)
+│   │   ├── Embed blocks (bookmark, embed, link_preview)
+│   │   └── Child pages/databases (nested)
+│   ├── Properties (for database pages)
+│   └── Comments
+├── Databases (structured collections of pages)
+│   ├── Schema (property definitions)
+│   ├── Views (table, board, calendar, etc.)
+│   └── Pages (rows/entries)
+└── Users &amp; Permissions
+</code></pre>
+<h3>Page Structure</h3>
+<p>Each Notion page contains:</p>
+<table>
+<tr><th>Field</th><th>Description</th><th>Onelist Mapping</th></tr>
+<tr><td><code>id</code></td><td>UUID identifier</td><td><code>metadata.notion_id</code></td></tr>
+<tr><td><code>parent</code></td><td>Parent page/database/workspace</td><td>Parent entry or tag</td></tr>
+<tr><td><code>properties</code></td><td>Database page properties</td><td><code>entry.metadata</code> + tags</td></tr>
+<tr><td><code>icon</code></td><td>Emoji or image</td><td><code>metadata.icon</code></td></tr>
+<tr><td><code>cover</code></td><td>Cover image</td><td>Asset</td></tr>
+<tr><td><code>created_time</code></td><td>Creation timestamp</td><td><code>entry.content_created_at</code></td></tr>
+<tr><td><code>last_edited_time</code></td><td>Last modified</td><td><code>entry.updated_at</code></td></tr>
+<tr><td><code>created_by</code></td><td>Creator user</td><td><code>metadata.created_by</code></td></tr>
+<tr><td><code>archived</code></td><td>Archived status</td><td><code>metadata.archived</code></td></tr>
+<tr><td><code>url</code></td><td>Notion URL</td><td><code>metadata.notion_url</code></td></tr>
+</table>
+<h3>Block Types (28 Supported)</h3>
+<strong>Text Blocks</strong>:
+<li><code>paragraph</code> - Standard text</li>
+<li><code>heading_1</code>, <code>heading_2</code>, <code>heading_3</code> - Headings (can be toggleable)</li>
+<li><code>bulleted_list_item</code> - Unordered list</li>
+<li><code>numbered_list_item</code> - Ordered list</li>
+<li><code>to_do</code> - Checkbox item</li>
+<li><code>toggle</code> - Collapsible content</li>
+<li><code>quote</code> - Block quote</li>
+<li><code>callout</code> - Highlighted box with icon</li>
+<li><code>code</code> - Code block (60+ languages)</li>
+<strong>Media Blocks</strong>:
+<li><code>image</code> - Images (external URL or uploaded)</li>
+<li><code>video</code> - Video embeds</li>
+<li><code>audio</code> - Audio files</li>
+<li><code>file</code> - Generic file attachment</li>
+<li><code>pdf</code> - PDF embed</li>
+<strong>Embed Blocks</strong>:
+<li><code>bookmark</code> - URL preview</li>
+<li><code>embed</code> - External embed</li>
+<li><code>link_preview</code> - Rich link preview</li>
+<strong>Structural Blocks</strong>:
+<li><code>divider</code> - Horizontal rule</li>
+<li><code>table_of_contents</code> - Auto-generated TOC</li>
+<li><code>breadcrumb</code> - Navigation breadcrumb</li>
+<li><code>column_list</code>, <code>column</code> - Multi-column layout</li>
+<li><code>table</code>, <code>table_row</code> - Tables</li>
+<strong>Special Blocks</strong>:
+<li><code>child_page</code> - Nested page</li>
+<li><code>child_database</code> - Inline database</li>
+<li><code>synced_block</code> - Cross-page synced content</li>
+<li><code>template</code> - Template button</li>
+<li><code>equation</code> - LaTeX math</li>
+<strong>Unsupported</strong>: Any block not in this list returns <code>type: "unsupported"</code>
+<h3>Database Properties (23 Types)</h3>
+<table>
+<tr><th>Property Type</th><th>Description</th><th>Onelist Mapping</th></tr>
+<tr><td><code>title</code></td><td>Page title (required)</td><td><code>entry.title</code></td></tr>
+<tr><td><code>rich_text</code></td><td>Formatted text</td><td><code>metadata</code> or representation</td></tr>
+<tr><td><code>number</code></td><td>Numeric value</td><td><code>metadata</code></td></tr>
+<tr><td><code>select</code></td><td>Single choice</td><td>Tag</td></tr>
+<tr><td><code>multi_select</code></td><td>Multiple choices</td><td>Tags</td></tr>
+<tr><td><code>date</code></td><td>Date/date range</td><td><code>metadata</code> or <code>content_created_at</code></td></tr>
+<tr><td><code>people</code></td><td>User references</td><td><code>metadata</code></td></tr>
+<tr><td><code>files</code></td><td>File attachments</td><td>Assets</td></tr>
+<tr><td><code>checkbox</code></td><td>Boolean</td><td><code>metadata</code></td></tr>
+<tr><td><code>url</code></td><td>Web link</td><td><code>metadata</code></td></tr>
+<tr><td><code>email</code></td><td>Email address</td><td><code>metadata</code></td></tr>
+<tr><td><code>phone_number</code></td><td>Phone</td><td><code>metadata</code></td></tr>
+<tr><td><code>formula</code></td><td>Calculated field</td><td><code>metadata</code> (computed)</td></tr>
+<tr><td><code>relation</code></td><td>Link to other pages</td><td>Internal links</td></tr>
+<tr><td><code>rollup</code></td><td>Aggregated relation data</td><td><code>metadata</code></td></tr>
+<tr><td><code>created_time</code></td><td>Auto timestamp</td><td><code>content_created_at</code></td></tr>
+<tr><td><code>created_by</code></td><td>Auto creator</td><td><code>metadata</code></td></tr>
+<tr><td><code>last_edited_time</code></td><td>Auto updated</td><td><code>updated_at</code></td></tr>
+<tr><td><code>last_edited_by</code></td><td>Auto editor</td><td><code>metadata</code></td></tr>
+<tr><td><code>status</code></td><td>Status workflow</td><td>Tag</td></tr>
+<tr><td><code>unique_id</code></td><td>Auto-increment ID</td><td><code>metadata</code></td></tr>
+</table>
+<h3>Rich Text Structure</h3>
+<p>Notion uses rich text arrays for formatted content:</p>
+<pre><code class="language-json">{
+  &quot;rich_text&quot;: [
+    {
+      &quot;type&quot;: &quot;text&quot;,
+      &quot;text&quot;: {
+        &quot;content&quot;: &quot;Hello &quot;,
+        &quot;link&quot;: null
+      },
+      &quot;annotations&quot;: {
+        &quot;bold&quot;: false,
+        &quot;italic&quot;: false,
+        &quot;strikethrough&quot;: false,
+        &quot;underline&quot;: false,
+        &quot;code&quot;: false,
+        &quot;color&quot;: &quot;default&quot;
+      },
+      &quot;plain_text&quot;: &quot;Hello &quot;
+    },
+    {
+      &quot;type&quot;: &quot;text&quot;,
+      &quot;text&quot;: {
+        &quot;content&quot;: &quot;world&quot;,
+        &quot;link&quot;: { &quot;url&quot;: &quot;https://example.com&quot; }
+      },
+      &quot;annotations&quot;: {
+        &quot;bold&quot;: true,
+        &quot;italic&quot;: false,
+        &quot;strikethrough&quot;: false,
+        &quot;underline&quot;: false,
+        &quot;code&quot;: false,
+        &quot;color&quot;: &quot;blue&quot;
+      },
+      &quot;plain_text&quot;: &quot;world&quot;
+    }
+  ]
+}
+</code></pre>
+<strong>Annotation Types</strong>:
+<li><code>bold</code>, <code>italic</code>, <code>strikethrough</code>, <code>underline</code>, <code>code</code></li>
+<li><code>color</code>: default, gray, brown, orange, yellow, green, blue, purple, pink, red (+ background variants)</li>
+<strong>Mention Types</strong>:
+<li><code>user</code> - @mention a user</li>
+<li><code>page</code> - Link to page</li>
+<li><code>database</code> - Link to database</li>
+<li><code>date</code> - Date mention</li>
+<li><code>link_preview</code> - URL preview</li>
+<hr>
+<h2>Export File Import</h2>
+<h3>Overview</h3>
+<p>Notion allows exporting workspaces/pages as Markdown & CSV or HTML. This is the primary import method for one-time migrations.</p>
+<h3>Export Formats</h3>
+<strong>Markdown & CSV Export</strong>:
+<li>Pages → Markdown files (<code>.md</code>)</li>
+<li>Databases → CSV files (<code>.csv</code>) + Markdown for subpages</li>
+<li>Attachments → Separate files in folders</li>
+<li>Produces a ZIP file with folder structure</li>
+<strong>HTML Export</strong>:
+<li>Pages → HTML files</li>
+<li>Preserves more formatting than Markdown</li>
+<li>Includes <code>index.html</code> sitemap</li>
+<h3>Export Structure (Markdown & CSV)</h3>
+<pre><code class="language-">notion-export.zip
+├── Page Name abc123.md
+├── Another Page def456.md
+├── Database Name/
+│   ├── Database Name.csv
+│   ├── Row 1 ghi789.md
+│   ├── Row 2 jkl012.md
+│   └── attachments/
+│       ├── image1.png
+│       └── document.pdf
+├── Nested Page mno345/
+│   ├── Nested Page mno345.md
+│   └── Child Page pqr678.md
+└── attachments/
+    └── cover-image.jpg
+</code></pre>
+<h3>Export Limitations</h3>
+<table>
+<tr><th>Limitation</th><th>Impact</th></tr>
+<tr><td>Callouts → HTML</td><td>Not pure Markdown, need special handling</td></tr>
+<tr><td>Columns lost</td><td>Multi-column layout becomes sequential</td></tr>
+<tr><td>Synced blocks</td><td>Exported as static content</td></tr>
+<tr><td>Toggles</td><td>May lose toggle functionality</td></tr>
+<tr><td>Database views</td><td>Only default view exported</td></tr>
+<tr><td>Relations</td><td>Become plain text links</td></tr>
+<tr><td>Formulas/Rollups</td><td>Show calculated value, not formula</td></tr>
+<tr><td>Comments</td><td>Not exported</td></tr>
+<tr><td>Version history</td><td>Not exported</td></tr>
+<tr><td>Internal links</td><td>Become relative file paths</td></tr>
+<tr><td>Colors</td><td>Text colors may be lost in Markdown</td></tr>
+</table>
+<h3>Parsing Strategy</h3>
+<strong>Markdown Processing</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Import.Notion.ExportParser do
+  @moduledoc &quot;&quot;&quot;
+  Parser for Notion exported Markdown/CSV files.
+  &quot;&quot;&quot;
+<p>def parse_export(zip_path) do
+    {:ok, files} = :zip.unzip(String.to_charlist(zip_path), [:memory])</p>
+<p>files
+    |&gt; Enum.map(&amp;classify_file/1)
+    |&gt; Enum.group_by(&amp; &amp;1.type)
+    |&gt; process_by_type()
+  end</p>
+<p>defp classify_file({path, content}) do
+    path_str = to_string(path)
+    cond do
+      String.ends_with?(path_str, &quot;.md&quot;) -&gt;
+        %{type: :page, path: path_str, content: content}
+      String.ends_with?(path_str, &quot;.csv&quot;) -&gt;
+        %{type: :database, path: path_str, content: content}
+      true -&gt;
+        %{type: :asset, path: path_str, content: content}
+    end
+  end</p>
+<p>defp process_by_type(%{page: pages, database: databases, asset: assets}) do
+    # Extract Notion IDs from filenames (e.g., &quot;Page Name abc123def.md&quot;)
+    pages_with_ids = Enum.map(pages, &amp;extract_notion_id/1)</p>
+<p>%{
+      pages: pages_with_ids,
+      databases: parse_databases(databases),
+      assets: assets
+    }
+  end</p>
+<p>defp extract_notion_id(%{path: path} = file) do
+    # Notion appends ID to filename: &quot;Page Name abc123def456.md&quot;
+    case Regex.run(~r/\s([a-f0-9]{32})\.md$/, path) do
+      [_, id] -&gt; Map.put(file, :notion_id, id)
+      nil -&gt; Map.put(file, :notion_id, nil)
+    end
+  end
+end
+</code></pre></p>
+<strong>CSV Database Parsing</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Import.Notion.CsvParser do
+  @moduledoc &quot;&quot;&quot;
+  Parser for Notion database CSV exports.
+  &quot;&quot;&quot;
+<p>def parse_database(csv_content) do
+    csv_content
+    |&gt; String.trim()
+    |&gt; String.split(&quot;\n&quot;)
+    |&gt; CSV.decode!(headers: true)
+    |&gt; Enum.map(&amp;parse_row/1)
+  end</p>
+<p>defp parse_row(row) do
+    %{
+      title: row[&quot;Name&quot;] || row[&quot;Title&quot;] || Map.values(row) |&gt; List.first(),
+      properties: row,
+      # CSV doesn't include Notion IDs, need to match by title
+    }
+  end
+end
+</code></pre></p>
+<hr>
+<h2>API-Based Sync</h2>
+<h3>Overview</h3>
+<p>The Notion API enables ongoing synchronization for users who want to gradually transition or maintain both systems.</p>
+<h3>Authentication</h3>
+<strong>Two Integration Types</strong>:
+<table>
+<tr><th>Type</th><th>Use Case</th><th>Auth Method</th></tr>
+<tr><td>Internal</td><td>Single workspace</td><td>Integration token</td></tr>
+<tr><td>Public</td><td>Multiple workspaces</td><td>OAuth 2.0</td></tr>
+</table>
+<strong>OAuth 2.0 Flow</strong> (for public integrations):
+<p>1. Redirect user to Notion authorization:
+   <pre><code class="language-">   https://api.notion.com/v1/oauth/authorize?
+     client_id={CLIENT_ID}&amp;
+     response_type=code&amp;
+     owner=user&amp;
+     redirect_uri={REDIRECT_URI}
+   </code></pre></p>
+<p>2. User grants access to specific pages/databases</p>
+<p>3. Exchange code for token:
+   <pre><code class="language-">   POST https://api.notion.com/v1/oauth/token
+   Authorization: Basic base64({CLIENT_ID}:{CLIENT_SECRET})
+   Content-Type: application/json</p>
+<p>{
+     &quot;grant_type&quot;: &quot;authorization_code&quot;,
+     &quot;code&quot;: &quot;{CODE}&quot;,
+     &quot;redirect_uri&quot;: &quot;{REDIRECT_URI}&quot;
+   }
+   </code></pre></p>
+<p>4. Response includes:
+   <pre><code class="language-json">   {
+     &quot;access_token&quot;: &quot;secret_...&quot;,
+     &quot;token_type&quot;: &quot;bearer&quot;,
+     &quot;bot_id&quot;: &quot;...&quot;,
+     &quot;workspace_id&quot;: &quot;...&quot;,
+     &quot;workspace_name&quot;: &quot;...&quot;,
+     &quot;workspace_icon&quot;: &quot;...&quot;,
+     &quot;owner&quot;: { &quot;type&quot;: &quot;user&quot;, &quot;user&quot;: {...} },
+     &quot;duplicated_template_id&quot;: null
+   }
+   </code></pre></p>
+<strong>Token Refresh</strong>:
+<pre><code class="language-">POST https://api.notion.com/v1/oauth/token
+{
+  &quot;grant_type&quot;: &quot;refresh_token&quot;,
+  &quot;refresh_token&quot;: &quot;{REFRESH_TOKEN}&quot;
+}
+</code></pre>
+<h3>API Endpoints</h3>
+<strong>Core Endpoints</strong>:
+<table>
+<tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+<tr><td><code>/v1/pages/{id}</code></td><td>GET</td><td>Retrieve page</td></tr>
+<tr><td><code>/v1/pages</code></td><td>POST</td><td>Create page</td></tr>
+<tr><td><code>/v1/pages/{id}</code></td><td>PATCH</td><td>Update page</td></tr>
+<tr><td><code>/v1/blocks/{id}/children</code></td><td>GET</td><td>Get page blocks</td></tr>
+<tr><td><code>/v1/blocks/{id}/children</code></td><td>PATCH</td><td>Append blocks</td></tr>
+<tr><td><code>/v1/databases/{id}</code></td><td>GET</td><td>Retrieve database</td></tr>
+<tr><td><code>/v1/databases/{id}/query</code></td><td>POST</td><td>Query database</td></tr>
+<tr><td><code>/v1/search</code></td><td>POST</td><td>Search workspace</td></tr>
+<tr><td><code>/v1/users</code></td><td>GET</td><td>List users</td></tr>
+<tr><td><code>/v1/comments</code></td><td>GET</td><td>Get comments</td></tr>
+</table>
+<strong>Headers Required</strong>:
+<pre><code class="language-">Authorization: Bearer {ACCESS_TOKEN}
+Notion-Version: 2022-06-28
+Content-Type: application/json
+</code></pre>
+<h3>Rate Limits</h3>
+<table>
+<tr><th>Limit</th><th>Value</th></tr>
+<tr><td>Requests per second</td><td>3 average (with burst allowance)</td></tr>
+<tr><td>Blocks per request</td><td>1000 max</td></tr>
+<tr><td>Payload size</td><td>500KB max</td></tr>
+<tr><td>Rich text length</td><td>2000 characters</td></tr>
+<tr><td>Block array size</td><td>100 elements</td></tr>
+<tr><td>Relations per property</td><td>100 pages</td></tr>
+<tr><td>Multi-select options</td><td>100 options</td></tr>
+</table>
+<strong>Rate Limit Response</strong>:
+<pre><code class="language-">HTTP 429 Too Many Requests
+Retry-After: 1
+</code></pre>
+<h3>Webhooks (Real-time Sync)</h3>
+<p>Notion now supports webhooks for real-time updates.</p>
+<strong>Supported Events</strong>:
+<li><code>page.content_updated</code> - Page content changed (aggregated)</li>
+<li><code>page.created</code> - New page created</li>
+<li><code>page.properties_updated</code> - Page properties changed</li>
+<li><code>page.locked</code> / <code>page.unlocked</code> - Lock status changed</li>
+<li><code>page.moved</code> - Page relocated</li>
+<li><code>page.deleted</code> / <code>page.restored</code> - Delete/restore</li>
+<li><code>comment.created</code> - New comment</li>
+<li><code>data_source.schema_updated</code> - Database schema changed</li>
+<strong>Webhook Setup</strong>:
+1. Register webhook URL in integration dashboard
+2. Handle verification request (extract <code>verification_token</code>)
+3. Receive POST requests with event payloads
+<strong>Payload Structure</strong>:
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;page.content_updated&quot;,
+  &quot;data&quot;: {
+    &quot;page_id&quot;: &quot;abc123...&quot;,
+    &quot;workspace_id&quot;: &quot;def456...&quot;
+  },
+  &quot;timestamp&quot;: &quot;2025-01-28T12:00:00.000Z&quot;
+}
+</code></pre>
+<strong>Signature Validation</strong>:
+<pre><code class="language-elixir">def valid_signature?(payload, signature, secret) do
+  expected = :crypto.mac(:hmac, :sha256, secret, payload)
+              |&gt; Base.encode16(case: :lower)
+  Plug.Crypto.secure_compare(expected, signature)
+end
+</code></pre>
+<strong>Retry Policy</strong>: Up to 8 retries with exponential backoff over 24 hours.
+<h3>Sync Implementation</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Notion.Sync do
+  @moduledoc &quot;&quot;&quot;
+  Ongoing synchronization with Notion via API.
+  &quot;&quot;&quot;
+<p>alias Onelist.Import.Notion.{Client, Mapper}</p>
+<p>@api_version &quot;2022-06-28&quot;</p>
+<p>def initial_sync(user_id, access_token) do
+    with {:ok, client} &lt;- Client.new(access_token),
+         {:ok, shared_pages} &lt;- search_all_pages(client),
+         {:ok, databases} &lt;- get_shared_databases(client) do</p>
+<p># Import all shared content
+      pages = Enum.map(shared_pages, &amp;import_page(client, &amp;1, user_id))
+      dbs = Enum.map(databases, &amp;import_database(client, &amp;1, user_id))</p>
+<p>save_sync_state(user_id, %{
+        last_sync: DateTime.utc_now(),
+        page_ids: Enum.map(pages, &amp; &amp;1.notion_id),
+        database_ids: Enum.map(dbs, &amp; &amp;1.notion_id)
+      })</p>
+<p>{:ok, %{pages: length(pages), databases: length(dbs)}}
+    end
+  end</p>
+<p>defp search_all_pages(client, cursor \\ nil, acc \\ []) do
+    case Client.search(client, %{
+      filter: %{property: &quot;object&quot;, value: &quot;page&quot;},
+      start_cursor: cursor,
+      page_size: 100
+    }) do
+      {:ok, %{results: results, has_more: false}} -&gt;
+        {:ok, acc ++ results}</p>
+<p>{:ok, %{results: results, has_more: true, next_cursor: next}} -&gt;
+        # Rate limit: wait between requests
+        Process.sleep(350)  # ~3 req/sec
+        search_all_pages(client, next, acc ++ results)</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>defp import_page(client, page, user_id) do
+    # Fetch full page content (blocks)
+    {:ok, blocks} = get_all_blocks(client, page[&quot;id&quot;])</p>
+<p># Convert to Onelist entry
+    entry_attrs = Mapper.map_page_to_entry(page, user_id)
+    content = Mapper.blocks_to_markdown(blocks)</p>
+<p># Create entry with representations
+    {:ok, entry} = Onelist.Entries.create_entry_with_content(
+      entry_attrs,
+      content,
+      extract_assets(blocks)
+    )</p>
+<p>entry
+  end</p>
+<p>defp get_all_blocks(client, block_id, cursor \\ nil, acc \\ []) do
+    case Client.get_block_children(client, block_id, cursor) do
+      {:ok, %{results: blocks, has_more: false}} -&gt;
+        # Recursively get children of blocks that have them
+        blocks_with_children = fetch_nested_blocks(client, blocks)
+        {:ok, acc ++ blocks_with_children}</p>
+<p>{:ok, %{results: blocks, has_more: true, next_cursor: next}} -&gt;
+        Process.sleep(350)
+        blocks_with_children = fetch_nested_blocks(client, blocks)
+        get_all_blocks(client, block_id, next, acc ++ blocks_with_children)</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>defp fetch_nested_blocks(client, blocks) do
+    Enum.map(blocks, fn block -&gt;
+      if block[&quot;has_children&quot;] do
+        {:ok, children} = get_all_blocks(client, block[&quot;id&quot;])
+        Map.put(block, &quot;children&quot;, children)
+      else
+        block
+      end
+    end)
+  end
+end
+</code></pre></p>
+<h3>Webhook Handler</h3>
+<pre><code class="language-elixir">defmodule OnelistWeb.NotionWebhookController do
+  use OnelistWeb, :controller
+<p>alias Onelist.Import.Notion.Sync</p>
+<p>def handle(conn, params) do
+    # Verify signature
+    signature = get_req_header(conn, &quot;x-notion-signature&quot;) |&gt; List.first()
+    {:ok, body, conn} = read_body(conn)</p>
+<p>if valid_signature?(body, signature, get_webhook_secret()) do
+      process_event(params)
+      send_resp(conn, 200, &quot;OK&quot;)
+    else
+      send_resp(conn, 401, &quot;Invalid signature&quot;)
+    end
+  end</p>
+<p>defp process_event(%{&quot;type&quot; =&gt; &quot;page.content_updated&quot;, &quot;data&quot; =&gt; data}) do
+    %{&quot;page_id&quot; =&gt; page_id, &quot;workspace_id&quot; =&gt; workspace_id} = data</p>
+<p># Find user by workspace
+    case find_user_by_workspace(workspace_id) do
+      {:ok, user} -&gt;
+        Oban.insert(Onelist.Workers.NotionSyncWorker.new(%{
+          user_id: user.id,
+          page_id: page_id,
+          event: &quot;content_updated&quot;
+        }))</p>
+<p>:not_found -&gt;
+        :ignore
+    end
+  end</p>
+<p>defp process_event(%{&quot;type&quot; =&gt; &quot;page.created&quot;, &quot;data&quot; =&gt; data}) do
+    # Similar handling for new pages
+  end</p>
+<p>defp process_event(_), do: :ignore
+end
+</code></pre></p>
+<hr>
+<h2>Data Mapping</h2>
+<h3>Entity Mapping</h3>
+<table>
+<tr><th>Notion</th><th>Onelist</th><th>Notes</th></tr>
+<tr><td>Page</td><td>Entry (type: "note")</td><td>Primary content unit</td></tr>
+<tr><td>Database</td><td>Tag (prefixed)</td><td><code>notion:database:Name</code></td></tr>
+<tr><td>Database Page</td><td>Entry + tags</td><td>Tags from select/multi-select</td></tr>
+<tr><td>Block</td><td>Representation content</td><td>Converted to Markdown</td></tr>
+<tr><td>File/Image</td><td>Asset</td><td>Binary attachments</td></tr>
+<tr><td>Comment</td><td>—</td><td>Not imported (future consideration)</td></tr>
+<tr><td>View</td><td>—</td><td>Not applicable</td></tr>
+</table>
+<h3>Page → Entry Mapping</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Notion.Mapper do
+  @moduledoc &quot;&quot;&quot;
+  Maps Notion data structures to Onelist entities.
+  &quot;&quot;&quot;
+<p>def map_page_to_entry(notion_page, user_id) do
+    %{
+      user_id: user_id,
+      title: extract_title(notion_page),
+      entry_type: &quot;note&quot;,
+      source_type: &quot;api&quot;,
+      content_created_at: parse_timestamp(notion_page[&quot;created_time&quot;]),
+      metadata: %{
+        &quot;notion&quot; =&gt; %{
+          &quot;id&quot; =&gt; notion_page[&quot;id&quot;],
+          &quot;url&quot; =&gt; notion_page[&quot;url&quot;],
+          &quot;parent&quot; =&gt; notion_page[&quot;parent&quot;],
+          &quot;icon&quot; =&gt; notion_page[&quot;icon&quot;],
+          &quot;cover&quot; =&gt; notion_page[&quot;cover&quot;],
+          &quot;created_by&quot; =&gt; notion_page[&quot;created_by&quot;],
+          &quot;last_edited_by&quot; =&gt; notion_page[&quot;last_edited_by&quot;],
+          &quot;archived&quot; =&gt; notion_page[&quot;archived&quot;],
+          &quot;imported_at&quot; =&gt; DateTime.utc_now()
+        }
+      }
+    }
+  end</p>
+<p>defp extract_title(page) do
+    # Title can be in properties (database page) or as page title
+    case page[&quot;properties&quot;][&quot;title&quot;] || page[&quot;properties&quot;][&quot;Name&quot;] do
+      %{&quot;title&quot; =&gt; [%{&quot;plain_text&quot; =&gt; text} | _]} -&gt; text
+      _ -&gt; &quot;Untitled&quot;
+    end
+  end</p>
+<p>def map_database_properties_to_tags(properties, schema) do
+    properties
+    |&gt; Enum.flat_map(fn {name, value} -&gt;
+      case schema[name][&quot;type&quot;] do
+        &quot;select&quot; when value[&quot;select&quot;] != nil -&gt;
+          [value[&quot;select&quot;][&quot;name&quot;]]</p>
+<p>&quot;multi_select&quot; -&gt;
+          Enum.map(value[&quot;multi_select&quot;] || [], &amp; &amp;1[&quot;name&quot;])</p>
+<p>&quot;status&quot; when value[&quot;status&quot;] != nil -&gt;
+          [&quot;status:&quot; &lt;&gt; value[&quot;status&quot;][&quot;name&quot;]]</p>
+<p>_ -&gt;
+          []
+      end
+    end)
+  end
+end
+</code></pre></p>
+<h3>Block → Markdown Conversion</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Notion.BlockConverter do
+  @moduledoc &quot;&quot;&quot;
+  Converts Notion blocks to Markdown.
+  &quot;&quot;&quot;
+<p>def blocks_to_markdown(blocks) do
+    blocks
+    |&gt; Enum.map(&amp;convert_block/1)
+    |&gt; Enum.join(&quot;\n&quot;)
+    |&gt; String.trim()
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;paragraph&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;paragraph&quot;][&quot;rich_text&quot;])
+    children = convert_children(block)
+    text &lt;&gt; children &lt;&gt; &quot;\n&quot;
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;heading_1&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;heading_1&quot;][&quot;rich_text&quot;])
+    &quot;# &quot; &lt;&gt; text &lt;&gt; &quot;\n&quot;
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;heading_2&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;heading_2&quot;][&quot;rich_text&quot;])
+    &quot;## &quot; &lt;&gt; text &lt;&gt; &quot;\n&quot;
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;heading_3&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;heading_3&quot;][&quot;rich_text&quot;])
+    &quot;### &quot; &lt;&gt; text &lt;&gt; &quot;\n&quot;
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;bulleted_list_item&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;bulleted_list_item&quot;][&quot;rich_text&quot;])
+    children = convert_children(block, &quot;  &quot;)
+    &quot;- &quot; &lt;&gt; text &lt;&gt; &quot;\n&quot; &lt;&gt; children
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;numbered_list_item&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;numbered_list_item&quot;][&quot;rich_text&quot;])
+    children = convert_children(block, &quot;  &quot;)
+    &quot;1. &quot; &lt;&gt; text &lt;&gt; &quot;\n&quot; &lt;&gt; children
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;to_do&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;to_do&quot;][&quot;rich_text&quot;])
+    checked = if block[&quot;to_do&quot;][&quot;checked&quot;], do: &quot;[x]&quot;, else: &quot;[ ]&quot;
+    &quot;- #{checked} &quot; &lt;&gt; text &lt;&gt; &quot;\n&quot;
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;toggle&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;toggle&quot;][&quot;rich_text&quot;])
+    children = convert_children(block)
+    # Use details/summary for toggles
+    &quot;&lt;details&gt;\n&lt;summary&gt;#{text}&lt;/summary&gt;\n\n#{children}&lt;/details&gt;\n&quot;
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;quote&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;quote&quot;][&quot;rich_text&quot;])
+    &quot;&gt; &quot; &lt;&gt; String.replace(text, &quot;\n&quot;, &quot;\n&gt; &quot;) &lt;&gt; &quot;\n&quot;
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;callout&quot;} = block) do
+    icon = extract_icon(block[&quot;callout&quot;][&quot;icon&quot;])
+    text = rich_text_to_markdown(block[&quot;callout&quot;][&quot;rich_text&quot;])
+    children = convert_children(block)
+    # Preserve callout as blockquote with icon
+    &quot;&gt; #{icon} #{text}\n#{indent_lines(children, &quot;&gt; &quot;)}\n&quot;
+  end</p>
+<p>defp convert_block(%{&quot;type&quot; =&gt; &quot;code&quot;} = block) do
+    text = rich_text_to_markdown(block[&quot;code&quot;][&quot;rich_text&quot;], false)
+    language = block[&quot;code&quot;][&quot;language&quot;] || &quot;&quot;
+    &quot;</code></pre>#{language}\n#{text}\n``<code>\n"
+  end</p>
+<p>defp convert_block(%{"type" => "equation"} = block) do
+    expression = block["equation"]["expression"]
+    "$$\n#{expression}\n$$\n"
+  end</p>
+<p>defp convert_block(%{"type" => "divider"} = _block) do
+    "---\n"
+  end</p>
+<p>defp convert_block(%{"type" => "image"} = block) do
+    url = extract_file_url(block["image"])
+    caption = rich_text_to_markdown(block["image"]["caption"] || [])
+    "!<a href="#{url}">#{caption}</a>\n"
+  end</p>
+<p>defp convert_block(%{"type" => "video"} = block) do
+    url = extract_file_url(block["video"])
+    caption = rich_text_to_markdown(block["video"]["caption"] || [])
+    "<a href="#{url}">Video: #{caption}</a>\n"
+  end</p>
+<p>defp convert_block(%{"type" => "audio"} = block) do
+    url = extract_file_url(block["audio"])
+    "<a href="#{url}">Audio</a>\n"
+  end</p>
+<p>defp convert_block(%{"type" => "file"} = block) do
+    url = extract_file_url(block["file"])
+    name = block["file"]["name"] || "File"
+    "<a href="#{url}">#{name}</a>\n"
+  end</p>
+<p>defp convert_block(%{"type" => "pdf"} = block) do
+    url = extract_file_url(block["pdf"])
+    "<a href="#{url}">PDF</a>\n"
+  end</p>
+<p>defp convert_block(%{"type" => "bookmark"} = block) do
+    url = block["bookmark"]["url"]
+    caption = rich_text_to_markdown(block["bookmark"]["caption"] || [])
+    title = if caption != "", do: caption, else: url
+    "<a href="#{url}">#{title}</a>\n"
+  end</p>
+<p>defp convert_block(%{"type" => "embed"} = block) do
+    url = block["embed"]["url"]
+    "<a href="#{url}">Embed: #{url}</a>\n"
+  end</p>
+<p>defp convert_block(%{"type" => "table"} = block) do
+    # Tables need special handling
+    convert_table(block)
+  end</p>
+<p>defp convert_block(%{"type" => "child_page"} = block) do
+    title = block["child_page"]["title"]
+    id = block["id"]
+    "[[notion:#{id}|#{title}]]\n"
+  end</p>
+<p>defp convert_block(%{"type" => "child_database"} = block) do
+    title = block["child_database"]["title"]
+    "[Database: #{title}]\n"
+  end</p>
+<p>defp convert_block(%{"type" => "synced_block"} = block) do
+    # Synced blocks contain children
+    convert_children(block)
+  end</p>
+<p>defp convert_block(%{"type" => "column_list"} = block) do
+    # Columns become sequential content
+    convert_children(block)
+  end</p>
+<p>defp convert_block(%{"type" => "column"} = block) do
+    convert_children(block)
+  end</p>
+<p>defp convert_block(%{"type" => type} = _block) do
+    "[Unsupported block: #{type}]\n"
+  end</p>
+<p># Rich text conversion
+  defp rich_text_to_markdown(rich_text, apply_formatting \\ true) do
+    rich_text
+    |> Enum.map(&rich_text_item_to_markdown(&1, apply_formatting))
+    |> Enum.join()
+  end</p>
+<p>defp rich_text_item_to_markdown(%{"type" => "text"} = item, apply_formatting) do
+    text = item["text"]["content"]
+    link = item["text"]["link"]
+    annotations = item["annotations"]</p>
+<p>text = if apply_formatting, do: apply_annotations(text, annotations), else: text</p>
+<p>case link do
+      %{"url" => url} -> "<a href="#{url}">#{text}</a>"
+      _ -> text
+    end
+  end</p>
+<p>defp rich_text_item_to_markdown(%{"type" => "mention", "mention" => mention}, _) do
+    case mention["type"] do
+      "page" -> "[[notion:#{mention["page"]["id"]}]]"
+      "database" -> "[Database]"
+      "user" -> "@#{mention["user"]["name"] || "user"}"
+      "date" -> mention["date"]["start"]
+      _ -> "[mention]"
+    end
+  end</p>
+<p>defp rich_text_item_to_markdown(%{"type" => "equation"} = item, _) do
+    "$#{item["equation"]["expression"]}$"
+  end</p>
+<p>defp apply_annotations(text, annotations) do
+    text
+    |> maybe_wrap(annotations["bold"], "<strong>")
+    |> maybe_wrap(annotations["italic"], "<em>")
+    |> maybe_wrap(annotations["strikethrough"], "~~")
+    |> maybe_wrap(annotations["code"], "</code>")
+    # Underline has no standard Markdown - use HTML
+    |> maybe_wrap_html(annotations["underline"], "u")
+  end</p>
+<p>defp maybe_wrap(text, true, wrapper), do: wrapper <> text <> wrapper
+  defp maybe_wrap(text, _, _), do: text</p>
+<p>defp maybe_wrap_html(text, true, tag), do: "<#{tag}>#{text}</#{tag}>"
+  defp maybe_wrap_html(text, _, _), do: text</p>
+<p>defp convert_children(%{"children" => children}, indent \\ "") when is_list(children) do
+    children
+    |> Enum.map(&convert_block/1)
+    |> Enum.map(&indent_lines(&1, indent))
+    |> Enum.join()
+  end
+  defp convert_children(_, _), do: ""</p>
+<p>defp indent_lines(text, indent) do
+    text
+    |> String.split("\n")
+    |> Enum.map(&(indent <> &1))
+    |> Enum.join("\n")
+  end</p>
+<p>defp extract_file_url(%{"type" => "external", "external" => %{"url" => url}}), do: url
+  defp extract_file_url(%{"type" => "file", "file" => %{"url" => url}}), do: url
+  defp extract_file_url(_), do: ""</p>
+<p>defp extract_icon(%{"type" => "emoji", "emoji" => emoji}), do: emoji
+  defp extract_icon(_), do: ""
+end
+<pre><code class="language-">
+<h3>Table Conversion</h3></p>
+</code></pre>elixir
+defp convert_table(%{"table" => table_info, "children" => rows}) do
+  has_header = table_info["has_column_header"]
+<p>rows
+  |> Enum.with_index()
+  |> Enum.map(fn {row, idx} ->
+    cells = row["table_row"]["cells"]
+    |> Enum.map(&rich_text_to_markdown/1)
+    |> Enum.join(" | ")</p>
+<p>line = "| " <> cells <> " |"</p>
+<p># Add separator after header
+    if has_header && idx == 0 do
+      separator = "| " <> (cells |> String.split(" | ") |> Enum.map(fn _ -> "---" end) |> Enum.join(" | ")) <> " |"
+      line <> "\n" <> separator
+    else
+      line
+    end
+  end)
+  |> Enum.join("\n")
+  |> Kernel.<>("\n")
+end
+<pre><code class="language-">
+<hr></p>
+<h2>Implementation Phases</h2>
+<h3>Phase 1: Export File Import (MVP)</h3>
+</strong>Duration<strong>: 2-3 weeks
+</strong>Scope<strong>:
+<li>ZIP file upload and extraction</li>
+<li>Markdown file parsing</li>
+<li>CSV database parsing</li>
+<li>Page → Entry conversion</li>
+<li>Asset extraction and storage</li>
+<li>Basic folder structure → tags</li>
+<li>Import progress tracking</li>
+</strong>Deliverables<strong>:
+<li><code>Onelist.Import.Notion.ExportParser</code> - ZIP/file parsing</li>
+<li><code>Onelist.Import.Notion.Mapper</code> - Data mapping</li>
+<li><code>Onelist.Import.Notion.ImportJob</code> - Background processing</li>
+<li>Import UI in settings</li>
+</strong>User Flow<strong>:
+1. User exports from Notion (Settings → Export → Markdown &amp; CSV)
+2. User uploads ZIP to Onelist
+3. Preview import (page count, databases, attachments)
+4. Configure options (database→tag mapping)
+5. Start import
+6. Monitor progress
+7. Review import report
+<h3>Phase 2: Enhanced Markdown Processing</h3>
+</strong>Duration<strong>: 1-2 weeks
+</strong>Scope<strong>:
+<li>Callout block handling (HTML in Markdown)</li>
+<li>Table preservation</li>
+<li>Toggle conversion (details/summary)</li>
+<li>Code block language detection</li>
+<li>Internal link resolution</li>
+<li>Duplicate detection</li>
+</strong>Deliverables<strong>:
+<li>Enhanced Markdown parser with special block handling</li>
+<li>Internal link resolver</li>
+<li>Duplicate detector</li>
+<h3>Phase 3: API Authentication</h3>
+</strong>Duration<strong>: 1-2 weeks
+</strong>Scope<strong>:
+<li>OAuth 2.0 flow implementation</li>
+<li>Public integration registration with Notion</li>
+<li>Account linking UI</li>
+<li>Token storage and refresh</li>
+<li>Permission management</li>
+</strong>Deliverables<strong>:
+<li><code>Onelist.Import.Notion.OAuth</code> - OAuth flow</li>
+<li><code>Onelist.Import.Notion.Client</code> - API client wrapper</li>
+<li>Account linking UI</li>
+</strong>Prerequisites<strong>:
+<li>Create public integration at notion.so/my-integrations</li>
+<li>Submit for Notion security review</li>
+<li>Configure OAuth redirect URIs</li>
+<h3>Phase 4: Initial API Sync</h3>
+</strong>Duration<strong>: 2-3 weeks
+</strong>Scope<strong>:
+<li>Full workspace sync (shared pages/databases)</li>
+<li>Block fetching and conversion</li>
+<li>Database schema import</li>
+<li>Progress reporting</li>
+<li>Rate limit handling</li>
+</strong>Deliverables<strong>:
+<li><code>Onelist.Import.Notion.Sync</code> - Sync orchestration</li>
+<li><code>Onelist.Import.Notion.BlockConverter</code> - Block → Markdown</li>
+<li>Background sync workers</li>
+<h3>Phase 5: Ongoing Sync with Webhooks</h3>
+</strong>Duration<strong>: 2-3 weeks
+</strong>Scope<strong>:
+<li>Webhook endpoint setup</li>
+<li>Event handling (page.created, page.content_updated, etc.)</li>
+<li>Incremental sync on changes</li>
+<li>Conflict detection</li>
+<li>Sync status dashboard</li>
+</strong>Deliverables<strong>:
+<li>Webhook controller and handlers</li>
+<li>Incremental sync logic</li>
+<li>Sync management UI</li>
+<h3>Phase 6: Database &amp; Relations</h3>
+</strong>Duration<strong>: 2 weeks
+</strong>Scope<strong>:
+<li>Full database property import</li>
+<li>Relation handling (cross-page links)</li>
+<li>Formula/rollup display values</li>
+<li>View recreation (where possible)</li>
+<li>Bi-directional sync considerations</li>
+</strong>Deliverables<strong>:
+<li>Database property mapper</li>
+<li>Relation resolver</li>
+<li>Advanced database import options</li>
+<hr>
+<h2>Technical Considerations</h2>
+<h3>Performance</h3>
+</strong>Large Workspaces<strong>:
+<li>Stream process exported files</li>
+<li>Paginate API requests (100 items max)</li>
+<li>Use background jobs for import/sync</li>
+<li>Rate limit API calls (3 req/sec with backoff)</li>
+<li>Cache API responses where appropriate</li>
+</strong>Block Fetching Optimization<strong>:
+</code></pre>elixir
+<h1>Fetch blocks with rate limiting</h1>
+def fetch_with_rate_limit(client, block_ids) do
+  block_ids
+  |> Stream.chunk_every(3)  # 3 requests per second
+  |> Stream.each(fn chunk ->
+    Enum.each(chunk, &fetch_block(client, &1))
+    Process.sleep(1000)  # Wait 1 second between chunks
+  end)
+  |> Stream.run()
+end
+<pre><code class="language-">
+</strong>Asset Handling<strong>:
+<li>Download Notion-hosted files before they expire (URLs are temporary)</li>
+<li>Generate thumbnails asynchronously</li>
+<li>Track asset URLs for cache invalidation</li>
+<h3>API Limitations</h3>
+<table>
+<tr><th>Limitation</th><th>Workaround</th></tr>
+<tr><td>3 req/sec rate limit</td><td>Implement backoff and queuing</td></tr>
+<tr><td>100 blocks per request</td><td>Paginate with <code>start_cursor</code></td></tr>
+<tr><td>25 items for title/rich_text</td><td>Use paginated property retrieval</td></tr>
+<tr><td>Temporary file URLs</td><td>Download immediately on import</td></tr>
+<tr><td>No full-workspace search</td><td>Iterate shared pages/databases</td></tr>
+<tr><td>Webhook aggregation</td><td>Accept delayed content updates</td></tr>
+</table>
+<h3>Error Handling</h3>
+</code></pre>elixir
+defmodule Onelist.Import.Notion.Client do
+  @max_retries 3
+  @base_delay_ms 1000
+<p>def request(method, path, opts \\ []) do
+    do_request(method, path, opts, 0)
+  end</p>
+<p>defp do_request(method, path, opts, attempt) when attempt < @max_retries do
+    case Req.request(method, base_url() <> path, build_opts(opts)) do
+      {:ok, %{status: 200} = resp} ->
+        {:ok, resp.body}</p>
+<p>{:ok, %{status: 429, headers: headers}} ->
+        retry_after = get_retry_after(headers)
+        Process.sleep(retry_after </em> 1000)
+        do_request(method, path, opts, attempt + 1)</p>
+<p>{:ok, %{status: 400, body: %{"code" => "validation_error"} = body}} ->
+        {:error, {:validation_error, body["message"]}}</p>
+<p>{:ok, %{status: 401}} ->
+        {:error, :unauthorized}</p>
+<p>{:ok, %{status: 404}} ->
+        {:error, :not_found}</p>
+<p>{:ok, %{status: status, body: body}} ->
+        {:error, {:api_error, status, body}}</p>
+<p>{:error, reason} ->
+        delay = @base_delay_ms * :math.pow(2, attempt) |> round()
+        Process.sleep(delay)
+        do_request(method, path, opts, attempt + 1)
+    end
+  end</p>
+<p>defp do_request(_, _, _, _), do: {:error, :max_retries_exceeded}
+end
+<pre><code class="language-">
+<h3>Security</h3></p>
+</strong>Token Storage<strong>:
+<li>Encrypt OAuth tokens at rest</li>
+<li>Store refresh tokens securely</li>
+<li>Clear on account unlink</li>
+</strong>Webhook Security<strong>:
+<li>Validate <code>X-Notion-Signature</code> header</li>
+<li>Use timing-safe comparison</li>
+<li>Rate limit webhook endpoint</li>
+</strong>File Downloads<strong>:
+<li>Validate MIME types</li>
+<li>Scan for malicious content</li>
+<li>Enforce size limits</li>
+<h3>Elixir Libraries</h3>
+</code></pre>elixir
+<h1>mix.exs</h1>
+defp deps do
+  [
+    # Notion API client (or build custom)
+    {:notionex, "~> 0.3"},  # Optional - can use Req directly
+<p># HTTP client
+    {:req, "~> 0.4"},</p>
+<p># OAuth 2.0
+    {:oauth2, "~> 2.0"},</p>
+<p># CSV parsing
+    {:nimble_csv, "~> 1.2"},</p>
+<p># ZIP handling
+    # (Erlang :zip is built-in)</p>
+<p># Markdown processing (optional)
+    {:earmark, "~> 1.4"}
+  ]
+end
+<pre><code class="language-">
+<hr></p>
+<h2>User Experience</h2>
+<h3>Import UI</h3>
+</strong>Upload Page<strong>:
+</code></pre>
+┌─────────────────────────────────────────────┐
+│  Import from Notion                         │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ┌─────────────────────────────────────┐   │
+│  │  📁 Drop Notion export (ZIP) here   │   │
+│  │     or click to browse              │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+│  How to export from Notion:                │
+│  1. Open Notion Settings (⚙️)              │
+│  2. Go to Settings → Export all content   │
+│  3. Choose "Markdown & CSV"                │
+│  4. Upload the ZIP file here               │
+│                                             │
+│  ─────── or ───────                        │
+│                                             │
+│  [🔗 Connect Notion Account]               │
+│  Enable ongoing sync with your workspace   │
+│                                             │
+└─────────────────────────────────────────────┘
+<pre><code class="language-">
+</strong>OAuth Connection Flow<strong>:
+</code></pre>
+┌─────────────────────────────────────────────┐
+│  Connect to Notion                          │
+├─────────────────────────────────────────────┤
+│                                             │
+│  Onelist will request access to:           │
+│                                             │
+│  ✓ Read pages you select                   │
+│  ✓ Read databases you select               │
+│  ✓ View your basic profile                 │
+│                                             │
+│  You'll choose which pages to share        │
+│  in the next step on Notion.               │
+│                                             │
+│  [Cancel]        [Connect with Notion →]   │
+│                                             │
+└─────────────────────────────────────────────┘
+<pre><code class="language-">
+</strong>Import Preview<strong>:
+</code></pre>
+┌─────────────────────────────────────────────┐
+│  Import Preview                             │
+├─────────────────────────────────────────────┤
+│                                             │
+│  📝 Pages: 156                             │
+│  📊 Databases: 8                           │
+│  📎 Files: 234 (128 MB)                    │
+│                                             │
+│  Databases found:                           │
+│  ☑ Tasks → Create tag "notion:db:Tasks"    │
+│  ☑ Projects → Create tag "notion:db:Proj…" │
+│  ☑ Reading List → Create tag "notion:db:…" │
+│                                             │
+│  Options:                                   │
+│  ☑ Import database properties as metadata  │
+│  ☑ Convert select/multi-select to tags     │
+│  ☐ Skip pages without content              │
+│                                             │
+│  [Cancel]              [Start Import →]    │
+│                                             │
+└─────────────────────────────────────────────┘
+<pre><code class="language-">
+</strong>Sync Dashboard<strong>:
+</code></pre>
+┌─────────────────────────────────────────────┐
+│  Notion Sync                                │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ✅ Connected: My Workspace                │
+│  Last sync: 2 minutes ago                  │
+│                                             │
+│  Shared with Onelist:                       │
+│  • 156 pages                               │
+│  • 8 databases                             │
+│                                             │
+│  Sync mode:                                 │
+│  ◉ Real-time (webhooks enabled)            │
+│  ○ Manual only                             │
+│                                             │
+│  [Sync Now]  [Manage Access]  [Disconnect] │
+│                                             │
+│  Recent activity:                           │
+│  • "Project Notes" updated - 2 min ago     │
+│  • "Meeting 1/28" created - 1 hour ago     │
+│  • "Tasks" database synced - 1 hour ago    │
+│                                             │
+└─────────────────────────────────────────────┘
+<pre><code class="language-">
+<hr>
+<h2>Success Metrics</h2>
+<h3>Phase 1 (Export Import)</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Parse success rate</td><td>&gt;99% of valid exports</td></tr>
+<tr><td>Content fidelity</td><td>&gt;90% of formatting preserved</td></tr>
+<tr><td>Import speed</td><td>&gt;20 pages/second</td></tr>
+<tr><td>Asset extraction</td><td>100% of files recovered</td></tr>
+</table>
+<h3>Phase 5 (Ongoing Sync)</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Sync latency (webhook)</td><td>&lt;60 seconds</td></tr>
+<tr><td>Block conversion accuracy</td><td>&gt;95%</td></tr>
+<tr><td>API error rate</td><td>&lt;0.1%</td></tr>
+<tr><td>Rate limit violations</td><td>0</td></tr>
+</table>
+<hr>
+<h2>Dependencies</h2>
+<h3>External</h3>
+<li></strong>Notion Public Integration<strong>: Must create and configure</li>
+<li></strong>Security Review<strong>: Required for public integrations</li>
+<li></strong>Webhook URL**: Public HTTPS endpoint required</li>
+<h3>Internal</h3>
+<li>Storage backend for assets (already implemented)</li>
+<li>Background job processing (Oban)</li>
+<li>User authentication</li>
+<h3>Libraries to Add</h3>
+</code></pre>elixir
+<h1>mix.exs</h1>
+defp deps do
+  [
+    # HTTP client (if not present)
+    {:req, "~> 0.4"},
+<p># OAuth 2.0
+    {:oauth2, "~> 2.0"},</p>
+<p># CSV parsing
+    {:nimble_csv, "~> 1.2"},</p>
+<p># Optional: Notion client
+    {:notionex, "~> 0.3"}
+  ]
+end
+```</p>
+<hr>
+<h2>References</h2>
+<h3>Official Documentation</h3>
+<li><a href="https://developers.notion.com/docs/getting-started">Notion API Getting Started</a></li>
+<li><a href="https://developers.notion.com/reference/block">Block Reference</a></li>
+<li><a href="https://developers.notion.com/reference/page-property-values">Page Properties</a></li>
+<li><a href="https://developers.notion.com/reference/webhooks">Webhooks</a></li>
+<li><a href="https://developers.notion.com/reference/request-limits">Request Limits</a></li>
+<li><a href="https://developers.notion.com/docs/authorization">OAuth Authorization</a></li>
+<h3>Export Documentation</h3>
+<li><a href="https://www.notion.com/help/export-your-content">Export Your Content</a></li>
+<h3>Elixir Libraries</h3>
+<li><a href="https://hexdocs.pm/notionex/">notionex</a> - Notion API client with rendering</li>
+<li><a href="https://hex.pm/packages/notion_api">notion_api</a> - Alternative client</li>
+<li><a href="https://hexdocs.pm/req/">Req</a> - HTTP client</li>
+<li><a href="https://hexdocs.pm/oauth2/">OAuth2</a> - OAuth 2.0 client</li>
+<h3>Migration Tools (Reference)</h3>
+<li><a href="https://github.com/visualcurrent/Notion-2-Obsidian">Notion2Obsidian</a> - Bidirectional link preservation</li>
+<li><a href="https://affine.pro/blog/import-your-data-from-notion-into-affine">AFFiNE Import</a></li>
+</ul>
+<hr>
+<h2>Appendix: Notion Block Type Reference</h2>
+<h3>Text Blocks</h3>
+<table>
+<tr><th>Type</th><th>Has Children</th><th>Rich Text</th></tr>
+<tr><td>paragraph</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>heading_1</td><td>When toggleable</td><td>Yes</td></tr>
+<tr><td>heading_2</td><td>When toggleable</td><td>Yes</td></tr>
+<tr><td>heading_3</td><td>When toggleable</td><td>Yes</td></tr>
+<tr><td>bulleted_list_item</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>numbered_list_item</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>to_do</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>toggle</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>quote</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>callout</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>code</td><td>No</td><td>Yes</td></tr>
+</table>
+<h3>Media Blocks</h3>
+<table>
+<tr><th>Type</th><th>File Source</th><th>Caption</th></tr>
+<tr><td>image</td><td>external/file</td><td>Yes</td></tr>
+<tr><td>video</td><td>external/file</td><td>Yes</td></tr>
+<tr><td>audio</td><td>external/file</td><td>No</td></tr>
+<tr><td>file</td><td>external/file</td><td>Yes</td></tr>
+<tr><td>pdf</td><td>external/file</td><td>Yes</td></tr>
+</table>
+<h3>Structural Blocks</h3>
+<table>
+<tr><th>Type</th><th>Description</th></tr>
+<tr><td>divider</td><td>Horizontal rule</td></tr>
+<tr><td>table_of_contents</td><td>Auto-generated</td></tr>
+<tr><td>breadcrumb</td><td>Navigation path</td></tr>
+<tr><td>column_list</td><td>Multi-column container</td></tr>
+<tr><td>column</td><td>Single column</td></tr>
+<tr><td>table</td><td>Table container</td></tr>
+<tr><td>table_row</td><td>Table row</td></tr>
+</table>
+<h3>Special Blocks</h3>
+<table>
+<tr><th>Type</th><th>Description</th></tr>
+<tr><td>child_page</td><td>Nested page reference</td></tr>
+<tr><td>child_database</td><td>Inline database</td></tr>
+<tr><td>synced_block</td><td>Cross-page synced content</td></tr>
+<tr><td>template</td><td>Template button</td></tr>
+<tr><td>link_preview</td><td>Rich URL preview</td></tr>
+<tr><td>bookmark</td><td>URL with preview</td></tr>
+<tr><td>embed</td><td>External embed</td></tr>
+<tr><td>equation</td><td>LaTeX math block</td></tr>
+</table>
+<hr>
+<em>Document created: 2026-01-28</em>
+<em>Last updated: 2026-01-28</em>
+  </article>
+</body>
+</html>

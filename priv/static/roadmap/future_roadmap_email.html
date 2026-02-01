@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Feature Branch Exploration: Email Integration - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Feature Branch Exploration: Email Integration</h1>
+<strong>Status:</strong> Conceptual Exploration (Post-v2.0 Roadmap Completion)
+<strong>Date:</strong> 2025-05-06
+<h2>1. Vision & Goal</h2>
+<p>This document explores a potential future direction for Onelist, initiated <em>after</em> the successful implementation of the core v2.0 roadmap (including advanced AI features and daemons). The vision is to extend Onelist's role as the central "augmented memory" by integrating email directly into its ecosystem, transforming it into a <strong>full-featured email client and repository.</strong></p>
+<strong>Goal:</strong> Address the challenge of scattered information across multiple inboxes by treating emails as first-class Onelist Entries. This allows emails to be stored permanently, searched universally alongside other knowledge, linked contextually, and acted upon by Onelist's AI capabilities and automated daemons, ultimately consolidating a major communication channel into the user's unified knowledge base.
+<h2>2. Core Concepts & Features</h2>
+<p>Integrating email functionality would involve several key capabilities:</p>
+<strong>A. Full Email Client Functionality:</strong>
+<em> <strong>Multi-Account Connectivity:</strong> Support connecting multiple external email accounts via standard protocols (IMAP for fetching, SMTP for sending) and potentially specific vendor APIs (e.g., Gmail, Outlook) using secure authentication (OAuth2 where applicable).
+</em> <strong>Email Operations:</strong> Fetching, receiving, reading, composing, replying, and forwarding emails directly within the Onelist interface.
+<em> <strong>Storage:</strong> Securely storing fetched and sent emails within the Onelist system.
+</em> <strong>Folder/Label Management:</strong> Synchronizing email folders/labels and potentially mapping them to/from Onelist tags.
+<em> <strong>Attachment Handling:</strong> Storing and accessing email attachments.
+<strong>B. Emails as Native Onelist Entries:</strong>
+</em> <strong>Data Model:</strong> Each email becomes an <code>entry</code> with <code>entry_type='email'</code>.
+  <em> Headers (From, To, Cc, Subject, Message-ID, etc.) stored efficiently (potentially in a dedicated <code>email_details</code> side-table for threading/querying).
+  </em> Email bodies stored as <code>representations</code> (e.g., <code>'text/plain'</code>, <code>'text/html'</code>, <code>'original_eml'</code>).
+  <em> Attachments stored as linked <code>assets</code>.
+  </em> <code>entries.content_created_at</code> stores the email's timestamp.
+<strong>C. Deep Integration with Onelist Ecosystem (Leveraging v2.0 Capabilities):</strong>
+<em> <strong>Universal Search:</strong> Emails indexed by the Onelist Searcher (FTS and semantic embeddings) for unified search across all knowledge types.
+</em> <strong>Contextual Linking:</strong> Ability to link emails to/from other Onelist entries (notes, tasks, projects, chat logs) using <code>entry_links</code> for rich context.
+<em> <strong>Daemon Interaction:</strong> Emails become inputs for automated processing by daemons:
+  </em> <em>Planner:</em> Derive tasks, flag follow-ups.
+  <em> </em>Reader:<em> Summarize emails/threads.
+  </em> <em>Researcher:</em> Find related Onelist content based on email topics.
+  <em> </em>Librarian:<em> Suggest tags based on email content/context.
+</em> <strong>AI Interaction:</strong>
+  <em> </em>Contextual AI Chat Pane:<em> Operate on email entries (summarize, draft replies, extract information, suggest linked tasks/notes).
+  </em> <em>"Onelist AI" (Global Assistant):</em> Query across all emails, draft new emails, manage email-derived tasks via natural language.
+<strong>D. Enhanced Email Workflows:</strong>
+<em> <strong>Task Derivation:</strong> Streamlined features to create Onelist Tasks (e.g., <code>entry_type='task'</code>) directly from email content, automatically linking the task back to the source email.
+</em> <strong>Follow-up Management:</strong> System for tracking emails requiring follow-up actions.
+<em> <strong>Derived Task Tracking:</strong> Visibility into the status of tasks generated from specific emails.
+</em> <strong>Actionable Content Extraction:</strong> Simplified workflows for extracting specific information (like links for wishlists, recipe details, meeting times) from emails and creating relevant linked Onelist entries.
+<h2>3. Impact on Existing Onelist System (Post-v2.0)</h2>
+<p>Implementing this requires significant additions and modifications:</p>
+<em> <strong>Data Model:</strong> Introduction of <code>entry_type='email'</code> and potentially a dedicated <code>email_details</code> side-table. Heavy reliance on <code>representations</code>, <code>assets</code>, and especially <code>entry_links</code>.
+</em> <strong>New Backend Service(s):</strong> A dedicated, robust service is needed for handling email protocol connections (IMAP/SMTP/APIs), synchronization, parsing, and state management.
+<em> <strong>Daemon & AI Enhancements:</strong> Existing daemons (Planner, Reader, Searcher, etc.) and AI components need updates to process the <code>'email'</code> entry type and associated metadata/workflows.
+</em> <strong>API Expansion:</strong> New API endpoints for email-specific actions and management.
+<em> <strong>Major Frontend UI Development:</strong> Requires building a comprehensive email interface within Onelist (account management, list views, read/compose views, folder/tag integration).
+</em> <strong>Security Infrastructure:</strong> Enhanced handling of user credentials (OAuth tokens) for external email services. Safe rendering of HTML email content. Spam filtering considerations.
+<h2>4. Potential MVP for Email Integration Branch (Post-v2.0)</h2>
+<p>A phased approach would be necessary. A minimal viable product for this feature branch could focus on demonstrating core value:</p>
+<em> <strong>Connect Single Account:</strong> Support for connecting one email account (e.g., Gmail via API).
+</em> <strong>Fetch & Store (Incoming Only):</strong> Reliably fetch incoming emails, parse essential headers and plaintext body, store as <code>entry_type='email'</code> with <code>representations</code> and linked <code>assets</code> for attachments.
+<em> <strong>Read-Only View:</strong> Provide a basic UI within Onelist to list and read these fetched emails.
+</em> <strong>Unified Search Integration:</strong> Ensure fetched emails are indexed and searchable via the core Onelist search.
+<em> <strong>Manual Linking:</strong> Allow users to manually create <code>entry_links</code> between an email entry and another Onelist entry.
+</em> <strong>(Defer:</strong> Sending/replying, multi-account, folder sync, complex daemon integration, specific workflow enhancements).
+<h2>5. Future Evolution within this Branch</h2>
+<em> Full send/reply/forward capabilities.
+</em> Robust multi-account support.
+<em> Advanced folder/label mapping and management.
+</em> Rich HTML email rendering (securely).
+<em> Deep integration with Planner, Reader, and AI for task derivation, summarization, reply assistance, etc.
+</em> Email rules and automation within Onelist.
+<em> Offline support improvements.
+<h2>6. Risks & Challenges</h2>
+</em> <strong>Technical Complexity:</strong> Email protocols and APIs are complex and require significant effort to implement reliably. Synchronization state management is difficult.
+<em> <strong>Security:</strong> Handling email credentials and rendering potentially unsafe email content securely are major challenges. OAuth2 implementations are required.
+</em> <strong>Scalability:</strong> Potential for high volume of data (emails and attachments) requires robust storage and processing infrastructure.
+<em> <strong>User Experience:</strong> Designing an integrated experience that is genuinely better than using a dedicated email client alongside Onelist, avoiding feature bloat.
+</em> <strong>Third-Party Dependencies:</strong> Reliance on external email provider APIs and protocols introduces external risks (changes, rate limits, downtime).
+<em> <strong>Resource Intensive:</strong> This is a very large feature requiring significant development effort across the stack.
+<h2>Conclusion</h2>
+<p>Integrating email represents a significant potential expansion of Onelist's scope, strongly aligning with the vision of a unified "augmented memory." While technically challenging, successfully incorporating email would allow users to manage, search, link, and act upon a critical stream of personal and professional information directly within their central knowledge base, unlocking powerful new workflows and insights through Onelist's existing AI and daemon ecosystem. This direction would need careful consideration regarding its complexity and resource requirements relative to other potential post-v2.0 roadmap items.</p>
+<h2>Future Consideration</h2>
+</em> <https://medium.com/bouncin-and-behavin-blogs/i-didnt-realize-how-outdated-gmail-was-until-i-tried-this-64d75738120f>
+  </article>
+</body>
+</html>

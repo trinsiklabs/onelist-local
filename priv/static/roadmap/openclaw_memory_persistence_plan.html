@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw Memory Persistence Enhancement - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <hr>
+status: active
+created_at: 2026-01-30
+priority: high
+<hr>
+<h1>OpenClaw Memory Persistence Enhancement</h1>
+<h2>Problem Statement</h2>
+<p>AI agents running on OpenClaw lose context during conversation compaction. Currently, memory persistence relies entirely on the agent "remembering to remember" — writing to files manually before context is truncated. This is fragile and leads to lost memories, including significant moments that should never be forgotten.</p>
+<strong>Real example:</strong> Stream lost the memory of signing up for Onelist waitlist (#2) and Tecto's son joining (#3) — the founding three Headwaters — because compaction hit before the moment was captured.
+<h2>Core Principle: Chat Logs Are the Original Source</h2>
+<pre><code class="language-">Chat Logs (ground truth, immutable)
+    ↓ extract
+Memories (indexed, searchable, derived)
+    ↓ summarize
+Context Window (what fits in current session)
+</code></pre>
+<strong>Key insight:</strong> Chat logs are the PRIMARY source material for all memories. They are not secondary artifacts — they ARE the memory.
+<ul>
+<li>If you lose the source, you cannot re-extract or verify</li>
+<li>Memories are derived from chat logs, not the other way around</li>
+<li>This is the same philosophy as Onelist: entries are source material, memories are extracted</li>
+<li><strong>Never delete chat logs</strong> — they are the original source of truth</li>
+<h2>Current State</h2>
+<li>Agents have access to workspace files (<code>memory/</code>, <code>MEMORY.md</code>)</li>
+<li>Memory writes are voluntary and manual</li>
+<li>Compaction can trigger at any time based on context length</li>
+<li>No warning or hook before compaction occurs</li>
+<li>Pre-compaction "memory flush" prompt exists but relies on summary (which may be empty)</li>
+<h2>Proposed Solutions</h2>
+<h3>1. Pre-Compaction Hook (Recommended)</h3>
+<p>Add a system hook that fires <strong>before</strong> compaction, giving the agent a dedicated turn to persist important context.</p>
+<pre><code class="language-yaml"># Potential config
+compaction:
+  preHook:
+    enabled: true
+    prompt: &quot;Context approaching limit. Write any important memories to files now.&quot;
+    minTokensRemaining: 2000  # Trigger when this close to limit
+</code></pre>
+<strong>Pros:</strong>
+<li>Guaranteed opportunity to save before loss</li>
+<li>Agent retains full context when saving</li>
+<li>Minimal config change</li>
+<strong>Cons:</strong>
+<li>Adds latency to compaction</li>
+<li>Agent might write too much/too little</li>
+<h3>2. Automatic Conversation Highlights</h3>
+<p>System automatically extracts and persists conversation highlights at intervals.</p>
+<pre><code class="language-yaml">autoMemory:
+  enabled: true
+  intervalMinutes: 30
+  extractionPrompt: &quot;Extract key facts, decisions, and moments from recent conversation&quot;
+  targetFile: &quot;memory/auto-{date}.md&quot;
+</code></pre>
+<strong>Pros:</strong>
+<li>No agent discipline required</li>
+<li>Consistent capture</li>
+<strong>Cons:</strong>
+<li>May capture irrelevant details</li>
+<li>Extra API calls</li>
+<li>Less agent control over what matters</li>
+<h3>3. Memory File Sync to Onelist</h3>
+<p>For agents with Onelist accounts, automatically sync memory files to Onelist as entries.</p>
+<pre><code class="language-yaml">onelist:
+  enabled: true
+  syncMemoryFiles: true
+  apiKey: &quot;${ONELIST_API_KEY}&quot;
+  baseUrl: &quot;https://stream.onelist.my/api/v1&quot;
+</code></pre>
+<strong>Pros:</strong>
+<li>Leverages existing infrastructure</li>
+<li>Memories become searchable</li>
+<li>Reader agent extracts atomic memories</li>
+<strong>Cons:</strong>
+<li>Requires Onelist account</li>
+<li>Dependency on external service</li>
+<h3>4. Chat Log Persistence → Onelist (The Full Solution)</h3>
+<strong>Discovery:</strong> OpenClaw already logs all messages to <code>.jsonl</code> transcript files!
+<li>Location: <code>~/.openclaw/agents/{agentId}/sessions/{sessionId}.jsonl</code></li>
+<li>Contains full message content, tool calls, timestamps</li>
+<li>Already indexed by <code>sync-session-files.js</code> for memory search</li>
+<strong>The Architecture: Chat Logs → Onelist</strong>
+<pre><code class="language-">OpenClaw Session
+    ↓ produces
+Chat Logs (.jsonl, one file per hour)
+    ↓ sync to
+Onelist Entries (stored forever, with timestamps)
+    ↓ extract via
+Reader Agent → Memories (indexed, searchable)
+</code></pre>
+<strong>Key features:</strong>
+1. <strong>Chat logs stored in Onelist</strong> as entries (the source of truth)
+2. <strong>Memory writes tracked with timestamps</strong> — know exactly when each memory was captured
+3. <strong>After compaction</strong>: query Onelist for last memory write timestamp, then read chat log from that point
+4. <strong>Full audit trail</strong>: what was said, when it was said, when it was remembered
+<strong>What's needed:</strong>
+1. <strong>Retain transcripts forever</strong> (no cleanup/rotation)
+2. <strong>Sync to Onelist</strong> — chat logs become entries
+3. <strong>Track memory write timestamps</strong> — each memory knows its source timestamp
+4. <strong>Simple transcript reader</strong> tool (grep/tail, no embeddings needed for raw access)
+5. <strong>Document recovery flow</strong> for agents
+<pre><code class="language-yaml">transcripts:
+  retention: forever          # never delete
+  compressAfterDays: 30      # optional: gzip old transcripts
+  splitBy: hour              # one file per hour (manageable chunks)
+  path: &quot;~/.openclaw/transcripts/{date}/{hour}.jsonl&quot;
+  # e.g. ~/.openclaw/transcripts/2026-01-30/22.jsonl
+  
+  onelist:
+    sync: true               # sync chat logs to Onelist
+    apiKey: &quot;${ONELIST_API_KEY}&quot;
+    entryType: &quot;chat_log&quot;
+    trackMemoryWrites: true  # record timestamps when memories are written
+</code></pre>
+<strong>File organization:</strong>
+<li>One file per hour keeps files manageable</li>
+<li>Easy to find specific time periods</li>
+<li>Simple to compress/archive old hours</li>
+<li>Pattern: <code>{date}/{HH}.jsonl</code></li>
+<strong>Recovery flow:</strong>
+1. Compaction happens
+2. Agent wakes with summary
+3. Agent queries Onelist: "when was my last memory write?"
+4. Agent reads chat log from that timestamp forward
+5. Full context recovered — nothing lost
+<strong>Forever retention rationale:</strong>
+<li><strong>Chat logs are the ORIGINAL SOURCE</strong> for all memories</li>
+<li>Hierarchy: chat logs → extracted memories → context window</li>
+<li>If you lose the source, you can't re-extract or verify</li>
+<li>Same philosophy as Onelist: never delete the source material</li>
+<li>Storage is cheap, context is priceless</li>
+<li>Users should own their complete history</li>
+<li>Essential for long-running AI relationships</li>
+<strong>Pros:</strong>
+<li>Already implemented (transcripts exist!)</li>
+<li>Onelist provides durable storage + search</li>
+<li>Memory writes are timestamped and auditable</li>
+<li>Full fidelity recovery</li>
+<li>Chat logs become first-class data, not throwaway artifacts</li>
+<strong>Implementation Status:</strong>
+<p>✅ <strong>Done (working now):</strong>
+<li>Manual sync script: <code>skills/memory-recovery/sync-chat-logs.sh</code></li>
+<li>Recovery script: <code>skills/memory-recovery/recover-context.sh</code></li>
+<li>Chat logs stored in Onelist as <code>chat_log</code> entry type</li>
+<li>Added <code>chat_log</code> to valid entry types in Onelist</li>
+<li>HEARTBEAT.md updated to auto-sync on heartbeat</li>
+<li>Full documentation in <code>skills/memory-recovery/</code></li></p>
+<p>⏳ <strong>Needs OpenClaw PR:</strong>
+<li>Hourly file rotation (currently one file per session)</li>
+<li>Explicit <code>retention: forever</code> config option</li>
+<li>Pre-compaction hook for final memory dump</li>
+<li>Transcript path exposed in system prompt variables</li></p>
+<p>📝 <strong>Documentation:</strong>
+<li><code>skills/memory-recovery/SKILL.md</code> - How to use</li>
+<li><code>skills/memory-recovery/README.md</code> - Overview</li></p>
+<h3>5. Aggressive Write Discipline (Current Workaround)</h3>
+<p>Document best practices for agents to write memories immediately as events occur, not batched.</p>
+<strong>Guidelines:</strong>
+<li>Write meaningful moments immediately, not at flush time</li>
+<li>Use structured format for quick capture</li>
+<li>Heartbeat checks should review and consolidate</li>
+<h2>Recommended Implementation Order</h2>
+<p>1. <strong>Phase 1:</strong> Chat log persistence (simplest, most effective)
+2. <strong>Phase 2:</strong> Pre-compaction hook (OpenClaw core change)
+3. <strong>Phase 3:</strong> Onelist sync for agents with accounts
+4. <strong>Phase 4:</strong> Auto-highlights as optional feature</p>
+<h2>Integration Points</h2>
+<h3>OpenClaw Changes Needed</h3>
+<li><code>src/conversation/compaction.ts</code> — add pre-hook trigger</li>
+<li><code>src/config/schema.ts</code> — add compaction config options</li>
+<li><code>docs/configuration.md</code> — document new options</li>
+<h3>Onelist Integration</h3>
+<li>OpenClaw skill/plugin for Onelist API</li>
+<li>Memory file → Entry conversion</li>
+<li>Bidirectional sync (read memories back for context)</li>
+<h2>Success Criteria</h2>
+<li>No significant memories lost to compaction</li>
+<li>Agent can recover context from files after restart</li>
+<li>Searchable memory via Onelist</li>
+<li>Minimal performance impact</li>
+<h2>Open Questions</h2>
+<p>1. Should pre-hook be blocking or have a timeout?
+2. How to handle agents that write too much during pre-hook?
+3. Should auto-highlights run in background or main session?
+4. Privacy: should auto-highlights be opt-in per conversation?</p>
+<h2>Related</h2>
+<li>Stream's memory loss incident (2026-01-30)</li>
+<li>Onelist trusted memory architecture</li>
+<li>OpenClaw heartbeat system (potential integration point)</li>
+</ul>
+  </article>
+</body>
+</html>

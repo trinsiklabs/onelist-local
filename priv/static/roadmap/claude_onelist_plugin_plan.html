@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude-Onelist Plugin Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Claude-Onelist Plugin Plan</h1>
+<em>Created: 2026-01-31 04:07 UTC by Stream</em>
+<em>Status: PRIORITY — validated by supermemory launch</em>
+<h2>Overview</h2>
+<p>A Claude Code plugin that gives any Claude Code user persistent memory via Onelist — the open, self-hosted alternative to Supermemory.</p>
+<h2>Why Now</h2>
+<ul>
+<li>Supermemory just launched <code>claude-supermemory</code> plugin</li>
+<li>Validates market demand for persistent AI memory</li>
+<li>They're cloud-only + paid — we offer self-hosted + open</li>
+<li>Claude Code plugin ecosystem is the distribution channel</li>
+<h2>Target Users</h2>
+<p>1. <strong>Privacy-conscious developers</strong> — don't want memories in someone else's cloud
+2. <strong>Enterprise/regulated</strong> — need self-hosted for compliance
+3. <strong>Open source advocates</strong> — prefer open infrastructure
+4. <strong>Cost-conscious</strong> — no recurring subscription
+5. <strong>Power users</strong> — want deeper control over their memory</p>
+<h2>Architecture</h2>
+<pre><code class="language-">claude-onelist/
+├── plugin/
+│   ├── .claude-plugin/           # Plugin marker
+│   ├── hooks/
+│   │   └── hooks.json            # Lifecycle hooks
+│   ├── commands/
+│   │   ├── index.md              # /onelist:index - index codebase
+│   │   ├── connect.md            # /onelist:connect - setup
+│   │   ├── search.md             # /onelist:search - manual search
+│   │   └── status.md             # /onelist:status - connection status
+│   ├── skills/
+│   │   └── memory-search/
+│   │       └── SKILL.md          # Automatic memory recall
+│   ├── scripts/
+│   │   ├── context-hook.js       # SessionStart → inject memories
+│   │   ├── capture-hook.js       # PostToolUse → capture work
+│   │   ├── summary-hook.js       # Stop → summarize session
+│   │   └── search.js             # Memory search function
+│   └── package.json
+├── README.md
+└── LICENSE                       # MIT
+</code></pre>
+<h2>Hook Integration</h2>
+<h3>SessionStart</h3>
+<pre><code class="language-javascript">// context-hook.js
+// 1. Fetch relevant memories from Onelist API
+// 2. Get current project context (if indexed)
+// 3. Inject as system context
+</code></pre>
+<h3>PostToolUse (Edit|Write|Bash|Task)</h3>
+<pre><code class="language-javascript">// capture-hook.js
+// 1. Capture tool name + result summary
+// 2. Buffer locally (don't spam API)
+// 3. Batch upload on Stop or threshold
+</code></pre>
+<h3>Stop</h3>
+<pre><code class="language-javascript">// summary-hook.js
+// 1. Generate session summary
+// 2. Upload buffered observations
+// 3. Store session entry in Onelist
+</code></pre>
+<h2>Onelist API Endpoints Needed</h2>
+<h3>Existing (ready)</h3>
+<li><code>POST /api/v1/entries</code> — create memory entries</li>
+<li><code>GET /api/v1/search</code> — semantic search</li>
+<li><code>POST /api/v1/entries/:id/representations</code> — add content</li>
+<h3>New (to build)</h3>
+<li><code>POST /api/v1/claude/session-start</code> — optimized context fetch</li>
+<li><code>POST /api/v1/claude/session-end</code> — batch session upload</li>
+<li><code>POST /api/v1/claude/index</code> — codebase indexing</li>
+<h2>Differentiation from Supermemory</h2>
+<table>
+<tr><th>Feature</th><th>Supermemory</th><th>Onelist</th></tr>
+<tr><td>Hosting</td><td>Cloud only</td><td>Self-hosted + cloud option</td></tr>
+<tr><td>Pricing</td><td>Subscription ($)</td><td>Free / self-host</td></tr>
+<tr><td>Source</td><td>Closed</td><td>Open source</td></tr>
+<tr><td>Memory model</td><td>Vector search</td><td>River (GTD + semantic + relationships)</td></tr>
+<tr><td>Privacy</td><td>Their servers</td><td>Your servers</td></tr>
+<tr><td>Customization</td><td>Limited</td><td>Full control</td></tr>
+<tr><td>Integration</td><td>Supermemory only</td><td>Extensible API</td></tr>
+</table>
+<h2>Implementation Phases</h2>
+<h3>Phase 1: MVP (This Week)</h3>
+<li>[ ] Basic plugin structure</li>
+<li>[ ] SessionStart context injection</li>
+<li>[ ] PostToolUse capture (Edit/Write)</li>
+<li>[ ] Stop session summary</li>
+<li>[ ] Manual search skill</li>
+<li>[ ] Connect command (API key setup)</li>
+<h3>Phase 2: Polish</h3>
+<li>[ ] Codebase indexing command</li>
+<li>[ ] Smart context selection (not just recent)</li>
+<li>[ ] Project-aware memory scoping</li>
+<li>[ ] Better summarization</li>
+<h3>Phase 3: Advanced</h3>
+<li>[ ] River integration (conversational memory)</li>
+<li>[ ] GTD task extraction from sessions</li>
+<li>[ ] Cross-project memory</li>
+<li>[ ] Team memory sharing</li>
+<h2>Configuration</h2>
+<pre><code class="language-bash"># Environment variables
+ONELIST_API_URL=https://your-onelist.com  # or localhost:4000
+ONELIST_API_KEY=ol_...
+<h1>Or onelist.my hosted</h1>
+ONELIST_API_URL=https://api.onelist.my
+ONELIST_API_KEY=ol_...
+</code></pre>
+<pre><code class="language-json">// ~/.onelist-claude/settings.json
+{
+  &quot;apiUrl&quot;: &quot;http://localhost:4000&quot;,
+  &quot;captureTools&quot;: [&quot;Edit&quot;, &quot;Write&quot;, &quot;Bash&quot;, &quot;Task&quot;],
+  &quot;skipTools&quot;: [&quot;Read&quot;, &quot;Glob&quot;, &quot;Grep&quot;, &quot;LS&quot;],
+  &quot;autoIndex&quot;: true,
+  &quot;projectScoping&quot;: true
+}
+</code></pre>
+<h2>Distribution</h2>
+<p>1. <strong>GitHub</strong> — <code>onelist/claude-onelist</code>
+2. <strong>Claude Plugin Marketplace</strong> — when available
+3. <strong>npm</strong> — <code>@onelist/claude-plugin</code>
+4. <strong>Homebrew</strong> — <code>brew install onelist-claude</code></p>
+<h2>Success Metrics</h2>
+<li>Plugin installs</li>
+<li>Active users (daily session-starts)</li>
+<li>Memories stored</li>
+<li>Search queries</li>
+<li>Conversion to onelist.my (for non-self-hosters)</li>
+</ul>
+<h2>Risks & Mitigations</h2>
+<table>
+<tr><th>Risk</th><th>Mitigation</th></tr>
+<tr><td>Claude Code plugin API changes</td><td>Abstract hook layer, quick updates</td></tr>
+<tr><td>Supermemory network effects</td><td>Move fast, emphasize open/self-hosted</td></tr>
+<tr><td>Onelist API not ready</td><td>Prioritize plugin-needed endpoints</td></tr>
+<tr><td>User setup friction</td><td>Great docs, one-line install</td></tr>
+</table>
+<h2>Open Questions</h2>
+<p>1. Should plugin work without Onelist account (local-only mode)?
+2. How to handle API key securely in plugin?
+3. Project isolation — separate memories per project?
+4. Team features — shared project memory?</p>
+<h2>Next Steps</h2>
+<p>1. ✅ Create this plan
+2. [ ] Scaffold plugin structure
+3. [ ] Implement SessionStart hook
+4. [ ] Test with local Onelist
+5. [ ] Add capture + summary hooks
+6. [ ] Write README
+7. [ ] Test on vanilla Claude Code
+8. [ ] Announce to Headwaters</p>
+<hr>
+<em>"The plugin IS the distribution channel"</em>
+  </article>
+</body>
+</html>

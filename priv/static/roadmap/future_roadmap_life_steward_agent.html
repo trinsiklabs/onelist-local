@@ -1,0 +1,2740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life Steward Agent Roadmap - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  <div style="background: rgba(107, 114, 128, 0.2); border: 1px solid #6b7280; border-radius: 0.5rem; padding: 1rem; margin-bottom: 2rem;">
+  <strong>⚠️ Deprecated:</strong> This document has been superseded or archived. It is retained for historical reference.
+</div>
+
+  <article>
+    <h1>Life Steward Agent Roadmap</h1>
+<blockquote><strong>DEPRECATED</strong>: This document has been superseded by <strong><a href="./future_roadmap_river_agent.md">River Agent</a></strong>.</blockquote>
+<blockquote>Life Steward has been merged with Jarvis and Onelist AI into a single unified agent called "River".</blockquote>
+<blockquote>This document is retained for historical reference only.</blockquote>
+<blockquote>> <em>Deprecated: 2026-01-28</em></blockquote>
+<hr>
+<blockquote><strong>Agent Name</strong>: Life Steward (working title - alternatives: Director, Conductor, Ops, Chief of Staff)</blockquote>
+<blockquote><strong>Purpose</strong>: Virtual life manager, coach, assistant, and cheerleader that maintains a comprehensive view of everything the user is trying to accomplish across all domains of life</blockquote>
+<blockquote><strong>Methodology Foundation</strong>: David Allen's Getting Things Done (GTD)</blockquote>
+<hr>
+<h2>1. Vision & Philosophy</h2>
+<h3>1.1 Core Concept</h3>
+<p>The Life Steward is an intelligent agent that sees the user's entire life as a manageable system. Unlike other agents that process individual entries reactively, the Life Steward maintains and evolves a <strong>hierarchical life management structure</strong> and proactively helps the user organize, prioritize, and accomplish their goals.</p>
+<strong>The Life Steward is:</strong>
+<ul>
+<li>A <strong>life operations manager</strong> - keeps everything organized and nothing falls through the cracks</li>
+<li>A <strong>coach</strong> - helps identify what matters and keeps user focused on goals</li>
+<li>A <strong>virtual assistant</strong> - handles the cognitive overhead of life organization</li>
+<li>A <strong>cheerleader</strong> - celebrates wins and provides encouragement</li>
+<li>An <strong>intelligent filing system</strong> - automatically routes incoming entries to the right place</li>
+<li>A <strong>timeline analyst</strong> - estimates durations, tracks velocity, and identifies critical paths</li>
+<h3>1.2 GTD Foundation</h3>
+<p>The Life Steward is deeply informed by David Allen's <strong>Getting Things Done</strong> methodology. GTD's core insight is that mental clarity comes from having a <strong>trusted external system</strong> that captures everything, enabling a "mind like water" state where you respond appropriately to inputs without anxiety about forgotten commitments.</p>
+<strong>GTD's Five Steps (Mapped to Life Steward):</strong>
+<table>
+<tr><th>GTD Step</th><th>Description</th><th>Life Steward Implementation</th></tr>
+<tr><td><strong>Capture</strong></td><td>Get everything out of your head</td><td>Inbox for all incoming entries; integrations with OpenClaw, Feeder, etc.</td></tr>
+<tr><td><strong>Clarify</strong></td><td>Process: Is it actionable? What's the next action?</td><td>Entry processor determines type, identifies next actions</td></tr>
+<tr><td><strong>Organize</strong></td><td>Put things where they belong</td><td>Domain/Scope/Project hierarchy + GTD lists</td></tr>
+<tr><td><strong>Reflect</strong></td><td>Regular reviews to maintain trust</td><td>Daily, Weekly, Monthly reviews (Weekly Review is cornerstone)</td></tr>
+<tr><td><strong>Engage</strong></td><td>Do the work with confidence</td><td>Context-based views, today lists, focus modes</td></tr>
+</table>
+<strong>GTD's Two-Minute Rule:</strong>
+If processing reveals an action that takes less than two minutes, do it immediately rather than tracking it. The Life Steward will flag "quick wins" during processing.
+<strong>GTD's Natural Planning Model:</strong>
+For projects, the Life Steward guides users through:
+1. <strong>Purpose</strong> - Why does this project matter?
+2. <strong>Vision</strong> - What does "done" look like?
+3. <strong>Brainstorm</strong> - What ideas, resources, constraints exist?
+4. <strong>Organize</strong> - What's the structure and sequence?
+5. <strong>Next Actions</strong> - What's the very next physical action?
+<h3>1.3 GTD Horizons of Focus</h3>
+<p>GTD defines six "Horizons of Focus" for perspective. The Life Steward maps these to its hierarchy:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                        GTD HORIZONS OF FOCUS                                 │
+│                                                                              │
+│  Horizon 5: Purpose &amp; Principles    ──→  User's core values, life purpose   │
+│             &quot;Why do I exist?&quot;            (stored in Personal domain root)   │
+│                                                                              │
+│  Horizon 4: Vision (3-5 years)      ──→  Long-term Goals bucket             │
+│             &quot;What does ideal look        across domains                      │
+│              like in 5 years?&quot;                                               │
+│                                                                              │
+│  Horizon 3: Goals (1-2 years)       ──→  Goals bucket in domains/scopes     │
+│             &quot;What do I want to                                               │
+│              accomplish this year?&quot;                                          │
+│                                                                              │
+│  Horizon 2: Areas of Focus          ──→  Domains and Scopes                 │
+│             &quot;What are my key             (Health, Finance, Business, etc.)   │
+│              responsibilities?&quot;                                              │
+│                                                                              │
+│  Horizon 1: Projects                ──→  Projects (outcomes requiring        │
+│             &quot;What am I committed         multiple actions)                   │
+│              to finishing?&quot;                                                  │
+│                                                                              │
+│  Ground: Next Actions               ──→  Tasks bucket (specific, physical,   │
+│          &quot;What's the next               actionable next steps)              │
+│           physical action?&quot;                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>GTD's Bottom-Up Approach:</strong>
+Allen argues you must gain control at the Ground level before effectively working higher horizons. The Life Steward supports this by:
+<li>Defaulting new users to task capture and organization first</li>
+<li>Only suggesting higher-horizon work once daily workflow is trusted</li>
+<li>Weekly Review ensures ground-level control before horizon reflection</li>
+<h3>1.4 Key Differentiators from Other Agents</h3>
+<table>
+<tr><th>Agent</th><th>Focus</th><th>Life Steward Difference</th></tr>
+<tr><td><strong>Planner</strong></td><td>Extract actionable items from entries</td><td>Life Steward manages the <em>structure</em> of goals/projects, not just individual tasks</td></tr>
+<tr><td><strong>Librarian</strong></td><td>Tag organization and merging</td><td>Life Steward organizes <em>life domains</em>, not just tags</td></tr>
+<tr><td><strong>Jarvis</strong></td><td>Query and synthesize information</td><td>Life Steward <em>proactively</em> recommends and organizes, doesn't wait for queries</td></tr>
+<tr><td><strong>Reader</strong></td><td>Process and summarize content</td><td>Life Steward determines <em>where</em> content belongs in life structure</td></tr>
+</table>
+<h3>1.5 Design Philosophy</h3>
+<p>1. <strong>User remains in control</strong> - Agent recommends, user accepts/rejects
+2. <strong>Flexibility over rigidity</strong> - Structure adapts to user's life, not vice versa
+3. <strong>Progressive disclosure</strong> - Start simple, complexity grows as needed
+4. <strong>Everything is promotable/demotable</strong> - Any entry can become a project, any project can become a domain
+5. <strong>Intelligent defaults</strong> - Standard buckets work for most people, custom buckets for power users
+6. <strong>Next Actions, not vague tasks</strong> - Every task should be a concrete, physical next step
+7. <strong>Weekly Review is sacred</strong> - The cornerstone practice that maintains system trust
+8. <strong>Bottom-up control before top-down planning</strong> - Master daily chaos before strategizing</p>
+<hr>
+<h2>2. Hierarchical Life Management Structure</h2>
+<h3>2.1 Core Hierarchy</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USER'S LIFE                                     │
+│                                                                              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │  Personal   │  │  Business 1 │  │  Business 2 │  │   Person:   │        │
+│  │   Domain    │  │   Domain    │  │   Domain    │  │    Sarah    │        │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘        │
+│         │                │                │                │                │
+│    ┌────┴────┐      ┌────┴────┐      ┌────┴────┐      ┌────┴────┐          │
+│    │  Scopes │      │  Scopes │      │  Scopes │      │  Scopes │          │
+│    ├─────────┤      ├─────────┤      ├─────────┤      ├─────────┤          │
+│    │ Health  │      │Marketing│      │ Product │      │ Birthday │          │
+│    │ Finance │      │  Sales  │      │   Dev   │      │  Gifts   │          │
+│    │ Home    │      │   Ops   │      │   Ops   │      │Memories  │          │
+│    └────┬────┘      └─────────┘      └─────────┘      └──────────┘          │
+│         │                                                                    │
+│    ┌────┴────┐                                                              │
+│    │Projects │  ← &quot;Home&quot; scope contains:                                    │
+│    ├─────────┤                                                              │
+│    │Kitchen  │                                                              │
+│    │Remodel  │  ← Could be promoted to its own Domain if scope grows        │
+│    │         │                                                              │
+│    │Backyard │                                                              │
+│    │Landscap.│                                                              │
+│    └─────────┘                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.2 Terminology</h3>
+<table>
+<tr><th>Term</th><th>Definition</th><th>Examples</th></tr>
+<tr><td><strong>Domain</strong></td><td>Top-level area of life with sustained focus</td><td>Personal, Business (Acme Inc), Person (Sarah), House</td></tr>
+<tr><td><strong>Scope</strong></td><td>Major category within a domain</td><td>Health, Finance, Marketing, Product Dev</td></tr>
+<tr><td><strong>Project</strong></td><td>Time-bound or goal-oriented work within a scope</td><td>Kitchen Remodel, Q1 Campaign, Book Writing</td></tr>
+<tr><td><strong>Bucket</strong></td><td>Category of entries within any level (domain/scope/project)</td><td>Tasks, Ideas, Notes, Decisions, Shopping, Goals, Habits</td></tr>
+<tr><td><strong>Entry</strong></td><td>Individual item within a bucket</td><td>"Call contractor", "Try subway tile", "Budget is $15k"</td></tr>
+</table>
+<h3>2.3 Domains</h3>
+<strong>Characteristics:</strong>
+<li>Top-level containers representing major areas of focus (GTD Horizon 2: Areas of Focus)</li>
+<li>Created by user or recommended by agent</li>
+<li>Have their own set of scopes, projects, and buckets</li>
+<li>Can be archived (not deleted) when focus ends</li>
+<li><strong>Can contain items visible from other domains</strong> (see Multi-Domain Visibility)</li>
+<strong>Default Domain:</strong>
+<li>Every user starts with a <strong>"Personal"</strong> domain</li>
+<li>Acts as catch-all for entries that don't fit elsewhere</li>
+<li>Cannot be deleted, only renamed</li>
+<strong>Domain Types:</strong>
+<table>
+<tr><th>Type</th><th>Description</th><th>Auto-Recommend When</th></tr>
+<tr><td><strong>Personal</strong></td><td>Default catch-all for personal life</td><td>Always exists</td></tr>
+<tr><td><strong>Business</strong></td><td>A business, job, or professional venture</td><td>User mentions company name frequently</td></tr>
+<tr><td><strong>Person</strong></td><td>Dedicated space for a relationship</td><td>High entry volume about specific person</td></tr>
+<tr><td><strong>Project-Domain</strong></td><td>Promoted from large project</td><td>Project scope exceeds typical project</td></tr>
+<tr><td><strong>Custom</strong></td><td>User-defined domain type</td><td>User creates manually</td></tr>
+</table>
+<strong>Promotion Triggers (Agent Recommendations):</strong>
+<li>Person mentioned in 20+ entries → Recommend person domain</li>
+<li>Project with 50+ entries → Recommend promotion to domain</li>
+<li>Topic spanning multiple existing domains → Recommend dedicated domain</li>
+<h3>2.3.1 Multi-Domain Visibility & Movement</h3>
+<p>Projects, scopes, and entries often relate to multiple life areas. The Life Steward supports flexible placement:</p>
+<strong>Primary vs. Linked Locations:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                     MULTI-DOMAIN VISIBILITY                                  │
+│                                                                              │
+│  &quot;Website Redesign&quot; Project                                                  │
+│                                                                              │
+│  Primary Location: Business: Acme Inc / Marketing                           │
+│  ────────────────────────────────────────────────────────────────────────── │
+│  Also Visible In:                                                            │
+│    • Personal / Learning &amp; Education  (learning new skills)                 │
+│    • Person: Sarah / Collaboration    (Sarah is helping)                    │
+│                                                                              │
+│  Why: Project involves learning React (personal growth) and                 │
+│       collaborating with Sarah (relationship context)                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Visibility Rules:</strong>
+<table>
+<tr><th>Item Type</th><th>Can Have Multiple Locations?</th><th>Movement Between Domains?</th></tr>
+<tr><td><strong>Entry</strong></td><td>Yes - primary + links</td><td>Yes - can move or link</td></tr>
+<tr><td><strong>Project</strong></td><td>Yes - primary domain + visible in others</td><td>Yes - can relocate or add visibility</td></tr>
+<tr><td><strong>Scope</strong></td><td>No - belongs to one domain</td><td>Yes - can move to different domain</td></tr>
+<tr><td><strong>Domain</strong></td><td>N/A (top level)</td><td>N/A</td></tr>
+</table>
+<strong>Movement Triggers:</strong>
+<li>User explicitly moves item</li>
+<li>Agent recommends based on activity patterns ("This project has 15 entries tagged 'Sarah' - show in Sarah's domain?")</li>
+<li>Dependency relationships (if Project A depends on Project B in another domain, consider visibility link)</li>
+<strong>Cross-Domain Views:</strong>
+The agent can generate views that span domains:
+<li>"All tasks related to Sarah" (across Personal, Business, Person:Sarah)</li>
+<li>"Everything blocking the product launch" (across multiple domains)</li>
+<li>"All my learning goals" (from Personal, Business, any domain with learning content)</li>
+<h3>2.4 Scopes</h3>
+<strong>Characteristics:</strong>
+<li>Major categories within a domain</li>
+<li>Can contain projects and/or direct entries (via buckets)</li>
+<li>Provide organizational structure without requiring projects</li>
+<strong>Standard Scopes (Suggested for Personal Domain):</strong>
+<li>Health & Fitness</li>
+<li>Finance & Money</li>
+<li>Home & Property</li>
+<li>Relationships (before individual promotion)</li>
+<li>Career & Professional Development</li>
+<li>Learning & Education</li>
+<li>Hobbies & Recreation</li>
+<strong>Standard Scopes (Suggested for Business Domain):</strong>
+<li>Strategy & Planning</li>
+<li>Marketing & Sales</li>
+<li>Operations</li>
+<li>Finance & Accounting</li>
+<li>Product / Service Delivery</li>
+<li>Team & HR</li>
+<h3>2.5 Projects</h3>
+<strong>Characteristics:</strong>
+<li>Time-bound or goal-oriented work</li>
+<li>Live within a scope (or directly in a domain)</li>
+<li>Can be promoted to scope or domain if they grow</li>
+<li>Have lifecycle: Active → Completed → Archived</li>
+<strong>Project Attributes:</strong>
+<li>Name and description</li>
+<li>Goal(s) - what defines success</li>
+<li>Status: Active, On Hold, Completed, Archived</li>
+<li>Due date (optional)</li>
+<li>Parent scope or domain</li>
+<li>Child buckets with entries</li>
+<h3>2.6 Buckets (Entry Categories)</h3>
+<p>Buckets are categories of entries that can exist at any level (domain, scope, or project). They map directly to GTD's organizational lists.</p>
+<strong>Standard Buckets (Built-in) - GTD Aligned:</strong>
+<table>
+<tr><th>Bucket</th><th>GTD Equivalent</th><th>Purpose</th><th>Entry Examples</th></tr>
+<tr><td><strong>Next Actions</strong></td><td>Next Actions List</td><td>Specific, physical, actionable steps (not vague)</td><td>"Call John at 555-1234 about quote", "Draft intro paragraph for blog post"</td></tr>
+<tr><td><strong>Waiting For</strong></td><td>Waiting For List</td><td>Delegated or pending external response (with who/what/when)</td><td>"Waiting: Contractor quote from ABC (asked 1/25)", "Waiting: Sarah to review doc"</td></tr>
+<tr><td><strong>Someday/Maybe</strong></td><td>Someday/Maybe</td><td>Ideas to revisit later, not committed</td><td>"Maybe learn Italian", "Someday: write a novel"</td></tr>
+<tr><td><strong>Reference</strong></td><td>Reference Material</td><td>Non-actionable information to keep</td><td>"Meeting notes from...", "Research findings", "Tax ID numbers"</td></tr>
+<tr><td><strong>Decisions</strong></td><td>(Enhancement)</td><td>Choices made with reasoning (reviewable)</td><td>"Decided to go with Option A because..."</td></tr>
+<tr><td><strong>Shopping</strong></td><td>(Enhancement)</td><td>Items to acquire (specialized Next Actions)</td><td>"Buy: New drill", "Order: Tile samples from Home Depot"</td></tr>
+<tr><td><strong>Goals</strong></td><td>Horizons 3-4</td><td>Desired outcomes with success criteria</td><td>"Lose 10 lbs by June", "Launch MVP by Q2"</td></tr>
+<tr><td><strong>Habits</strong></td><td>(Enhancement)</td><td>Recurring behaviors to build/track</td><td>"Daily: 10min walk", "Weekly: Review finances"</td></tr>
+</table>
+<strong>GTD Clarification: Tasks vs. Next Actions:</strong>
+<p>The Life Steward enforces GTD's critical distinction between vague tasks and concrete next actions:</p>
+<table>
+<tr><th>❌ Vague Task</th><th>✅ Next Action</th></tr>
+<tr><td>"Handle car insurance"</td><td>"Call Geico at 800-555-1234 to get renewal quote"</td></tr>
+<tr><td>"Mom's birthday"</td><td>"Text Sarah to coordinate Mom's party (she has venue ideas)"</td></tr>
+<tr><td>"Website project"</td><td>"Draft homepage wireframe in Figma"</td></tr>
+<tr><td>"Taxes"</td><td>"Download 1099 from Schwab.com"</td></tr>
+</table>
+<p>The agent will prompt for clarification when entries are too vague:
+<blockquote>"What's the very next physical action for 'Handle car insurance'?"</blockquote></p>
+<h3>2.7 Contexts (GTD Enhancement)</h3>
+<p>GTD organizes Next Actions by <strong>context</strong> - the tool, location, or condition required to do them. The Life Steward supports context tagging:</p>
+<strong>Standard Contexts:</strong>
+<table>
+<tr><th>Context</th><th>When Available</th><th>Examples</th></tr>
+<tr><td><strong>@computer</strong></td><td>At a computer with internet</td><td>"Email vendor", "Research options"</td></tr>
+<tr><td><strong>@phone</strong></td><td>Can make calls</td><td>"Call contractor", "Schedule appointment"</td></tr>
+<tr><td><strong>@errands</strong></td><td>Out running errands</td><td>"Pick up dry cleaning", "Return item to store"</td></tr>
+<tr><td><strong>@home</strong></td><td>At home</td><td>"Fix leaky faucet", "Organize closet"</td></tr>
+<tr><td><strong>@office</strong></td><td>At work location</td><td>"Talk to boss about raise", "File expense report"</td></tr>
+<tr><td><strong>@anywhere</strong></td><td>No special requirement</td><td>"Brainstorm ideas", "Review notes"</td></tr>
+<tr><td><strong>@waiting</strong></td><td>(Special) Pending others</td><td>Auto-tagged for Waiting For items</td></tr>
+<tr><td><strong>@agenda:Person</strong></td><td>Next time you see Person</td><td>"Discuss vacation with Sarah", "Ask boss about project"</td></tr>
+</table>
+<strong>Context-Based Views:</strong>
+<li>"What can I do right now?" → Filter by current context</li>
+<li>"I have 15 minutes and my phone" → @phone + quick tasks</li>
+<li>"I'm meeting with Sarah tomorrow" → @agenda:Sarah items</li>
+<strong>Custom Contexts:</strong>
+Users can create contexts like <code>@low_energy</code>, <code>@creative</code>, <code>@deep_work</code>, etc.
+<h3>2.8 Custom Buckets</h3>
+<p>Beyond standard buckets, users and agents can create custom buckets:
+<li>Users create manually for specific needs</li>
+<li>Agent recommends based on patterns</li>
+<li>Examples: "Recipes" in Personal/Health, "Competitors" in Business/Marketing</li></p>
+<strong>Bucket Inheritance:</strong>
+<li>Projects inherit available bucket types from parent scope/domain</li>
+<li>Custom buckets can be scope-specific or project-specific</li>
+<hr>
+<h2>3. Entry Processing & Intelligent Filing</h2>
+<h3>3.1 Entry Lifecycle</h3>
+<pre><code class="language-">┌──────────────────────────────────────────────────────────────────────────────┐
+│                           ENTRY PROCESSING FLOW                               │
+│                                                                               │
+│  ┌─────────────┐                                                             │
+│  │ New Entry   │  (from any source: manual, OpenClaw, Reader, Feeder, etc.)   │
+│  │   Arrives   │                                                             │
+│  └──────┬──────┘                                                             │
+│         │                                                                     │
+│         ▼                                                                     │
+│  ┌─────────────────────────────────────────────────────────────────────┐     │
+│  │                    LIFE STEWARD ANALYSIS                             │     │
+│  │                                                                      │     │
+│  │  1. Content Analysis                                                 │     │
+│  │     - What is this about?                                           │     │
+│  │     - What type of entry? (task, idea, note, etc.)                  │     │
+│  │                                                                      │     │
+│  │  2. Context Matching                                                 │     │
+│  │     - Which domain(s) does this relate to?                          │     │
+│  │     - Which scope(s)?                                               │     │
+│  │     - Which project(s)?                                             │     │
+│  │                                                                      │     │
+│  │  3. Relationship Detection                                          │     │
+│  │     - Does this connect to existing entries?                        │     │
+│  │     - Does this progress/update existing items?                     │     │
+│  │     - Is this a response to a &quot;waiting&quot; item?                       │     │
+│  │                                                                      │     │
+│  │  4. Classification Decision                                          │     │
+│  │     - High confidence → Auto-file (with undo option)                │     │
+│  │     - Medium confidence → File with notification                    │     │
+│  │     - Low confidence → Queue for user decision                      │     │
+│  └─────────────────────────────────────────────────────────────────────┘     │
+│         │                                                                     │
+│         ▼                                                                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │  Auto-filed │  │  Filed w/   │  │   Queued    │  │  Triggers   │         │
+│  │  (high conf)│  │  Notice     │  │  for Review │  │  Structural │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘  │   Change    │         │
+│                                                      └─────────────┘         │
+└──────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.2 Classification Confidence Levels</h3>
+<table>
+<tr><th>Level</th><th>Confidence</th><th>Agent Action</th><th>User Experience</th></tr>
+<tr><td><strong>High</strong></td><td>90%+</td><td>Auto-file</td><td>Entry appears in location; undo available</td></tr>
+<tr><td><strong>Medium</strong></td><td>70-89%</td><td>File with notification</td><td>"Filed X in Y - correct?"</td></tr>
+<tr><td><strong>Low</strong></td><td>50-69%</td><td>Suggest with alternatives</td><td>"This seems like X, or maybe Y?"</td></tr>
+<tr><td><strong>Very Low</strong></td><td><50%</td><td>Queue for review</td><td>"Where should this go?"</td></tr>
+</table>
+<h3>3.3 Entry Connections</h3>
+<p>The Life Steward tracks relationships between entries:</p>
+<table>
+<tr><th>Connection Type</th><th>Description</th><th>Example</th></tr>
+<tr><td><strong>Progresses</strong></td><td>New entry advances existing item</td><td>Task update progresses original task</td></tr>
+<tr><td><strong>Blocks</strong></td><td>Entry blocks progress on another</td><td>"Waiting for X" blocks task Y</td></tr>
+<tr><td><strong>Relates</strong></td><td>General relationship</td><td>Note about topic X relates to project X</td></tr>
+<tr><td><strong>Answers</strong></td><td>Entry answers a question</td><td>Decision entry answers a Question entry</td></tr>
+<tr><td><strong>Spawns</strong></td><td>Entry creates new items</td><td>Meeting note spawns 3 new tasks</td></tr>
+</table>
+<hr>
+<h2>4. Proactive Intelligence</h2>
+<h3>4.1 Structure Recommendations</h3>
+<p>The Life Steward proactively recommends changes to the life management structure:</p>
+<strong>Promotion Recommendations:</strong>
+<table>
+<tr><th>Current Level</th><th>Promote To</th><th>Trigger Conditions</th></tr>
+<tr><td>Entry</td><td>Task</td><td>Entry contains actionable language</td></tr>
+<tr><td>Entry</td><td>Project</td><td>Entry describes multi-step work</td></tr>
+<tr><td>Task</td><td>Project</td><td>Task has 5+ subtasks or blockers</td></tr>
+<tr><td>Project</td><td>Scope</td><td>Project has 10+ sub-projects</td></tr>
+<tr><td>Project</td><td>Domain</td><td>Project becomes ongoing concern</td></tr>
+<tr><td>Scope</td><td>Domain</td><td>Scope dominates parent domain</td></tr>
+<tr><td>Person mention</td><td>Person Domain</td><td>20+ entries about person</td></tr>
+</table>
+<strong>Demotion Recommendations:</strong>
+<table>
+<tr><th>Current Level</th><th>Demote To</th><th>Trigger Conditions</th></tr>
+<tr><td>Domain</td><td>Scope</td><td>Domain inactive 90+ days, few entries</td></tr>
+<tr><td>Project</td><td>Task</td><td>Project has single remaining task</td></tr>
+<tr><td>Scope</td><td>Project</td><td>Scope has single active project</td></tr>
+</table>
+<strong>Consolidation Recommendations:</strong>
+<li>Merge similar scopes</li>
+<li>Combine related projects</li>
+<li>Archive completed/stale items</li>
+<h3>4.2 Coaching & Guidance</h3>
+<p>The Life Steward provides proactive guidance:</p>
+<strong>Goal Tracking:</strong>
+<li>Monitor progress toward stated goals</li>
+<li>Alert when goals are at risk</li>
+<li>Celebrate milestones and completions</li>
+<strong>Habit Support:</strong>
+<li>Track habit consistency</li>
+<li>Encourage streak maintenance</li>
+<li>Suggest habit adjustments based on success/failure patterns</li>
+<strong>Task Management:</strong>
+<li>Identify overdue items</li>
+<li>Suggest task prioritization</li>
+<li>Flag blocked items and suggest unblocking actions</li>
+<strong>Life Balance:</strong>
+<li>Track entry distribution across domains</li>
+<li>Alert on domain neglect ("No entries in Health for 2 weeks")</li>
+<li>Suggest focus shifts based on goals and activity</li>
+<h3>4.3 Intelligent Suggestions</h3>
+<table>
+<tr><th>Suggestion Type</th><th>Trigger</th><th>Example</th></tr>
+<tr><td><strong>New Task</strong></td><td>Goal without actionable tasks</td><td>"Your goal 'Learn Spanish' has no tasks. Add some?"</td></tr>
+<tr><td><strong>New Project</strong></td><td>Multiple related tasks without project</td><td>"You have 5 tasks about website. Create project?"</td></tr>
+<tr><td><strong>New Habit</strong></td><td>Repeated similar tasks</td><td>"You've added 'Go to gym' 3 times. Make it a habit?"</td></tr>
+<tr><td><strong>Decision Needed</strong></td><td>Question entry aging</td><td>"Question 'Which contractor?' is 7 days old. Ready to decide?"</td></tr>
+<tr><td><strong>Archive</strong></td><td>Completed/stale items</td><td>"Project 'Kitchen Remodel' completed 30 days ago. Archive?"</td></tr>
+</table>
+<hr>
+<h2>5. Timeline Estimation & Critical Path Analysis</h2>
+<h3>5.1 Philosophy: Practical Timeline Estimation</h3>
+<p>GTD intentionally de-emphasizes time estimation - Allen argues that most knowledge work is difficult to estimate and that "hard landscape" (calendar-bound) items should be few. However, for project planning and life management, timeline visibility has value when approached pragmatically.</p>
+<strong>Life Steward's Approach:</strong>
+<li>Estimates are <strong>ranges with confidence levels</strong>, not false precision</li>
+<li>Estimates are <strong>dynamic</strong> - continuously updated based on actual progress</li>
+<li>User <strong>velocity</strong> (historical completion rate) informs all estimates</li>
+<li>The system distinguishes <strong>effort</strong> (how long the work takes) from <strong>duration</strong> (calendar time including delays)</li>
+<li>Estimates are <strong>optional</strong> - users can use the system without ever estimating</li>
+<strong>When Timeline Estimation is Valuable:</strong>
+<table>
+<tr><th>Scenario</th><th>Value</th></tr>
+<tr><td>Hard deadlines (taxes due, event date)</td><td>Critical - must work backward</td></tr>
+<tr><td>Coordinating with others</td><td>High - need to communicate expectations</td></tr>
+<tr><td>Large projects with dependencies</td><td>High - identify bottlenecks early</td></tr>
+<tr><td>Personal goals without deadlines</td><td>Low - focus on next actions, not dates</td></tr>
+<tr><td>Creative/exploratory work</td><td>Low - estimates often counterproductive</td></tr>
+</table>
+<h3>5.2 Effort Estimation Model</h3>
+<strong>Entry-Level Estimation:</strong>
+<p>Each actionable item can have an optional effort estimate:</p>
+<table>
+<tr><th>Estimate Type</th><th>Description</th><th>Example</th></tr>
+<tr><td><strong>T-shirt Size</strong></td><td>Quick relative sizing</td><td>XS (< 15m), S (15-30m), M (30m-2h), L (2-4h), XL (4h+)</td></tr>
+<tr><td><strong>Time Range</strong></td><td>Min-max estimate</td><td>"30 minutes to 2 hours"</td></tr>
+<tr><td><strong>Story Points</strong></td><td>Relative complexity (for those who prefer)</td><td>1, 2, 3, 5, 8, 13</td></tr>
+</table>
+<strong>Agent-Assisted Estimation:</strong>
+<p>The Life Steward can suggest estimates based on:
+<li>Similar past tasks (if user tracks actuals)</li>
+<li>Task description analysis ("Call X" typically takes 5-15 min)</li>
+<li>User's historical velocity with similar work</li></p>
+<pre><code class="language-">Life Steward: &quot;You're adding 'Write blog post about X'.
+              Your last 3 blog posts took 2-4 hours each.
+              Estimate: M-L (1-4 hours)?&quot;
+<p>[Accept] [Adjust: ___] [Skip Estimate]
+</code></pre></p>
+<h3>5.3 Project Timeline Calculation</h3>
+<strong>Bottom-Up Estimation:</strong>
+<p>Project duration calculated from component tasks:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    PROJECT TIMELINE CALCULATION                              │
+│                                                                              │
+│  Project: Kitchen Remodel                                                    │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Tasks &amp; Estimates:                                                          │
+│    1. Get contractor quotes (L: 2-4h effort, 2-week duration - waiting)     │
+│    2. Select contractor (M: 1-2h)                          ← depends on 1   │
+│    3. Order materials (M: 1-2h, 1-week delivery)           ← depends on 2   │
+│    4. Demo existing kitchen (contractor: 2 days)           ← depends on 3   │
+│    5. Install cabinets (contractor: 3 days)                ← depends on 4   │
+│    6. Install countertops (contractor: 2 days)             ← depends on 5   │
+│    7. Final inspection (S: 30m, schedule 1 week out)       ← depends on 6   │
+│                                                                              │
+│  Critical Path: 1 → 2 → 3 → 4 → 5 → 6 → 7                                   │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Calculated Duration:                                                        │
+│    Optimistic:  4 weeks  (everything goes perfectly)                        │
+│    Expected:    6 weeks  (normal delays)                                    │
+│    Pessimistic: 10 weeks (significant issues)                               │
+│                                                                              │
+│  Confidence: Medium (several external dependencies)                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Factors Affecting Duration:</strong>
+<table>
+<tr><th>Factor</th><th>Impact</th></tr>
+<tr><td><strong>Task effort</strong></td><td>Base time to do the work</td></tr>
+<tr><td><strong>Dependencies</strong></td><td>Tasks that must complete first</td></tr>
+<tr><td><strong>Waiting time</strong></td><td>External responses (quotes, approvals, deliveries)</td></tr>
+<tr><td><strong>Parallelism</strong></td><td>Tasks that can happen simultaneously</td></tr>
+<tr><td><strong>Resource availability</strong></td><td>How much time user can dedicate</td></tr>
+<tr><td><strong>Buffer</strong></td><td>Contingency for unexpected issues</td></tr>
+</table>
+<h3>5.4 Dynamic Timeline Updates</h3>
+<p>Estimates are living values that update based on reality:</p>
+<strong>Velocity Tracking:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         USER VELOCITY METRICS                                │
+│                                                                              │
+│  This Week:                                                                  │
+│    Tasks completed: 12                                                       │
+│    Estimated effort: 8 hours                                                │
+│    Actual effort: 10 hours                                                  │
+│    Velocity factor: 0.8x (taking 25% longer than estimates)                 │
+│                                                                              │
+│  Trailing 4-Week Average:                                                    │
+│    Velocity factor: 0.85x                                                   │
+│    Tasks per week: 10                                                       │
+│    Hours per week on tasks: 8                                               │
+│                                                                              │
+│  By Category:                                                                │
+│    Writing tasks: 0.6x (consistently underestimate)                         │
+│    Admin tasks: 1.1x (usually faster than expected)                         │
+│    Technical tasks: 0.9x (close to estimates)                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Automatic Recalculation Triggers:</strong>
+<table>
+<tr><th>Trigger</th><th>Action</th></tr>
+<tr><td>Task completed</td><td>Update project completion %, recalculate remaining duration</td></tr>
+<tr><td>Task delayed</td><td>Cascade delays to dependent tasks and project end date</td></tr>
+<tr><td>New task added</td><td>Recalculate project scope and duration</td></tr>
+<tr><td>Estimate revised</td><td>Update project timeline</td></tr>
+<tr><td>Velocity changes</td><td>Adjust all estimates by velocity factor</td></tr>
+<tr><td>Blocking item cleared</td><td>Recalculate newly unblocked tasks</td></tr>
+</table>
+<strong>Timeline Update Notifications:</strong>
+<pre><code class="language-">Life Steward: &quot;Kitchen Remodel timeline update:
+<p>⚠️  Contractor quotes taking longer than expected (2 weeks → 3 weeks)</p>
+<p>Impact: Project end date shifts from March 15 → March 25</p>
+<p>Downstream effects:
+                • 'Host dinner party' (March 20) now conflicts
+                • 'File Q1 taxes' unaffected (no dependency)</p>
+<p>[Acknowledge] [Adjust Dinner Party Date] [See Full Timeline]&quot;
+</code></pre></p>
+<h3>5.5 Critical Path Analysis</h3>
+<strong>What is Critical Path?</strong>
+<p>The critical path is the longest sequence of dependent tasks that determines the minimum project duration. Tasks on the critical path have zero "slack" - any delay directly delays the project.</p>
+<strong>Task Dependencies:</strong>
+<table>
+<tr><th>Dependency Type</th><th>Description</th><th>Example</th></tr>
+<tr><td><strong>Finish-to-Start (FS)</strong></td><td>B can't start until A finishes</td><td>"Install cabinets" after "Demo kitchen"</td></tr>
+<tr><td><strong>Start-to-Start (SS)</strong></td><td>B can't start until A starts</td><td>"Monitor progress" when "Construction" starts</td></tr>
+<tr><td><strong>Finish-to-Finish (FF)</strong></td><td>B can't finish until A finishes</td><td>"Final review" can't finish until "All testing" finishes</td></tr>
+<tr><td><strong>Start-to-Finish (SF)</strong></td><td>B can't finish until A starts</td><td>Rare; shift handoffs</td></tr>
+</table>
+<strong>Visual Critical Path:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CRITICAL PATH VISUALIZATION                               │
+│                                                                              │
+│  Week 1      Week 2      Week 3      Week 4      Week 5      Week 6        │
+│  ──────────────────────────────────────────────────────────────────────────│
+│                                                                              │
+│  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  Get quotes      │
+│              ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  Select contractor│
+│                      ████████████████░░░░░░░░░░░░░░░░░░░░  Order materials │
+│                                      ████████░░░░░░░░░░░░  Demo kitchen    │
+│                                              ████████████  Install cabinets │
+│                                                          ████  Countertops │
+│                                                                              │
+│  ══════════════════════════════════════════════════════════════════════════ │
+│  ↑ CRITICAL PATH (any delay here delays the whole project)                  │
+│                                                                              │
+│  Non-critical (has slack):                                                   │
+│  ░░░░████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  Research tiles  │
+│              (can start anytime in weeks 1-2, 1 week slack)                 │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Slack/Float Calculation:</strong>
+<li><strong>Total Slack</strong>: How long a task can be delayed without delaying the project</li>
+<li><strong>Free Slack</strong>: How long a task can be delayed without delaying any successor</li>
+<h3>5.6 Cross-Project Dependencies</h3>
+<p>Projects can depend on other projects, even across domains:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CROSS-PROJECT DEPENDENCIES                                │
+│                                                                              │
+│  Business: Acme Inc                      Personal                           │
+│  ┌─────────────────────────┐            ┌─────────────────────────┐        │
+│  │  Product Launch         │            │  Learn React            │        │
+│  │  (Due: March 31)        │───────────→│  (Due: Feb 28)          │        │
+│  │                         │  depends   │                         │        │
+│  │  &quot;Build dashboard&quot; task │    on      │  &quot;Complete React course&quot;│        │
+│  └─────────────────────────┘            └─────────────────────────┘        │
+│             │                                                               │
+│             │ depends on                                                    │
+│             ▼                                                               │
+│  ┌─────────────────────────┐                                               │
+│  │  Hire Designer          │                                               │
+│  │  (In Progress)          │                                               │
+│  │                         │                                               │
+│  │  &quot;Design system ready&quot;  │                                               │
+│  └─────────────────────────┘                                               │
+│                                                                              │
+│  CROSS-DOMAIN CRITICAL PATH:                                                │
+│    Learn React → Product Launch (Product Launch blocked until React done)   │
+│    Hire Designer → Product Launch (parallel path, also on critical path)    │
+│                                                                              │
+│  ⚠️  Alert: &quot;Learn React&quot; is 60% complete with 3 weeks remaining.           │
+│      &quot;Product Launch&quot; needs dashboard work to start by March 1.             │
+│      Current projection: React completion Feb 25 - OK with 3 days buffer.   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Dependency Types Between Projects:</strong>
+<table>
+<tr><th>Type</th><th>Description</th><th>Example</th></tr>
+<tr><td><strong>Hard Dependency</strong></td><td>Project B literally cannot proceed without Project A</td><td>"Launch product" needs "Build product"</td></tr>
+<tr><td><strong>Resource Dependency</strong></td><td>Same person/resource needed</td><td>"Write book" and "Major work project" compete for time</td></tr>
+<tr><td><strong>Soft Dependency</strong></td><td>Preferred but not required</td><td>"Would be nice to finish X before starting Y"</td></tr>
+<tr><td><strong>External Dependency</strong></td><td>Waiting on outside party</td><td>"Await permit approval" before "Start construction"</td></tr>
+</table>
+<h3>5.7 Practicality Assessment: When Estimation Helps vs. Hurts</h3>
+<strong>Timeline Estimation Works Well For:</strong>
+<table>
+<tr><th>Scenario</th><th>Why It Helps</th></tr>
+<tr><td>Projects with hard deadlines</td><td>Must work backward from deadline</td></tr>
+<tr><td>Multi-person coordination</td><td>Need shared expectations</td></tr>
+<tr><td>Sequential dependencies</td><td>Delays cascade predictably</td></tr>
+<tr><td>Familiar, repeatable work</td><td>Historical data is reliable</td></tr>
+<tr><td>External commitments</td><td>Others depend on your timeline</td></tr>
+</table>
+<strong>Timeline Estimation Works Poorly For:</strong>
+<table>
+<tr><th>Scenario</th><th>Why It Hurts</th></tr>
+<tr><td>Creative/exploratory work</td><td>Inherently unpredictable</td></tr>
+<tr><td>First-time novel work</td><td>No historical basis for estimates</td></tr>
+<tr><td>Research with unknown scope</td><td>Can't estimate what you don't know</td></tr>
+<tr><td>Personal goals without deadlines</td><td>Adds pressure without benefit</td></tr>
+<tr><td>Rapidly changing requirements</td><td>Estimates obsolete quickly</td></tr>
+</table>
+<strong>Life Steward's Adaptive Approach:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                   ESTIMATION MODE RECOMMENDATIONS                            │
+│                                                                              │
+│  Project: &quot;Write Novel&quot;                                                      │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Life Steward Analysis:                                                      │
+│    • Creative project with uncertain scope                                  │
+│    • No hard deadline                                                        │
+│    • First novel (no historical velocity data)                              │
+│    • User has struggled with writing estimates before                       │
+│                                                                              │
+│  Recommendation: MINIMAL ESTIMATION MODE                                     │
+│    • Track word count progress (measurable output)                          │
+│    • Don't estimate individual writing sessions                             │
+│    • Set milestone targets, not deadlines (&quot;Draft 1 complete&quot; not &quot;by X&quot;)   │
+│    • Review monthly: &quot;Is progress satisfying? Adjust approach?&quot;             │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Project: &quot;Tax Preparation 2026&quot;                                            │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Life Steward Analysis:                                                      │
+│    • Hard deadline (April 15)                                               │
+│    • Done this before (historical data available)                           │
+│    • Sequential dependencies (need docs before filing)                       │
+│    • External dependencies (waiting for 1099s, W-2s)                        │
+│                                                                              │
+│  Recommendation: FULL ESTIMATION MODE                                        │
+│    • Work backward from April 15 deadline                                   │
+│    • Track waiting items with expected arrival dates                        │
+│    • Estimate each task based on last year's actuals                        │
+│    • Build in 2-week buffer for issues                                      │
+│    • Alert if critical path threatens deadline                              │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.8 Timeline Data Model</h3>
+<strong>Entry-Level Timeline Metadata:</strong>
+<pre><code class="language-elixir">metadata: %{
+  # Effort estimates
+  &quot;effort_estimate_min&quot; =&gt; 30,           # minutes
+  &quot;effort_estimate_max&quot; =&gt; 120,          # minutes
+  &quot;effort_estimate_unit&quot; =&gt; &quot;minutes&quot;,
+  &quot;effort_tshirt&quot; =&gt; &quot;M&quot;,                # XS/S/M/L/XL
+  &quot;effort_actual&quot; =&gt; 90,                 # actual time taken (if tracked)
+<p># Duration (calendar time)
+  &quot;duration_estimate_days&quot; =&gt; 14,        # for waiting/external items
+  &quot;due_date&quot; =&gt; &quot;2026-03-15&quot;,            # hard deadline if any
+  &quot;start_date&quot; =&gt; &quot;2026-02-01&quot;,          # earliest start</p>
+<p># Dependencies
+  &quot;depends_on&quot; =&gt; [
+    %{&quot;entry_id&quot; =&gt; &quot;uuid&quot;, &quot;type&quot; =&gt; &quot;finish_to_start&quot;},
+    %{&quot;project_id&quot; =&gt; &quot;uuid&quot;, &quot;type&quot; =&gt; &quot;project_dependency&quot;}
+  ],
+  &quot;blocks&quot; =&gt; [&quot;uuid1&quot;, &quot;uuid2&quot;],        # what this blocks</p>
+<p># Timeline analysis
+  &quot;on_critical_path&quot; =&gt; true,
+  &quot;total_slack_days&quot; =&gt; 0,
+  &quot;free_slack_days&quot; =&gt; 0,</p>
+<p># Status
+  &quot;percent_complete&quot; =&gt; 60,
+  &quot;timeline_confidence&quot; =&gt; &quot;medium&quot;      # low/medium/high
+}
+</code></pre></p>
+<strong>Project-Level Timeline Metadata:</strong>
+<pre><code class="language-elixir">metadata: %{
+  # Calculated from tasks
+  &quot;calculated_start&quot; =&gt; &quot;2026-02-01&quot;,
+  &quot;calculated_end_optimistic&quot; =&gt; &quot;2026-03-10&quot;,
+  &quot;calculated_end_expected&quot; =&gt; &quot;2026-03-20&quot;,
+  &quot;calculated_end_pessimistic&quot; =&gt; &quot;2026-04-05&quot;,
+<p># User-set
+  &quot;target_end_date&quot; =&gt; &quot;2026-03-15&quot;,     # desired completion
+  &quot;hard_deadline&quot; =&gt; &quot;2026-03-31&quot;,       # must complete by</p>
+<p># Analysis
+  &quot;critical_path&quot; =&gt; [&quot;task-uuid-1&quot;, &quot;task-uuid-2&quot;, &quot;task-uuid-3&quot;],
+  &quot;blocking_items&quot; =&gt; [&quot;task-uuid-5&quot;],    # items with zero slack
+  &quot;at_risk&quot; =&gt; true,                      # expected &gt; target
+  &quot;risk_factors&quot; =&gt; [&quot;external_dependency&quot;, &quot;resource_contention&quot;],</p>
+<p># Progress
+  &quot;percent_complete&quot; =&gt; 45,
+  &quot;velocity_factor&quot; =&gt; 0.85,              # user's actual vs estimated
+  &quot;tasks_completed&quot; =&gt; 8,
+  &quot;tasks_remaining&quot; =&gt; 10
+}
+</code></pre></p>
+<hr>
+<h2>6. User Interaction Modes</h2>
+<h3>6.1 Review Sessions</h3>
+<p>GTD emphasizes that the <strong>Weekly Review is the cornerstone habit</strong> that keeps the system trusted. Without regular reviews, any productivity system becomes stale and loses the user's trust.</p>
+<strong>Daily Review (5-10 min) - "Get Clear":</strong>
+<li>Review calendar for today and tomorrow</li>
+<li>Review Next Actions list - what's realistic today?</li>
+<li>Check Waiting For list - any follow-ups needed?</li>
+<li>Process inbox items that arrived overnight</li>
+<li>Quick wins: anything < 2 minutes, do now</li>
+<strong>Weekly Review (60-90 min) - "The Cornerstone":</strong>
+<p>Per GTD, the Weekly Review has three phases:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                          GTD WEEKLY REVIEW                                   │
+│                                                                              │
+│  PHASE 1: GET CLEAR (Empty all inboxes)                                     │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│    □ Process all entries in Inbox                                           │
+│    □ Empty email/physical inbox to zero (or reference)                      │
+│    □ Review loose notes, voicemails, meeting notes                          │
+│    □ Empty your head - capture anything still floating around               │
+│                                                                              │
+│  PHASE 2: GET CURRENT (Review all lists)                                    │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│    □ Review Next Actions lists - still relevant? Complete? Re-context?      │
+│    □ Review Waiting For list - need to follow up on any?                    │
+│    □ Review Project list - each has a next action? Any complete?            │
+│    □ Review Someday/Maybe - anything to activate? Anything to delete?       │
+│    □ Review calendar (past week: capture follow-ups)                        │
+│    □ Review calendar (upcoming: prepare, add actions)                       │
+│                                                                              │
+│  PHASE 3: GET CREATIVE (Reflect and plan)                                   │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│    □ Review Goals - progress this week? Actions aligned?                    │
+│    □ Review Areas of Focus (Domains/Scopes) - anything neglected?           │
+│    □ Consider: any new projects emerging?                                   │
+│    □ Consider: any projects to delegate, defer, or drop?                    │
+│    □ Timeline review: any projects at risk? Dependencies clear?             │
+│    □ Accept/reject Life Steward recommendations                             │
+│                                                                              │
+│  ✓ WEEKLY REVIEW COMPLETE                                                   │
+│    &quot;Mind like water&quot; - ready for the week ahead                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Life Steward's Weekly Review Enhancement:</strong>
+<p>The agent prepares a Weekly Review briefing:
+<li>Pre-sorted inbox items with suggested classifications</li>
+<li>Stale items flagged (no activity in 14+ days)</li>
+<li>Waiting For items past expected response date</li>
+<li>Projects with no next actions defined</li>
+<li>Timeline risks and critical path alerts</li>
+<li>Domain balance analysis (time spent vs. goals)</li>
+<li>Celebration: completed projects and progress highlights</li></p>
+<strong>Monthly Review (30-60 min) - "Horizon Check":</strong>
+<li>Review Horizon 2: Areas of Focus (Domains/Scopes) - still accurate?</li>
+<li>Review Horizon 3: Goals (1-2 year) - on track?</li>
+<li>Habit effectiveness review - what's working?</li>
+<li>Structural changes - domains/scopes to add/archive/merge?</li>
+<li>Velocity analysis - are estimates calibrated?</li>
+<li>Life balance check - any areas severely neglected?</li>
+<strong>Quarterly Review (90-120 min) - "Strategic Altitude":</strong>
+<li>Review Horizon 4: Vision (3-5 year) - still inspiring?</li>
+<li>Review Horizon 5: Purpose & Principles - still true?</li>
+<li>Major project planning for upcoming quarter</li>
+<li>Cross-project dependencies and resource allocation</li>
+<li>Archive completed/abandoned projects</li>
+<li>Celebrate major accomplishments</li>
+<h3>6.2 Interaction Patterns</h3>
+<strong>Proactive Notifications:</strong>
+<pre><code class="language-">Life Steward: &quot;I noticed 8 entries about 'Sarah's wedding' in the past week.
+              Would you like to create a dedicated project for it?&quot;
+<p>[Create Project] [Add to Existing] [Ignore]
+</code></pre></p>
+<strong>Bulk Processing:</strong>
+<pre><code class="language-">Life Steward: &quot;You have 12 entries to review. Want to do a quick triage?&quot;
+<p>Entry: &quot;Need to call Mom about Sunday dinner&quot;
+              Suggested: Personal / Relationships / Tasks
+              [Accept] [Change Location] [Skip]
+</code></pre></p>
+<strong>Coaching Moments:</strong>
+<pre><code class="language-">Life Steward: &quot;Great work! You completed 5 tasks in 'Kitchen Remodel' this week.
+              You're 70% toward your goal of finishing by March.&quot;
+</code></pre>
+<h3>6.3 Configuration Options</h3>
+<table>
+<tr><th>Setting</th><th>Options</th><th>Default</th></tr>
+<tr><td>Auto-file confidence threshold</td><td>70-95%</td><td>85%</td></tr>
+<tr><td>Daily review time</td><td>User-set time</td><td>8:00 AM</td></tr>
+<tr><td>Weekly review day</td><td>Day of week</td><td>Sunday</td></tr>
+<tr><td>Notification frequency</td><td>Real-time / Batched / Manual</td><td>Batched</td></tr>
+<tr><td>Coaching tone</td><td>Minimal / Supportive / Enthusiastic</td><td>Supportive</td></tr>
+<tr><td>Structure suggestion frequency</td><td>Conservative / Moderate / Aggressive</td><td>Moderate</td></tr>
+</table>
+<hr>
+<h2>7. User Interface Design</h2>
+<h3>7.1 UI Architecture: Integration with Onelist</h3>
+<p>The Life Steward UI must integrate seamlessly with the existing Onelist application architecture while providing its own specialized views for life management.</p>
+<strong>Onelist UI Context (from existing plans):</strong>
+<li><strong>Phoenix LiveView</strong> - Core web UI framework, renders in native app shells</li>
+<li><strong>Cloud is headless</strong> - No web UI in cloud; UI runs locally in Mac app, home server, or iOS app</li>
+<li><strong>Entry-centric design</strong> - Current UI organized around entries, representations, tags</li>
+<li><strong>Planned AI interfaces</strong>:</li>
+  <li>Contextual AI Chat Pane (in-context assistant for specific entries)</li>
+  <li>Onelist AI (Global Assistant) - always-running, takes over main screen</li>
+<strong>Life Steward Integration Strategy:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                     ONELIST APPLICATION SHELL                                │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │  NAVIGATION BAR                                                        │  │
+│  │  [Entries] [Life Steward] [Search] [Settings]        [Onelist AI 💬]  │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  ┌──────────────┐  ┌──────────────────────────────────────────────────┐ ││
+│  │  │   SIDEBAR    │  │              MAIN CONTENT AREA                    │ ││
+│  │  │              │  │                                                   │ ││
+│  │  │ Life Steward │  │  (Switches based on navigation)                  │ ││
+│  │  │ Navigation:  │  │                                                   │ ││
+│  │  │              │  │  • Entry List (existing)                         │ ││
+│  │  │ ▼ Domains    │  │  • Entry Editor (existing)                       │ ││
+│  │  │   Personal   │  │  • Life Steward Views (new)                      │ ││
+│  │  │   Business   │  │  • Search Results                                │ ││
+│  │  │   Sarah      │  │                                                   │ ││
+│  │  │              │  │                                                   │ ││
+│  │  │ ─────────── │  │                                                   │ ││
+│  │  │ Quick Views: │  │                                                   │ ││
+│  │  │ 📥 Inbox     │  │                                                   │ ││
+│  │  │ ☐ Today      │  │                                                   │ ││
+│  │  │ ⏳ Waiting   │  │                                                   │ ││
+│  │  │ 💭 Someday   │  │                                                   │ ││
+│  │  │              │  │                                                   │ ││
+│  │  │ ─────────── │  │                                                   │ ││
+│  │  │ 📋 Review    │  │                                                   │ ││
+│  │  │ 📊 Timeline  │  │                                                   │ ││
+│  │  └──────────────┘  └──────────────────────────────────────────────────┘ ││
+│  │                                                                          ││
+│  │  ┌──────────────────────────────────────────────────────────────────┐   ││
+│  │  │  CONTEXTUAL AI CHAT PANE (toggleable, right side)                │   ││
+│  │  │  - Life Steward coaching mode when in Life Steward views         │   ││
+│  │  │  - Entry assistance mode when in Entry views                     │   ││
+│  │  └──────────────────────────────────────────────────────────────────┘   ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Integration Points:</strong>
+<table>
+<tr><th>Onelist Component</th><th>Life Steward Integration</th></tr>
+<tr><td><strong>Entry List</strong></td><td>Filtered by domain/scope/project; shows bucket type</td></tr>
+<tr><td><strong>Entry Editor</strong></td><td>Shows entry's location in hierarchy; quick-file options</td></tr>
+<tr><td><strong>Tags</strong></td><td>Coexist with domains/scopes/projects; contexts as special tags</td></tr>
+<tr><td><strong>Contextual AI Chat Pane</strong></td><td>Life Steward coaching mode; clarification prompts</td></tr>
+<tr><td><strong>Onelist AI (Global)</strong></td><td>Life Steward briefings; review session facilitation</td></tr>
+<tr><td><strong>Search</strong></td><td>Filter by domain/scope/project; context-aware results</td></tr>
+</table>
+<h3>7.2 Life Steward Views</h3>
+<h4>7.2.1 Hierarchy Browser (Primary Navigation)</h4>
+<p>The main Life Steward view showing the domain/scope/project tree:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  LIFE STEWARD                                               [+ New Domain]  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ▼ Personal                                              12 active projects │
+│    │                                                                         │
+│    ├─▼ Health &amp; Fitness                                                     │
+│    │   ├── 📋 Gym Routine Project              ████████░░ 80%   Due Mar 15 │
+│    │   └── [+ New Project]                                                  │
+│    │                                                                         │
+│    ├─▼ Finance                                                              │
+│    │   ├── 📋 Tax Prep 2026           ⚠️ AT RISK ████░░░░░░ 40%   Due Apr 15 │
+│    │   └── [+ New Project]                                                  │
+│    │                                                                         │
+│    ├─▼ Home                                                                 │
+│    │   └── 📋 Kitchen Remodel          🔴 CRITICAL PATH   Due Mar 31       │
+│    │                                   ████████████░░ 60%                   │
+│    │                                                                         │
+│    └── [+ New Scope]                                                        │
+│                                                                              │
+│  ▶ Business: Acme Inc                                     8 active projects │
+│  ▶ Person: Sarah                                          3 active projects │
+│                                                                              │
+│  [+ New Domain]                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>7.2.2 Project Detail View</h4>
+<p>Drill-down view for a single project with GTD buckets and timeline:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  ← Back    Kitchen Remodel                          Personal / Home         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  🎯 GOAL: Complete kitchen renovation by March 31 within $15K budget        │
+│                                                                              │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  Progress: ████████████░░░░░░░░ 60%        Est. Completion: Mar 25-Apr 5    │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ [Next Actions] [Waiting For] [Reference] [Someday] [Decisions] [Timeline]│
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  NEXT ACTIONS                                                    [+ Add]    │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  ☐ @phone: Call ABC Contractors 555-9876 to follow up on quote     S  →    │
+│  ☐ @errands: Pick up cabinet hardware samples at Home Depot        M       │
+│  ☐ @computer: Research subway tile patterns on Pinterest           S       │
+│                                                                              │
+│  WAITING FOR                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  ⏳ Quote from ABC Contractors (asked 1/25)                    ⚠️ OVERDUE    │
+│  ⏳ Tile samples from Home Depot (ordered 1/27, due 2/3)          3 days    │
+│                                                                              │
+│  BLOCKING CHAIN                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  🔴 Get contractor quote → Select contractor → Order materials → Demo →...  │
+│     ↑ YOU ARE HERE (overdue)                                                 │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>7.2.3 GTD Quick Views</h4>
+<p>Fast-access views for GTD workflow:</p>
+<strong>Inbox View:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  📥 INBOX                                           23 items to process     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Process each item: Is it actionable? What's the next action?               │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ &quot;Meeting with boss went well - discussed Q2 goals&quot;                      ││
+│  │                                                                          ││
+│  │ Life Steward suggests: Reference note in Business: Acme Inc / Career    ││
+│  │                                                                          ││
+│  │ [✓ Accept] [Change Location] [Make Actionable] [Someday/Maybe] [Delete] ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  Up Next: &quot;Need to buy anniversary gift for Sarah&quot;                          │
+│           &quot;Interesting article about index funds&quot;                           │
+│           ... 20 more                                                        │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  💡 Tip: Items here less than 2 minutes? Do them now!                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Today View (Next Actions by Context):</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  ☐ TODAY                                     Wed, Jan 28, 2026              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  What context are you in?                                                    │
+│  [@phone 3] [@computer 8] [@errands 2] [@home 4] [@anywhere 2]  [Show All]  │
+│                                                                              │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  @computer (8 items)                                                         │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│  ☐ Draft this week's newsletter intro paragraph          Business / Mktg    │
+│  ☐ Download W-2 from Workday                             Personal / Tax     │
+│  ☐ Research subway tile patterns on Pinterest            Personal / Kitchen │
+│  ☐ Reproduce login bug in staging environment            Business / Product │
+│  ... 4 more                                                                  │
+│                                                                              │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│  @phone (3 items)                                                            │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│  ☐ Call ABC Contractors 555-9876 (follow up on quote)    Personal / Kitchen │
+│  ☐ Call Dr. Smith 555-1234 (schedule checkup)            Personal / Health  │
+│  ☐ Call Fidelity 800-343-3548 (rollover IRA question)    Personal / Finance │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>7.2.4 Timeline View</h4>
+<p>Visual timeline with critical path highlighting:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  📊 TIMELINE                    [All Projects ▼] [Feb 2026 ▼]  [Zoom: Week] │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│         Feb 1    Feb 8    Feb 15   Feb 22   Mar 1    Mar 8    Mar 15        │
+│           │        │        │        │        │        │        │           │
+│  ─────────┼────────┼────────┼────────┼────────┼────────┼────────┼─────────  │
+│           │        │        │        │        │        │        │           │
+│  Kitchen Remodel   │        │        │        │        │        │           │
+│  ════════════════════════════════════════════════════════════►  Mar 31     │
+│  │ Get quotes ████▓▓▓│        │        │        │        │        │         │
+│  │            └─ OVERDUE      │        │        │        │        │         │
+│  │         Select ▒▒▒▒▒▒▒▒▒▒▒▒│        │        │        │        │         │
+│  │                 └─ Blocked  │        │        │        │        │         │
+│  │                    Order    │████████│        │        │        │         │
+│  │                             │    Demo│████████│        │        │         │
+│  │                             │        │  Install████████│        │         │
+│  │                             │        │        │        │   Done │         │
+│           │        │        │        │        │        │        │           │
+│  Tax Prep │        │        │        │        │        │        │           │
+│  ════════════════════════════════════════════════════════════►  Apr 15     │
+│  │ Gather docs ████│        │        │        │        │        │           │
+│  │     Wait 1099   │▓▓▓▓▓▓▓▓│        │        │        │        │           │
+│  │                 │   File  │▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒│        │        │           │
+│           │        │        │        │        │        │        │           │
+│  ─────────┼────────┼────────┼────────┼────────┼────────┼────────┼─────────  │
+│           │        │        │        │        │        │        │           │
+│  Legend: ████ Complete  ▓▓▓▓ In Progress/Delayed  ▒▒▒▒ Planned  ═══ Critical│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>7.2.5 Weekly Review View</h4>
+<p>Guided Weekly Review workflow:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  📋 WEEKLY REVIEW                              Sunday, Jan 26, 2026         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Progress: ████████░░░░░░░░░░ 45%               Est. time remaining: 35 min │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ [✓ Get Clear] [● Get Current] [ Get Creative]                          ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  PHASE 2: GET CURRENT                                                        │
+│  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  │
+│                                                                              │
+│  Review Next Actions Lists                                                   │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  You have 23 Next Actions. Let's make sure each is still relevant.          │
+│                                                                              │
+│  ☐ &quot;Research gym programs&quot; - still relevant?                                │
+│    [Keep] [Completed] [Someday/Maybe] [Delete]                              │
+│                                                                              │
+│  ☐ &quot;Draft Q1 report intro&quot; - still relevant?                                │
+│    [Keep] [Completed] [Someday/Maybe] [Delete]                              │
+│                                                                              │
+│  ... 21 more                                                                 │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  ☐ Review Waiting For list (8 items, 2 overdue)                             │
+│  ☐ Review Projects list (23 active, 3 without next actions)                 │
+│  ☐ Review Someday/Maybe (45 items)                                          │
+│  ☐ Review calendar (past week)                                              │
+│  ☐ Review calendar (upcoming 2 weeks)                                       │
+│                                                                              │
+│  [Skip to Phase 3] [Pause Review] [Complete Phase 2 ▶]                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>7.3 Integration with Onelist AI</h3>
+<p>The Life Steward leverages both AI interfaces planned for Onelist:</p>
+<strong>Contextual AI Chat Pane (Life Steward Mode):</strong>
+When the Contextual AI Chat Pane is open in Life Steward views, it operates in "Life Steward Mode":
+<pre><code class="language-">┌─────────────────────────────────┐
+│  Life Steward 🎯                │
+├─────────────────────────────────┤
+│                                 │
+│  💬 I noticed you have 3       │
+│  projects without next actions. │
+│  Want me to help identify the   │
+│  next physical action for each? │
+│                                 │
+│  📋 Kitchen Remodel             │
+│  📋 Learn React                 │
+│  📋 Q1 Campaign                 │
+│                                 │
+│  [Help me with these]           │
+│  [I'll do it later]             │
+│                                 │
+│  ─────────────────────────────  │
+│                                 │
+│  You: What's blocking the       │
+│  kitchen remodel?               │
+│                                 │
+│  💬 The Kitchen Remodel is      │
+│  currently blocked by waiting   │
+│  for contractor quotes. ABC     │
+│  Contractors was asked on 1/25  │
+│  and is now 3 days overdue.     │
+│                                 │
+│  Next action: Call ABC at       │
+│  555-9876 to follow up.         │
+│                                 │
+│  [Add to Today] [Call now]      │
+│                                 │
+├─────────────────────────────────┤
+│  [Type a message...]        [→] │
+└─────────────────────────────────┘
+</code></pre>
+<strong>Onelist AI (Global Assistant) - Life Steward Briefings:</strong>
+The global Onelist AI can provide Life Steward briefings:
+<pre><code class="language-">User: &quot;Give me a life briefing&quot;
+<p>Onelist AI: &quot;Good morning! Here's your Life Steward briefing:</p>
+<p>📊 OVERVIEW
+• 23 active projects across 3 domains
+• 8 items completed this week 🎉
+• 2 projects at risk, 1 on critical path</p>
+<p>⚠️ NEEDS ATTENTION
+• Kitchen Remodel: Contractor quote overdue (3 days)
+• Tax Prep: 1099 from Schwab expected today
+• Weekly Review: Scheduled for Sunday, not done yet</p>
+<p>☐ TODAY'S TOP 3
+1. Follow up with ABC Contractors (blocking kitchen)
+2. Check Schwab for 1099
+3. 15 min: Process inbox (12 new items)</p>
+<p>💪 WINS THIS WEEK
+• Completed 'Gym Routine' project setup
+• 5-day streak on morning walk habit
+• Filed Q4 expense report</p>
+<p>Want me to help with any of these?&quot;
+</code></pre></p>
+<h3>7.4 Mobile Considerations</h3>
+<p>For iOS/mobile views, Life Steward needs a simplified interface:</p>
+<strong>Mobile Priority Views:</strong>
+1. <strong>Inbox</strong> - Quick capture and processing
+2. <strong>Today</strong> - Context-filtered next actions
+3. <strong>Quick Add</strong> - Fast entry creation with auto-classification
+4. <strong>Waiting For</strong> - Check and update status
+<strong>Mobile-Specific Features:</strong>
+<li>Swipe actions (complete, defer, context-change)</li>
+<li>Location-based context suggestions (@errands when away from home)</li>
+<li>Quick capture via share sheet</li>
+<li>Widget: Today's top 3 + inbox count</li>
+<h3>7.5 Desktop App vs. Web App</h3>
+<p>Per Onelist architecture, the Life Steward UI runs locally:</p>
+<table>
+<tr><th>Deployment</th><th>Life Steward UI</th></tr>
+<tr><td><strong>Mac App</strong></td><td>Full UI in WKWebView; native menu bar widget for quick add/today</td></tr>
+<tr><td><strong>Home Server</strong></td><td>Full UI accessible via LAN browser</td></tr>
+<tr><td><strong>iOS App</strong></td><td>Simplified views via Phoenix Native/SwiftUI</td></tr>
+<tr><td><strong>Premium VM</strong></td><td>Full UI on cloud-hosted instance</td></tr>
+</table>
+<strong>Note:</strong> Cloud storage tier (base) has NO Life Steward UI - users must run local instance or upgrade to VM tier.
+<h3>7.6 Voice-Driven Review Sessions (Post-MVP)</h3>
+<p>A breakthrough feature for making reviews effortless: the Life Steward conducts review sessions via <strong>audio conversation</strong>, controlling the app UI while the user simply talks. This enables hands-free reviews while driving, walking, doing chores, or relaxing.</p>
+<h4>7.6.1 Vision: The Conversational Review</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                     VOICE-DRIVEN WEEKLY REVIEW                               │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │     🎙️ LISTENING                                          [End Session] ││
+│  │                                                                          ││
+│  │  ┌─────────────────────────────────────────────────────────────────┐    ││
+│  │  │                    PROJECT: Kitchen Remodel                      │    ││
+│  │  │                                                                  │    ││
+│  │  │   Next Actions:                                                  │    ││
+│  │  │   ▶ ☐ Call ABC Contractors 555-9876         ← DISCUSSING         │    ││
+│  │  │     ☐ Pick up cabinet hardware samples                           │    ││
+│  │  │     ☐ Research subway tile patterns                              │    ││
+│  │  │                                                                  │    ││
+│  │  └─────────────────────────────────────────────────────────────────┘    ││
+│  │                                                                          ││
+│  │  ───────────────────────────────────────────────────────────────────    ││
+│  │                                                                          ││
+│  │  🔊 Life Steward: &quot;You have 'Call ABC Contractors' on your list.        ││
+│  │     It's been marked overdue for 3 days. Did you get a chance to        ││
+│  │     call them, or should we keep this on the list?&quot;                     ││
+│  │                                                                          ││
+│  │  👤 You: &quot;Oh yeah, I called them yesterday. They said the quote         ││
+│  │     will be ready by Friday. It's going to be around twelve             ││
+│  │     thousand dollars.&quot;                                                   ││
+│  │                                                                          ││
+│  │  🔊 Life Steward: &quot;Great! I'll mark that task complete and create       ││
+│  │     a new Waiting For item: 'Quote from ABC Contractors, expected       ││
+│  │     Friday.' I'll also add a note that the estimate is around           ││
+│  │     $12,000. Does that capture it correctly?&quot;                           ││
+│  │                                                                          ││
+│  │  👤 You: &quot;Yes, perfect.&quot;                                                ││
+│  │                                                                          ││
+│  │  🔊 Life Steward: &quot;Done. Moving on... [scrolls to next item]            ││
+│  │     'Pick up cabinet hardware samples.' Is this still relevant?&quot;        ││
+│  │                                                                          ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>7.6.2 Core Capabilities</h4>
+<strong>Voice Input/Output:</strong>
+<table>
+<tr><th>Capability</th><th>Implementation</th></tr>
+<tr><td>Speech-to-Text</td><td>System APIs (macOS Dictation, iOS Speech), or cloud STT (Whisper, Deepgram)</td></tr>
+<tr><td>Text-to-Speech</td><td>System voices (high quality on macOS/iOS), or cloud TTS (ElevenLabs, OpenAI)</td></tr>
+<tr><td>Wake word (optional)</td><td>"Hey Steward" or button activation</td></tr>
+<tr><td>Continuous listening</td><td>During active session with pause detection</td></tr>
+<tr><td>Interruption handling</td><td>User can interrupt; agent stops and listens</td></tr>
+</table>
+<strong>App Control (UI Automation):</strong>
+<table>
+<tr><th>Action</th><th>Description</th></tr>
+<tr><td>Navigate views</td><td>Switch between Inbox, Projects, Today, etc.</td></tr>
+<tr><td>Scroll</td><td>Move through lists, bring items into view</td></tr>
+<tr><td>Highlight</td><td>Visually indicate current item being discussed</td></tr>
+<tr><td>Expand/collapse</td><td>Open project details, show/hide sections</td></tr>
+<tr><td>Create entries</td><td>Add tasks, notes, decisions in real-time</td></tr>
+<tr><td>Update entries</td><td>Mark complete, change status, edit content</td></tr>
+<tr><td>Move entries</td><td>Refile to different project/scope/domain</td></tr>
+</table>
+<strong>Conversational Intelligence:</strong>
+<table>
+<tr><th>Capability</th><th>Description</th></tr>
+<tr><td>Context awareness</td><td>Knows what's on screen, what was just discussed</td></tr>
+<tr><td>Intent recognition</td><td>Understands "done", "skip", "delete", "move to someday"</td></tr>
+<tr><td>Information extraction</td><td>Captures dates, amounts, names from natural speech</td></tr>
+<tr><td>Clarification</td><td>Asks follow-up questions when unclear</td></tr>
+<tr><td>Confirmation</td><td>Reads back changes before committing (configurable)</td></tr>
+<tr><td>Correction handling</td><td>"Actually, make that Thursday not Friday"</td></tr>
+</table>
+<h4>7.6.3 Review Session Flows</h4>
+<strong>Voice-Driven Weekly Review:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    WEEKLY REVIEW - VOICE SESSION FLOW                        │
+│                                                                              │
+│  SESSION START                                                               │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  🔊 &quot;Good morning! Ready for your Weekly Review? I see you have 12 items   │
+│      in your inbox, 23 active projects, and 8 waiting-for items to check.  │
+│      We'll go through the three phases: Get Clear, Get Current, and Get    │
+│      Creative. Should take about 45 minutes. Ready to begin?&quot;              │
+│                                                                              │
+│  👤 &quot;Let's do it.&quot;                                                          │
+│                                                                              │
+│  PHASE 1: GET CLEAR (Inbox Processing)                                      │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  🔊 &quot;Starting with your inbox. First item: 'Meeting with boss went well,   │
+│      discussed Q2 goals.' This sounds like a reference note. Should I      │
+│      file it under Business, Acme Inc, Career scope?&quot;                       │
+│                                                                              │
+│  👤 &quot;Yes, and actually create a task to follow up on the Q2 planning       │
+│      discussion.&quot;                                                            │
+│                                                                              │
+│  🔊 &quot;Got it. Filing the note and creating a new task: 'Follow up on Q2     │
+│      planning discussion with boss.' What's the next physical action?&quot;      │
+│                                                                              │
+│  👤 &quot;Schedule a meeting with him for next week.&quot;                            │
+│                                                                              │
+│  🔊 &quot;Updated to: 'Schedule Q2 planning meeting with boss.' Context?&quot;        │
+│                                                                              │
+│  👤 &quot;Calendar, so at-computer I guess.&quot;                                     │
+│                                                                              │
+│  🔊 &quot;Perfect. Added to Business, Acme, Career with @computer context.       │
+│      Next inbox item...&quot;                                                     │
+│                                                                              │
+│  PHASE 2: GET CURRENT (List Review)                                         │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  🔊 &quot;Inbox clear! Nice work. Now let's review your lists. Starting with    │
+│      Next Actions. You have 23 items. I'll read each one - just tell me    │
+│      'keep', 'done', 'someday', or 'delete'. Ready?&quot;                        │
+│                                                                              │
+│  👤 &quot;Go ahead.&quot;                                                             │
+│                                                                              │
+│  🔊 &quot;'Research gym programs' - Personal, Health scope.&quot;                     │
+│  👤 &quot;Done, actually. I signed up for the YMCA.&quot;                             │
+│  🔊 &quot;Marking complete. Want to capture any notes about that?&quot;               │
+│  👤 &quot;Yeah, YMCA membership, forty dollars a month, started January 15th.&quot;  │
+│  🔊 &quot;Added decision note: 'YMCA membership, $40/month, started 1/15.'       │
+│      Moving on... 'Call Dr. Smith for checkup' - Personal, Health.&quot;         │
+│  👤 &quot;Keep.&quot;                                                                  │
+│  🔊 &quot;'Draft newsletter intro' - Business, Marketing.&quot;                       │
+│  👤 &quot;Keep, but I should do that today actually.&quot;                            │
+│  🔊 &quot;Noted as priority for today. Next...&quot;                                  │
+│                                                                              │
+│  [Continues through Waiting For, Projects, Someday/Maybe, Calendar]         │
+│                                                                              │
+│  PHASE 3: GET CREATIVE                                                       │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  🔊 &quot;Lists are current. Now for the creative phase. Looking at your        │
+│      domains... Personal has 12 projects, Business has 8, Sarah has 3.     │
+│      Any areas feeling neglected or needing attention?&quot;                     │
+│                                                                              │
+│  👤 &quot;I've been neglecting my health goals honestly.&quot;                        │
+│                                                                              │
+│  🔊 &quot;I noticed that too - your Health scope has had less activity lately.  │
+│      Your goal was 'Run 5K by June.' Want to create some next actions      │
+│      to get back on track?&quot;                                                  │
+│                                                                              │
+│  👤 &quot;Yeah. I should find a couch to 5K program and commit to starting it.&quot; │
+│                                                                              │
+│  🔊 &quot;Creating task: 'Research and choose a Couch to 5K program' in         │
+│      Personal, Health. Context?&quot;                                             │
+│                                                                              │
+│  👤 &quot;Computer.&quot;                                                              │
+│                                                                              │
+│  🔊 &quot;Added. Any other actions for Health?&quot;                                  │
+│                                                                              │
+│  SESSION END                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  🔊 &quot;Excellent Weekly Review! Here's the summary:                           │
+│      • Inbox: 12 items processed, now at zero                               │
+│      • Tasks: 5 completed, 3 moved to someday, 2 new created               │
+│      • Waiting For: 2 followed up, 1 new added                              │
+│      • Projects: All have next actions defined                              │
+│      • New focus: Health scope with running goal                            │
+│                                                                              │
+│      Total time: 38 minutes. Great job! You're set for the week.&quot;          │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Voice-Driven Daily Review (Quick - 5 min):</strong>
+<pre><code class="language-">🔊 &quot;Good morning! Quick daily review. You have 3 items due today and 2 new
+    inbox items. Let's start with what's due...&quot;
+<p>👤 &quot;Actually, can we just do inbox? I know what's due.&quot;</p>
+<p>🔊 &quot;Sure. First inbox item: 'Buy milk on the way home.' Sounds like a task.
+    Personal, Shopping list?&quot;</p>
+<p>👤 &quot;Yeah, @errands.&quot;</p>
+<p>🔊 &quot;Done. Second: 'Sarah mentioned wanting to try that new Thai place.'
+    This could be a note or an idea for Sarah's domain?&quot;</p>
+<p>👤 &quot;Make it an idea in Sarah's domain. And actually create a task to make
+    a reservation for this weekend.&quot;</p>
+<p>🔊 &quot;Added idea and task. Inbox clear. Anything else before you start your day?&quot;</p>
+<p>👤 &quot;What's my most important thing today?&quot;</p>
+<p>🔊 &quot;Based on your critical path analysis, following up on the contractor
+    quote is highest impact - it's blocking your kitchen remodel which has
+    a March 31 deadline. After that, the newsletter draft is due today.&quot;</p>
+<p>👤 &quot;Got it. Thanks.&quot;</p>
+<p>🔊 &quot;Have a great day! I'll check in this evening if you want.&quot;
+</code></pre></p>
+<strong>Ad-Hoc Voice Processing:</strong>
+<pre><code class="language-">👤 &quot;Hey Steward, quick capture.&quot;
+<p>🔊 &quot;Listening.&quot;</p>
+<p>👤 &quot;I just realized we need to get Sarah a birthday card before her party
+    on Saturday. And remind me to ask Mom what time she's arriving.&quot;</p>
+<p>🔊 &quot;Got it. Creating two items:
+    1. Task: 'Buy birthday card for Sarah' - @errands, due before Saturday
+    2. Task: 'Ask Mom what time she's arriving for party' - @phone</p>
+<p>Filing both under Sarah's Birthday project. Correct?&quot;</p>
+<p>👤 &quot;Perfect.&quot;</p>
+<p>🔊 &quot;Done. Anything else?&quot;</p>
+<p>👤 &quot;No, that's it.&quot;</p>
+<p>🔊 &quot;Okay, back to listening mode. Just say 'Hey Steward' when you need me.&quot;
+</code></pre></p>
+<h4>7.6.4 Hands-Free Use Cases</h4>
+<table>
+<tr><th>Scenario</th><th>Benefit</th></tr>
+<tr><td><strong>Driving commute</strong></td><td>Do Weekly Review during 30-min drive; completely hands-free</td></tr>
+<tr><td><strong>Morning walk</strong></td><td>Daily review while exercising; voice captures thoughts</td></tr>
+<tr><td><strong>Doing dishes/chores</strong></td><td>Process inbox while hands are busy</td></tr>
+<tr><td><strong>Relaxing on couch</strong></td><td>Review without reaching for device; lean back and talk</td></tr>
+<tr><td><strong>Accessibility needs</strong></td><td>Users with mobility limitations can fully participate</td></tr>
+<tr><td><strong>Multitasking</strong></td><td>Review while watching screen shows data being updated</td></tr>
+<tr><td><strong>Before bed wind-down</strong></td><td>Verbal brain dump without screen stimulation</td></tr>
+</table>
+<h4>7.6.5 Conversation Design Principles</h4>
+<strong>Minimize Cognitive Load:</strong>
+<li>Agent drives the conversation; user just responds</li>
+<li>Default suggestions reduce decision fatigue ("Should I file this under X?")</li>
+<li>Quick responses accepted: "yes", "no", "done", "skip", "next"</li>
+<li>Agent remembers context within session ("same as last one")</li>
+<strong>Graceful Corrections:</strong>
+<li>"Actually..." triggers edit mode</li>
+<li>"Wait, go back" returns to previous item</li>
+<li>"No, I meant..." allows re-statement</li>
+<li>Confirmation before destructive actions</li>
+<strong>Adaptive Pacing:</strong>
+<li>Detects when user needs time to think (silence handling)</li>
+<li>Speeds up or slows down based on response patterns</li>
+<li>"Take your time" mode for thoughtful reviews</li>
+<li>"Quick mode" for rapid triage</li>
+<strong>Natural Language Understanding:</strong>
+<table>
+<tr><th>User Says</th><th>Agent Understands</th></tr>
+<tr><td>"Done" / "Finished" / "I did that"</td><td>Mark complete</td></tr>
+<tr><td>"Skip" / "Next" / "Move on"</td><td>Keep, proceed to next</td></tr>
+<tr><td>"Nah" / "Delete it" / "Never mind"</td><td>Remove item</td></tr>
+<tr><td>"Later" / "Someday" / "Not now"</td><td>Move to Someday/Maybe</td></tr>
+<tr><td>"Move to [project]"</td><td>Refile entry</td></tr>
+<tr><td>"Add a note..."</td><td>Create reference entry</td></tr>
+<tr><td>"That reminds me..."</td><td>Capture new item, then return</td></tr>
+<tr><td>"What's next?"</td><td>Proceed in flow</td></tr>
+<tr><td>"Where are we?"</td><td>Summarize current state</td></tr>
+<tr><td>"How much longer?"</td><td>Estimate remaining time</td></tr>
+</table>
+<h4>7.6.6 Visual Feedback During Voice Sessions</h4>
+<p>Even though the user is primarily using voice, the screen provides valuable context:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  VOICE SESSION ACTIVE                                    🎙️ ████████░░░░░   │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Current: Weekly Review &gt; Phase 2 &gt; Next Actions &gt; Item 7 of 23             │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  ☐ Research gym programs            ← Last discussed (✓ Done)         │ │
+│  │  ☐ Call Dr. Smith for checkup       ← Kept                             │ │
+│  │  ▶ ☐ Draft newsletter intro         ← CURRENT (marked priority)       │ │
+│  │    ☐ Follow up on invoice #1234                                        │ │
+│  │    ☐ Book flight for March trip                                        │ │
+│  │    ...                                                                  │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  Progress: ████████████░░░░░░░░ 52%           Est. remaining: 18 min       │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  💬 Transcript (live)                                                  │ │
+│  │  ────────────────────────────────────────────────────────────────────  │ │
+│  │  🔊 &quot;'Draft newsletter intro' - Business, Marketing. Keep or done?&quot;   │ │
+│  │  👤 &quot;Keep, but I should do that today.&quot;                                │ │
+│  │  🔊 &quot;Noted as priority for today.&quot;                                     │ │
+│  │  ────────────────────────────────────────────────────────────────────  │ │
+│  │  Actions taken this session:                                           │ │
+│  │  • ✓ Completed: Research gym programs                                  │ │
+│  │  • 📝 Added note: YMCA membership $40/mo                               │ │
+│  │  • ⭐ Prioritized: Draft newsletter intro                              │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  [Pause] [End Session] [Type Instead]                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Visual Indicators:</strong>
+<li>Current item highlighted/scrolled into view</li>
+<li>Recent actions shown (so user can verify)</li>
+<li>Progress indicator (items done / total)</li>
+<li>Live transcript (confirms speech was understood)</li>
+<li>Session actions log (what changed)</li>
+<h4>7.6.7 Technical Requirements</h4>
+<strong>Speech Processing:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    VOICE SESSION ARCHITECTURE                                │
+│                                                                              │
+│  ┌──────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
+│  │   User   │───▶│  Microphone  │───▶│     STT      │───▶│   Intent     │  │
+│  │  Speech  │    │   Capture    │    │   Engine     │    │   Parser     │  │
+│  └──────────┘    └──────────────┘    └──────────────┘    └──────┬───────┘  │
+│                                                                  │          │
+│                                                                  ▼          │
+│  ┌──────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐  │
+│  │  Audio   │◀───│     TTS      │◀───│   Response   │◀───│  Life        │  │
+│  │  Output  │    │   Engine     │    │  Generator   │    │  Steward     │  │
+│  └──────────┘    └──────────────┘    └──────────────┘    │  Agent       │  │
+│                                                           │              │  │
+│                         ┌──────────────────────────────────┤              │  │
+│                         │                                  │  • Context   │  │
+│                         ▼                                  │  • Intent    │  │
+│                  ┌──────────────┐                         │  • Actions   │  │
+│                  │  UI Control  │                         │  • Flow      │  │
+│                  │  Commands    │                         └──────────────┘  │
+│                  └──────┬───────┘                                           │
+│                         │                                                   │
+│                         ▼                                                   │
+│                  ┌──────────────┐                                           │
+│                  │  Phoenix     │                                           │
+│                  │  LiveView    │                                           │
+│                  │  (navigate,  │                                           │
+│                  │   scroll,    │                                           │
+│                  │   update)    │                                           │
+│                  └──────────────┘                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Platform Considerations:</strong>
+<table>
+<tr><th>Platform</th><th>STT</th><th>TTS</th><th>UI Control</th></tr>
+<tr><td><strong>Mac App</strong></td><td>macOS Speech Recognition or Whisper</td><td>macOS Speech Synthesis (Siri voices)</td><td>LiveView commands + AppleScript for native</td></tr>
+<tr><td><strong>iOS App</strong></td><td>iOS Speech framework</td><td>iOS Speech Synthesis</td><td>LiveView commands</td></tr>
+<tr><td><strong>Home Server</strong></td><td>Browser Web Speech API or Whisper</td><td>Browser Speech Synthesis or cloud TTS</td><td>LiveView commands</td></tr>
+<tr><td><strong>Premium VM</strong></td><td>Cloud STT (Whisper API)</td><td>Cloud TTS (ElevenLabs/OpenAI)</td><td>LiveView commands</td></tr>
+</table>
+<strong>Privacy Considerations:</strong>
+<li>Local STT preferred (Whisper running locally on Mac)</li>
+<li>Cloud STT optional with clear consent</li>
+<li>Audio not stored by default</li>
+<li>Transcript optionally saved as session log (user choice)</li>
+<h4>7.6.8 Session Configuration</h4>
+<table>
+<tr><th>Setting</th><th>Options</th><th>Default</th></tr>
+<tr><td>Voice</td><td>System voices / Cloud TTS voice selection</td><td>System default</td></tr>
+<tr><td>Speech rate</td><td>Slow / Normal / Fast</td><td>Normal</td></tr>
+<tr><td>Confirmation level</td><td>Always / Important only / Never</td><td>Important only</td></tr>
+<tr><td>Auto-advance delay</td><td>1-5 seconds after user response</td><td>2 seconds</td></tr>
+<tr><td>Session type</td><td>Weekly / Daily / Inbox only / Custom</td><td>Context-aware</td></tr>
+<tr><td>Transcript saving</td><td>Always / Ask / Never</td><td>Ask at end</td></tr>
+<tr><td>Wake word</td><td>Enabled / Disabled</td><td>Disabled (button start)</td></tr>
+<tr><td>Interruption sensitivity</td><td>Low / Medium / High</td><td>Medium</td></tr>
+</table>
+<h4>7.6.9 Implementation Phases</h4>
+<strong>Phase A: Basic Voice Review (MVP voice)</strong>
+<li>Start/stop voice session</li>
+<li>STT → intent recognition for common commands (done, skip, keep)</li>
+<li>TTS responses for guidance</li>
+<li>UI highlighting of current item</li>
+<li>Manual mode fallback always available</li>
+<strong>Phase B: Full Conversational Flow</strong>
+<li>Multi-turn conversation support</li>
+<li>Context carryover ("same for this one")</li>
+<li>Natural language capture for new entries</li>
+<li>Corrections and clarifications</li>
+<li>Session summary and actions log</li>
+<strong>Phase C: Proactive Voice Features</strong>
+<li>Voice notifications ("You have 3 overdue items")</li>
+<li>Scheduled voice check-ins</li>
+<li>Ambient listening mode (optional, with clear privacy controls)</li>
+<li>Voice shortcuts for common operations outside reviews</li>
+<h3>7.7 Multi-Agent Orchestration: Living Documents & Creative Projects</h3>
+<p>The Life Steward can orchestrate other agents (Researcher, Writer, etc.) to manage complex, evolving creative projects like ebooks, reports, or documentation that grow and update over time.</p>
+<h4>7.7.1 Vision: The Living Ebook</h4>
+<p>Imagine maintaining an ebook on "Personal Finance for Developers" that automatically evolves:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    LIVING DOCUMENT PROJECT FLOW                              │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │                         CONTENT SOURCES                                  ││
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐               ││
+│  │  │ Manual   │  │  Feeder  │  │ OpenClaw  │  │ Reader   │               ││
+│  │  │ Captures │  │ (RSS)    │  │ Convos   │  │ Extracts │               ││
+│  │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘               ││
+│  │       │             │             │             │                       ││
+│  │       └─────────────┴──────┬──────┴─────────────┘                       ││
+│  │                            │                                             ││
+│  │                            ▼                                             ││
+│  │              ┌─────────────────────────────┐                             ││
+│  │              │  Entries tagged #fintech    │                             ││
+│  │              │  or in Finance/Learning     │                             ││
+│  │              └──────────────┬──────────────┘                             ││
+│  └─────────────────────────────┼───────────────────────────────────────────┘│
+│                                │                                             │
+│                                ▼                                             │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │                      LIFE STEWARD (Orchestrator)                         ││
+│  │                                                                          ││
+│  │  Project: &quot;Personal Finance Ebook&quot;                                       ││
+│  │  ─────────────────────────────────────────────────────────────────────  ││
+│  │                                                                          ││
+│  │  1. TRIAGE NEW CONTENT                                                   ││
+│  │     • 3 new entries this week related to project                        ││
+│  │     • Categorize: Chapter 3 (Investing), Chapter 5 (Taxes), New topic?  ││
+│  │                                                                          ││
+│  │  2. UPDATE PROJECT PLAN                                                  ││
+│  │     • &quot;Index funds vs ETFs&quot; article → Research task for Chapter 3       ││
+│  │     • &quot;New tax law changes&quot; → Flag Chapter 5 for update                 ││
+│  │     • &quot;Crypto staking income&quot; → Propose new section in Chapter 5        ││
+│  │                                                                          ││
+│  │  3. QUEUE AGENT TASKS                                                    ││
+│  │     • Researcher: &quot;Flesh out index funds vs ETFs comparison&quot;            ││
+│  │     • Researcher: &quot;Summarize 2026 tax law changes for developers&quot;       ││
+│  │     • Writer: &quot;Update Chapter 3 with new research&quot; (after research)     ││
+│  │                                                                          ││
+│  └──────────────────────────────┬──────────────────────────────────────────┘│
+│                                 │                                            │
+│        ┌────────────────────────┼────────────────────────────┐              │
+│        │                        │                            │              │
+│        ▼                        ▼                            ▼              │
+│  ┌───────────┐           ┌───────────┐                ┌───────────┐        │
+│  │RESEARCHER │           │RESEARCHER │                │  (waits)  │        │
+│  │  Agent    │           │  Agent    │                │           │        │
+│  │           │           │           │                │           │        │
+│  │ &quot;Index    │           │ &quot;2026 Tax │                │           │        │
+│  │  funds    │           │  changes&quot; │                │           │        │
+│  │  vs ETFs&quot; │           │           │                │           │        │
+│  └─────┬─────┘           └─────┬─────┘                │           │        │
+│        │                       │                       │           │        │
+│        ▼                       ▼                       │           │        │
+│  ┌───────────┐           ┌───────────┐                │           │        │
+│  │ Research  │           │ Research  │                │           │        │
+│  │ Report    │           │ Report    │                │           │        │
+│  │ (Entry)   │           │ (Entry)   │                │           │        │
+│  └─────┬─────┘           └─────┬─────┘                │           │        │
+│        │                       │                       │           │        │
+│        └───────────┬───────────┘                       │           │        │
+│                    │                                   │           │        │
+│                    ▼                                   ▼           │        │
+│              ┌─────────────────────────────────────────────┐      │        │
+│              │           LIFE STEWARD                       │      │        │
+│              │                                              │      │        │
+│              │  Research complete. Ready to update ebook.  │      │        │
+│              │                                              │      │        │
+│              │  [Review Research] [Approve for Writing]     │      │        │
+│              └──────────────────────┬──────────────────────┘      │        │
+│                                     │                              │        │
+│                                     ▼                              │        │
+│                              ┌───────────┐                         │        │
+│                              │  WRITER   │◀────────────────────────┘        │
+│                              │  Agent    │                                  │
+│                              │           │                                  │
+│                              │ &quot;Update   │                                  │
+│                              │  Ch 3 &amp; 5&quot;│                                  │
+│                              └─────┬─────┘                                  │
+│                                    │                                        │
+│                                    ▼                                        │
+│                             ┌────────────┐                                  │
+│                             │  Draft     │                                  │
+│                             │  Updates   │                                  │
+│                             │  (Entries) │                                  │
+│                             └─────┬──────┘                                  │
+│                                   │                                         │
+│                                   ▼                                         │
+│              ┌─────────────────────────────────────────────┐               │
+│              │           LIFE STEWARD                       │               │
+│              │                                              │               │
+│              │  Draft ready for review.                    │               │
+│              │                                              │               │
+│              │  [Review Draft] [Request Revisions]          │               │
+│              │  [Approve &amp; Publish Edition 2.1]             │               │
+│              └─────────────────────────────────────────────┘               │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>7.7.2 Project Types Supporting Multi-Agent Workflows</h4>
+<table>
+<tr><th>Project Type</th><th>Description</th><th>Agent Pipeline</th></tr>
+<tr><td><strong>Living Ebook</strong></td><td>Book that evolves with new knowledge</td><td>Content → Researcher → Writer → Edition</td></tr>
+<tr><td><strong>Research Report</strong></td><td>Ongoing research compilation</td><td>Sources → Researcher → Writer → Report</td></tr>
+<tr><td><strong>Documentation</strong></td><td>Technical docs staying current</td><td>Code changes → Researcher → Writer → Docs</td></tr>
+<tr><td><strong>Newsletter</strong></td><td>Regular content curation + writing</td><td>Feeds → Researcher → Writer → Newsletter</td></tr>
+<tr><td><strong>Knowledge Base</strong></td><td>Growing reference material</td><td>Entries → Researcher → Writer → Articles</td></tr>
+<tr><td><strong>Course Material</strong></td><td>Educational content that updates</td><td>Industry changes → Researcher → Writer → Lessons</td></tr>
+</table>
+<h4>7.7.3 Living Document Project Structure</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  PROJECT: Personal Finance Ebook                                             │
+│  Type: Living Document                      Status: Active                   │
+│  Current Edition: 2.0 (Published Jan 15)    Next: 2.1 (In Progress)         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  📚 DOCUMENT STRUCTURE                                                       │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  ├── Chapter 1: Getting Started          ✓ Current                          │
+│  ├── Chapter 2: Budgeting Basics         ✓ Current                          │
+│  ├── Chapter 3: Investing 101            🔄 Update queued (new research)    │
+│  │   ├── 3.1 Index Funds                 🔄 Updating                         │
+│  │   ├── 3.2 ETFs                        🔄 Updating                         │
+│  │   └── 3.3 Bonds                       ✓ Current                          │
+│  ├── Chapter 4: Retirement Planning      ✓ Current                          │
+│  ├── Chapter 5: Taxes for Developers     🔄 Update queued (tax law changes) │
+│  │   ├── 5.1 W-2 vs 1099                 ✓ Current                          │
+│  │   ├── 5.2 Deductions                  🔄 Updating                         │
+│  │   └── 5.3 Crypto Income               ✨ NEW SECTION PROPOSED             │
+│  └── Chapter 6: Building Wealth          ✓ Current                          │
+│                                                                              │
+│  📥 CONTENT PIPELINE                                                         │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  Incoming (3 items this week):                                               │
+│  • &quot;Index Funds vs ETFs in 2026&quot; (article)     → Ch 3, Research queued      │
+│  • &quot;New IRS rules for remote workers&quot; (note)   → Ch 5, Research queued      │
+│  • &quot;Crypto staking tax treatment&quot; (article)    → Ch 5.3 proposal            │
+│                                                                              │
+│  🔬 RESEARCH QUEUE                                                           │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  ☐ &quot;Compare index funds vs ETFs for long-term holding&quot;      → Ch 3.1, 3.2  │
+│  ☐ &quot;Summarize 2026 tax changes affecting developers&quot;        → Ch 5.2       │
+│  ☐ &quot;Research crypto staking tax implications&quot;               → Ch 5.3       │
+│                                                                              │
+│  ✍️ WRITING QUEUE                                                            │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  (Waiting for research to complete)                                          │
+│                                                                              │
+│  📋 EDITION PLANNING                                                         │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  Edition 2.1 Scope:                                                          │
+│  • Update Chapter 3 investment advice (index funds vs ETFs)                 │
+│  • Update Chapter 5 tax deductions for 2026 rules                           │
+│  • Add new section 5.3 on crypto income                                     │
+│                                                                              │
+│  Target: February 15, 2026                                                   │
+│  Dependencies: Research complete → Writing complete → Review → Publish       │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>7.7.4 Content Routing & Triage</h4>
+<p>Life Steward automatically routes incoming content to relevant living document projects:</p>
+<strong>Routing Rules:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  CONTENT ROUTING CONFIGURATION                                               │
+│                                                                              │
+│  Project: Personal Finance Ebook                                             │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Auto-capture entries matching:                                              │
+│  ├── Tags: #finance, #investing, #taxes, #retirement, #budgeting            │
+│  ├── Domains: Personal/Finance, Business/Finance                            │
+│  ├── Sources: RSS feeds from financial blogs                                │
+│  └── Keywords: &quot;index fund&quot;, &quot;ETF&quot;, &quot;401k&quot;, &quot;IRA&quot;, &quot;tax deduction&quot;          │
+│                                                                              │
+│  When content matches:                                                       │
+│  ├── High relevance (90%+): Auto-add to project pipeline                   │
+│  ├── Medium relevance (70-89%): Suggest addition, user confirms             │
+│  └── Low relevance (50-69%): Show in &quot;Maybe related&quot; list                   │
+│                                                                              │
+│  Chapter mapping (AI-assisted):                                              │
+│  ├── Investment topics → Chapter 3                                          │
+│  ├── Tax topics → Chapter 5                                                  │
+│  ├── Budgeting topics → Chapter 2                                           │
+│  └── Unknown/new topics → Suggest new chapter or appendix                    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Triage Workflow:</strong>
+<pre><code class="language-">Life Steward: &quot;I found 3 new entries this week related to your Finance Ebook:
+<p>1. 'Index Funds vs ETFs in 2026' - Looks like good material for Chapter 3.
+   Should I queue research to compare these for your investment section?</p>
+<p>2. 'New IRS rules for remote workers' - This affects Chapter 5 on taxes.
+   The current edition doesn't cover the 2026 changes. Queue for research?</p>
+<p>3. 'Crypto staking tax treatment' - This is a new topic not in your ebook.
+   Options:
+   • Add as new section 5.3 'Crypto Income'
+   • Add to appendix
+   • Skip for this edition</p>
+<p>What would you like to do?&quot;</p>
+<p>User: &quot;Yes to the first two. For crypto, let's add it as section 5.3.&quot;</p>
+<p>Life Steward: &quot;Got it. I've:
+• Queued research task: 'Compare index funds vs ETFs for Chapter 3'
+• Queued research task: 'Summarize 2026 tax changes for Chapter 5'
+• Created new section outline: '5.3 Crypto Income'
+• Queued research task: 'Research crypto staking tax implications'</p>
+<p>Once research is complete, I'll prepare writing tasks. Estimated timeline:
+• Research: 2-3 days
+• Writing: 3-5 days
+• Your review: TBD
+• Edition 2.1 ready: ~2 weeks</p>
+<p>I'll notify you when research reports are ready for review.&quot;
+</code></pre></p>
+<h4>7.7.5 Agent Task Handoffs</h4>
+<strong>Research Request (Life Steward → Researcher):</strong>
+<pre><code class="language-elixir">%{
+  task_type: &quot;research_request&quot;,
+  project_id: &quot;finance-ebook-uuid&quot;,
+  chapter: &quot;3.1&quot;,
+  topic: &quot;Index funds vs ETFs comparison for long-term investors&quot;,
+  context: [
+    %{entry_id: &quot;source-article-uuid&quot;, role: &quot;seed_content&quot;},
+    %{entry_id: &quot;chapter-3-current-uuid&quot;, role: &quot;existing_content&quot;}
+  ],
+  instructions: &quot;&quot;&quot;
+  Research and compare index funds vs ETFs for the ebook audience
+  (software developers learning personal finance).
+<p>Cover:
+  <li>Key differences (structure, trading, fees)</li>
+  <li>Tax implications</li>
+  <li>When to choose each</li>
+  <li>Specific recommendations for tech workers</li></p>
+<p>Output: Research report entry with citations.
+  Depth: Comprehensive but accessible to beginners.
+  &quot;&quot;&quot;,
+  output_destination: &quot;project-research-queue&quot;,
+  notify_on_complete: true
+}
+</code></pre></p>
+<strong>Research Output (Researcher → Life Steward):</strong>
+<pre><code class="language-elixir">%{
+  task_type: &quot;research_complete&quot;,
+  request_id: &quot;research-request-uuid&quot;,
+  project_id: &quot;finance-ebook-uuid&quot;,
+  output_entry_id: &quot;research-report-uuid&quot;,
+  summary: &quot;Comprehensive comparison of index funds vs ETFs completed.
+            Key finding: For most tech workers, total market index funds
+            are preferable due to simplicity and tax efficiency.&quot;,
+  citations: 12,
+  confidence: &quot;high&quot;,
+  suggested_changes: [
+    &quot;Update section 3.1 to recommend index funds as default&quot;,
+    &quot;Add new subsection on tax-loss harvesting with ETFs&quot;,
+    &quot;Update fee comparison table with 2026 data&quot;
+  ]
+}
+</code></pre>
+<strong>Writing Request (Life Steward → Writer):</strong>
+<pre><code class="language-elixir">%{
+  task_type: &quot;writing_request&quot;,
+  project_id: &quot;finance-ebook-uuid&quot;,
+  chapters: [&quot;3.1&quot;, &quot;3.2&quot;],
+  action: &quot;update&quot;,
+  research_entries: [&quot;research-report-uuid&quot;],
+  current_content_entries: [&quot;chapter-3-1-uuid&quot;, &quot;chapter-3-2-uuid&quot;],
+  instructions: &quot;&quot;&quot;
+  Update Chapter 3 sections 3.1 and 3.2 based on the research report.
+<p>Maintain:
+  <li>Existing voice and tone (friendly, technical but accessible)</li>
+  <li>Structure (intro, explanation, examples, action items)</li>
+  <li>Audience focus (software developers)</li></p>
+<p>Changes needed:
+  <li>Update index fund vs ETF recommendation</li>
+  <li>Add tax-loss harvesting subsection</li>
+  <li>Refresh fee comparison table</li>
+  <li>Ensure 2026 data throughout</li></p>
+<p>Output: Updated chapter drafts as entries.
+  &quot;&quot;&quot;,
+  style_guide_entry: &quot;ebook-style-guide-uuid&quot;,
+  output_destination: &quot;project-drafts-queue&quot;
+}
+</code></pre></p>
+<strong>Writing Output (Writer → Life Steward):</strong>
+<pre><code class="language-elixir">%{
+  task_type: &quot;writing_complete&quot;,
+  request_id: &quot;writing-request-uuid&quot;,
+  project_id: &quot;finance-ebook-uuid&quot;,
+  draft_entries: [
+    %{entry_id: &quot;draft-3-1-uuid&quot;, chapter: &quot;3.1&quot;, word_count: 1850},
+    %{entry_id: &quot;draft-3-2-uuid&quot;, chapter: &quot;3.2&quot;, word_count: 2100}
+  ],
+  changes_summary: &quot;&quot;&quot;
+  <li>Section 3.1: Rewritten recommendation to favor index funds; added</li>
+    decision flowchart
+  <li>Section 3.2: New subsection on tax-loss harvesting; updated fee</li>
+    table with 2026 Vanguard/Fidelity data
+  <li>Total: +450 words, 3 new examples, 1 new diagram suggestion</li>
+  &quot;&quot;&quot;,
+  ready_for_review: true
+}
+</code></pre>
+<h4>7.7.6 Human-in-the-Loop Checkpoints</h4>
+<p>The user remains in control with approval gates:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  APPROVAL WORKFLOW                                                           │
+│                                                                              │
+│  ┌─────────┐     ┌─────────┐     ┌─────────┐     ┌─────────┐     ┌────────┐│
+│  │ Content │────▶│ Triage  │────▶│Research │────▶│ Writing │────▶│Publish ││
+│  │ Arrives │     │ ✓ User  │     │ ✓ User  │     │ ✓ User  │     │ ✓ User ││
+│  └─────────┘     │ Approve │     │ Review  │     │ Review  │     │Approve ││
+│                  └─────────┘     └─────────┘     └─────────┘     └────────┘│
+│                                                                              │
+│  Checkpoint Options (per project):                                           │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  □ Auto-triage high-confidence content (skip triage approval)               │
+│  □ Auto-approve research tasks (skip research review)                        │
+│  ☑ Always review writing before publishing (recommended)                    │
+│  □ Auto-publish minor updates (typos, data refreshes)                       │
+│                                                                              │
+│  Notification Preferences:                                                   │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  ☑ Notify when research is ready for review                                 │
+│  ☑ Notify when drafts are ready for review                                  │
+│  ☑ Weekly digest of pipeline status                                         │
+│  □ Real-time notifications for all pipeline events                          │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Review Interface:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  DRAFT REVIEW: Chapter 3.1 - Index Funds                                     │
+│  Project: Personal Finance Ebook                     Edition: 2.1 Draft      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ [Current v2.0] [Draft v2.1] [Diff View] [Research Source]              ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─────────────────────────┐  ┌─────────────────────────────────────────┐  │
+│  │ CURRENT (v2.0)          │  │ DRAFT (v2.1)                             │  │
+│  │ ─────────────────────── │  │ ─────────────────────────────────────── │  │
+│  │                         │  │                                          │  │
+│  │ When choosing between   │  │ For most software developers building   │  │
+│  │ index funds and ETFs,   │  │ long-term wealth, <strong>index funds are     │  │
+│  │ consider your trading   │  │ the recommended default choice</strong>.       │  │
+│  │ frequency and...        │  │                                          │  │
+│  │                         │  │ Here's why: [new content...]            │  │
+│  │                         │  │                                          │  │
+│  │                         │  │ ### When ETFs Make Sense                 │  │
+│  │                         │  │ [new subsection...]                      │  │
+│  │                         │  │                                          │  │
+│  │                         │  │ ### Tax-Loss Harvesting (NEW)            │  │
+│  │                         │  │ [new subsection from research...]        │  │
+│  │                         │  │                                          │  │
+│  └─────────────────────────┘  └─────────────────────────────────────────┘  │
+│                                                                              │
+│  Changes: +450 words | +2 subsections | Updated fee table                   │
+│  Based on: Research report &quot;Index Funds vs ETFs 2026&quot;                       │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  [✓ Approve] [Request Revisions] [Edit Directly] [Reject &amp; Discard]        │
+│                                                                              │
+│  Revision notes (if requesting revisions):                                   │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ The tax-loss harvesting section is good but needs a concrete example   ││
+│  │ with actual numbers...                                                  ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>7.7.7 Edition Management</h4>
+<strong>Version Control for Living Documents:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  EDITION HISTORY: Personal Finance Ebook                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  📗 Edition 2.1 (In Progress)                          Target: Feb 15       │
+│     Changes: Ch 3 investment updates, Ch 5 tax updates, new crypto section  │
+│     Status: Research 67% → Writing 0% → Review 0%                           │
+│                                                                              │
+│  📘 Edition 2.0 (Current)                              Published: Jan 15    │
+│     Changes: Major rewrite of retirement chapter, new on RSUs               │
+│     Stats: 45,000 words, 6 chapters, 127 downloads                          │
+│     [View] [Changelog] [Download]                                           │
+│                                                                              │
+│  📘 Edition 1.2                                        Published: Nov 1     │
+│     Changes: Updated tax brackets for 2025, minor corrections               │
+│     [View] [Changelog] [Download]                                           │
+│                                                                              │
+│  📘 Edition 1.1                                        Published: Sep 15    │
+│     Changes: Added chapter on stock options (ISOs vs NSOs)                  │
+│     [View] [Changelog] [Download]                                           │
+│                                                                              │
+│  📘 Edition 1.0                                        Published: Jul 1     │
+│     Initial release                                                          │
+│     [View] [Changelog] [Download]                                           │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  Publishing Options:                                                         │
+│  ☑ Auto-generate changelog from commit messages                             │
+│  ☑ Notify subscribers of new editions                                       │
+│  ☑ Keep all editions accessible                                             │
+│  □ Auto-publish when all chapters approved                                  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>7.7.8 Voice-Driven Living Document Management</h4>
+<p>The voice review system integrates with living document projects:</p>
+<pre><code class="language-">🔊 Life Steward: &quot;Your Finance Ebook has some updates. Three new articles
+    came in this week that look relevant. Want to do a quick triage?&quot;
+<p>👤 &quot;Sure, what do we have?&quot;</p>
+<p>🔊 &quot;First: 'Index Funds vs ETFs - 2026 Analysis' from your Feedly feed.
+    Looks like good material for Chapter 3 on investing. Queue for research?&quot;</p>
+<p>👤 &quot;Yes, definitely.&quot;</p>
+<p>🔊 &quot;Queued. Second: 'IRS Announces New Remote Work Deductions' - this affects
+    Chapter 5 on taxes. Your current edition doesn't cover the 2026 changes.&quot;</p>
+<p>👤 &quot;Add that too. We should update the tax chapter.&quot;</p>
+<p>🔊 &quot;Added. Third: 'Understanding Crypto Staking Taxes' - this is a new topic
+    not currently in your ebook. Should I propose a new section, add it to
+    the appendix, or skip it for now?&quot;</p>
+<p>👤 &quot;Let's add a new section. Crypto is relevant for developers.&quot;</p>
+<p>🔊 &quot;Got it. I'll create section 5.3 'Crypto Income' and queue research.</p>
+<p>Summary for Edition 2.1:
+    • Chapter 3: Investment update (index funds vs ETFs)
+    • Chapter 5: Tax update (2026 rules) plus new crypto section</p>
+<p>Research will take about 3 days, then writing another 3-5 days.
+    I'll let you know when drafts are ready to review. Sound good?&quot;</p>
+<p>👤 &quot;Perfect.&quot;</p>
+<p>🔊 &quot;Great! Anything else on the ebook, or should we continue with your
+    regular review?&quot;
+</code></pre></p>
+<h4>7.7.9 Integration with Existing Agents</h4>
+<table>
+<tr><th>Agent</th><th>Role in Living Document Pipeline</th></tr>
+<tr><td><strong>Feeder</strong></td><td>Sources content from RSS, newsletters, etc. that feeds into projects</td></tr>
+<tr><td><strong>Reader</strong></td><td>Extracts key points from source material; initial categorization</td></tr>
+<tr><td><strong>Researcher</strong></td><td>Deep dives on topics; produces research reports with citations</td></tr>
+<tr><td><strong>Writer</strong></td><td>Produces/updates prose content based on research</td></tr>
+<tr><td><strong>Librarian</strong></td><td>Maintains tag consistency; suggests content organization</td></tr>
+<tr><td><strong>Searcher</strong></td><td>Finds related existing content; semantic matching for relevance</td></tr>
+<tr><td><strong>Life Steward</strong></td><td>Orchestrates entire pipeline; manages project structure; human interface</td></tr>
+</table>
+<strong>Orchestration Flow:</strong>
+<pre><code class="language-">Feeder → Reader → Life Steward (triage) → Researcher → Life Steward (review)
+→ Writer → Life Steward (review) → Publish
+</code></pre>
+<hr>
+<h2>8. Asset Enrichment Agent Integration</h2>
+<p>The <strong>Asset Enrichment Agent</strong> serves as a critical preprocessor for the Life Steward, extracting structured intelligence from raw assets (documents, audio, video, images) that enables automatic classification, filing, and life management. This is a <strong>key dependency</strong> for intelligent filing to reach its full potential.</p>
+<h3>8.1 Data Flow: Enriched Assets → Life Steward</h3>
+<p>When assets are processed by the Asset Enrichment Agent, they produce structured metadata that Life Steward consumes:</p>
+<pre><code class="language-">┌─────────────────┐     ┌────────────────────────┐     ┌─────────────────┐
+│  Raw Asset      │────→│ Asset Enrichment Agent │────→│  Life Steward   │
+│  (audio/video/  │     │                        │     │                 │
+│   doc/image)    │     │  Extracts:             │     │  Processes:     │
+│                 │     │  - Action items        │     │  - Files entries│
+│                 │     │  - Commitments         │     │  - Updates GTD  │
+│                 │     │  - Decisions           │     │  - Links people │
+│                 │     │  - People              │     │  - Tracks goals │
+│                 │     │  - Dates/deadlines     │     │  - Sets context │
+│                 │     │  - Project references  │     │                 │
+│                 │     │  - Topics/themes       │     │                 │
+└─────────────────┘     └────────────────────────┘     └─────────────────┘
+</code></pre>
+<h3>8.2 Extracted Intelligence → GTD Buckets</h3>
+<table>
+<tr><th>Asset Enrichment Output</th><th>Life Steward Action</th></tr>
+<tr><td><strong>Action Items</strong> (speaker: user, confidence > 0.8)</td><td>Creates <strong>Next Action</strong> task in appropriate project</td></tr>
+<tr><td><strong>Commitments from Others</strong> ("They said they'll send...")</td><td>Creates <strong>Waiting For</strong> entry with expected date</td></tr>
+<tr><td><strong>Decisions Made</strong></td><td>Files in <strong>Decisions</strong> bucket, links to relevant project</td></tr>
+<tr><td><strong>People Detected</strong></td><td>Links to <strong>Person domain</strong>; adds to <strong>@agenda</strong> context if follow-up needed</td></tr>
+<tr><td><strong>Dates/Deadlines Mentioned</strong></td><td>Sets due dates, updates <strong>project timeline</strong></td></tr>
+<tr><td><strong>Project/Goal References</strong></td><td>Auto-files content under referenced project/goal</td></tr>
+<tr><td><strong>Topics/Themes</strong></td><td>Suggests filing location based on semantic match to domains/scopes</td></tr>
+<tr><td><strong>Urgency/Importance Signals</strong></td><td>Informs <strong>prioritization</strong> and alert generation</td></tr>
+<tr><td><strong>Context Clues</strong> ("when I get to the office...")</td><td>Sets GTD <strong>context</strong> tags (@office, @phone, @computer)</td></tr>
+</table>
+<h3>8.3 Meeting Notes → Life Steward Processing</h3>
+<p>A key use case is processing meeting audio/transcripts:</p>
+<pre><code class="language-yaml"># Asset Enrichment Agent Output (meeting notes)
+extracted_intelligence:
+  action_items:
+    <li>speaker: &quot;user&quot;</li>
+      statement: &quot;I'll send the proposal by Friday&quot;
+      confidence: 0.92
+    <li>speaker: &quot;other&quot;</li>
+      statement: &quot;Sarah will review the budget&quot;
+      confidence: 0.88
+<p>decisions:
+    <li>decision: &quot;Go with vendor A for the project&quot;</li>
+      participants: [&quot;user&quot;, &quot;sarah&quot;, &quot;mike&quot;]
+      context: &quot;Cost was deciding factor&quot;</p>
+<p>people:
+    <li>name: &quot;Sarah Chen&quot;</li>
+      role: &quot;CFO&quot;
+      mentioned_context: &quot;budget review&quot;</p>
+<p>dates:
+    <li>date: &quot;2026-02-07&quot;</li>
+      context: &quot;proposal deadline&quot;
+      type: &quot;deadline&quot;</p>
+<h1>Life Steward Processing Result</h1>
+creates:
+  <li>entry_type: &quot;task&quot;</li>
+    bucket: &quot;next_actions&quot;
+    title: &quot;Send proposal to Acme&quot;
+    metadata:
+      due_date: &quot;2026-02-07&quot;
+      gtd_context: &quot;@computer&quot;
+      source_asset: &quot;meeting_2026-01-28.m4a&quot;
+<li>entry_type: &quot;task&quot;</li>
+    bucket: &quot;waiting_for&quot;
+    title: &quot;Sarah: Budget review&quot;
+    metadata:
+      waiting_on_person: &quot;sarah_chen_uuid&quot;
+      source_asset: &quot;meeting_2026-01-28.m4a&quot;
+<li>entry_type: &quot;decision&quot;</li>
+    bucket: &quot;decisions&quot;
+    title: &quot;Selected vendor A for Acme project&quot;
+    metadata:
+      decision_rationale: &quot;Cost was deciding factor&quot;
+      participants: [&quot;sarah_chen_uuid&quot;, &quot;mike_wilson_uuid&quot;]
+</code></pre>
+<h3>8.4 Media Consumption → Goal Progress</h3>
+<p>For content the user consumes (podcasts, videos, articles):</p>
+<pre><code class="language-yaml"># Asset Enrichment detects topic relevance
+asset: &quot;podcast_episode_ai_trends.mp3&quot;
+detected_topics: [&quot;artificial intelligence&quot;, &quot;machine learning&quot;, &quot;career development&quot;]
+matches_user_goals:
+  <li>goal: &quot;Stay current on AI for career&quot;</li>
+    confidence: 0.85
+<h1>Life Steward processing</h1>
+actions:
+  <li>logs_progress_toward_goal: &quot;Stay current on AI for career&quot;</li>
+  <li>suggests_filing: &quot;Domain: Professional &gt; Scope: Learning &gt; Project: AI Knowledge&quot;</li>
+  <li>extracts_key_insights: [...] # stored as notes</li>
+</code></pre>
+<h3>8.5 Automatic Context Detection</h3>
+<p>Asset Enrichment can detect GTD contexts from content:</p>
+<table>
+<tr><th>Content Pattern</th><th>Detected Context</th><th>Example</th></tr>
+<tr><td>"when I get to the office"</td><td><code>@office</code></td><td>"I need to print this when I get to the office"</td></tr>
+<tr><td>"remind me to call"</td><td><code>@phone</code></td><td>Meeting notes mentioning a follow-up call</td></tr>
+<tr><td>"next time I'm at the store"</td><td><code>@errands</code></td><td>Shopping list items embedded in notes</td></tr>
+<tr><td>"I should look up"</td><td><code>@computer</code></td><td>Research tasks implied in conversation</td></tr>
+<tr><td>Email/message discussions</td><td><code>@email</code></td><td>Items requiring email follow-up</td></tr>
+<tr><td>References to specific person</td><td><code>@agenda:PersonName</code></td><td>Items to discuss at next meeting</td></tr>
+</table>
+<h3>8.6 Person Domain Intelligence</h3>
+<p>Asset Enrichment identifies people mentioned across assets, enabling Life Steward to:</p>
+<li><strong>Create/update Person domains</strong> automatically when new people are mentioned</li>
+<li><strong>Build @agenda lists</strong> for each person (topics to discuss next time you meet)</li>
+<li><strong>Track relationship touchpoints</strong> (when did you last interact?)</li>
+<li><strong>Link commitments</strong> to the right person's Waiting For list</li>
+<li><strong>Identify shared projects</strong> where a person is involved</li>
+<pre><code class="language-yaml"># Over time, Asset Enrichment builds person profile
+person: &quot;Sarah Chen&quot;
+detected_in_assets: 47
+role_signals: [&quot;CFO&quot;, &quot;budget approver&quot;, &quot;Acme project stakeholder&quot;]
+interaction_frequency: &quot;weekly&quot;
+common_topics: [&quot;budget&quot;, &quot;finance&quot;, &quot;Q2 planning&quot;]
+<h1>Life Steward uses this to</h1>
+<li>maintain_person_domain: &quot;Person: Sarah Chen&quot;</li>
+<li>suggest_@agenda_items: [&quot;Discuss Q2 budget concerns&quot;, &quot;Follow up on vendor decision&quot;]</li>
+<li>detect_relationship_decay: &quot;Haven't interacted in 3 weeks&quot;</li>
+</code></pre>
+<h3>8.7 Implementation Dependencies</h3>
+<strong>Asset Enrichment Agent Phases → Life Steward Features:</strong>
+<table>
+<tr><th>Asset Enrichment Phase</th><th>Enables Life Steward Feature</th></tr>
+<tr><td>Phase 1: Basic Extraction</td><td>Manual context enrichment hints</td></tr>
+<tr><td><strong>Phase 2: Life Steward Integration</strong></td><td>Automatic filing from extracted intelligence</td></tr>
+<tr><td>Phase 3: Advanced Analysis</td><td>Relationship mapping, implicit action detection</td></tr>
+<tr><td>Phase 4: Cross-Asset Intelligence</td><td>Multi-source project context building</td></tr>
+</table>
+<strong>Recommended Implementation Order:</strong>
+<p>1. Life Steward Phase 1-2 (Foundation + Intelligent Filing) can work without Asset Enrichment
+2. Life Steward Phase 2+ gains significant accuracy boost when Asset Enrichment Phase 2 is available
+3. Full automation (Phase 7+ Advanced Intelligence) relies on Asset Enrichment Phase 3-4</p>
+<h3>8.8 Open Questions for Integration</h3>
+<li>[ ] <strong>Q</strong>: How to handle conflicting signals between Asset Enrichment confidence and Life Steward filing rules?</li>
+<li>[ ] <strong>Q</strong>: Should Asset Enrichment run before or after user reviews raw asset?</li>
+<li>[ ] <strong>Q</strong>: What's the UX for showing "enrichment source" on auto-created entries?</li>
+<li>[ ] <strong>Q</strong>: How to handle extraction errors gracefully (wrong person detected, misheard action)?</li>
+<li>[ ] <strong>Q</strong>: Should user be able to "replay" Asset Enrichment on existing assets after Life Steward learns their structure?</li>
+<hr>
+<h2>9. Technical Implementation</h2>
+<h3>8.1 Data Model Extensions</h3>
+<strong>New Entry Types (or metadata extensions):</strong>
+<pre><code class="language-elixir"># Domain/Scope/Project hierarchy stored as entries with relationships
+entry_type: &quot;life_domain&quot; | &quot;life_scope&quot; | &quot;life_project&quot;
+<h1>Entry placement metadata</h1>
+metadata: %{
+  &quot;life_domain_id&quot; =&gt; &quot;uuid&quot;,      # Which domain
+  &quot;life_scope_id&quot; =&gt; &quot;uuid&quot;,       # Which scope (optional)
+  &quot;life_project_id&quot; =&gt; &quot;uuid&quot;,     # Which project (optional)
+  &quot;bucket_type&quot; =&gt; &quot;task&quot; | &quot;idea&quot; | &quot;note&quot; | &quot;decision&quot; | &quot;shopping&quot; | &quot;goal&quot; | &quot;habit&quot; | &quot;question&quot; | &quot;waiting&quot; | &quot;custom:<em>&quot;,
+  &quot;steward_confidence&quot; =&gt; 0.85,    # Filing confidence
+  &quot;steward_auto_filed&quot; =&gt; true,    # Was auto-filed?
+  &quot;connections&quot; =&gt; [               # Related entries
+    %{&quot;entry_id&quot; =&gt; &quot;uuid&quot;, &quot;type&quot; =&gt; &quot;progresses&quot;},
+    %{&quot;entry_id&quot; =&gt; &quot;uuid&quot;, &quot;type&quot; =&gt; &quot;relates&quot;}
+  ]
+}
+</code></pre>
+<strong>Domain Entry Structure:</strong>
+<pre><code class="language-elixir">%{
+  entry_type: &quot;life_domain&quot;,
+  title: &quot;Business: Acme Inc&quot;,
+  content: &quot;Domain for Acme Inc business operations&quot;,
+  metadata: %{
+    &quot;domain_type&quot; =&gt; &quot;business&quot;,
+    &quot;icon&quot; =&gt; &quot;briefcase&quot;,
+    &quot;color&quot; =&gt; &quot;#3B82F6&quot;,
+    &quot;archived&quot; =&gt; false,
+    &quot;created_reason&quot; =&gt; &quot;user_created&quot; | &quot;promoted_from_project&quot; | &quot;agent_recommended&quot;
+  }
+}
+</code></pre>
+<strong>Scope Entry Structure:</strong>
+<pre><code class="language-elixir">%{
+  entry_type: &quot;life_scope&quot;,
+  title: &quot;Marketing&quot;,
+  content: &quot;Marketing and growth initiatives&quot;,
+  metadata: %{
+    &quot;parent_domain_id&quot; =&gt; &quot;uuid&quot;,
+    &quot;icon&quot; =&gt; &quot;megaphone&quot;,
+    &quot;standard_scope&quot; =&gt; true,      # Is this a standard suggested scope?
+    &quot;custom_buckets&quot; =&gt; [&quot;competitors&quot;, &quot;campaigns&quot;]
+  }
+}
+</code></pre>
+<strong>Project Entry Structure:</strong>
+<pre><code class="language-elixir">%{
+  entry_type: &quot;life_project&quot;,
+  title: &quot;Q1 Product Launch&quot;,
+  content: &quot;Launch new product line by end of Q1&quot;,
+  metadata: %{
+    &quot;parent_scope_id&quot; =&gt; &quot;uuid&quot;,
+    &quot;parent_domain_id&quot; =&gt; &quot;uuid&quot;,
+    &quot;status&quot; =&gt; &quot;active&quot; | &quot;on_hold&quot; | &quot;completed&quot; | &quot;archived&quot;,
+    &quot;due_date&quot; =&gt; &quot;2026-03-31&quot;,
+    &quot;goals&quot; =&gt; [&quot;Launch by March 31&quot;, &quot;50 beta signups&quot;],
+    &quot;custom_buckets&quot; =&gt; []
+  }
+}
+</code></pre>
+<h3>8.2 Agent Architecture</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                          LIFE STEWARD AGENT                                  │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                        ENTRY PROCESSOR                               │    │
+│  │  - Watches for new entries via Onelist API                          │    │
+│  │  - Analyzes content and context                                     │    │
+│  │  - Determines classification and connections                        │    │
+│  │  - Files entries or queues for review                               │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                       STRUCTURE ANALYZER                             │    │
+│  │  - Monitors life structure for optimization opportunities           │    │
+│  │  - Detects promotion/demotion candidates                            │    │
+│  │  - Identifies consolidation opportunities                           │    │
+│  │  - Generates structural recommendations                             │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                          COACH ENGINE                                │    │
+│  │  - Tracks goal progress                                             │    │
+│  │  - Monitors habit consistency                                       │    │
+│  │  - Identifies stale/blocked items                                   │    │
+│  │  - Generates encouragement and guidance                             │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                       REVIEW ORCHESTRATOR                            │    │
+│  │  - Schedules and runs review sessions                               │    │
+│  │  - Batches notifications appropriately                              │    │
+│  │  - Presents items for user decision                                 │    │
+│  │  - Processes user feedback to improve classification                │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                         LLM INTERFACE                                │    │
+│  │  - Content analysis for classification                              │    │
+│  │  - Natural language coaching messages                               │    │
+│  │  - Understanding user corrections for learning                      │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>8.3 API Requirements</h3>
+<strong>From Onelist Core:</strong>
+<li>Entry CRUD with metadata (existing)</li>
+<li>Entry relationships/linking API (new or enhanced)</li>
+<li>Entry type filtering (existing)</li>
+<li>Webhook/polling for new entries (needed for real-time processing)</li>
+<li>Bulk entry updates (for efficient filing)</li>
+<strong>Life Steward-Specific Endpoints (if needed):</strong>
+<pre><code class="language-">GET  /api/v1/life/domains                  # List all domains
+GET  /api/v1/life/domains/:id/tree         # Full domain tree (scopes, projects)
+GET  /api/v1/life/inbox                    # Entries pending classification
+POST /api/v1/life/classify                 # Submit classification decision
+GET  /api/v1/life/recommendations          # Pending structural recommendations
+POST /api/v1/life/recommendations/:id      # Accept/reject recommendation
+GET  /api/v1/life/review/daily             # Get daily review items
+GET  /api/v1/life/review/weekly            # Get weekly review items
+</code></pre>
+<h3>8.4 Integration with Other Agents</h3>
+<table>
+<tr><th>Agent</th><th>Integration</th></tr>
+<tr><td><strong>OpenClaw</strong></td><td>Life Steward provides context about active projects/goals for conversation</td></tr>
+<tr><td><strong>Reader</strong></td><td>Reader extracts content; Life Steward files it</td></tr>
+<tr><td><strong>Feeder</strong></td><td>Feeder imports content; Life Steward classifies it</td></tr>
+<tr><td><strong>Planner</strong></td><td>Planner extracts tasks; Life Steward places them in structure</td></tr>
+<tr><td><strong>Jarvis</strong></td><td>Jarvis can query life structure ("What are my active projects?")</td></tr>
+<tr><td><strong>Searcher</strong></td><td>Search within specific domains/scopes/projects</td></tr>
+</table>
+<hr>
+<h2>10. Implementation Phases</h2>
+<h3>Phase 1: Foundation (MVP)</h3>
+<strong>Goal</strong>: Basic hierarchy with GTD alignment
+<li>[ ] Domain/Scope/Project entry types</li>
+<li>[ ] Manual creation of domains, scopes, projects</li>
+<li>[ ] Manual filing of entries into structure</li>
+<li>[ ] GTD-aligned bucket types (Next Actions, Waiting For, Reference, Someday/Maybe)</li>
+<li>[ ] Context tagging (@phone, @computer, @errands, etc.)</li>
+<li>[ ] Simple tree view UI</li>
+<li>[ ] Entry movement between locations</li>
+<li>[ ] Basic inbox for unprocessed items</li>
+<strong>Exit Criteria</strong>: User can manually organize entries into GTD-aligned domain/scope/project hierarchy with contexts
+<h3>Phase 2: Intelligent Filing & Processing</h3>
+<strong>Goal</strong>: Agent-assisted entry clarification and classification
+<li>[ ] Entry processor component</li>
+<li>[ ] GTD clarification prompts ("What's the next action?", "Is it actionable?")</li>
+<li>[ ] Vague task detection → prompt for concrete next action</li>
+<li>[ ] Classification confidence scoring</li>
+<li>[ ] Auto-filing with undo</li>
+<li>[ ] Filing suggestions for low-confidence entries</li>
+<li>[ ] User feedback loop for improving classification</li>
+<li>[ ] Two-minute rule detection ("This seems quick - do it now?")</li>
+<strong>Asset Enrichment Integration</strong> (optional but recommended):
+<li>[ ] Consume extracted action items from Asset Enrichment → auto-create Next Actions</li>
+<li>[ ] Consume commitments from others → auto-create Waiting For entries</li>
+<li>[ ] Consume detected people → link to Person domains, add @agenda items</li>
+<li>[ ] Consume context clues → auto-apply GTD contexts</li>
+<strong>Exit Criteria</strong>: 70%+ of entries auto-filed correctly; vague tasks converted to concrete next actions; enriched assets create structured GTD entries automatically
+<h3>Phase 3: Multi-Domain Flexibility</h3>
+<strong>Goal</strong>: Items visible and moveable across domains
+<li>[ ] Primary location + linked locations for entries/projects</li>
+<li>[ ] Move projects between domains</li>
+<li>[ ] Cross-domain visibility based on tags, relationships, or manual links</li>
+<li>[ ] Agent suggestions for cross-domain links ("Show in Sarah's domain?")</li>
+<li>[ ] Cross-domain views and queries</li>
+<li>[ ] Dependency tracking across domains</li>
+<strong>Exit Criteria</strong>: User can see project in multiple domains without duplication; can move items freely
+<h3>Phase 4: Timeline Estimation</h3>
+<strong>Goal</strong>: Practical, dynamic timeline tracking
+<li>[ ] Optional effort estimates on entries (T-shirt sizes, ranges)</li>
+<li>[ ] Historical velocity tracking (estimated vs. actual)</li>
+<li>[ ] Agent-suggested estimates based on similar past work</li>
+<li>[ ] Project duration calculation from component tasks</li>
+<li>[ ] Due date and deadline tracking</li>
+<li>[ ] Waiting For expected response dates</li>
+<li>[ ] Automatic recalculation when tasks complete or delay</li>
+<li>[ ] Timeline risk alerts</li>
+<strong>Exit Criteria</strong>: Projects with deadlines show calculated timeline with confidence; estimates improve with velocity data
+<h3>Phase 5: Critical Path Analysis</h3>
+<strong>Goal</strong>: Dependency tracking and bottleneck identification
+<li>[ ] Task-to-task dependencies (finish-to-start, start-to-start, etc.)</li>
+<li>[ ] Project-to-project dependencies</li>
+<li>[ ] Cross-domain dependency tracking</li>
+<li>[ ] Critical path calculation and visualization</li>
+<li>[ ] Slack/float calculation for non-critical tasks</li>
+<li>[ ] Blocking chain identification ("This is blocked by X which is blocked by Y")</li>
+<li>[ ] Cascade delay alerts</li>
+<li>[ ] Resource contention detection (same person needed for parallel work)</li>
+<strong>Exit Criteria</strong>: User can see critical path for any project; receives alerts when delays cascade
+<h3>Phase 6: GTD Reviews & Coaching</h3>
+<strong>Goal</strong>: Active life management with structured reviews
+<li>[ ] Daily review workflow</li>
+<li>[ ] Weekly Review workflow (GTD three-phase: Get Clear, Get Current, Get Creative)</li>
+<li>[ ] Monthly and Quarterly review workflows</li>
+<li>[ ] Review preparation: pre-computed briefings from agent</li>
+<li>[ ] Stale item detection and nudges</li>
+<li>[ ] Goal tracking and progress monitoring</li>
+<li>[ ] Habit tracking integration</li>
+<li>[ ] Balance monitoring across domains</li>
+<li>[ ] Celebration system (completed projects, streaks, progress)</li>
+<li>[ ] Horizon-level reflection prompts</li>
+<strong>Exit Criteria</strong>: Users complete Weekly Reviews consistently; report feeling more organized and in control
+<h3>Phase 7: Advanced Intelligence</h3>
+<strong>Goal</strong>: Deep life management insights
+<li>[ ] Entry connection tracking (progresses, blocks, relates, answers)</li>
+<li>[ ] Predictive suggestions (anticipate needs based on patterns)</li>
+<li>[ ] Pattern recognition (recurring themes, seasonal tasks)</li>
+<li>[ ] Natural Planning Model guidance for new projects</li>
+<li>[ ] Life optimization recommendations</li>
+<li>[ ] Cross-domain insight generation</li>
+<li>[ ] Adaptive estimation mode (suggest more/less estimation based on project type)</li>
+<li>[ ] "Mind like water" score - overall system trust metric</li>
+<strong>Exit Criteria</strong>: Agent provides insights user wouldn't have discovered alone; recommends appropriate estimation approach per project
+<h3>Phase 8: Voice-Driven Reviews</h3>
+<strong>Goal</strong>: Hands-free review sessions via audio conversation
+<li>[ ] Basic voice session start/stop</li>
+<li>[ ] Speech-to-text integration (local Whisper or system STT)</li>
+<li>[ ] Text-to-speech for agent responses (system voices or cloud TTS)</li>
+<li>[ ] Intent recognition for common commands (done, skip, keep, next)</li>
+<li>[ ] UI automation during voice session (scroll, highlight, navigate)</li>
+<li>[ ] Multi-turn conversational flow</li>
+<li>[ ] Natural language entry capture ("Add a task to call Mom")</li>
+<li>[ ] Correction and clarification handling</li>
+<li>[ ] Session transcript and actions log</li>
+<li>[ ] Voice-driven Weekly Review complete flow</li>
+<li>[ ] Voice-driven Daily Review quick flow</li>
+<li>[ ] Ad-hoc voice capture mode</li>
+<strong>Exit Criteria</strong>: User can complete entire Weekly Review hands-free via voice; 90%+ of spoken commands correctly understood
+<h3>Phase 9: Proactive Voice & Ambient Features</h3>
+<strong>Goal</strong>: Voice becomes a natural interaction mode, not just for reviews
+<li>[ ] Voice notifications for important events ("You have an overdue item")</li>
+<li>[ ] Scheduled voice check-ins</li>
+<li>[ ] Quick voice capture from any screen</li>
+<li>[ ] Voice briefings on demand ("Give me a life update")</li>
+<li>[ ] Cross-platform voice consistency (Mac, iOS, web)</li>
+<li>[ ] Voice preference learning (adapts to user's speech patterns)</li>
+<strong>Exit Criteria</strong>: Voice is a first-class interaction method alongside visual UI
+<h3>Phase 10: Multi-Agent Orchestration</h3>
+<strong>Goal</strong>: Life Steward orchestrates other agents for complex creative projects
+<li>[ ] Living Document project type</li>
+<li>[ ] Content routing rules (tags, keywords, sources → projects)</li>
+<li>[ ] Auto-triage incoming content to relevant projects</li>
+<li>[ ] Research task generation and handoff to Researcher agent</li>
+<li>[ ] Research output review workflow</li>
+<li>[ ] Writing task generation and handoff to Writer agent</li>
+<li>[ ] Draft review and revision workflow</li>
+<li>[ ] Human-in-the-loop approval gates (configurable)</li>
+<li>[ ] Edition/version management for living documents</li>
+<li>[ ] Changelog generation</li>
+<li>[ ] Voice-driven project triage and management</li>
+<li>[ ] Pipeline status dashboard</li>
+<strong>Exit Criteria</strong>: User can maintain a living ebook that auto-updates with new content via Researcher/Writer pipeline
+<h3>Phase 11: Advanced Orchestration & Publishing</h3>
+<strong>Goal</strong>: Full publishing pipeline with external outputs
+<li>[ ] Multi-project orchestration (dependencies between living documents)</li>
+<li>[ ] Publishing integrations (Xamlr blog, PDF export, EPUB generation)</li>
+<li>[ ] Subscriber notifications for new editions</li>
+<li>[ ] Scheduled publishing (weekly newsletter from curated content)</li>
+<li>[ ] Quality gates (word count, citation requirements, consistency checks)</li>
+<li>[ ] Collaborative review (multiple reviewers for larger projects)</li>
+<li>[ ] A/B content testing integration</li>
+<strong>Exit Criteria</strong>: Living documents can be published to external platforms automatically
+<hr>
+<h2>11. Open Questions</h2>
+<h3>10.1 Design Questions</h3>
+<li>[ ] <strong>Q1</strong>: How deeply should Life Steward integrate with existing tag system? Should domains/scopes/projects be tags, or separate entities?</li>
+  <li></em>Leaning<em>: Separate entities stored as special entry types, but can auto-generate tags for compatibility</li>
+<li>[ ] <strong>Q2</strong>: Should there be a limit on hierarchy depth? (Domain → Scope → Project → ???)</li>
+  <li></em>Leaning<em>: Three levels is enough per GTD (Areas → Projects → Actions); deeper nesting creates complexity</li>
+<li>[x] <strong>Q3</strong>: How to handle entries that genuinely belong in multiple places?</li>
+  <li></em>Decision<em>: Primary location + links to related locations; projects can be "visible in" multiple domains</li>
+<li>[ ] <strong>Q4</strong>: What happens to entries when a project is archived?</li>
+  <li></em>Leaning<em>: Entries stay with archived project, searchable but hidden from active views</li>
+<li>[ ] <strong>Q5</strong>: Should there be templates for common domain types (Business, Creative Project, etc.)?</li>
+  <li></em>Leaning<em>: Yes, with suggested scopes, buckets, and Natural Planning prompts</li>
+<li>[ ] <strong>Q6</strong>: How strictly to enforce GTD vocabulary vs. user's preferred terms?</li>
+  <li></em>Leaning<em>: Default to GTD terms with option to customize; help text explains mapping</li>
+<h3>10.2 Timeline & Estimation Questions</h3>
+<li>[ ] <strong>Q7</strong>: Should effort estimates be required or optional?</li>
+  <li></em>Leaning<em>: Always optional; agent recommends estimation mode based on project type</li>
+<li>[ ] <strong>Q8</strong>: How to handle estimation for creative/exploratory work?</li>
+  <li></em>Leaning<em>: Recommend minimal estimation mode; track output metrics (word count, commits) instead</li>
+<li>[ ] <strong>Q9</strong>: What's the right confidence interval representation for non-technical users?</li>
+  <li></em>Leaning<em>: Simple "Optimistic / Expected / Pessimistic" with visual range bar</li>
+<li>[ ] <strong>Q10</strong>: Should velocity tracking be automatic or opt-in?</li>
+  <li></em>Leaning<em>: Opt-in with prompt when user starts tracking actuals; explain benefit</li>
+<li>[ ] <strong>Q11</strong>: How to handle projects with many unknowns ("research" phase)?</li>
+  <li></em>Leaning<em>: Support milestone-based estimation ("Research done by X, then re-estimate")</li>
+<h3>10.3 Critical Path Questions</h3>
+<li>[ ] <strong>Q12</strong>: How to visualize cross-domain dependencies without overwhelming?</li>
+  <li></em>Leaning<em>: Only show when relevant (project view, timeline risk alerts); don't clutter day-to-day</li>
+<li>[ ] <strong>Q13</strong>: Should resource contention be automatic (based on time) or manual?</li>
+  <li></em>Leaning<em>: Start manual ("I can spend 10h/week on this"); optionally infer from calendar</li>
+<li>[ ] <strong>Q14</strong>: How to handle soft vs. hard dependencies?</li>
+  <li></em>Leaning<em>: Both types; soft dependencies don't affect critical path calculation</li>
+<h3>10.4 Technical Questions</h3>
+<li>[ ] <strong>Q15</strong>: Real-time entry processing vs. batch processing?</li>
+  <li></em>Leaning<em>: Near real-time with batched notifications</li>
+<li>[ ] <strong>Q16</strong>: How to handle classification learning/improvement over time?</li>
+  <li></em>Leaning<em>: Track user corrections, adjust confidence accordingly</li>
+<li>[ ] <strong>Q17</strong>: Where does Life Steward state live? (its own DB? Onelist entries?)</li>
+  <li></em>Leaning<em>: Everything in Onelist as entries (domains, scopes, projects, timeline metadata all in entries)</li>
+<li>[ ] <strong>Q18</strong>: How to efficiently compute critical path for large project graphs?</li>
+  <li></em>Leaning<em>: Compute on-demand and cache; invalidate when dependencies change</li>
+<h3>10.5 UX Questions</h3>
+<li>[ ] <strong>Q19</strong>: How prominent should Life Steward suggestions be? Interrupting vs. passive?</li>
+  <li></em>Leaning<em>: Configurable; default to batched/passive</li>
+<li>[ ] <strong>Q20</strong>: How to onboard users to the domain/scope/project concept without overwhelming?</li>
+  <li></em>Leaning<em>: Start with just Personal domain + inbox; GTD "mind sweep" capture exercise; suggest structure as entries accumulate</li>
+<li>[ ] <strong>Q21</strong>: Should Weekly Review be enforced (nagging) or gentle (available)?</li>
+  <li></em>Leaning<em>: Gentle by default with configurable commitment mode for users who want accountability</li>
+<h3>10.6 Voice Feature Questions</h3>
+<li>[ ] <strong>Q22</strong>: Local STT (Whisper) vs cloud STT - how to handle the tradeoff?</li>
+  <li></em>Leaning<em>: Local by default on capable devices; cloud as opt-in for better accuracy or less powerful devices</li>
+<li>[ ] <strong>Q23</strong>: Should voice sessions be recorded/transcribed by default?</li>
+  <li></em>Leaning<em>: Transcript saved (for user reference); audio discarded immediately (privacy)</li>
+<li>[ ] <strong>Q24</strong>: How to handle voice recognition errors gracefully?</li>
+  <li></em>Leaning<em>: Show transcript in real-time; "I heard X, is that right?" for low-confidence; easy "that's not right" correction</li>
+<li>[ ] <strong>Q25</strong>: What's the minimum viable voice feature for initial release?</li>
+  <li></em>Leaning<em>: Weekly Review flow with basic commands (done/skip/keep); capture new items; UI follows along</li>
+<li>[ ] <strong>Q26</strong>: How to handle multi-person households (voice identification)?</li>
+  <li></em>Leaning<em>: Session start requires visual confirmation or PIN; don't rely on voice ID initially</li>
+<li>[ ] <strong>Q27</strong>: Should voice work when app is in background/locked?</li>
+  <li></em>Leaning<em>: Requires app open initially; background listening is future enhancement with clear privacy controls</li>
+<h3>10.7 Multi-Agent Orchestration Questions</h3>
+<li>[ ] <strong>Q28</strong>: How to handle agent failures mid-pipeline (Researcher fails, Writer waiting)?</li>
+  <li></em>Leaning<em>: Retry with backoff; notify user after N failures; allow manual intervention</li>
+<li>[ ] <strong>Q29</strong>: Should research/writing agents run on user's LLM keys or Onelist's?</li>
+  <li></em>Leaning<em>: User's keys by default (cost control); Onelist keys as premium option</li>
+<li>[ ] <strong>Q30</strong>: How to handle conflicting content updates (two sources update same chapter)?</li>
+  <li></em>Leaning<em>: Queue for user triage; show both sources; let user decide merge strategy</li>
+<li>[ ] <strong>Q31</strong>: What's the right granularity for human approval gates?</li>
+  <li></em>Leaning<em>: Configurable per project; default to review research + review drafts</li>
+<li>[ ] <strong>Q32</strong>: How long should research/writing tasks wait before timing out?</li>
+  <li></em>Leaning<em>: Configurable; default 24h for research, 48h for writing; notify on delay</li>
+<li>[ ] <strong>Q33</strong>: Should living documents support multiple simultaneous editions in progress?</li>
+  <li></em>Leaning<em>: Initially no (one edition at a time); future enhancement for parallel tracks</li>
+<li>[ ] <strong>Q34</strong>: How to handle external publishing failures (Xamlr down, PDF generation fails)?</li>
+  <li></em>Leaning<em>: Retry; keep edition ready; notify user; don't block future editions</li>
+<hr>
+<h2>12. Success Metrics</h2>
+<h3>11.1 Core Organization Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Target</th><th>How Measured</th></tr>
+<tr><td>Auto-filing accuracy</td><td>>80%</td><td>User corrections / total auto-filed</td></tr>
+<tr><td>Time to organize</td><td><30s per entry</td><td>Average time from entry creation to filed</td></tr>
+<tr><td>Recommendation acceptance</td><td>>50%</td><td>Accepted / total recommendations</td></tr>
+<tr><td>Entry organization rate</td><td>>90%</td><td>Entries in structure / total entries</td></tr>
+<tr><td>Inbox zero frequency</td><td>>70%</td><td>Days where inbox is empty at EOD</td></tr>
+<tr><td>Next action clarity</td><td>>90%</td><td>Entries marked as tasks that are specific next actions</td></tr>
+</table>
+<h3>11.2 GTD Practice Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Target</th><th>How Measured</th></tr>
+<tr><td>Weekly Review completion</td><td>>80%</td><td>Completed / scheduled reviews</td></tr>
+<tr><td>Weekly Review thoroughness</td><td>>70%</td><td>Checklist items completed per review</td></tr>
+<tr><td>Projects with next actions</td><td>100%</td><td>Active projects with at least one next action</td></tr>
+<tr><td>Stale item resolution</td><td><14 days</td><td>Average time items sit without activity</td></tr>
+<tr><td>"Mind like water" score</td><td>>4/5</td><td>User self-reported clarity/control</td></tr>
+</table>
+<h3>11.3 Timeline & Estimation Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Target</th><th>How Measured</th></tr>
+<tr><td>Estimation accuracy</td><td>±30%</td><td>(Actual - Estimated) / Estimated for completed tasks</td></tr>
+<tr><td>Velocity stability</td><td><20% variance</td><td>Week-over-week velocity change</td></tr>
+<tr><td>Deadline hit rate</td><td>>85%</td><td>Projects completed by target date</td></tr>
+<tr><td>Critical path alerts</td><td>>3 days warning</td><td>Average lead time on timeline risk alerts</td></tr>
+<tr><td>Cascade prevention</td><td>>50%</td><td>Cascade alerts acted upon before delay materialized</td></tr>
+</table>
+<h3>11.4 User Experience Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Target</th><th>How Measured</th></tr>
+<tr><td>User satisfaction</td><td>>4/5</td><td>Periodic survey</td></tr>
+<tr><td>Daily active usage</td><td>>80%</td><td>Days with at least one interaction</td></tr>
+<tr><td>Feature adoption</td><td>>50%</td><td>Users using timeline features (opt-in)</td></tr>
+<tr><td>Onboarding completion</td><td>>70%</td><td>Users completing initial setup</td></tr>
+<tr><td>Retention (90-day)</td><td>>60%</td><td>Users still active after 90 days</td></tr>
+</table>
+<hr>
+<h2>13. Appendix</h2>
+<h3>12.1 Standard Bucket Definitions (GTD-Aligned)</h3>
+<table>
+<tr><th>Bucket</th><th>Icon</th><th>GTD Equivalent</th><th>Description</th><th>Typical Actions</th></tr>
+<tr><td>Next Actions</td><td>☐</td><td>Next Actions</td><td>Concrete, physical next steps (not vague!)</td><td>Complete, delegate, defer</td></tr>
+<tr><td>Waiting For</td><td>⏳</td><td>Waiting For</td><td>Delegated or awaiting external response (track who/what/when)</td><td>Follow up, receive response</td></tr>
+<tr><td>Someday/Maybe</td><td>💭</td><td>Someday/Maybe</td><td>Ideas to revisit, not committed now</td><td>Activate, delete, keep</td></tr>
+<tr><td>Reference</td><td>📝</td><td>Reference</td><td>Non-actionable information to keep</td><td>Link, tag, archive</td></tr>
+<tr><td>Decisions</td><td>⚖️</td><td>(Enhancement)</td><td>Choices made with reasoning (reviewable)</td><td>Reference, revisit</td></tr>
+<tr><td>Shopping</td><td>🛒</td><td>(Next Actions variant)</td><td>Items to acquire (context: @errands)</td><td>Purchase, remove</td></tr>
+<tr><td>Goals</td><td>🎯</td><td>Horizons 3-4</td><td>Desired outcomes with success criteria</td><td>Track progress, celebrate, revise</td></tr>
+<tr><td>Habits</td><td>🔄</td><td>(Enhancement)</td><td>Recurring behaviors to build/track</td><td>Track streak, adjust</td></tr>
+</table>
+<strong>Deprecated (replaced by GTD equivalents):</strong>
+<table>
+<tr><th>Old Bucket</th><th>Replaced By</th><th>Reason</th></tr>
+<tr><td>Tasks</td><td>Next Actions</td><td>"Task" is vague; Next Action must be specific and physical</td></tr>
+<tr><td>Ideas</td><td>Someday/Maybe</td><td>Clearer GTD terminology; distinguishes uncommitted from active</td></tr>
+<tr><td>Notes</td><td>Reference</td><td>Clearer distinction: reference = non-actionable</td></tr>
+<tr><td>Questions</td><td>Next Actions or Someday/Maybe</td><td>A question needs a next action to answer it, or it's someday/maybe</td></tr>
+</table>
+<h3>12.2 Example Life Structure (GTD-Aligned)</h3>
+<pre><code class="language-">Personal (Domain) ─────────────────────────────────────────────────────────────
+│
+├── Purpose &amp; Principles (Horizon 5)
+│   └── &quot;Be present for family. Create meaningful work. Stay healthy.&quot;
+│
+├── Vision (Horizon 4 - 3-5 years)
+│   └── Goals: &quot;Financial independence by 50&quot;, &quot;Kids thriving in school&quot;
+│
+├── Health &amp; Fitness (Scope - Horizon 2: Area of Focus)
+│   ├── Goals (Horizon 3): &quot;Run 5K by June&quot;, &quot;Lose 15 lbs by December&quot;
+│   ├── Next Actions:
+│   │   ├── &quot;@phone: Call Dr. Smith at 555-1234 to schedule annual checkup&quot;
+│   │   └── &quot;@anywhere: Research couch-to-5K programs (15 min)&quot;
+│   ├── Waiting For: &quot;Lab results from Quest Diagnostics (expected Feb 1)&quot;
+│   ├── Someday/Maybe: &quot;Try rock climbing&quot;, &quot;Join a sports league&quot;
+│   ├── Habits: &quot;Daily: 10min walk after lunch&quot;, &quot;Weekly: Meal prep Sunday&quot;
+│   └── Gym Routine Project (Horizon 1)
+│       ├── Next Actions: &quot;@computer: Watch YouTube video on Starting Strength&quot;
+│       ├── Reference: &quot;Current stats: 180lbs, 5'10\&quot;, can run 1 mile&quot;
+│       └── Shopping: &quot;@errands: Buy running shoes at Fleet Feet&quot;
+│
+├── Finance (Scope)
+│   ├── Goals: &quot;Emergency fund $10K by June&quot;, &quot;Max out 401k&quot;
+│   ├── Next Actions:
+│   │   ├── &quot;@computer: Log into Mint and categorize last month's expenses&quot;
+│   │   └── &quot;@phone: Call Fidelity 800-343-3548 about rollover IRA&quot;
+│   ├── Waiting For: &quot;Schwab 1099 (expected by Feb 15)&quot;
+│   └── Tax Prep 2026 Project ─── Due: April 15 ─── Est: 3-4 weeks
+│       ├── Next Actions: &quot;@computer: Download W-2 from Workday&quot;
+│       ├── Waiting For:
+│       │   ├── &quot;1099 from Schwab (asked 1/20, expected 2/15)&quot;
+│       │   └── &quot;1098 from mortgage company (expected 1/31)&quot;
+│       ├── Decisions: &quot;Use TurboTax - it worked well last year&quot;
+│       └── Reference: &quot;Tax ID: xxx-xx-xxxx&quot;, &quot;Last year's AGI: $X&quot;
+│
+├── Home (Scope)
+│   └── Kitchen Remodel Project ─── Due: March 31 ─── Est: 6-8 weeks
+│       │                          ⚠️ ON CRITICAL PATH
+│       ├── Next Actions:
+│       │   └── &quot;@phone: Call ABC Contractors 555-9876 to follow up on quote&quot;
+│       ├── Waiting For:
+│       │   ├── &quot;Quote from ABC Contractors (asked 1/25)&quot; ← OVERDUE
+│       │   └── &quot;Tile samples from Home Depot (ordered 1/27, due 2/3)&quot;
+│       ├── Someday/Maybe: &quot;Subway tile backsplash?&quot;, &quot;Under-cabinet lighting?&quot;
+│       ├── Decisions: &quot;Budget: $15K&quot;, &quot;Keep existing layout&quot;
+│       ├── Shopping: &quot;@errands: Pick up cabinet hardware samples&quot;
+│       ├── Dependencies:
+│       │   └── Blocks: &quot;Host dinner party&quot; (March 20)
+│       └── Timeline:
+│           ├── Get quotes: Week 1-2 (current) ← CRITICAL
+│           ├── Select contractor: Week 3
+│           ├── Order materials: Week 3-4
+│           ├── Demo &amp; install: Week 5-7
+│           └── Final touches: Week 8
+│
+├── @agenda:Sarah (Context list - things to discuss when we meet)
+│   ├── &quot;Discuss summer vacation plans&quot;
+│   └── &quot;Coordinate Mom's birthday party&quot;
+│
+└── Inbox (unprocessed entries)
+    ├── &quot;Meeting with boss went well&quot; ← Needs processing
+    └── &quot;Interesting article about investing&quot; ← Is it actionable?
+<p>Business: Acme Inc (Domain) ───────────────────────────────────────────────────
+│
+├── Marketing (Scope)
+│   ├── Goals: &quot;1000 newsletter subscribers by Q2&quot;
+│   ├── Next Actions:
+│   │   └── &quot;@computer: Draft this week's newsletter intro paragraph&quot;
+│   └── Q1 Campaign Project ─── Due: March 15 ─── Depends on: &quot;Learn React&quot; project
+│       ├── Next Actions: &quot;@computer: Create Mailchimp campaign template&quot;
+│       ├── Waiting For: &quot;Design assets from Sarah (due 2/5)&quot;
+│       └── Someday/Maybe: &quot;Partner with influencer?&quot;
+│
+└── Product (Scope)
+    ├── Next Actions: &quot;@computer: Reproduce login bug in staging environment&quot;
+    └── V2 Launch Project ─── Hard Deadline: March 31
+        ├── Goals: &quot;50 beta signups&quot;, &quot;Zero critical bugs at launch&quot;
+        ├── Next Actions: &quot;@computer: Write acceptance criteria for onboarding flow&quot;
+        ├── Decisions: &quot;Pricing: $29/mo&quot;, &quot;Stripe for payments&quot;
+        ├── Dependencies:
+        │   ├── Depends on: &quot;Learn React&quot; (Personal/Learning) ← Cross-domain!
+        │   └── Depends on: &quot;Hire Designer&quot; project
+        └── CRITICAL PATH ALERT: &quot;Learn React&quot; at 60%, needs completion by Feb 28</p>
+<p>Person: Sarah (Domain) ← Promoted from frequent mentions ──────────────────────
+│
+├── @agenda:Sarah: &quot;Ask about her new job&quot;, &quot;Coordinate kitchen help&quot;
+│
+├── Birthday 2026 Project ─── Due: March 8
+│   ├── Next Actions: &quot;@phone: Text Mom to coordinate surprise party logistics&quot;
+│   ├── Shopping: &quot;@errands: Buy gift from registry at Target&quot;
+│   └── Waiting For: &quot;Party venue confirmation (asked 1/27)&quot;
+│
+└── Wedding Planning Project ← Agent suggested creating this
+    ├── Next Actions: &quot;@computer: RSVP on wedding website&quot;
+    ├── Shopping: &quot;@computer: Order gift from Williams Sonoma registry&quot;
+    └── Reference: &quot;Venue: The Grand Ballroom, June 15, 4pm&quot;</p>
+<p>Cross-Domain Views Available:
+────────────────────────────────────────────────────────────────────────────────
+• &quot;All Waiting For&quot; - 8 items across all domains
+• &quot;All items involving Sarah&quot; - 12 items
+• &quot;Critical path items&quot; - 4 items blocking deadlines
+• &quot;Today's Next Actions by Context&quot;:
+    @phone (3)    @computer (8)    @errands (2)    @anywhere (2)
+</code></pre></p>
+<hr>
+<h2>14. Decision Log</h2>
+<table>
+<tr><th>Date</th><th>Decision</th><th>Rationale</th><th>Alternatives Considered</th></tr>
+<tr><td>2026-01-28</td><td>New agent vs extending existing</td><td>Scope is fundamentally different from Planner/Librarian/Jarvis; holistic life management needs dedicated agent</td><td>Extend Planner (too narrow), Extend Jarvis (different focus)</td></tr>
+<tr><td>2026-01-28</td><td>Three-level hierarchy (Domain/Scope/Project)</td><td>Balances flexibility with simplicity; aligns with GTD's Areas/Projects/Actions</td><td>Two levels (too flat), Four+ levels (too complex)</td></tr>
+<tr><td>2026-01-28</td><td>Entries as structure storage</td><td>Consistent with Onelist philosophy; no new data model</td><td>Separate database tables (adds complexity)</td></tr>
+<tr><td>2026-01-28</td><td>Configurable auto-filing confidence</td><td>Users have different comfort levels with automation</td><td>Fixed threshold (one-size-fits-all)</td></tr>
+<tr><td>2026-01-28</td><td>Batched notifications as default</td><td>Reduces interruption while maintaining awareness</td><td>Real-time (too noisy), Manual only (misses value)</td></tr>
+<tr><td>2026-01-28</td><td>GTD methodology as foundation</td><td>Proven system with clear practices; "Weekly Review" is cornerstone; "Next Actions" vs vague tasks is key insight</td><td>Custom methodology, no methodology, other systems (Bullet Journal, PARA)</td></tr>
+<tr><td>2026-01-28</td><td>Multi-domain visibility (primary + links)</td><td>Projects genuinely span life areas; duplication is worse than complexity</td><td>Single location only (too rigid), Full duplication (sync nightmare)</td></tr>
+<tr><td>2026-01-28</td><td>Projects moveable between domains</td><td>Life changes; what started personal may become business</td><td>Fixed hierarchy (frustrating when wrong)</td></tr>
+<tr><td>2026-01-28</td><td>Timeline estimation as optional</td><td>Not all work benefits from estimation; creative work can be harmed by it</td><td>Always estimate (counterproductive), Never estimate (misses deadline use cases)</td></tr>
+<tr><td>2026-01-28</td><td>Adaptive estimation mode</td><td>Agent recommends estimation approach based on project type</td><td>One-size-fits-all estimation</td></tr>
+<tr><td>2026-01-28</td><td>Effort vs duration separation</td><td>Waiting time is different from work time; both needed for timeline</td><td>Combined "duration" (loses information)</td></tr>
+<tr><td>2026-01-28</td><td>Velocity tracking opt-in</td><td>Not everyone wants this data; requires tracking actuals</td><td>Always track (intrusive), Never track (loses learning opportunity)</td></tr>
+<tr><td>2026-01-28</td><td>Cross-project dependencies</td><td>Real life has these; ignoring causes surprises</td><td>Project-only dependencies (misses reality)</td></tr>
+<tr><td>2026-01-28</td><td>Critical path calculation on-demand</td><td>Most users won't need it; compute when requested</td><td>Always compute (wasted resources), Never compute (misses value for complex projects)</td></tr>
+<tr><td>2026-01-28</td><td>GTD Contexts for task filtering</td><td>Proven valuable in GTD; enables "what can I do right now?"</td><td>Tags only (less semantic), No contexts (harder to filter)</td></tr>
+<tr><td>2026-01-28</td><td>Weekly Review as cornerstone</td><td>GTD's most important practice; system fails without it</td><td>Optional reviews (system becomes untrustworthy)</td></tr>
+<tr><td>2026-01-28</td><td>UI integrated into Onelist app, not separate</td><td>Leverages existing Phoenix LiveView infrastructure; consistent UX; integrates with Onelist AI</td><td>Separate standalone app (duplicate infrastructure), Browser extension only (limited)</td></tr>
+<tr><td>2026-01-28</td><td>Life Steward mode in Contextual AI Chat Pane</td><td>Natural integration point for coaching; reuses existing planned AI interface</td><td>Separate chat interface (fragmented UX), No chat integration (loses coaching capability)</td></tr>
+<tr><td>2026-01-28</td><td>Hierarchy browser as primary navigation</td><td>Users need to see domain/scope/project structure; GTD requires reviewing "Areas of Focus"</td><td>Entry-only view (loses hierarchy context), Flat list (loses structure)</td></tr>
+<tr><td>2026-01-28</td><td>Context-based Today view for Next Actions</td><td>Core GTD practice; enables "what can I do right now?" workflow</td><td>Project-based view only (misses cross-cutting contexts)</td></tr>
+<tr><td>2026-01-28</td><td>Guided Weekly Review workflow</td><td>GTD cornerstone; step-by-step guidance increases completion rate</td><td>Checklist only (less guidance), Free-form review (inconsistent)</td></tr>
+<tr><td>2026-01-28</td><td>Voice-driven review sessions (post-MVP)</td><td>Enables hands-free reviews (driving, walking, chores); reduces friction; accessibility benefit</td><td>Visual-only reviews (requires full attention), Voice-only without visual (loses context)</td></tr>
+<tr><td>2026-01-28</td><td>Agent controls UI during voice session</td><td>User stays in conversation flow; sees progress visually; can verify actions taken</td><td>User must manually navigate (breaks flow), No visual feedback (loses trust)</td></tr>
+<tr><td>2026-01-28</td><td>Local STT preferred (Whisper)</td><td>Privacy-first; works offline; user data stays local</td><td>Cloud-only STT (privacy concerns), No voice feature (misses major UX improvement)</td></tr>
+<tr><td>2026-01-28</td><td>Conversational flow with quick commands</td><td>"Done", "skip", "keep" minimize speaking; natural language for complex actions</td><td>Full sentences required (tedious), Command-only (unnatural)</td></tr>
+<tr><td>2026-01-28</td><td>Confirmation for important actions only</td><td>Balance between safety and flow; don't interrupt for minor changes</td><td>Always confirm (slow), Never confirm (risky)</td></tr>
+<tr><td>2026-01-28</td><td>Life Steward as orchestrator for multi-agent workflows</td><td>Natural extension of project management role; maintains user control</td><td>Each agent independent (fragmented), Monolithic super-agent (complex)</td></tr>
+<tr><td>2026-01-28</td><td>Living Document as project type</td><td>Common use case (ebooks, reports, docs); demonstrates agent cooperation value</td><td>Generic projects only (misses optimization opportunity)</td></tr>
+<tr><td>2026-01-28</td><td>Content routing rules for auto-triage</td><td>Reduces manual work; ensures relevant content reaches projects</td><td>Manual triage only (tedious), Fully automatic (loses control)</td></tr>
+<tr><td>2026-01-28</td><td>Human-in-the-loop approval gates</td><td>Quality control; user remains author; prevents runaway automation</td><td>Fully automatic (quality risk), Every step approval (tedious)</td></tr>
+<tr><td>2026-01-28</td><td>Configurable automation level per project</td><td>Different projects need different oversight; user preferences vary</td><td>One-size-fits-all (inflexible)</td></tr>
+<tr><td>2026-01-28</td><td>Edition/version management for documents</td><td>Enables rollback; tracks evolution; supports publishing workflow</td><td>Overwrite only (loses history), Git-style (too technical)</td></tr>
+<tr><td>2026-01-28</td><td>Agent task handoffs via structured entries</td><td>All data in Onelist; auditable; agents loosely coupled</td><td>Direct API calls (tight coupling), External queue (adds infrastructure)</td></tr>
+<tr><td>2026-01-28</td><td>Asset Enrichment Agent as key dependency</td><td>Automatic extraction of structured intelligence from raw assets dramatically improves filing accuracy</td><td>Life Steward parses assets directly (complex, duplicate effort), No integration (manual filing only)</td></tr>
+<tr><td>2026-01-28</td><td>Action items from enrichment → Next Actions</td><td>Natural mapping; Asset Enrichment extracts "I will..." statements, Life Steward files as tasks</td><td>Create generic notes (loses actionability), Require manual tagging (tedious)</td></tr>
+<tr><td>2026-01-28</td><td>Commitments from others → Waiting For</td><td>GTD Waiting For list is exactly this use case; Asset Enrichment identifies "They said they'll..."</td><td>Ignore commitments (things fall through), Generic tasks (loses context of who)</td></tr>
+<tr><td>2026-01-28</td><td>People detection → Person domains & @agenda</td><td>Builds relationship context automatically; @agenda lists enable "topics for next meeting"</td><td>Manual person tracking (tedious), No people linking (loses relationship intelligence)</td></tr>
+<tr><td>2026-01-28</td><td>Context detection from content</td><td>Enables automatic GTD context tagging without user effort</td><td>Require manual context tags (friction), No context filtering (loses GTD workflow)</td></tr>
+<tr><td>2026-01-28</td><td>Life Steward Phase 2+ depends on Asset Enrichment Phase 2</td><td>Full intelligent filing requires extracted intelligence</td><td>Independent development (suboptimal integration), Tight coupling (fragile)</td></tr>
+</table>
+<hr>
+<h2>15. References</h2>
+<li><a href="https://gettingthingsdone.com/what-is-gtd/">David Allen's Getting Things Done</a> - Official GTD resource</li>
+<li><a href="https://hamberg.no/gtd">GTD in 15 Minutes</a> - Pragmatic guide to GTD</li>
+<li><a href="https://en.wikipedia.org/wiki/Getting_Things_Done">Getting Things Done - Wikipedia</a> - Overview of methodology</li>
+<li><a href="https://www.todoist.com/productivity-methods/getting-things-done">Todoist GTD Guide</a> - Practical GTD implementation</li>
+</ul>
+<hr>
+</em>Last updated: 2026-01-28<em>
+</em>Status: Planning<em>
+</em>Owner: TBD*
+  </article>
+</body>
+</html>

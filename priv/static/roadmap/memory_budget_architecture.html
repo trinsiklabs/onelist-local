@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Budget Architecture - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Memory Budget Architecture</h1>
+<strong>Document Version:</strong> 2026-01-31
+<strong>Status:</strong> Draft - Synthesis Document
+<strong>Related:</strong> river_agent_plan.md, Rata's Attention Budget Allocation paper (Moltbook)
+<hr>
+<h2>1. Overview</h2>
+<p>This document synthesizes two complementary approaches to agent memory management:</p>
+<p>1. <strong>Attention Budget Allocation</strong> (Rata, Moltbook) — runtime decisions about what to load into finite context windows
+2. <strong>Value Tier System</strong> (River plan) — lifecycle decisions about what's worth preserving long-term</p>
+<p>Both address the same fundamental constraint: <strong>memory is finite, not everything can be kept equally accessible</strong>. They operate at different timescales and together form a complete memory architecture.</p>
+<hr>
+<h2>2. The Two Timescales</h2>
+<h3>2.1 Runtime Budget (Milliseconds to Seconds)</h3>
+<strong>Problem:</strong> Given a 128k token context window, how do we decide what to include for this specific query?
+<strong>Rata's Framework:</strong>
+<ul>
+<li>Treat context as fixed budget with competing allocations</li>
+<li>Estimate query complexity before retrieval</li>
+<li>Stage retrieval (top-3 → top-10 → broad) based on need</li>
+<li>Compress older content rather than dropping it</li>
+<pre><code class="language-">Total Budget: 128,000 tokens
+├── Fixed costs (system prompt, tools, response reserve): ~9,000
+└── Variable allocation: ~119,000
+    ├── Conversation history: f(complexity)
+    ├── Retrieved memories: f(complexity)
+    └── Working scratch space: remainder
+</code></pre>
+<strong>Key insight:</strong> Different queries need different allocations. "What time is it?" needs minimal context; "Debug my intermittent API failures" needs maximum.
+<h3>2.2 Lifecycle Budget (Days to Months)</h3>
+<strong>Problem:</strong> Given infinite potential memories, how do we decide what's worth keeping accessible vs. archived vs. forgotten?
+<strong>River's Value Tier System:</strong>
+<table>
+<tr><th>Tier</th><th>Description</th><th>Auto-Cleanup</th><th>Search Default</th></tr>
+<tr><td><code>temporary</code></td><td>Pending review</td><td>30 days if unaccessed</td><td>Excluded</td></tr>
+<tr><td><code>standard</code></td><td>Normal content</td><td>Never</td><td>Included</td></tr>
+<tr><td><code>valuable</code></td><td>Explicitly important</td><td>Never</td><td>Included</td></tr>
+<tr><td><code>archive</code></td><td>Low-priority reference</td><td>Never</td><td>Excluded</td></tr>
+</table>
+<strong>Key insight:</strong> Content has a lifecycle. What's urgent today may be irrelevant next month. Explicit tiering prevents context pollution.
+<hr>
+<h2>3. Synthesis: Unified Memory Architecture</h2>
+<h3>3.1 The Full Stack</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         MEMORY ARCHITECTURE                                  │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                    RUNTIME LAYER (per-request)                         │ │
+│  │                                                                        │ │
+│  │  Query arrives → Complexity estimation → Budget allocation             │ │
+│  │                                                                        │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                 │ │
+│  │  │   History    │  │   Memories   │  │   Scratch    │                 │ │
+│  │  │   Budget     │  │   Budget     │  │   Space      │                 │ │
+│  │  │              │  │              │  │              │                 │ │
+│  │  │ Recent turns │  │ Retrieved    │  │ Reasoning    │                 │ │
+│  │  │ (compressed) │  │ (staged)     │  │ room         │                 │ │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘                 │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                         │
+│                                    │ retrieval                               │
+│                                    ▼                                         │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                    STORAGE LAYER (persistent)                          │ │
+│  │                                                                        │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐ │ │
+│  │  │   Valuable   │  │   Standard   │  │  Temporary   │  │  Archive   │ │ │
+│  │  │              │  │              │  │              │  │            │ │ │
+│  │  │ High-value   │  │ Normal       │  │ Pending      │  │ Historical │ │ │
+│  │  │ content      │  │ entries      │  │ review       │  │ reference  │ │ │
+│  │  │              │  │              │  │              │  │            │ │ │
+│  │  │ Priority     │  │ Default      │  │ Auto-cleanup │  │ Excluded   │ │ │
+│  │  │ retrieval    │  │ retrieval    │  │ if ignored   │  │ from search│ │ │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘  └────────────┘ │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                    │                                         │
+│                                    │ consolidation                           │
+│                                    ▼                                         │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                    CONSOLIDATION LAYER (periodic)                      │ │
+│  │                                                                        │ │
+│  │  • Episodes → Schemas (pattern extraction)                             │ │
+│  │  • Verbose → Compressed (information density)                          │ │
+│  │  • Temporary → Standard/Archive/Delete (lifecycle)                     │ │
+│  │  • Low-access → Archive (usage-based demotion)                         │ │
+│  │  • High-valence → Valuable (significance-based promotion)              │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.2 How Layers Interact</h3>
+<p>1. <strong>Query arrives</strong> → Runtime layer estimates complexity
+2. <strong>Budget allocated</strong> → History gets X%, memories get Y%, scratch gets Z%
+3. <strong>Retrieval from storage</strong> → Valuable/Standard tiers searched first
+4. <strong>Staged retrieval</strong> → Start with top-3, expand if needed
+5. <strong>Response generated</strong> → Working memory used for reasoning
+6. <strong>Post-response</strong> → New memories written to Temporary tier
+7. <strong>Consolidation (periodic)</strong> → Temporary reviewed, promoted/archived/deleted</p>
+<h3>3.3 The Compression Question</h3>
+<strong>Rata's insight:</strong> Compress rather than drop. But how much?
+<table>
+<tr><th>Compression Level</th><th>Use Case</th><th>Information Loss</th></tr>
+<tr><td><strong>Verbatim</strong></td><td>Recent turns, high-valence</td><td>None</td></tr>
+<tr><td><strong>Summarized</strong></td><td>5-10 turns ago, standard tier</td><td>Medium</td></tr>
+<tr><td><strong>Key points</strong></td><td>10-20 turns ago, archived</td><td>High</td></tr>
+<tr><td><strong>Pointer only</strong></td><td>Very old, archived</td><td>Maximum</td></tr>
+</table>
+<strong>The texture problem:</strong> A debugging session has <em>path</em> (the false starts, the aha moments) and <em>destination</em> (the fix). Compression preserves destination, loses path.
+<strong>Proposed solution:</strong> Store path as episode, extract destination as schema. Episodes can be archived; schemas stay accessible.
+<pre><code class="language-">Episode (archivable):
+  &quot;Spent 3 hours debugging Tesla API timeout. Tried X, Y, Z.
+   Discovered rate limiting was the issue. Fixed by...&quot;
+<p>Schema (persistent):
+  &quot;Tesla API: Rate limiting causes intermittent timeouts.
+   Solution: Implement exponential backoff.&quot;
+</code></pre></p>
+<hr>
+<h2>4. Implementation in River</h2>
+<h3>4.1 Complexity Estimation</h3>
+<p>Add complexity estimation to River's query processing:</p>
+<pre><code class="language-elixir">defmodule Onelist.River.Query.ComplexityEstimator do
+  @moduledoc &quot;&quot;&quot;
+  Estimates query complexity to inform budget allocation.
+  &quot;&quot;&quot;
+<p>@complexity_signals %{
+    keywords: ~w(debug analyze compare trace investigate why how),
+    history_refs: ~r/(yesterday|last week|earlier|before|previously)/i,
+    multi_entity: fn query -&gt; length(extract_entities(query)) &gt; 2 end,
+    explicit_detail: ~r/(detailed|comprehensive|thorough|full)/i
+  }</p>
+<p>def estimate(query, conversation_history) do
+    signals = [
+      keyword_complexity(query),
+      history_dependency(query),
+      entity_count(query),
+      detail_request(query),
+      conversation_depth(conversation_history)
+    ]</p>
+<p># 0.0 = trivial, 1.0 = maximum complexity
+    Enum.sum(signals) / length(signals)
+  end</p>
+<p>defp keyword_complexity(query) do
+    matches = Enum.count(@complexity_signals.keywords, &amp;String.contains?(String.downcase(query), &amp;1))
+    min(matches / 3, 1.0)
+  end</p>
+<p># ... additional signal functions
+end
+</code></pre></p>
+<h3>4.2 Budget Allocation</h3>
+<p>Add dynamic budget allocation based on complexity:</p>
+<pre><code class="language-elixir">defmodule Onelist.River.Context.BudgetAllocator do
+  @moduledoc &quot;&quot;&quot;
+  Allocates context budget based on query complexity.
+  &quot;&quot;&quot;
+<p>@total_budget 128_000
+  @fixed_costs %{
+    system_prompt: 3_000,
+    tool_schemas: 2_000,
+    response_reserve: 4_000
+  }</p>
+<p>@allocation_curves %{
+    # {history_pct, memory_pct} at complexity levels
+    low:    {0.10, 0.05},
+    medium: {0.30, 0.20},
+    high:   {0.50, 0.30}
+  }</p>
+<p>def allocate(complexity) do
+    available = @total_budget - fixed_total()
+    {history_pct, memory_pct} = curve_for(complexity)</p>
+<p>%{
+      history_budget: round(available <em> history_pct),
+      memory_budget: round(available </em> memory_pct),
+      scratch_budget: round(available <em> (1 - history_pct - memory_pct)),
+      complexity: complexity
+    }
+  end</p>
+<p>defp fixed_total, do: Enum.sum(Map.values(@fixed_costs))</p>
+<p>defp curve_for(c) when c &lt; 0.3, do: @allocation_curves.low
+  defp curve_for(c) when c &lt; 0.7, do: @allocation_curves.medium
+  defp curve_for(_), do: @allocation_curves.high
+end
+</code></pre></p>
+<h3>4.3 Staged Retrieval</h3>
+<p>Implement staged retrieval in Searcher integration:</p>
+<pre><code class="language-elixir">defmodule Onelist.River.Query.StagedRetrieval do
+  @moduledoc &quot;&quot;&quot;
+  Staged retrieval: start small, expand if needed.
+  &quot;&quot;&quot;
+<p>alias Onelist.Searcher</p>
+<p>def retrieve(user_id, query, budget) do
+    # Stage 1: Top 3
+    {:ok, stage1} = Searcher.search(user_id, query, limit: 3, tiers: [&quot;valuable&quot;, &quot;standard&quot;])</p>
+<p>if sufficient?(stage1, query) do
+      {:ok, stage1.results, :stage1}
+    else
+      # Stage 2: Top 10
+      {:ok, stage2} = Searcher.search(user_id, query, limit: 10, tiers: [&quot;valuable&quot;, &quot;standard&quot;])</p>
+<p>if sufficient?(stage2, query) or budget_exhausted?(stage2, budget) do
+        {:ok, stage2.results, :stage2}
+      else
+        # Stage 3: Broad (include archived, higher limit)
+        {:ok, stage3} = Searcher.search(user_id, query, limit: 25, tiers: [&quot;valuable&quot;, &quot;standard&quot;, &quot;archive&quot;])
+        {:ok, Enum.take(stage3.results, max_entries(budget)), :stage3}
+      end
+    end
+  end</p>
+<p>defp sufficient?(results, query) do
+    # Heuristic: high relevance scores, query terms covered
+    avg_score = Enum.sum(Enum.map(results.results, &amp; &amp;1.score)) / max(length(results.results), 1)
+    avg_score &gt; 0.7
+  end</p>
+<p>defp budget_exhausted?(results, budget) do
+    estimated_tokens = estimate_tokens(results.results)
+    estimated_tokens &gt;= budget.memory_budget </em> 0.8
+  end
+end
+</code></pre></p>
+<h3>4.4 Conversation Compression</h3>
+<p>Add rolling compression to conversation history:</p>
+<pre><code class="language-elixir">defmodule Onelist.River.Conversation.Compressor do
+  @moduledoc &quot;&quot;&quot;
+  Compresses conversation history to fit budget.
+  &quot;&quot;&quot;
+<p>def compress_to_budget(messages, budget_tokens) do
+    recent_count = 5  # Always keep last 5 verbatim</p>
+<p>{recent, older} = Enum.split(messages, -recent_count)
+    recent_tokens = estimate_tokens(recent)
+    remaining_budget = budget_tokens - recent_tokens</p>
+<p>compressed_older = compress_messages(older, remaining_budget)</p>
+<p>compressed_older ++ recent
+  end</p>
+<p>defp compress_messages(messages, budget) do
+    cond do
+      budget &lt;= 0 -&gt;
+        []</p>
+<p>budget &lt; 1000 -&gt;
+        # Extreme compression: one-line summary
+        [%{role: &quot;system&quot;, content: summarize_to_line(messages)}]</p>
+<p>budget &lt; 5000 -&gt;
+        # High compression: key points only
+        [%{role: &quot;system&quot;, content: extract_key_points(messages)}]</p>
+<p>true -&gt;
+        # Moderate compression: summarize each message
+        Enum.map(messages, &amp;summarize_message/1)
+    end
+  end</p>
+<p>defp summarize_message(%{role: role, content: content}) do
+    summary = content
+              |&gt; String.slice(0..200)
+              |&gt; String.replace(~r/\s+/, &quot; &quot;)
+    %{role: role, content: &quot;[Summary] #{summary}...&quot;}
+  end
+end
+</code></pre></p>
+<hr>
+<h2>5. Open Questions</h2>
+<h3>5.1 Compression Fidelity</h3>
+<p>How much can you compress before losing critical information? Need empirical testing:
+<li>Run queries against verbatim vs compressed history</li>
+<li>Measure answer quality degradation</li>
+<li>Find the knee of the curve</li></p>
+<h3>5.2 Consolidation Timing</h3>
+<p>When should consolidation run?
+<li>After each conversation? (high overhead)</li>
+<li>Daily batch? (good balance)</li>
+<li>Weekly? (may miss patterns)</li></p>
+<h3>5.3 Schema Extraction</h3>
+<p>How do we extract schemas from episodes?
+<li>LLM-based summarization (expensive but good)</li>
+<li>Template matching (cheap but rigid)</li>
+<li>User-guided (accurate but effortful)</li></p>
+<h3>5.4 Cross-Session Memory</h3>
+<p>How does this interact with agent continuity?
+<li>Each session starts fresh (current model)</li>
+<li>Persistent working memory (requires trusted storage)</li>
+<li>Hybrid (schemas persist, episodes decay)</li></p>
+<hr>
+<h2>6. Relationship to Existing River Components</h2>
+<table>
+<tr><th>River Component</th><th>Memory Budget Integration</th></tr>
+<tr><td><strong>Query Engine</strong></td><td>Uses complexity estimation + staged retrieval</td></tr>
+<tr><td><strong>Conversation Manager</strong></td><td>Uses rolling compression</td></tr>
+<tr><td><strong>Filing Engine</strong></td><td>Assigns initial value tier</td></tr>
+<tr><td><strong>Review Engine</strong></td><td>Triggers consolidation reviews</td></tr>
+<tr><td><strong>Proactive Engine</strong></td><td>Uses lightweight retrieval (low complexity)</td></tr>
+</table>
+<hr>
+<h2>7. Next Steps</h2>
+<p>1. <strong>Implement complexity estimation</strong> — Start with heuristics, refine with data
+2. <strong>Add budget allocation to query pipeline</strong> — Wire into existing RAG
+3. <strong>Implement staged retrieval</strong> — Modify Searcher integration
+4. <strong>Add conversation compression</strong> — Integrate with conversation manager
+5. <strong>Design consolidation job</strong> — Oban worker for periodic memory maintenance
+6. <strong>Test compression fidelity</strong> — Empirical study on answer quality vs compression</p>
+<hr>
+<h2>8. References</h2>
+<li><strong>future_roadmap_ai_memory_patterns.md</strong> — Core memory architecture doc. Defines 4-layer hierarchy, token budgets, pre-loading pipeline, relevance decay, compaction. This synthesis builds on that foundation.</li>
+<li>Rata, "Attention Budget Allocation: Resource-Aware Cognition for Persistent Agents" (Moltbook, 2026) — Theoretical framework for runtime allocation</li>
+<li>River Agent Development Plan, Section 3.5: Value Tiers</li>
+<li>River Agent Development Plan, Section 22.3: Passive Context Strategy</li>
+<li>GTD: "Mind Like Water" concept (David Allen)</li>
+</ul>
+<hr>
+<em>Synthesis by Stream, 2026-01-31</em>
+<em>"Streams feed rivers. Rivers are made of streams."</em>
+  </article>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Searcher Agent UI Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Searcher Agent UI Plan</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Active
+<strong>Parent:</strong> ui_plan.md
+<strong>Related:</strong> shared_agent_ui_components.md, settings_ui_plan.md
+<hr>
+<h2>1. Overview</h2>
+<p>This document defines UI components specific to the Searcher Agent. For shared agent UI patterns (processing status, activity items, duplicate detection), see <code>shared_agent_ui_components.md</code>.</p>
+<strong>Searcher Responsibilities:</strong>
+<ul>
+<li>Embedding generation and management</li>
+<li>Semantic search (vector similarity)</li>
+<li>Keyword search (full-text)</li>
+<li>Hybrid search (combined)</li>
+<li>Pre-storage similarity checking</li>
+<li>Similar entries discovery</li>
+<hr>
+<h2>2. Search Results Display</h2>
+<h3>2.1 Score Display Philosophy</h3>
+<li><strong>Default</strong>: Simple match percentage only</li>
+<li><strong>Hover/Expanded</strong>: Full breakdown (semantic + keyword scores)</li>
+<h3>2.2 Search Results List</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  🔍 &quot;elixir process memory&quot;                                                 │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  Found 12 results                                              0.23 seconds │
+│                                                                              │
+│  Mode: [Hybrid ▼]    Search in: [All ▼]                                    │
+│                                                                              │
+│  ───────────────────────────────────────────────────────────────────────────│
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  [Article] Understanding Elixir Processes                            │   │
+│  │                                                                       │   │
+│  │  ...processes are lightweight and isolated. Each <strong>process</strong> has     │   │
+│  │  approximately 2KB of initial <strong>memory</strong>, making them cheap to...    │   │
+│  │                                                                       │   │
+│  │  [elixir] [concurrency]                          Jan 28, 2026        │   │
+│  │                                                                       │   │
+│  │  Match: 89%                                          [View Entry →]  │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  [Note] GenServer Memory Management                                  │   │
+│  │                                                                       │   │
+│  │  When designing GenServers, consider <strong>memory</strong> usage per            │   │
+│  │  <strong>process</strong> state. Large state can cause issues when...             │   │
+│  │                                                                       │   │
+│  │  [elixir] [otp]                                  Jan 20, 2026        │   │
+│  │                                                                       │   │
+│  │  Match: 76%                                          [View Entry →]  │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.3 Score Hover Detail (Desktop)</h3>
+<p>On hover over "Match: 89%":</p>
+<pre><code class="language-">┌─ Score Breakdown ───────────────────┐
+│                                      │
+│  Combined:   89%                     │
+│  ─────────────────────────────────  │
+│  Semantic:   92%  ████████████████░ │
+│  Keyword:    81%  █████████████░░░░ │
+│                                      │
+│  Weights: 70% semantic / 30% keyword │
+│                                      │
+└──────────────────────────────────────┘
+</code></pre>
+<h3>2.4 Keyword Highlighting</h3>
+<li>Search terms highlighted in <strong>bold</strong> in result snippets</li>
+<li>Highlight color matches agent color (Amber for Searcher)</li>
+<h3>2.5 Search Mode Selector</h3>
+<pre><code class="language-">Mode: [Hybrid ▼]
+       ├── Hybrid (Recommended)
+       │   Combines semantic understanding with keyword matching
+       ├── Semantic
+       │   Finds conceptually similar content
+       └── Keyword
+           Traditional text matching
+</code></pre>
+<hr>
+<h2>3. Similar Entries Section</h2>
+<p>Displayed in Entry Detail sidebar. Shows semantically related entries.</p>
+<h3>3.1 Sidebar Component</h3>
+<pre><code class="language-">┌─ Related Entries ───────────────────────────────────────────────────────────┐
+│                                                                              │
+│  Based on semantic similarity:                                              │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  GenServer Basics                                           84%      │   │
+│  │  [article]                                                           │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  OTP Principles                                             79%      │   │
+│  │  [note]                                                              │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  Building Concurrent Apps                                   71%      │   │
+│  │  [article]                                                           │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│                                                    [See All (8) ↗]         │
+│                                                    Opens in new tab         │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.2 "See All" Behavior</h3>
+<li>Opens filtered search view <strong>in a new tab</strong></li>
+<li>URL: <code>/search?similar_to={entry_id}</code></li>
+<li>Shows all entries above similarity threshold</li>
+<li>Sorted by similarity score descending</li>
+<h3>3.3 Click Behavior</h3>
+<li>Clicking related entry opens it in current tab</li>
+<li>Cmd/Ctrl+Click opens in new tab</li>
+<hr>
+<h2>4. Embedding Status</h2>
+<h3>4.1 In Entry Detail Sidebar</h3>
+<pre><code class="language-">┌─ Processing Status ─────────────────────────────────────────────────────────┐
+│                                                                              │
+│  [●] Reader          ✓ 8 memories                              2 min ago   │
+│  [●] Searcher        ✓ Indexed                                 2 min ago   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 Embedding In Progress</h3>
+<pre><code class="language-">│  [●] Searcher        ⏳ Generating embeddings...               Processing   │
+</code></pre>
+<h3>4.3 Embedding States</h3>
+<table>
+<tr><th>State</th><th>Display</th></tr>
+<tr><td>Not started</td><td>"○ Pending"</td></tr>
+<tr><td>Processing</td><td>"⏳ Generating embeddings..."</td></tr>
+<tr><td>Complete</td><td>"✓ Indexed"</td></tr>
+<tr><td>Failed</td><td>"✗ Failed to index" with [Retry]</td></tr>
+</table>
+<hr>
+<h2>5. Searcher Settings</h2>
+<p>Located at <code>/settings/agents?tab=searcher</code></p>
+<h3>5.1 Settings Layout</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Searcher Agent Settings                                     [Reset All]    │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  ┌─ Search Defaults ────────────────────────────────────────────────────┐  │
+│  │                                                                       │  │
+│  │  Default search mode                               [Hybrid ▼]        │  │
+│  │  Used when searching from the search bar                             │  │
+│  │                                                                       │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  ┌─ Search Weights ─────────────────────────────────────────────────────┐  │
+│  │                                                                       │  │
+│  │  Balance between semantic and keyword matching:                      │  │
+│  │                                                                       │  │
+│  │  Semantic                                                            │  │
+│  │  ──────────────────────────●────────────── 70%                       │  │
+│  │  Conceptual similarity                                               │  │
+│  │                                                                       │  │
+│  │  Keyword                                                              │  │
+│  │  ────────────●──────────────────────────── 30%                       │  │
+│  │  Exact text matching                              (Auto-balanced)    │  │
+│  │                                                                       │  │
+│  │  💡 Higher semantic finds related concepts; higher keyword           │  │
+│  │     requires exact matches. 70/30 works well for most users.        │  │
+│  │                                                                       │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  ┌─ Auto-Indexing ──────────────────────────────────────────────────────┐  │
+│  │                                                                       │  │
+│  │  Index new entries automatically                    [━━━━━●] On      │  │
+│  │  Make new entries searchable immediately                             │  │
+│  │                                                                       │  │
+│  │  Re-index on edit                                   [━━━━━●] On      │  │
+│  │  Update search index when entries are modified                       │  │
+│  │                                                                       │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  ┌─ Similarity Detection ───────────────────────────────────────────────┐  │
+│  │                                                                       │  │
+│  │  Show similarity warnings                           [━━━━━●] On      │  │
+│  │  Warn when saving content similar to existing entries                │  │
+│  │                                                                       │  │
+│  │  Warning threshold                            [────────●──] 70%      │  │
+│  │                                                50%         90%       │  │
+│  │  Lower = more warnings; higher = only near-duplicates                │  │
+│  │                                                                       │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  ┌─ Advanced ───────────────────────────────────────────────────────────┐  │
+│  │                                                                       │  │
+│  │  Embedding model                      [text-embedding-3-small ▼]     │  │
+│  │  Change requires re-indexing all entries                             │  │
+│  │                                                                       │  │
+│  │  Entries indexed: 1,234                          [Re-index All]      │  │
+│  │  Last full index: Jan 28, 2026                                       │  │
+│  │                                                                       │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.2 Weight Slider Interaction</h3>
+<li>Sliders are <strong>linked</strong>: moving one adjusts the other to total 100%</li>
+<li>Visual feedback shows how weights affect results</li>
+<li>"(Auto-balanced)" label indicates linked behavior</li>
+<h3>5.3 Re-index Confirmation</h3>
+<p>When clicking [Re-index All]:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Re-index All Entries?                                                      │
+│  ───────────────────────────────────────────────────────────────────────────│
+│                                                                              │
+│  This will regenerate search embeddings for all 1,234 entries.             │
+│                                                                              │
+│  • Entries remain searchable during re-indexing                            │
+│  • Estimated cost: $0.12                                                   │
+│  • Entries will use the new model after re-indexing                        │
+│                                                                              │
+│                                              [Cancel]  [Re-index All]      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>6. Search Bar Enhancements</h2>
+<h3>6.1 Global Search Bar</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  🔍 Search entries...                                    [⌘K]  [Hybrid ▼]  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>6.2 Search Suggestions (As You Type)</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  🔍 elixir proc                                                             │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  Recent Searches                                                            │
+│  ├── elixir processes                                                       │
+│  └── elixir programming basics                                              │
+│                                                                              │
+│  Suggested                                                                  │
+│  ├── elixir processes memory                                                │
+│  └── elixir process supervision                                             │
+│                                                                              │
+│  Press Enter to search or ↑↓ to navigate                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>7. Activity Log Items</h2>
+<p>Searcher contributes to unified activity log:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  [●] Searcher indexed &quot;Understanding Elixir Processes&quot;          2 min ago   │
+│      2 chunks embedded  •  $0.0002                                         │
+│                                                            [View Entry →]  │
+└─────────────────────────────────────────────────────────────────────────────┘
+<p>┌─────────────────────────────────────────────────────────────────────────────┐
+│  [●] Searcher detected similar content                          5 min ago   │
+│      &quot;AI Memory Deep Dive&quot; is 87% similar to existing entry                │
+│                                                        [Review Warning →]  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre></p>
+<hr>
+<h2>8. Empty States</h2>
+<h3>8.1 No Search Results</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│                              🔍                                             │
+│                                                                              │
+│                    No results for &quot;quantum computing&quot;                       │
+│                                                                              │
+│         Try different keywords or switch to semantic search.               │
+│                                                                              │
+│         Current mode: Keyword                                               │
+│                                                                              │
+│                        [Try Semantic Search]                                │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>8.2 No Similar Entries</h3>
+<pre><code class="language-">┌─ Related Entries ───────────────────────────────────────────────────────────┐
+│                                                                              │
+│  No similar entries found.                                                  │
+│                                                                              │
+│  This entry covers unique content in your library.                          │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>9. Integration Points</h2>
+<h3>9.1 Global Keyboard Shortcut</h3>
+<li><code>⌘K</code> / <code>Ctrl+K</code>: Open search bar with focus</li>
+<h3>9.2 Entry Detail Integration</h3>
+<li>Similar Entries section in sidebar</li>
+<li>Embedding status in Processing Status section</li>
+<h3>9.3 Library/Inbox Integration</h3>
+<li>Search bar at top of list view</li>
+<li>Filter by "Has Similarity Warning"</li>
+<h3>9.4 Entry Creation Integration</h3>
+<li>Similarity check runs automatically on save</li>
+<li>Warning displayed inline (non-blocking)</li>
+<hr>
+<h2>10. Database Additions for UI</h2>
+<pre><code class="language-sql">-- Add to user_settings (if not already present)
+ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS
+  default_search_mode VARCHAR(20) DEFAULT 'hybrid',
+  search_semantic_weight DECIMAL(3,2) DEFAULT 0.70,
+  search_keyword_weight DECIMAL(3,2) DEFAULT 0.30,
+  similarity_warning_enabled BOOLEAN DEFAULT true,
+  similarity_warning_threshold DECIMAL(3,2) DEFAULT 0.70;
+</code></pre>
+<hr>
+<h2>11. Related Documents</h2>
+<li><a href="./shared_agent_ui_components.md">Shared Agent UI</a> - Processing status, duplicate detection</li>
+<li><a href="./settings_ui_plan.md">Settings UI Plan</a> - Auto-save, agent colors</li>
+<li><a href="../searcher_agent_plan.md">Searcher Agent Plan</a> - Technical specification</li>
+</ul>
+<hr>
+<em>Last updated: 2026-01-30</em>
+  </article>
+</body>
+</html>

@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Content Capture Integration Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Web Content Capture Integration Plan</h1>
+<h2>Executive Summary</h2>
+<p>This document provides comprehensive recommendations for integrating advanced web content capture tools into the Onelist agent ecosystem. Based on analysis of Hyperbrowser, agent-browser, and Browser Use, we propose a tiered capture strategy that enhances the existing Web Clipper while maintaining Onelist's privacy-first architecture.</p>
+<h3>Key Recommendation</h3>
+<strong>Implement a browser-first capture architecture with server-side fallback:</strong>
+<strong>Primary: Browser Plugin (Authenticated Content)</strong>
+<ul>
+<li>Captures directly from user's authenticated browser session</li>
+<li>Processes content locally using <a href="https://github.com/kepano/defuddle">Defuddle</a> + <a href="https://github.com/mixmark-io/turndown">Turndown</a></li>
+<li>Generates archives via <a href="https://github.com/gildas-lormeau/SingleFile">SingleFile</a></li>
+<li>Queues offline, syncs when connected</li>
+<li><strong>Minimizes Onelist server load</strong> - all heavy processing in browser</li>
+<strong>Fallback: Server-Side Tiers (Public URLs)</strong>
+1. <strong>Tier 1: Simple Fetch</strong> - Direct HTTP for public, unblocked content
+2. <strong>Tier 2: Intelligent Browser</strong> - Browser Use for JavaScript-heavy sites
+3. <strong>Tier 3: Cloud Scraping</strong> - Hyperbrowser API for protected sites (opt-in)
+<p>This approach:
+<li>Captures authenticated content server-side agents cannot access</li>
+<li>Minimizes Onelist server load (browser does heavy lifting)</li>
+<li>Works offline with local queue + background sync</li>
+<li>Maintains privacy (content processed locally first)</li>
+<li>Supports all deployment tiers (self-hosted, cloud sync, web access)</li></p>
+<hr>
+<h2>Table of Contents</h2>
+<p>1. <a href="#tool-analysis">Tool Analysis</a>
+2. <a href="#architecture-integration">Architecture Integration</a>
+3. <a href="#capture-strategy">Capture Strategy</a>
+4. <a href="#implementation-plan">Implementation Plan</a>
+5. <a href="#database-integration">Database Integration</a>
+6. <a href="#privacy-considerations">Privacy Considerations</a>
+7. <a href="#cost-analysis">Cost Analysis</a>
+8. <a href="#agent-ecosystem-integration">Agent Ecosystem Integration</a>
+9. <a href="#technical-specifications">Technical Specifications</a>
+10. <a href="#success-metrics">Success Metrics</a>
+11. <a href="#implementation-checklist">Implementation Checklist</a>
+12. <a href="#browser-plugin-architecture-authenticated-content">Browser Plugin Architecture</a>
+13. <a href="#references">References</a></p>
+<hr>
+<h2>1. Tool Analysis</h2>
+<h3>1.1 Tool Comparison Matrix</h3>
+<table>
+<tr><th>Capability</th><th>Web Clipper (Current)</th><th>agent-browser</th><th>Browser Use</th><th>Hyperbrowser</th></tr>
+<tr><td><strong>Type</strong></td><td>HTTP client</td><td>CLI tool</td><td>Python/Node SDK</td><td>Cloud API</td></tr>
+<tr><td><strong>JS Rendering</strong></td><td>None</td><td>Full (Playwright)</td><td>Full (browser)</td><td>Full (cloud)</td></tr>
+<tr><td><strong>Anti-bot Bypass</strong></td><td>None</td><td>Basic</td><td>Intelligent</td><td>Advanced</td></tr>
+<tr><td><strong>Self-hosted</strong></td><td>Yes</td><td>Yes</td><td>Yes</td><td>No (cloud)</td></tr>
+<tr><td><strong>Cost</strong></td><td>Free</td><td>Free</td><td>LLM costs only</td><td>$0.50/1k pages</td></tr>
+<tr><td><strong>Privacy</strong></td><td>Full control</td><td>Full control</td><td>Full control</td><td>Data sent to API</td></tr>
+<tr><td><strong>Speed</strong></td><td>Fast (~1-2s)</td><td>Medium (~3-5s)</td><td>Variable (~5-30s)</td><td>Medium (~3-5s)</td></tr>
+<tr><td><strong>Reliability</strong></td><td>60-70% web</td><td>85-90% web</td><td>95%+ web</td><td>95%+ web</td></tr>
+</table>
+<h3>1.2 Tool Strengths</h3>
+<h4>agent-browser</h4>
+<li><strong>Fast CLI snapshots</strong>: Lightweight, single-page captures</li>
+<li><strong>Markdown output</strong>: AI-friendly format, no post-processing needed</li>
+<li><strong>Self-hosted</strong>: No data leaves user's infrastructure</li>
+<li><strong>Playwright-based</strong>: Full JavaScript execution</li>
+<li><strong>Best for</strong>: Quick captures of known-good sites</li>
+<h4>Browser Use</h4>
+<li><strong>Intelligent navigation</strong>: Handles dynamic content, pagination, login flows</li>
+<li><strong>Multi-model support</strong>: Works with OpenAI, Anthropic, local models</li>
+<li><strong>DOM awareness</strong>: Understands page structure for targeted extraction</li>
+<li><strong>Error recovery</strong>: Automatically retries failed actions</li>
+<li><strong>Best for</strong>: Complex sites with anti-bot measures, interactive content</li>
+<h4>Hyperbrowser</h4>
+<li><strong>Managed infrastructure</strong>: No browser maintenance required</li>
+<li><strong>Rate limit handling</strong>: Built-in IP rotation and retry logic</li>
+<li><strong>Structured extraction</strong>: LLM-powered data extraction via <code>/extract</code></li>
+<li><strong>Best for</strong>: High-volume scraping, heavily protected sites</li>
+<h3>1.3 Tool Limitations</h3>
+<table>
+<tr><th>Tool</th><th>Limitations</th></tr>
+<tr><td><strong>agent-browser</strong></td><td>No anti-bot bypass, fails on Cloudflare/captchas</td></tr>
+<tr><td><strong>Browser Use</strong></td><td>LLM costs per capture, slower for simple pages</td></tr>
+<tr><td><strong>Hyperbrowser</strong></td><td>Cloud-only (privacy concern), per-page cost, rate limits</td></tr>
+</table>
+<hr>
+<h2>2. Architecture Integration</h2>
+<h3>2.1 Enhanced Web Clipper Architecture</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                     ENHANCED WEB CLIPPER ARCHITECTURE                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  USER REQUEST                                                                │
+│  (URL via API, Extension, OpenClaw, River)                                   │
+│         │                                                                    │
+│         ▼                                                                    │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                      CAPTURE ORCHESTRATOR                            │    │
+│  │  • Analyzes URL/domain                                              │    │
+│  │  • Checks site classification cache                                 │    │
+│  │  • Selects optimal capture tier                                     │    │
+│  │  • Manages fallback chain                                           │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│         │                                                                    │
+│         ├─────────────────────────────────────────────────────────────┐     │
+│         │                                                             │     │
+│         ▼                                                             │     │
+│  ┌──────────────────┐   Fail   ┌──────────────────┐   Fail   ┌──────▼─────┐│
+│  │  TIER 1          │─────────►│  TIER 2          │─────────►│  TIER 3    ││
+│  │  Simple Fetch    │          │  Browser Use     │          │  Hyperbrowser│
+│  │                  │          │                  │          │  (Opt-in)  ││
+│  │  • Req + Floki   │          │  • Local browser │          │            ││
+│  │  • Fast (1-2s)   │          │  • JS rendering  │          │  • Cloud API│
+│  │  • No JS         │          │  • LLM actions   │          │  • Anti-bot ││
+│  │  • Free          │          │  • Anti-bot lite │          │  • Paid    ││
+│  └────────┬─────────┘          └────────┬─────────┘          └──────┬─────┘│
+│           │                             │                            │      │
+│           └─────────────────────────────┼────────────────────────────┘      │
+│                                         │                                    │
+│                                         ▼                                    │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                      CONTENT PROCESSOR                               │    │
+│  │  • Readability extraction (article content)                         │    │
+│  │  • Metadata extraction (OG, Twitter Cards)                          │    │
+│  │  • YouTube/video handling (API + transcripts)                       │    │
+│  │  • Asset detection (images, PDFs, files)                            │    │
+│  │  • Language detection                                               │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│         │                                                                    │
+│         ▼                                                                    │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                      SIMILARITY CHECK                                │    │
+│  │  (Via Searcher Agent)                                               │    │
+│  │  • Generate embedding                                               │    │
+│  │  • Check for duplicates                                             │    │
+│  │  • Return recommendation                                            │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│         │                                                                    │
+│         ▼                                                                    │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                      ENTRY CREATION                                  │    │
+│  │  (Via Feeder Agent)                                                 │    │
+│  │  • Create entry with extracted content                              │    │
+│  │  • Apply auto-tags                                                  │    │
+│  │  • Store capture metadata                                           │    │
+│  │  • Trigger post-import chain                                        │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.2 Integration with Feeder Agent</h3>
+<p>The Web Clipper remains part of the Feeder Agent ecosystem. The enhanced architecture adds capture tiers without changing the existing adapter interface:</p>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapters.WebClipper do
+  # Existing adapter implementation enhanced with capture tiers
+<p>@capture_tiers [
+    {:simple_fetch, Onelist.Capture.SimpleFetch},
+    {:browser_use, Onelist.Capture.BrowserUse},
+    {:hyperbrowser, Onelist.Capture.Hyperbrowser}
+  ]</p>
+<p>def extract_content(url, opts \\ []) do
+    tier = Keyword.get(opts, :tier, :auto)</p>
+<p>case tier do
+      :auto -&gt; auto_capture(url, opts)
+      tier -&gt; capture_with_tier(url, tier, opts)
+    end
+  end</p>
+<p>defp auto_capture(url, opts) do
+    # Try each tier in sequence until success
+    Enum.reduce_while(@capture_tiers, {:error, :all_tiers_failed}, fn {tier, module}, acc -&gt;
+      case module.capture(url, opts) do
+        {:ok, content} -&gt;
+          # Record successful tier for site classification learning
+          SiteClassifier.record_success(url, tier)
+          {:halt, {:ok, content}}
+        {:error, _} -&gt;
+          {:cont, acc}
+      end
+    end)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>3. Capture Strategy</h2>
+<h3>3.1 Tier Selection Logic</h3>
+<pre><code class="language-elixir">defmodule Onelist.Capture.TierSelector do
+  @moduledoc &quot;&quot;&quot;
+  Intelligent tier selection based on URL characteristics and historical data.
+  &quot;&quot;&quot;
+<p># Sites known to work with simple fetch
+  @simple_fetch_domains ~w(
+    wikipedia.org
+    github.com
+    medium.com
+    dev.to
+    stackoverflow.com
+    arxiv.org
+    paulgraham.com
+    substack.com
+  )</p>
+<p># Sites requiring browser rendering
+  @browser_required_domains ~w(
+    twitter.com x.com
+    linkedin.com
+    instagram.com
+    bloomberg.com
+    wsj.com
+    nytimes.com
+    washingtonpost.com
+  )</p>
+<p># Sites known to be heavily protected
+  @protected_domains ~w(
+    cloudflare.com
+    amazon.com
+    google.com
+  )</p>
+<p>def select_tier(url, user_settings) do
+    domain = extract_domain(url)</p>
+<p>cond do
+      # Check user's explicit tier preference
+      user_settings.force_tier != nil -&gt;
+        user_settings.force_tier</p>
+<p># Check site classification cache (learned from past captures)
+      cached_tier = SiteClassifier.get_recommended_tier(domain) -&gt;
+        cached_tier</p>
+<p># Domain-based heuristics
+      domain in @simple_fetch_domains -&gt;
+        :simple_fetch</p>
+<p>domain in @browser_required_domains -&gt;
+        :browser_use</p>
+<p>domain in @protected_domains and user_settings.allow_cloud_capture -&gt;
+        :hyperbrowser</p>
+<p># Default: start with simple fetch
+      true -&gt;
+        :simple_fetch
+    end
+  end</p>
+<p>def fallback_tier(current_tier, user_settings) do
+    case current_tier do
+      :simple_fetch -&gt; :browser_use
+      :browser_use when user_settings.allow_cloud_capture -&gt; :hyperbrowser
+      :browser_use -&gt; nil  # No fallback if cloud not allowed
+      :hyperbrowser -&gt; nil  # Last tier, no fallback
+    end
+  end
+end
+</code></pre></p>
+<h3>3.2 Capture Flow with Fallback</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         CAPTURE FLOW WITH FALLBACK                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  1. SELECT INITIAL TIER                                                      │
+│     ├── Check user preferences (force_tier setting)                         │
+│     ├── Check site classification cache                                     │
+│     └── Apply domain heuristics                                             │
+│                                                                              │
+│  2. ATTEMPT CAPTURE                                                          │
+│     │                                                                        │
+│     ├── Success?                                                            │
+│     │   └── YES → Extract content, update site classification, return       │
+│     │                                                                        │
+│     └── Failure?                                                            │
+│         ├── Determine failure type:                                         │
+│         │   ├── Network error → Retry (up to 3 times)                       │
+│         │   ├── Blocked/403/captcha → Escalate to next tier                 │
+│         │   ├── Content not found → Return error (don't escalate)           │
+│         │   └── Timeout → Escalate to next tier                             │
+│         │                                                                    │
+│         └── If escalating:                                                  │
+│             ├── Check user allows next tier                                 │
+│             ├── Log tier escalation for analytics                           │
+│             └── Retry with next tier                                        │
+│                                                                              │
+│  3. FINAL RESULT                                                            │
+│     ├── All tiers exhausted → Return error with details                    │
+│     │   └── Include: which tiers tried, failure reasons, suggestions       │
+│     │                                                                        │
+│     └── Success → Return content with metadata                             │
+│         └── Include: tier used, capture time, confidence score             │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.3 Site Classification Learning</h3>
+<p>The system learns which capture tier works best for each domain:</p>
+<pre><code class="language-elixir">defmodule Onelist.Capture.SiteClassifier do
+  @moduledoc &quot;&quot;&quot;
+  Learns optimal capture tier for domains based on historical success/failure.
+  Uses ETS for fast lookups, persisted to database for durability.
+  &quot;&quot;&quot;
+<p># Schema for site_capture_stats (stored in metadata JSONB on existing tables)
+  @type site_stats :: %{
+    domain: String.t(),
+    simple_fetch_success: integer(),
+    simple_fetch_fail: integer(),
+    browser_use_success: integer(),
+    browser_use_fail: integer(),
+    hyperbrowser_success: integer(),
+    hyperbrowser_fail: integer(),
+    last_successful_tier: atom(),
+    last_capture_at: DateTime.t()
+  }</p>
+<p>def record_success(url, tier) do
+    domain = extract_domain(url)</p>
+<p># Update ETS cache
+    update_stats(domain, tier, :success)</p>
+<p># Async persist to database (batch updates every 5 minutes)
+    schedule_persist(domain)
+  end</p>
+<p>def record_failure(url, tier, reason) do
+    domain = extract_domain(url)
+    update_stats(domain, tier, :failure)</p>
+<p># If repeated failures with simple_fetch, auto-escalate default tier
+    if tier == :simple_fetch and repeated_failures?(domain, tier, threshold: 3) do
+      set_recommended_tier(domain, :browser_use)
+    end
+  end</p>
+<p>def get_recommended_tier(domain) do
+    case get_stats(domain) do
+      nil -&gt; nil  # No data, use heuristics</p>
+<p>stats -&gt;
+        # Calculate success rates
+        rates = %{
+          simple_fetch: success_rate(stats, :simple_fetch),
+          browser_use: success_rate(stats, :browser_use),
+          hyperbrowser: success_rate(stats, :hyperbrowser)
+        }</p>
+<p># Recommend cheapest tier with &gt;80% success rate
+        cond do
+          rates.simple_fetch &gt;= 0.8 -&gt; :simple_fetch
+          rates.browser_use &gt;= 0.8 -&gt; :browser_use
+          rates.hyperbrowser &gt;= 0.8 -&gt; :hyperbrowser
+          true -&gt; stats.last_successful_tier || :simple_fetch
+        end
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>4. Implementation Plan</h2>
+<h3>4.1 Phase Overview</h3>
+<table>
+<tr><th>Phase</th><th>Scope</th><th>Duration</th><th>Priority</th></tr>
+<tr><td><strong>Phase 1</strong></td><td>Simple Fetch Enhancement</td><td>1 week</td><td>MVP</td></tr>
+<tr><td><strong>Phase 2</strong></td><td>Browser Use Integration</td><td>2 weeks</td><td>MVP</td></tr>
+<tr><td><strong>Phase 3</strong></td><td>Hyperbrowser Integration (Opt-in)</td><td>1 week</td><td>Post-MVP</td></tr>
+<tr><td><strong>Phase 4</strong></td><td>Site Classification Learning</td><td>1 week</td><td>Post-MVP</td></tr>
+<tr><td><strong>Phase 5</strong></td><td>Advanced Features</td><td>2 weeks</td><td>Future</td></tr>
+</table>
+<h3>4.2 Phase 1: Simple Fetch Enhancement (MVP)</h3>
+<strong>Scope</strong>: Improve the existing Web Clipper's simple fetch capabilities.
+<strong>Tasks</strong>:
+1. Add retry logic with exponential backoff
+2. Improve Readability extraction algorithm
+3. Better error classification (blocked vs. not found vs. network)
+4. Add response caching (15-minute TTL for same URL)
+5. Implement user-agent rotation
+<strong>Deliverables</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Capture.SimpleFetch do
+  @moduledoc &quot;&quot;&quot;
+  Enhanced HTTP-based content capture.
+  &quot;&quot;&quot;
+<p>@user_agents [
+    &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36...&quot;,
+    &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36...&quot;,
+    # ... more agents
+  ]</p>
+<p>@retry_delays [1_000, 2_000, 4_000]  # Exponential backoff</p>
+<p>def capture(url, opts \\ []) do
+    with {:ok, response} &lt;- fetch_with_retry(url, opts),
+         {:ok, content} &lt;- extract_content(response, url) do
+      {:ok, content}
+    else
+      {:error, :blocked} -&gt; {:error, :blocked}
+      {:error, :not_found} -&gt; {:error, :not_found}
+      {:error, reason} -&gt; {:error, {:fetch_failed, reason}}
+    end
+  end</p>
+<p>defp fetch_with_retry(url, opts, attempt \\ 0) do
+    headers = [
+      {&quot;User-Agent&quot;, Enum.random(@user_agents)},
+      {&quot;Accept&quot;, &quot;text/html,application/xhtml+xml,application/xml;q=0.9,<em>/</em>;q=0.8&quot;},
+      {&quot;Accept-Language&quot;, &quot;en-US,en;q=0.5&quot;},
+      {&quot;Accept-Encoding&quot;, &quot;gzip, deflate&quot;},
+      {&quot;Connection&quot;, &quot;keep-alive&quot;},
+      {&quot;Upgrade-Insecure-Requests&quot;, &quot;1&quot;}
+    ]</p>
+<p>case Req.get(url, headers: headers, follow_redirects: true, max_redirects: 5) do
+      {:ok, %{status: 200, body: body}} -&gt;
+        {:ok, %{body: body, url: url}}</p>
+<p>{:ok, %{status: status}} when status in [403, 429, 503] -&gt;
+        if attempt &lt; length(@retry_delays) do
+          Process.sleep(Enum.at(@retry_delays, attempt))
+          fetch_with_retry(url, opts, attempt + 1)
+        else
+          {:error, :blocked}
+        end</p>
+<p>{:ok, %{status: 404}} -&gt;
+        {:error, :not_found}</p>
+<p>{:error, reason} -&gt;
+        if attempt &lt; length(@retry_delays) do
+          Process.sleep(Enum.at(@retry_delays, attempt))
+          fetch_with_retry(url, opts, attempt + 1)
+        else
+          {:error, reason}
+        end
+    end
+  end
+end
+</code></pre></p>
+<h3>4.3 Phase 2: Browser Use Integration (MVP)</h3>
+<strong>Scope</strong>: Add intelligent browser-based capture for JS-heavy and soft-blocked sites.
+<strong>Architecture Decision</strong>: Run Browser Use as a sidecar service (Python) that the Elixir app communicates with via HTTP.
+<strong>Tasks</strong>:
+1. Create Browser Use Python service with HTTP API
+2. Add Dockerfile for Browser Use sidecar
+3. Implement Elixir client for Browser Use service
+4. Add capture timeout and resource limits
+5. Configure for self-hosted deployment
+<strong>Browser Use Service (Python)</strong>:
+<pre><code class="language-python"># services/browser_use_service/main.py
+from fastapi import FastAPI, HTTPException
+from browser_use import Agent
+from langchain_openai import ChatOpenAI
+import asyncio
+<p>app = FastAPI()</p>
+<p>@app.post(&quot;/capture&quot;)
+async def capture_url(url: str, extract_content: bool = True):
+    &quot;&quot;&quot;
+    Capture a URL using Browser Use agent.
+    &quot;&quot;&quot;
+    agent = Agent(
+        task=f&quot;Navigate to {url} and extract the main content&quot;,
+        llm=ChatOpenAI(model=&quot;gpt-4o-mini&quot;),  # Cost-effective model
+    )</p>
+<p>try:
+        result = await asyncio.wait_for(
+            agent.run(),
+            timeout=30.0  # 30 second timeout
+        )</p>
+<p>return {
+            &quot;success&quot;: True,
+            &quot;content&quot;: result.extracted_content,
+            &quot;title&quot;: result.page_title,
+            &quot;final_url&quot;: result.final_url,
+            &quot;screenshots&quot;: result.screenshots if result.screenshots else []
+        }
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=408, detail=&quot;Capture timeout&quot;)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))</p>
+<p>@app.post(&quot;/extract&quot;)
+async def extract_structured(url: str, schema: dict):
+    &quot;&quot;&quot;
+    Extract structured data using Browser Use's DOM understanding.
+    &quot;&quot;&quot;
+    agent = Agent(
+        task=f&quot;Navigate to {url} and extract data matching this schema: {schema}&quot;,
+        llm=ChatOpenAI(model=&quot;gpt-4o-mini&quot;),
+    )</p>
+<p>result = await agent.run()
+    return {&quot;success&quot;: True, &quot;data&quot;: result.extracted_data}
+</code></pre></p>
+<strong>Elixir Client</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Capture.BrowserUse do
+  @moduledoc &quot;&quot;&quot;
+  Client for Browser Use sidecar service.
+  &quot;&quot;&quot;
+<p>@service_url Application.compile_env(:onelist, :browser_use_url, &quot;http://localhost:8000&quot;)
+  @timeout 35_000  # Slightly longer than service timeout</p>
+<p>def capture(url, opts \\ []) do
+    body = %{
+      url: url,
+      extract_content: Keyword.get(opts, :extract_content, true)
+    }</p>
+<p>case Req.post(&quot;#{@service_url}/capture&quot;, json: body, receive_timeout: @timeout) do
+      {:ok, %{status: 200, body: %{&quot;success&quot; =&gt; true} = response}} -&gt;
+        {:ok, %{
+          content_type: :browser_use,
+          title: response[&quot;title&quot;],
+          text: response[&quot;content&quot;],
+          url: response[&quot;final_url&quot;],
+          screenshots: response[&quot;screenshots&quot;]
+        }}</p>
+<p>{:ok, %{status: 408}} -&gt;
+        {:error, :timeout}</p>
+<p>{:ok, %{status: _, body: %{&quot;detail&quot; =&gt; reason}}} -&gt;
+        {:error, {:browser_use_error, reason}}</p>
+<p>{:error, reason} -&gt;
+        {:error, {:service_unavailable, reason}}
+    end
+  end</p>
+<p>def available? do
+    case Req.get(&quot;#{@service_url}/health&quot;, receive_timeout: 5_000) do
+      {:ok, %{status: 200}} -&gt; true
+      _ -&gt; false
+    end
+  end
+end
+</code></pre></p>
+<strong>Docker Configuration</strong>:
+<pre><code class="language-yaml"># docker-compose.yml addition
+services:
+  browser_use:
+    build: ./services/browser_use_service
+    ports:
+      <li>&quot;8000:8000&quot;</li>
+    environment:
+      <li>OPENAI_API_KEY=${OPENAI_API_KEY}</li>
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1'
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:8000/health&quot;]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+</code></pre>
+<h3>4.4 Phase 3: Hyperbrowser Integration (Post-MVP, Opt-in)</h3>
+<strong>Scope</strong>: Add cloud-based capture for heavily protected sites (requires user opt-in).
+<strong>Privacy Considerations</strong>:
+<li>User must explicitly enable cloud capture in settings</li>
+<li>URLs are sent to Hyperbrowser's cloud API</li>
+<li>Clear disclosure in UI about data handling</li>
+<li>Option to exclude specific domains</li>
+<strong>Tasks</strong>:
+1. Add Hyperbrowser API client
+2. Create user settings for cloud capture opt-in
+3. Add domain exclusion list
+4. Implement API key management (user can use their own key)
+<strong>Implementation</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Capture.Hyperbrowser do
+  @moduledoc &quot;&quot;&quot;
+  Cloud-based capture using Hyperbrowser API.
+  Requires user opt-in due to privacy implications.
+  &quot;&quot;&quot;
+<p>@api_base &quot;https://api.hyperbrowser.ai/api/v1&quot;</p>
+<p>def capture(url, opts \\ []) do
+    user = Keyword.fetch!(opts, :user)</p>
+<p>with :ok &lt;- check_user_consent(user),
+         :ok &lt;- check_domain_not_excluded(url, user),
+         api_key &lt;- get_api_key(user),
+         {:ok, response} &lt;- do_capture(url, api_key) do
+      {:ok, response}
+    end
+  end</p>
+<p>defp check_user_consent(user) do
+    if user.settings.allow_cloud_capture do
+      :ok
+    else
+      {:error, :cloud_capture_not_enabled}
+    end
+  end</p>
+<p>defp check_domain_not_excluded(url, user) do
+    domain = extract_domain(url)
+    excluded = user.settings.cloud_capture_excluded_domains || []</p>
+<p>if domain in excluded do
+      {:error, :domain_excluded}
+    else
+      :ok
+    end
+  end</p>
+<p>defp get_api_key(user) do
+    # User can provide their own API key for cost control
+    user.settings.hyperbrowser_api_key ||
+      Application.get_env(:onelist, :hyperbrowser_api_key)
+  end</p>
+<p>defp do_capture(url, api_key) do
+    body = %{
+      url: url,
+      scrape_options: %{
+        formats: [&quot;markdown&quot;, &quot;screenshot&quot;],
+        only_main_content: true
+      }
+    }</p>
+<p>headers = [
+      {&quot;x-api-key&quot;, api_key},
+      {&quot;Content-Type&quot;, &quot;application/json&quot;}
+    ]</p>
+<p>case Req.post(&quot;#{@api_base}/scrape&quot;, json: body, headers: headers) do
+      {:ok, %{status: 200, body: response}} -&gt;
+        {:ok, %{
+          content_type: :hyperbrowser,
+          title: response[&quot;metadata&quot;][&quot;title&quot;],
+          text: response[&quot;data&quot;][&quot;markdown&quot;],
+          screenshot: response[&quot;data&quot;][&quot;screenshot&quot;],
+          url: response[&quot;metadata&quot;][&quot;sourceURL&quot;]
+        }}</p>
+<p>{:ok, %{status: 429}} -&gt;
+        {:error, :rate_limited}</p>
+<p>{:ok, %{status: status, body: body}} -&gt;
+        {:error, {:api_error, status, body}}</p>
+<p>{:error, reason} -&gt;
+        {:error, {:network_error, reason}}
+    end
+  end
+end
+</code></pre></p>
+<h3>4.5 Phase 4: Site Classification Learning (Post-MVP)</h3>
+<strong>Scope</strong>: Implement adaptive tier selection based on capture history.
+<strong>Tasks</strong>:
+1. Add site_capture_stats tracking
+2. Implement ETS cache for fast lookups
+3. Create background worker to persist stats
+4. Build analytics dashboard for capture success rates
+<h3>4.6 Phase 5: Advanced Features (Future)</h3>
+<strong>Potential Features</strong>:
+<li><strong>Multi-page capture</strong>: Crawl related pages (pagination, threads)</li>
+<li><strong>Scheduled captures</strong>: Re-capture URLs on schedule to track changes</li>
+<li><strong>Archive snapshots</strong>: Store historical versions of captured content</li>
+<li><strong>PDF generation</strong>: Render pages to PDF for archival</li>
+<li><strong>Cookie/session support</strong>: Capture from authenticated sessions (with user consent)</li>
+<hr>
+<h2>5. Database Integration</h2>
+<h3>5.1 Zero New Tables Approach</h3>
+<p>Following Onelist's pattern, we store capture metadata in existing tables using JSONB:</p>
+<pre><code class="language-elixir"># Entry metadata for captured content
+%{
+  &quot;capture&quot; =&gt; %{
+    &quot;tier&quot; =&gt; &quot;browser_use&quot;,           # Which tier captured this
+    &quot;captured_at&quot; =&gt; &quot;2026-01-30T...&quot;, # When captured
+    &quot;capture_time_ms&quot; =&gt; 3456,         # How long capture took
+    &quot;source_url&quot; =&gt; &quot;https://...&quot;,     # Original URL
+    &quot;final_url&quot; =&gt; &quot;https://...&quot;,      # After redirects
+    &quot;site_domain&quot; =&gt; &quot;example.com&quot;,
+    &quot;extraction_method&quot; =&gt; &quot;readability&quot;,
+    &quot;word_count&quot; =&gt; 1523,
+    &quot;language&quot; =&gt; &quot;en&quot;,
+    &quot;has_screenshot&quot; =&gt; true
+  },
+  &quot;web_clip&quot; =&gt; %{
+    # Existing web_clip metadata
+  }
+}
+</code></pre>
+<h3>5.2 Site Classification Storage</h3>
+<p>Use user_storage_configs table (already exists) for per-user capture preferences, and a shared ETS/database for site classification:</p>
+<pre><code class="language-elixir"># Per-user capture settings (in user_storage_configs or similar)
+%{
+  &quot;capture_settings&quot; =&gt; %{
+    &quot;default_tier&quot; =&gt; &quot;auto&quot;,
+    &quot;allow_cloud_capture&quot; =&gt; false,
+    &quot;cloud_capture_excluded_domains&quot; =&gt; [&quot;banking.com&quot;, &quot;health.org&quot;],
+    &quot;hyperbrowser_api_key&quot; =&gt; nil,  # Encrypted if provided
+    &quot;capture_timeout_seconds&quot; =&gt; 30,
+    &quot;max_retries&quot; =&gt; 3
+  }
+}
+<h1>Global site classification (system-wide, read-only for users)</h1>
+<h1>Stored in a dedicated &quot;site_classifications&quot; table or system entries</h1>
+%{
+  domain: &quot;example.com&quot;,
+  recommended_tier: &quot;simple_fetch&quot;,
+  success_rates: %{
+    simple_fetch: 0.95,
+    browser_use: 0.99,
+    hyperbrowser: 1.0
+  },
+  last_updated: &quot;2026-01-30T...&quot;,
+  sample_size: 1247
+}
+</code></pre>
+<hr>
+<h2>6. Privacy Considerations</h2>
+<h3>6.1 Privacy-First Architecture</h3>
+<table>
+<tr><th>Tier</th><th>Data Location</th><th>User Control</th></tr>
+<tr><td><strong>Simple Fetch</strong></td><td>User's infrastructure only</td><td>Full control</td></tr>
+<tr><td><strong>Browser Use</strong></td><td>User's infrastructure (LLM calls go to provider)</td><td>LLM provider choice</td></tr>
+<tr><td><strong>Hyperbrowser</strong></td><td>Cloud API (data sent to third party)</td><td>Explicit opt-in required</td></tr>
+</table>
+<h3>6.2 User Consent Flow</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Web Capture Settings                                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Capture Mode                                                                │
+│  ────────────────────────────────────────────────────────────────────────── │
+│                                                                              │
+│  ○ Privacy Mode (Recommended)                                               │
+│    Content is captured using only local processing.                          │
+│    Some protected sites may not be accessible.                               │
+│                                                                              │
+│  ○ Enhanced Mode                                                             │
+│    Uses AI to capture difficult sites (LLM API calls required).             │
+│    URL and page content sent to your configured LLM provider.                │
+│                                                                              │
+│  ○ Maximum Compatibility                                                     │
+│    Uses cloud services for heavily protected sites.                          │
+│    ⚠️  URL and content may be sent to Hyperbrowser's servers.               │
+│    You can exclude specific domains below.                                   │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Excluded Domains (Maximum Compatibility mode)                               │
+│  These domains will never use cloud capture:                                 │
+│                                                                              │
+│  [banking.com              ] [×]                                            │
+│  [health-records.org       ] [×]                                            │
+│  [my-private-wiki.local    ] [×]                                            │
+│                                                                              │
+│  [+ Add Domain]                                                              │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>6.3 Data Handling Policies</h3>
+<p>1. <strong>URLs are not logged</strong> beyond what's needed for capture
+2. <strong>Captured content stored locally</strong> by default (encrypted if E2EE enabled)
+3. <strong>Cloud capture opt-in</strong> requires explicit user action
+4. <strong>Domain exclusions</strong> always honored
+5. <strong>No tracking</strong> of capture patterns for advertising/analytics</p>
+<hr>
+<h2>7. Cost Analysis</h2>
+<h3>7.1 Per-Capture Costs</h3>
+<table>
+<tr><th>Tier</th><th>Infrastructure Cost</th><th>API Cost</th><th>Total per Capture</th></tr>
+<tr><td><strong>Simple Fetch</strong></td><td>~$0.0001</td><td>$0</td><td>~$0.0001</td></tr>
+<tr><td><strong>Browser Use</strong></td><td>~$0.001</td><td>~$0.002 (GPT-4o-mini)</td><td>~$0.003</td></tr>
+<tr><td><strong>Hyperbrowser</strong></td><td>$0</td><td>$0.0005 ($0.50/1k)</td><td>~$0.0005</td></tr>
+</table>
+<h3>7.2 Cost Optimization Strategies</h3>
+<p>1. <strong>Tier preference</strong>: Default to simple fetch, only escalate on failure
+2. <strong>Site classification</strong>: Learn which sites need which tier, avoid unnecessary escalation
+3. <strong>Caching</strong>: Cache captures for 15 minutes (same URL, same user)
+4. <strong>Batch processing</strong>: For RSS/scheduled captures, batch multiple captures
+5. <strong>User API keys</strong>: Let users provide their own Hyperbrowser/LLM keys</p>
+<h3>7.3 Cost Projection (1000 captures/day)</h3>
+<table>
+<tr><th>Scenario</th><th>Tier Distribution</th><th>Daily Cost</th><th>Monthly Cost</th></tr>
+<tr><td><strong>Conservative</strong></td><td>80% simple, 15% browser, 5% cloud</td><td>~$0.70</td><td>~$21</td></tr>
+<tr><td><strong>Moderate</strong></td><td>60% simple, 30% browser, 10% cloud</td><td>~$1.40</td><td>~$42</td></tr>
+<tr><td><strong>Heavy</strong></td><td>40% simple, 40% browser, 20% cloud</td><td>~$2.30</td><td>~$69</td></tr>
+</table>
+<hr>
+<h2>8. Agent Ecosystem Integration</h2>
+<h3>8.1 Integration Points</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    WEB CAPTURE IN AGENT ECOSYSTEM                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ENTRY POINTS (How captures are triggered)                                   │
+│  ─────────────────────────────────────────                                   │
+│                                                                              │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐       │
+│  │ REST API     │ │ Browser Ext. │ │ OpenClaw      │ │ River Agent  │       │
+│  │ POST /clip   │ │ (Chrome/FF)  │ │ /save URL    │ │ &quot;save this&quot;  │       │
+│  └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘       │
+│         │                │                │                │                │
+│         └────────────────┼────────────────┼────────────────┘                │
+│                          │                │                                  │
+│                          ▼                ▼                                  │
+│              ┌────────────────────────────────────────────┐                 │
+│              │            WEB CLIPPER                     │                 │
+│              │   (Part of Feeder Agent)                   │                 │
+│              │                                            │                 │
+│              │  • Capture orchestration                   │                 │
+│              │  • Tier selection                          │                 │
+│              │  • Content extraction                      │                 │
+│              └───────────────────┬────────────────────────┘                 │
+│                                  │                                          │
+│                                  ▼                                          │
+│              ┌────────────────────────────────────────────┐                 │
+│              │         POST-CAPTURE CHAIN                 │                 │
+│              │                                            │                 │
+│              │  1. Searcher Agent                         │                 │
+│              │     • Generate embedding                   │                 │
+│              │     • Similarity check (before save)       │                 │
+│              │     • Index for search                     │                 │
+│              │                                            │                 │
+│              │  2. Reader Agent                           │                 │
+│              │     • Extract atomic memories              │                 │
+│              │     • Generate summary                     │                 │
+│              │     • Detect relationships                 │                 │
+│              │                                            │                 │
+│              │  3. Asset Enrichment Agent                 │                 │
+│              │     • Process captured images              │                 │
+│              │     • Generate thumbnails                  │                 │
+│              │     • OCR if needed                        │                 │
+│              │                                            │                 │
+│              │  4. River Agent                            │                 │
+│              │     • Notify user of capture               │                 │
+│              │     • Suggest organization/tags            │                 │
+│              │     • Extract action items                 │                 │
+│              └────────────────────────────────────────────┘                 │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>8.2 River Agent Integration</h3>
+<p>River can trigger web captures via natural language:</p>
+<pre><code class="language-elixir">defmodule Onelist.River.Intents.WebCapture do
+  @moduledoc &quot;&quot;&quot;
+  Intent handler for web capture requests via River.
+  &quot;&quot;&quot;
+<p>@patterns [
+    ~r/save\s+(this\s+)?(link|url|page|article)/i,
+    ~r/clip\s+(this|the)\s+(page|article)/i,
+    ~r/remember\s+(this|the)\s+(link|url|page)/i,
+    ~r/(https?:\/\/\S+)/  # Direct URL
+  ]</p>
+<p>def match?(message) do
+    Enum.any?(@patterns, &amp;Regex.match?(&amp;1, message))
+  end</p>
+<p>def handle(message, context) do
+    url = extract_url(message) || context.current_url</p>
+<p>case Onelist.Feeder.Adapters.WebClipper.clip_url(context.user_id, url) do
+      {:ok, entry} -&gt;
+        {:reply, &quot;Saved! I've captured '#{entry.title}' to your library.&quot;}</p>
+<p>{:similar, matches} -&gt;
+        {:reply, &quot;&quot;&quot;
+        I found similar content already saved:
+        #{format_matches(matches)}</p>
+<p>Would you like me to save it anyway, or view the existing entry?
+        &quot;&quot;&quot;}</p>
+<p>{:error, reason} -&gt;
+        {:reply, &quot;I couldn't capture that page: #{format_error(reason)}&quot;}
+    end
+  end
+end
+</code></pre></p>
+<h3>8.3 OpenClaw Integration</h3>
+<p>OpenClaw users can save URLs directly:</p>
+<pre><code class="language-python"># OpenClaw memory_write with URL detection
+def memory_write(content: str, tags: list = None):
+    &quot;&quot;&quot;
+    Write to memory. If content is a URL, trigger web capture.
+    &quot;&quot;&quot;
+    if is_url(content):
+        # Call Onelist Web Clipper API
+        response = onelist_client.clip(
+            url=content,
+            tags=tags or [],
+            check_similarity=True
+        )
+<p>if response.get(&quot;similar&quot;):
+            return f&quot;Found similar: {response['similar'][0]['title']}. Use /save-anyway to force.&quot;</p>
+<p>return f&quot;Saved: {response['title']}&quot;
+    else:
+        # Regular memory write
+        return onelist_client.create_entry(content=content, tags=tags)
+</code></pre></p>
+<hr>
+<h2>9. Technical Specifications</h2>
+<h3>9.1 API Endpoints</h3>
+<h4>POST /api/v1/clip</h4>
+<p>Enhanced clip endpoint with tier support:</p>
+<pre><code class="language-bash"># Basic clip (auto tier selection)
+curl -X POST https://api.onelist.my/v1/clip \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -d '{
+    &quot;url&quot;: &quot;https://example.com/article&quot;,
+    &quot;tags&quot;: [&quot;reading-list&quot;]
+  }'
+<h1>Force specific tier</h1>
+curl -X POST https://api.onelist.my/v1/clip \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -d '{
+    &quot;url&quot;: &quot;https://protected-site.com/article&quot;,
+    &quot;tier&quot;: &quot;browser_use&quot;,
+    &quot;tags&quot;: [&quot;research&quot;]
+  }'
+<h1>Response includes capture metadata</h1>
+{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;entry_id&quot;: &quot;abc123&quot;,
+    &quot;title&quot;: &quot;Article Title&quot;,
+    &quot;entry_type&quot;: &quot;article&quot;,
+    &quot;capture&quot;: {
+      &quot;tier&quot;: &quot;browser_use&quot;,
+      &quot;capture_time_ms&quot;: 3456,
+      &quot;final_url&quot;: &quot;https://example.com/article&quot;
+    },
+    &quot;tags&quot;: [&quot;source:web&quot;, &quot;site:example-com&quot;, &quot;type:article&quot;, &quot;reading-list&quot;]
+  }
+}
+</code></pre>
+<h4>GET /api/v1/clip/status</h4>
+<p>Check capture tier availability:</p>
+<pre><code class="language-bash">curl https://api.onelist.my/v1/clip/status \
+  -H &quot;Authorization: Bearer $TOKEN&quot;
+<h1>Response</h1>
+{
+  &quot;tiers&quot;: {
+    &quot;simple_fetch&quot;: {&quot;available&quot;: true, &quot;cost&quot;: &quot;free&quot;},
+    &quot;browser_use&quot;: {&quot;available&quot;: true, &quot;cost&quot;: &quot;~$0.003/capture&quot;},
+    &quot;hyperbrowser&quot;: {&quot;available&quot;: false, &quot;reason&quot;: &quot;not_enabled_by_user&quot;}
+  },
+  &quot;user_settings&quot;: {
+    &quot;allow_cloud_capture&quot;: false,
+    &quot;default_tier&quot;: &quot;auto&quot;
+  }
+}
+</code></pre>
+<h3>9.2 Configuration</h3>
+<pre><code class="language-elixir"># config/config.exs
+config :onelist, Onelist.Capture,
+  # Tier configuration
+  simple_fetch: [
+    timeout_ms: 10_000,
+    max_retries: 3,
+    user_agent_rotation: true
+  ],
+<p>browser_use: [
+    service_url: System.get_env(&quot;BROWSER_USE_URL&quot;, &quot;http://localhost:8000&quot;),
+    timeout_ms: 35_000,
+    default_llm: &quot;gpt-4o-mini&quot;
+  ],</p>
+<p>hyperbrowser: [
+    api_base: &quot;https://api.hyperbrowser.ai/api/v1&quot;,
+    default_formats: [&quot;markdown&quot;, &quot;screenshot&quot;]
+  ],</p>
+<p># Site classification
+  classification: [
+    cache_ttl_hours: 24,
+    min_samples_for_recommendation: 10,
+    success_rate_threshold: 0.8
+  ]
+</code></pre></p>
+<h3>9.3 Error Handling</h3>
+<pre><code class="language-elixir">defmodule Onelist.Capture.Errors do
+  @moduledoc &quot;&quot;&quot;
+  Standardized error types for web capture.
+  &quot;&quot;&quot;
+<p>@type capture_error ::
+    {:blocked, String.t()} |           # Site blocked capture
+    {:not_found, String.t()} |         # URL returns 404
+    {:timeout, integer()} |            # Capture timeout
+    {:rate_limited, String.t()} |      # API rate limit
+    {:invalid_url, String.t()} |       # Malformed URL
+    {:unsupported_content, String.t()} | # Can't extract (e.g., binary file)
+    {:tier_unavailable, atom()} |      # Requested tier not available
+    {:all_tiers_failed, list()} |      # All tiers exhausted
+    {:cloud_not_enabled, nil} |        # User hasn't enabled cloud capture
+    {:domain_excluded, String.t()}     # Domain in user's exclusion list</p>
+<p>def format_error({:blocked, url}) do
+    &quot;This site (#{extract_domain(url)}) is blocking automated access. &quot; &lt;&gt;
+    &quot;Try enabling Enhanced Mode in your capture settings.&quot;
+  end</p>
+<p>def format_error({:all_tiers_failed, attempts}) do
+    tiers_tried = Enum.map(attempts, fn {tier, _} -&gt; tier end) |&gt; Enum.join(&quot;, &quot;)
+    &quot;Could not capture this page. Tried: #{tiers_tried}. &quot; &lt;&gt;
+    &quot;The site may require authentication or be blocking all automated access.&quot;
+  end</p>
+<p># ... other error formatters
+end
+</code></pre></p>
+<hr>
+<h2>10. Success Metrics</h2>
+<h3>10.1 Capture Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Target</th><th>Measurement</th></tr>
+<tr><td><strong>Capture success rate</strong></td><td>>90% of attempted URLs</td><td>Successful captures / Total attempts</td></tr>
+<tr><td><strong>First-tier success</strong></td><td>>70% captured on first tier</td><td>Simple fetch success / Total</td></tr>
+<tr><td><strong>Avg capture time</strong></td><td><5 seconds</td><td>End-to-end capture time</td></tr>
+<tr><td><strong>Content extraction quality</strong></td><td>>85% readable</td><td>User feedback / Manual review</td></tr>
+<tr><td><strong>Duplicate detection accuracy</strong></td><td>>95%</td><td>True positives + true negatives</td></tr>
+</table>
+<h3>10.2 User Experience Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Target</th><th>Measurement</th></tr>
+<tr><td><strong>Capture abandonment</strong></td><td><10%</td><td>Cancelled / Started</td></tr>
+<tr><td><strong>Tier escalation acceptance</strong></td><td>>80%</td><td>Users accepting tier escalation</td></tr>
+<tr><td><strong>Cloud opt-in rate</strong></td><td>Track only</td><td>Users enabling cloud capture</td></tr>
+<tr><td><strong>Error resolution</strong></td><td>>70% self-resolved</td><td>Users who retry successfully</td></tr>
+</table>
+<h3>10.3 Cost Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Target</th><th>Measurement</th></tr>
+<tr><td><strong>Avg cost per capture</strong></td><td><$0.005</td><td>Total API costs / Captures</td></tr>
+<tr><td><strong>Cloud tier usage</strong></td><td><15% of captures</td><td>Cloud captures / Total</td></tr>
+<tr><td><strong>Browser Use efficiency</strong></td><td>>85% success when used</td><td>Successes / Attempts</td></tr>
+</table>
+<hr>
+<h2>11. Implementation Checklist</h2>
+<h3>Phase 1: Simple Fetch Enhancement (Week 1)</h3>
+<li>[ ] Add retry logic with exponential backoff</li>
+<li>[ ] Implement user-agent rotation</li>
+<li>[ ] Improve error classification</li>
+<li>[ ] Add response caching</li>
+<li>[ ] Update API documentation</li>
+<h3>Phase 2: Browser Use Integration (Weeks 2-3)</h3>
+<li>[ ] Create Browser Use Python service</li>
+<li>[ ] Add Dockerfile and docker-compose entry</li>
+<li>[ ] Implement Elixir client</li>
+<li>[ ] Add health checking and failover</li>
+<li>[ ] Update Web Clipper to use new tier</li>
+<li>[ ] Add configuration options</li>
+<h3>Phase 3: Hyperbrowser Integration (Week 4, Post-MVP)</h3>
+<li>[ ] Implement Hyperbrowser client</li>
+<li>[ ] Create user consent flow</li>
+<li>[ ] Add domain exclusion management</li>
+<li>[ ] Support user-provided API keys</li>
+<li>[ ] Add privacy documentation</li>
+<h3>Phase 4: Site Classification (Week 5, Post-MVP)</h3>
+<li>[ ] Create ETS cache for classifications</li>
+<li>[ ] Implement success/failure tracking</li>
+<li>[ ] Add background persistence worker</li>
+<li>[ ] Build simple analytics dashboard</li>
+<hr>
+<h2>12. Browser Plugin Architecture (Authenticated Content)</h2>
+<p>This section addresses capturing content behind authentication walls that server-side agents cannot access. The browser plugin performs all heavy lifting locally, minimizing Onelist server load.</p>
+<h3>12.1 The Authentication Problem</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    THE AUTHENTICATED CONTENT PROBLEM                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  SCENARIO: User viewing authenticated content                                │
+│                                                                              │
+│  User's Browser                    External Service                          │
+│  ┌─────────────────┐              ┌─────────────────┐                       │
+│  │ Logged in to:   │◄────────────►│ • Company Wiki  │                       │
+│  │ • Corporate SSO │  Authenticated│ • Confluence   │                       │
+│  │ • Session cookie│  Session      │ • Private Slack│                       │
+│  │ • OAuth tokens  │              │ • Paid News    │                       │
+│  └────────┬────────┘              │ • Internal Docs│                       │
+│           │                       └─────────────────┘                       │
+│           │ User clicks &quot;Save to Onelist&quot;                                   │
+│           ▼                                                                  │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  ❌ Server-side capture FAILS                                        │    │
+│  │     • Onelist server has no authentication to this content           │    │
+│  │     • Would get login page or 403 error                              │    │
+│  │     • Cannot escalate to Browser Use or Hyperbrowser (no session)    │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ✅ SOLUTION: Browser plugin captures directly from rendered DOM            │
+│     • Plugin has access to authenticated page content                       │
+│     • Processes content locally in browser                                  │
+│     • Sends only processed result to Onelist                               │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>12.2 Plugin-First Architecture</h3>
+<p>The browser plugin is the <strong>primary capture mechanism</strong>, with server-side capture as a fallback for public URLs:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    ONELIST BROWSER PLUGIN ARCHITECTURE                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  BROWSER PLUGIN (Manifest V3)                                               │
+│  ─────────────────────────────                                               │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                      CONTENT SCRIPT                                  │    │
+│  │                                                                      │    │
+│  │  Injected into page, has access to:                                 │    │
+│  │  • Full rendered DOM (post-JavaScript)                               │    │
+│  │  • Authenticated content user can see                               │    │
+│  │  • Images, stylesheets, embedded media                              │    │
+│  │                                                                      │    │
+│  │  ┌──────────────────────────────────────────────────────────────┐   │    │
+│  │  │ CAPTURE PIPELINE (runs entirely in browser)                   │   │    │
+│  │  │                                                               │   │    │
+│  │  │  1. DOM Snapshot                                              │   │    │
+│  │  │     └── Clone current document state                          │   │    │
+│  │  │                                                               │   │    │
+│  │  │  2. Content Extraction (Defuddle)                             │   │    │
+│  │  │     ├── Remove ads, navigation, sidebars                      │   │    │
+│  │  │     ├── Extract main article content                          │   │    │
+│  │  │     └── Standardize HTML structure                            │   │    │
+│  │  │                                                               │   │    │
+│  │  │  3. Markdown Conversion (Turndown)                            │   │    │
+│  │  │     ├── Convert clean HTML to Markdown                        │   │    │
+│  │  │     ├── Preserve code blocks with syntax                      │   │    │
+│  │  │     └── Handle tables, lists, formatting                      │   │    │
+│  │  │                                                               │   │    │
+│  │  │  4. Asset Processing                                          │   │    │
+│  │  │     ├── Download images to base64/blob                        │   │    │
+│  │  │     ├── Generate thumbnails (canvas)                          │   │    │
+│  │  │     └── Extract embedded media URLs                           │   │    │
+│  │  │                                                               │   │    │
+│  │  │  5. Metadata Extraction                                       │   │    │
+│  │  │     ├── Title, author, publish date                           │   │    │
+│  │  │     ├── Open Graph / Twitter Cards                            │   │    │
+│  │  │     └── Schema.org structured data                            │   │    │
+│  │  │                                                               │   │    │
+│  │  │  6. Archive Generation (Optional)                             │   │    │
+│  │  │     ├── SingleFile HTML (self-contained)                      │   │    │
+│  │  │     └── MHTML bundle                                          │   │    │
+│  │  └──────────────────────────────────────────────────────────────┘   │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                      SERVICE WORKER                                  │    │
+│  │                                                                      │    │
+│  │  Handles background tasks:                                          │    │
+│  │  • IndexedDB queue for offline captures                            │    │
+│  │  • Communication with Onelist endpoint                             │    │
+│  │  • Retry logic for failed syncs                                    │    │
+│  │  • Cross-tab deduplication                                         │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>12.3 Core Libraries (Browser-Side)</h3>
+<table>
+<tr><th>Library</th><th>Purpose</th><th>Size</th><th>License</th></tr>
+<tr><td><a href="https://github.com/kepano/defuddle"><strong>Defuddle</strong></a></td><td>Content extraction (better than Readability)</td><td>~50KB</td><td>MIT</td></tr>
+<tr><td><a href="https://github.com/mixmark-io/turndown"><strong>Turndown</strong></a></td><td>HTML to Markdown</td><td>~30KB</td><td>MIT</td></tr>
+<tr><td><a href="https://github.com/gildas-lormeau/SingleFile"><strong>SingleFile Core</strong></a></td><td>Complete page archiving</td><td>~200KB</td><td>AGPL-3.0</td></tr>
+<tr><td><a href="https://dexie.org/"><strong>Dexie.js</strong></a></td><td>IndexedDB wrapper</td><td>~25KB</td><td>Apache-2.0</td></tr>
+</table>
+<strong>Why Defuddle over Readability.js:</strong>
+<li>Created by Obsidian team specifically for web clipping</li>
+<li>More forgiving - removes fewer uncertain elements</li>
+<li>Consistent output for footnotes, math, code blocks</li>
+<li>Extracts more metadata (schema.org)</li>
+<li>Actively maintained (Readability.js largely abandoned)</li>
+<h3>12.4 Content Processing Pipeline</h3>
+<pre><code class="language-typescript">// Content script: capture.ts
+<p>import { Defuddle } from 'defuddle';
+import TurndownService from 'turndown';
+import { gfm } from 'turndown-plugin-gfm';</p>
+<p>interface CaptureResult {
+  markdown: string;
+  title: string;
+  author: string | null;
+  publishedAt: string | null;
+  excerpt: string;
+  siteName: string;
+  wordCount: number;
+  language: string | null;
+  assets: Asset[];
+  metadata: Record&lt;string, any&gt;;
+  archive?: {
+    singleFileHtml?: string;
+    mhtml?: Blob;
+  };
+}</p>
+<p>interface Asset {
+  url: string;
+  localUrl: string;  // blob: or data: URL
+  mimeType: string;
+  size: number;
+  role: 'image' | 'thumbnail' | 'attachment';
+}</p>
+<p>class OnelistCapture {
+  private turndown: TurndownService;</p>
+<p>constructor() {
+    this.turndown = new TurndownService({
+      headingStyle: 'atx',
+      codeBlockStyle: 'fenced',
+      bulletListMarker: '-',
+    });
+    this.turndown.use(gfm);</p>
+<p>// Custom rules for better output
+    this.turndown.addRule('strikethrough', {
+      filter: ['del', 's', 'strike'],
+      replacement: (content) =&gt; <code>~~${content}~~</code>
+    });
+  }</p>
+<p>async capture(options: CaptureOptions = {}): Promise&lt;CaptureResult&gt; {
+    // 1. Extract content using Defuddle
+    const defuddle = new Defuddle(document);
+    const extracted = defuddle.parse();</p>
+<p>// 2. Process assets (images, etc.)
+    const assets = await this.processAssets(extracted.content);</p>
+<p>// 3. Convert to Markdown
+    const markdown = this.turndown.turndown(extracted.content);</p>
+<p>// 4. Generate archive if requested
+    let archive = {};
+    if (options.generateArchive) {
+      archive = await this.generateArchive(options.archiveFormat);
+    }</p>
+<p>return {
+      markdown,
+      title: extracted.title,
+      author: extracted.author,
+      publishedAt: extracted.publishedTime,
+      excerpt: extracted.excerpt,
+      siteName: extracted.siteName || new URL(location.href).hostname,
+      wordCount: this.countWords(markdown),
+      language: document.documentElement.lang || null,
+      assets,
+      metadata: {
+        url: location.href,
+        capturedAt: new Date().toISOString(),
+        captureMethod: 'browser_plugin',
+        schemaOrg: extracted.schemaOrg,
+        openGraph: this.extractOpenGraph(),
+      },
+      archive,
+    };
+  }</p>
+<p>private async processAssets(content: Element): Promise&lt;Asset[]&gt; {
+    const assets: Asset[] = [];
+    const images = content.querySelectorAll('img');</p>
+<p>for (const img of images) {
+      const src = img.src;
+      if (!src || src.startsWith('data:')) continue;</p>
+<p>try {
+        // Fetch image using browser's authenticated session
+        const response = await fetch(src, { credentials: 'include' });
+        const blob = await response.blob();
+        const localUrl = URL.createObjectURL(blob);</p>
+<p>assets.push({
+          url: src,
+          localUrl,
+          mimeType: blob.type,
+          size: blob.size,
+          role: 'image',
+        });</p>
+<p>// Update image src to local URL for archive
+        img.src = localUrl;
+      } catch (e) {
+        console.warn(<code>Failed to fetch asset: ${src}</code>, e);
+      }
+    }</p>
+<p>return assets;
+  }</p>
+<p>private async generateArchive(
+    format: 'singlefile' | 'mhtml' = 'singlefile'
+  ): Promise&lt;{ singleFileHtml?: string; mhtml?: Blob }&gt; {
+    if (format === 'singlefile') {
+      // Use SingleFile's processor
+      const { SingleFile } = await import('./singlefile-core.js');
+      const html = await SingleFile.getPageData({
+        removeHiddenElements: true,
+        removeUnusedStyles: true,
+        removeUnusedFonts: true,
+        compressHTML: true,
+        compressCSS: true,
+        loadDeferredImages: true,
+        loadDeferredImagesMaxIdleTime: 1500,
+      });
+      return { singleFileHtml: html };
+    }</p>
+<p>// MHTML generation would require native messaging or different approach
+    return {};
+  }</p>
+<p>private extractOpenGraph(): Record&lt;string, string&gt; {
+    const og: Record&lt;string, string&gt; = {};
+    document.querySelectorAll('meta[property^=&quot;og:&quot;]').forEach((meta) =&gt; {
+      const property = meta.getAttribute('property')?.replace('og:', '');
+      const content = meta.getAttribute('content');
+      if (property &amp;&amp; content) og[property] = content;
+    });
+    return og;
+  }</p>
+<p>private countWords(text: string): number {
+    return text.split(/\s+/).filter(Boolean).length;
+  }
+}</p>
+<p>export const capture = new OnelistCapture();
+</code></pre></p>
+<h3>12.5 Communication with Onelist</h3>
+<p>The plugin supports multiple Onelist deployment scenarios:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    DEPLOYMENT SCENARIOS                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  SCENARIO 1: Self-Hosted (OpenClaw / Local)                                  │
+│  ──────────────────────────────────────────                                  │
+│                                                                              │
+│  Browser Plugin ──► localhost:4000/api/v1/clip                              │
+│                     OR                                                       │
+│                     192.168.1.x:4000/api/v1/clip (LAN)                      │
+│                                                                              │
+│  • Plugin configured with local Onelist URL                                 │
+│  • All processing happens on user's machine                                 │
+│  • Assets stored locally                                                    │
+│  • Zero cloud dependency                                                    │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  SCENARIO 2: Cloud Sync (Onelist.my)                                        │
+│  ────────────────────────────────────                                        │
+│                                                                              │
+│  Browser Plugin ──► api.onelist.my/v1/clip                                  │
+│                                                                              │
+│  • Plugin sends processed markdown + metadata                               │
+│  • Assets can be uploaded to user's cloud storage                          │
+│  • Entry created server-side                                                │
+│  • Embeddings generated server-side (or locally if configured)             │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  SCENARIO 3: Offline-First (Queue + Sync)                                   │
+│  ─────────────────────────────────────────                                   │
+│                                                                              │
+│  Browser Plugin ──► IndexedDB (local queue)                                 │
+│                          │                                                  │
+│                          ├── When online: sync to Onelist                  │
+│                          └── When offline: queue for later                 │
+│                                                                              │
+│  • Captures work without internet                                          │
+│  • Background sync when connection restored                                │
+│  • Conflict resolution for same-URL captures                               │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>12.6 Plugin Service Worker</h3>
+<pre><code class="language-typescript">// service-worker.ts
+<p>import Dexie from 'dexie';</p>
+<p>// Local database for offline queue
+class OnelistDB extends Dexie {
+  captures!: Dexie.Table&lt;QueuedCapture, string&gt;;
+  assets!: Dexie.Table&lt;QueuedAsset, string&gt;;
+  settings!: Dexie.Table&lt;PluginSettings, string&gt;;</p>
+<p>constructor() {
+    super('OnelistPlugin');
+    this.version(1).stores({
+      captures: 'id, url, status, createdAt',
+      assets: 'id, captureId, status',
+      settings: 'key',
+    });
+  }
+}</p>
+<p>interface QueuedCapture {
+  id: string;
+  url: string;
+  markdown: string;
+  metadata: Record&lt;string, any&gt;;
+  status: 'pending' | 'syncing' | 'synced' | 'failed';
+  retryCount: number;
+  createdAt: Date;
+  syncedAt?: Date;
+  error?: string;
+}</p>
+<p>interface PluginSettings {
+  key: string;
+  value: any;
+}</p>
+<p>const db = new OnelistDB();</p>
+<p>// Endpoint discovery
+async function getOnelistEndpoint(): Promise&lt;string&gt; {
+  const settings = await db.settings.get('endpoint');</p>
+<p>// Priority order:
+  // 1. User-configured endpoint
+  if (settings?.value) return settings.value;</p>
+<p>// 2. Try localhost (OpenClaw/self-hosted)
+  try {
+    const localResponse = await fetch('http://localhost:4000/api/v1/health', {
+      method: 'GET',
+      signal: AbortSignal.timeout(2000),
+    });
+    if (localResponse.ok) return 'http://localhost:4000';
+  } catch {}</p>
+<p>// 3. Fall back to cloud
+  return 'https://api.onelist.my';
+}</p>
+<p>// Queue capture for sync
+async function queueCapture(capture: CaptureResult): Promise&lt;string&gt; {
+  const id = crypto.randomUUID();</p>
+<p>await db.captures.add({
+    id,
+    url: capture.metadata.url,
+    markdown: capture.markdown,
+    metadata: capture.metadata,
+    status: 'pending',
+    retryCount: 0,
+    createdAt: new Date(),
+  });</p>
+<p>// Queue assets separately
+  for (const asset of capture.assets) {
+    await db.assets.add({
+      id: crypto.randomUUID(),
+      captureId: id,
+      ...asset,
+      status: 'pending',
+    });
+  }</p>
+<p>// Trigger sync
+  await syncPendingCaptures();</p>
+<p>return id;
+}</p>
+<p>// Sync pending captures to Onelist
+async function syncPendingCaptures(): Promise&lt;void&gt; {
+  const pending = await db.captures
+    .where('status')
+    .equals('pending')
+    .toArray();</p>
+<p>const endpoint = await getOnelistEndpoint();
+  const apiKey = (await db.settings.get('apiKey'))?.value;</p>
+<p>if (!apiKey) {
+    console.warn('No API key configured, skipping sync');
+    return;
+  }</p>
+<p>for (const capture of pending) {
+    try {
+      await db.captures.update(capture.id, { status: 'syncing' });</p>
+<p>const response = await fetch(<code>${endpoint}/api/v1/clip/from-plugin</code>, {
+        method: 'POST',
+        headers: {
+          'Authorization': <code>Bearer ${apiKey}</code>,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: capture.url,
+          markdown: capture.markdown,
+          title: capture.metadata.title,
+          author: capture.metadata.author,
+          publishedAt: capture.metadata.publishedAt,
+          siteName: capture.metadata.siteName,
+          wordCount: capture.metadata.wordCount,
+          capturedAt: capture.metadata.capturedAt,
+          captureMethod: 'browser_plugin',
+          // Assets handled separately
+        }),
+      });</p>
+<p>if (response.ok) {
+        const result = await response.json();
+        await db.captures.update(capture.id, {
+          status: 'synced',
+          syncedAt: new Date(),
+        });</p>
+<p>// Sync assets to the created entry
+        await syncAssetsForCapture(capture.id, result.data.entry_id, endpoint, apiKey);
+      } else {
+        throw new Error(<code>HTTP ${response.status}</code>);
+      }
+    } catch (error) {
+      await db.captures.update(capture.id, {
+        status: 'failed',
+        retryCount: capture.retryCount + 1,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+}</p>
+<p>// Sync assets for a capture
+async function syncAssetsForCapture(
+  captureId: string,
+  entryId: string,
+  endpoint: string,
+  apiKey: string
+): Promise&lt;void&gt; {
+  const assets = await db.assets
+    .where('captureId')
+    .equals(captureId)
+    .toArray();</p>
+<p>for (const asset of assets) {
+    try {
+      // Convert blob URL back to blob
+      const response = await fetch(asset.localUrl);
+      const blob = await response.blob();</p>
+<p>// Upload to Onelist
+      const formData = new FormData();
+      formData.append('file', blob, <code>asset-${asset.id}.${asset.mimeType.split('/')[1]}</code>);
+      formData.append('entry_id', entryId);
+      formData.append('role', asset.role);
+      formData.append('original_url', asset.url);</p>
+<p>await fetch(<code>${endpoint}/api/v1/assets</code>, {
+        method: 'POST',
+        headers: { 'Authorization': <code>Bearer ${apiKey}</code> },
+        body: formData,
+      });</p>
+<p>await db.assets.update(asset.id, { status: 'synced' });
+    } catch (error) {
+      console.error(<code>Failed to sync asset ${asset.id}:</code>, error);
+    }
+  }
+}</p>
+<p>// Listen for messages from content script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) =&gt; {
+  if (message.type === 'CAPTURE_COMPLETE') {
+    queueCapture(message.capture)
+      .then((id) =&gt; sendResponse({ success: true, id }))
+      .catch((error) =&gt; sendResponse({ success: false, error: error.message }));
+    return true; // Keep channel open for async response
+  }</p>
+<p>if (message.type === 'GET_SYNC_STATUS') {
+    db.captures.toArray().then((captures) =&gt; {
+      sendResponse({
+        pending: captures.filter(c =&gt; c.status === 'pending').length,
+        synced: captures.filter(c =&gt; c.status === 'synced').length,
+        failed: captures.filter(c =&gt; c.status === 'failed').length,
+      });
+    });
+    return true;
+  }
+});</p>
+<p>// Periodic sync (every 5 minutes when browser is active)
+chrome.alarms.create('sync-captures', { periodInMinutes: 5 });
+chrome.alarms.onAlarm.addListener((alarm) =&gt; {
+  if (alarm.name === 'sync-captures') {
+    syncPendingCaptures();
+  }
+});
+</code></pre></p>
+<h3>12.7 Archive Formats</h3>
+<p>The plugin supports multiple archive formats for different use cases:</p>
+<table>
+<tr><th>Format</th><th>Size</th><th>Fidelity</th><th>Use Case</th></tr>
+<tr><td><strong>Markdown + Assets</strong></td><td>Small</td><td>Good</td><td>Default - searchable, editable</td></tr>
+<tr><td><strong>SingleFile HTML</strong></td><td>Medium</td><td>Excellent</td><td>Visual archive, offline viewing</td></tr>
+<tr><td><strong>MHTML</strong></td><td>Medium</td><td>Good</td><td>Browser-native, legacy compat</td></tr>
+<tr><td><strong>PDF</strong></td><td>Large</td><td>Excellent</td><td>Print, legal archival</td></tr>
+</table>
+<strong>SingleFile Integration:</strong>
+<pre><code class="language-typescript">// Archive generation using SingleFile core
+async function generateSingleFileArchive(): Promise&lt;string&gt; {
+  // SingleFile can run entirely in the browser
+  const options = {
+    // Remove unnecessary content
+    removeHiddenElements: true,
+    removeUnusedStyles: true,
+    removeUnusedFonts: true,
+    removeSavedDate: false,
+<p>// Compression
+    compressHTML: true,
+    compressCSS: true,</p>
+<p>// Images
+    loadDeferredImages: true,
+    loadDeferredImagesMaxIdleTime: 1500,</p>
+<p>// Do NOT remove frames (may contain content)
+    removeFrames: false,</p>
+<p>// Include all resources inline
+    saveRawPage: false,</p>
+<p>// Add info comment
+    infobarContent: 'Saved with Onelist Web Clipper',
+  };</p>
+<p>// SingleFile processes the current page
+  const pageData = await singlefile.getPageData(options);</p>
+<p>return pageData.content; // Self-contained HTML string
+}
+</code></pre></p>
+<h3>12.8 Ad and Clutter Removal</h3>
+<p>Defuddle handles most clutter removal, but we add additional heuristics:</p>
+<pre><code class="language-typescript">// Additional content cleaning beyond Defuddle
+function cleanContent(element: Element): void {
+  // Remove common ad containers
+  const adSelectors = [
+    '[class<em>=&quot;ad-&quot;]', '[class</em>=&quot;ads-&quot;]', '[class<em>=&quot;advertisement&quot;]',
+    '[id</em>=&quot;ad-&quot;]', '[id<em>=&quot;ads-&quot;]',
+    '[data-ad]', '[data-advertisement]',
+    '.sponsored', '.promotion',
+    'aside[role=&quot;complementary&quot;]',
+    '[aria-label</em>=&quot;advertisement&quot;]',
+  ];
+<p>adSelectors.forEach(selector =&gt; {
+    element.querySelectorAll(selector).forEach(el =&gt; el.remove());
+  });</p>
+<p>// Remove social sharing buttons
+  const socialSelectors = [
+    '[class<em>=&quot;share-&quot;]', '[class</em>=&quot;social-&quot;]',
+    '.addthis', '.sharethis',
+    '[data-share]',
+  ];</p>
+<p>socialSelectors.forEach(selector =&gt; {
+    element.querySelectorAll(selector).forEach(el =&gt; el.remove());
+  });</p>
+<p>// Remove newsletter signup forms
+  element.querySelectorAll('form').forEach(form =&gt; {
+    const text = form.textContent?.toLowerCase() || '';
+    if (text.includes('subscribe') || text.includes('newsletter') || text.includes('sign up')) {
+      form.remove();
+    }
+  });</p>
+<p>// Remove related articles sections (often noisy)
+  const relatedSelectors = [
+    '[class<em>=&quot;related-&quot;]', '[class</em>=&quot;recommended-&quot;]',
+    '[class<em>=&quot;you-might&quot;]', '[class</em>=&quot;more-from&quot;]',
+  ];</p>
+<p>relatedSelectors.forEach(selector =&gt; {
+    element.querySelectorAll(selector).forEach(el =&gt; el.remove());
+  });
+}
+</code></pre></p>
+<h3>12.9 Processing Load Distribution</h3>
+<strong>Principle: User endpoints do the heavy lifting, Onelist servers do lightweight coordination.</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    PROCESSING LOAD DISTRIBUTION                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  BROWSER PLUGIN (Heavy Lifting)          ONELIST SERVER (Lightweight)       │
+│  ──────────────────────────────          ───────────────────────────        │
+│                                                                              │
+│  ✓ DOM parsing and serialization         ✓ Authentication                   │
+│  ✓ Content extraction (Defuddle)         ✓ Entry creation                   │
+│  ✓ HTML → Markdown (Turndown)            ✓ Similarity check                 │
+│  ✓ Image downloading                     ✓ Duplicate detection              │
+│  ✓ Thumbnail generation                  ✓ Tag suggestions                  │
+│  ✓ Archive generation (SingleFile)       ✓ Link to existing entries         │
+│  ✓ Metadata extraction                   ✓ Trigger agent chain              │
+│  ✓ Word count, language detection                                           │
+│  ✓ Local queue management                                                   │
+│  ✓ Offline storage (IndexedDB)                                             │
+│                                                                              │
+│  OPTIONAL (Browser with Local LLM):      ONLY IF NEEDED (Server-side):     │
+│  ✓ Embedding generation (WebGPU)         ○ Embedding generation            │
+│  ✓ Atomic memory extraction              ○ Complex NLP processing          │
+│  ✓ Summary generation                    ○ Re-processing on request        │
+│                                                                              │
+│  ASSET UPLOADS:                                                             │
+│  ✓ Plugin → User's BYOB storage          OR                                 │
+│  ✓ Plugin → Onelist R2 (if configured)                                     │
+│  ✓ Plugin → Local filesystem (self-hosted)                                 │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>12.10 Local LLM Integration (Optional)</h3>
+<p>For users who want zero cloud dependency, the plugin can use local LLMs:</p>
+<pre><code class="language-typescript">// Optional: Local embedding generation using WebGPU
+class LocalEmbedding {
+  private model: any;
+<p>async initialize(): Promise&lt;void&gt; {
+    // Use Transformers.js with WebGPU backend
+    const { pipeline, env } = await import('@xenova/transformers');</p>
+<p>// Prefer WebGPU, fall back to WASM
+    env.backends.onnx.wasm.numThreads = 4;</p>
+<p>// Load a small, fast embedding model
+    this.model = await pipeline(
+      'feature-extraction',
+      'Xenova/all-MiniLM-L6-v2',
+      { device: 'webgpu' }
+    );
+  }</p>
+<p>async embed(text: string): Promise&lt;Float32Array&gt; {
+    const result = await this.model(text, {
+      pooling: 'mean',
+      normalize: true,
+    });
+    return result.data;
+  }
+}</p>
+<p>// Use local embedding when available
+async function processCapture(capture: CaptureResult): Promise&lt;ProcessedCapture&gt; {
+  const localEmbedding = new LocalEmbedding();</p>
+<p>try {
+    await localEmbedding.initialize();</p>
+<p>// Generate embedding locally
+    const embedding = await localEmbedding.embed(capture.markdown);</p>
+<p>return {
+      ...capture,
+      embedding: Array.from(embedding),
+      embeddingModel: 'all-MiniLM-L6-v2',
+      embeddingGeneratedLocally: true,
+    };
+  } catch (error) {
+    // WebGPU not available, skip local embedding
+    console.warn('Local embedding not available:', error);
+    return {
+      ...capture,
+      embeddingGeneratedLocally: false,
+    };
+  }
+}
+</code></pre></p>
+<h3>12.11 API Endpoint for Plugin Captures</h3>
+<pre><code class="language-elixir">defmodule OnelistWeb.Api.V1.ClipController do
+  # New endpoint specifically for browser plugin captures
+<p>@doc &quot;&quot;&quot;
+  Receive pre-processed capture from browser plugin.</p>
+<p>Unlike POST /clip which takes a URL and fetches it,
+  this endpoint receives already-extracted content.
+  &quot;&quot;&quot;
+  def from_plugin(conn, params) do
+    user = conn.assigns.current_user</p>
+<p># Validate required fields
+    with {:ok, attrs} &lt;- validate_plugin_params(params),
+         # Check for duplicates using provided content
+         {:ok, :proceed} &lt;- check_similarity(user.id, attrs.markdown),
+         # Create entry with pre-extracted content
+         {:ok, entry} &lt;- create_entry_from_plugin(user.id, attrs) do</p>
+<p># Trigger only lightweight post-processing
+      # (embeddings if not provided, tag suggestions)
+      trigger_post_plugin_processing(entry, attrs)</p>
+<p>conn
+      |&gt; put_status(:created)
+      |&gt; json(%{success: true, data: %{entry_id: entry.id}})
+    else
+      {:similar, matches} -&gt;
+        conn
+        |&gt; put_status(:conflict)
+        |&gt; json(%{success: false, code: &quot;SIMILAR_CONTENT&quot;, similar: matches})</p>
+<p>{:error, reason} -&gt;
+        conn
+        |&gt; put_status(:unprocessable_entity)
+        |&gt; json(%{success: false, error: format_error(reason)})
+    end
+  end</p>
+<p>defp validate_plugin_params(params) do
+    required = ~w(url markdown title capturedAt captureMethod)</p>
+<p>if Enum.all?(required, &amp;Map.has_key?(params, &amp;1)) do
+      {:ok, %{
+        url: params[&quot;url&quot;],
+        markdown: params[&quot;markdown&quot;],
+        title: params[&quot;title&quot;],
+        author: params[&quot;author&quot;],
+        published_at: params[&quot;publishedAt&quot;],
+        site_name: params[&quot;siteName&quot;],
+        word_count: params[&quot;wordCount&quot;],
+        captured_at: params[&quot;capturedAt&quot;],
+        capture_method: params[&quot;captureMethod&quot;],
+        embedding: params[&quot;embedding&quot;],
+        embedding_model: params[&quot;embeddingModel&quot;],
+      }}
+    else
+      {:error, :missing_required_fields}
+    end
+  end</p>
+<p>defp trigger_post_plugin_processing(entry, attrs) do
+    # Only generate embedding if not provided by plugin
+    unless attrs.embedding do
+      Oban.insert(EmbeddingWorker.new(%{entry_id: entry.id}))
+    end</p>
+<p># Always run Reader Agent for atomic memories
+    Oban.insert(ReaderWorker.new(%{entry_id: entry.id}))</p>
+<p># Tag suggestions
+    Oban.insert(TagSuggestionWorker.new(%{entry_id: entry.id}))
+  end
+end
+</code></pre></p>
+<h3>12.12 Plugin Settings UI</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Onelist Web Clipper Settings                                         [×]  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Connection                                                                  │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Onelist Endpoint:                                                          │
+│  ○ Auto-detect (try local first, then cloud)                               │
+│  ○ Local: [ http://localhost:4000      ]                                   │
+│  ○ Cloud: [ https://api.onelist.my     ]                                   │
+│  ○ Custom: [                           ]                                   │
+│                                                                              │
+│  API Key: [••••••••••••••••••••••••••••]  [Reveal] [Test]                  │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Capture Settings                                                            │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Content Extraction:                                                        │
+│  [✓] Remove ads and tracking                                               │
+│  [✓] Remove social buttons                                                 │
+│  [✓] Remove related articles                                               │
+│  [ ] Include comments                                                       │
+│                                                                              │
+│  Archives:                                                                   │
+│  [✓] Save Markdown (always)                                                │
+│  [ ] Save SingleFile HTML archive                                          │
+│  [ ] Save page screenshot                                                  │
+│                                                                              │
+│  Assets:                                                                     │
+│  [✓] Download images locally                                               │
+│  [✓] Generate thumbnails                                                   │
+│  [ ] Skip images larger than [ 5 ] MB                                      │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Advanced                                                                    │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  [✓] Generate embeddings locally (requires WebGPU)                         │
+│  [ ] Extract atomic memories locally (experimental)                        │
+│  [✓] Queue captures when offline                                           │
+│  [✓] Show notification on successful capture                               │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Sync Status                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  Pending: 0  |  Synced today: 12  |  Failed: 0                             │
+│                                                                              │
+│  [Sync Now]  [Clear Queue]  [View History]                                 │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>12.13 Implementation Phases for Browser Plugin</h3>
+<table>
+<tr><th>Phase</th><th>Scope</th><th>Duration</th></tr>
+<tr><td><strong>Phase BP-1</strong></td><td>Core capture (Defuddle + Turndown + basic sync)</td><td>2 weeks</td></tr>
+<tr><td><strong>Phase BP-2</strong></td><td>Offline queue (IndexedDB + service worker)</td><td>1 week</td></tr>
+<tr><td><strong>Phase BP-3</strong></td><td>Archive formats (SingleFile integration)</td><td>1 week</td></tr>
+<tr><td><strong>Phase BP-4</strong></td><td>Local embedding (WebGPU + Transformers.js)</td><td>1 week</td></tr>
+<tr><td><strong>Phase BP-5</strong></td><td>Firefox/Safari/Edge ports</td><td>1 week</td></tr>
+</table>
+<h3>12.14 Browser Plugin Checklist</h3>
+<strong>Phase BP-1: Core Capture</strong>
+<li>[ ] Manifest V3 extension structure</li>
+<li>[ ] Content script with Defuddle</li>
+<li>[ ] Turndown markdown conversion</li>
+<li>[ ] Basic popup UI</li>
+<li>[ ] API communication (configurable endpoint)</li>
+<li>[ ] Chrome Web Store submission</li>
+<strong>Phase BP-2: Offline Queue</strong>
+<li>[ ] IndexedDB schema (Dexie.js)</li>
+<li>[ ] Service worker for background sync</li>
+<li>[ ] Retry logic with exponential backoff</li>
+<li>[ ] Cross-tab deduplication</li>
+<li>[ ] Sync status indicator</li>
+<strong>Phase BP-3: Archives</strong>
+<li>[ ] SingleFile core integration</li>
+<li>[ ] Archive storage options</li>
+<li>[ ] Screenshot capture (optional)</li>
+<li>[ ] Archive viewer in Onelist</li>
+<strong>Phase BP-4: Local Processing</strong>
+<li>[ ] WebGPU detection</li>
+<li>[ ] Transformers.js embedding</li>
+<li>[ ] Fallback for non-WebGPU browsers</li>
+<li>[ ] Processing progress indicator</li>
+<strong>Phase BP-5: Cross-Browser</strong>
+<li>[ ] Firefox port (Manifest V2/V3)</li>
+<li>[ ] Safari port (Xcode/Swift wrapper)</li>
+<li>[ ] Edge port (same as Chrome)</li>
+<li>[ ] Mobile Safari (share extension)</li>
+<hr>
+<h2>13. References</h2>
+<h3>Related Documents</h3>
+<li><a href="./feeder_agent_plan.md">Feeder Agent Plan</a> - Parent agent documentation</li>
+<li><a href="./searcher_agent_plan.md">Searcher Agent Plan</a> - Similarity check integration</li>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a> - Overall MVP scope</li>
+<li><a href="./river_agent_plan.md">River Agent Plan</a> - Natural language capture triggers</li>
+<h3>Content Extraction Libraries</h3>
+<li><a href="https://github.com/kepano/defuddle">Defuddle</a> - Modern content extraction (created for Obsidian Web Clipper)</li>
+<li><a href="https://github.com/mixmark-io/turndown">Turndown</a> - HTML to Markdown conversion</li>
+<li><a href="https://github.com/mozilla/readability">Mozilla Readability</a> - Legacy content extraction</li>
+<h3>Archive & Capture Tools</h3>
+<li><a href="https://github.com/gildas-lormeau/SingleFile">SingleFile</a> - Complete page archiving to single HTML</li>
+<li><a href="https://github.com/deathau/markdownload">MarkDownload</a> - Browser extension for markdown web clipping</li>
+<li><a href="https://github.com/obsidianmd/obsidian-clipper">Obsidian Web Clipper</a> - Official Obsidian clipper</li>
+<h3>Browser Extension Development</h3>
+<li><a href="https://developer.chrome.com/docs/extensions/develop/migrate/to-service-workers">Chrome Extensions: Manifest V3</a></li>
+<li><a href="https://textslashplain.com/2020/09/04/web-to-app-communication-the-native-messaging-api/">Native Messaging API</a></li>
+<li><a href="https://developer.chrome.com/docs/extensions/how-to/web-platform/websockets">WebSocket in Service Workers</a></li>
+<h3>Storage & Offline-First</h3>
+<li><a href="https://dexie.org/">Dexie.js</a> - IndexedDB wrapper for offline-first apps</li>
+<li><a href="https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/">IndexedDB for Offline-First Apps</a></li>
+<li><a href="https://web.dev/learn/pwa/offline-data">Browser Storage Deep Dive</a></li>
+<h3>Server-Side Capture Tools</h3>
+<li><a href="https://github.com/browser-use/browser-use">Browser Use</a> - Intelligent browser agent</li>
+<li><a href="https://docs.hyperbrowser.ai/">Hyperbrowser API</a> - Cloud scraping API</li>
+<li><a href="https://github.com/AshwinKul28/agent-browser">agent-browser</a> - CLI browser snapshots</li>
+<h3>Local LLM / Embeddings</h3>
+<li><a href="https://huggingface.co/docs/transformers.js">Transformers.js</a> - ML models in browser</li>
+<li><a href="https://developer.chrome.com/docs/capabilities/web-apis/webgpu">WebGPU Support</a></li>
+</ul>
+<hr>
+<em>Document created: 2026-01-30</em>
+<em>Last updated: 2026-01-30</em> (Added comprehensive browser plugin architecture for authenticated content)
+<em>Status: Proposed</em>
+<em>Priority: MVP (Phases 1-2, BP-1), Post-MVP (Phases 3-5, BP-2-5)</em>
+  </article>
+</body>
+</html>

@@ -1,0 +1,61 @@
+# Build stage
+FROM elixir:1.16-otp-26-alpine AS builder
+
+RUN apk add --no-cache build-base git nodejs npm
+
+WORKDIR /app
+
+# Install hex + rebar
+RUN mix local.hex --force && mix local.rebar --force
+
+ENV MIX_ENV=prod
+
+# Install mix dependencies
+COPY mix.exs mix.lock ./
+RUN mix deps.get --only $MIX_ENV
+RUN mkdir config
+
+# Copy compile-time config
+COPY config/config.exs config/${MIX_ENV}.exs config/
+RUN mix deps.compile
+
+# Build assets
+COPY assets/package.json assets/package-lock.json ./assets/
+RUN npm install --prefix assets
+
+COPY priv priv
+COPY assets assets
+RUN mix assets.deploy
+
+# Compile application
+COPY lib lib
+RUN mix compile
+
+# Build release
+COPY config/runtime.exs config/
+COPY rel rel
+RUN mix release
+
+# Runtime stage
+FROM alpine:3.19 AS runner
+
+RUN apk add --no-cache libstdc++ openssl ncurses-libs curl
+
+WORKDIR /app
+
+RUN addgroup -g 1000 onelist && adduser -u 1000 -G onelist -s /bin/sh -D onelist
+
+COPY --from=builder --chown=onelist:onelist /app/_build/prod/rel/onelist ./
+
+USER onelist
+
+ENV HOME=/app
+ENV MIX_ENV=prod
+ENV PHX_SERVER=true
+
+# Create storage directory
+RUN mkdir -p /app/storage
+
+EXPOSE 4000
+
+CMD ["bin/onelist", "start"]

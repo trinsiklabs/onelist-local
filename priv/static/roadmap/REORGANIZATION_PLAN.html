@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roadmap Reorganization Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  <div style="background: rgba(107, 114, 128, 0.2); border: 1px solid #6b7280; border-radius: 0.5rem; padding: 1rem; margin-bottom: 2rem;">
+  <strong>⚠️ Deprecated:</strong> This document has been superseded or archived. It is retained for historical reference.
+</div>
+
+  <article>
+    <h1>Roadmap Reorganization Plan</h1>
+<strong>Created:</strong> 2026-02-01
+<strong>Purpose:</strong> Improve organization of roadmap files for better discoverability and maintenance
+<hr>
+<h2>1. Current State</h2>
+<strong>Total Files:</strong> 68 markdown files
+<ul>
+<li>Root <code>roadmap/</code>: 60 files</li>
+<li><code>roadmap/ui/</code>: 8 files</li>
+<strong>Problems Identified:</strong>
+1. Flat directory structure makes finding related docs difficult
+2. Deprecated files mixed with active ones
+3. Duplicate/overlapping content between files
+4. Schema definitions scattered across multiple documents
+5. Session prompts (internal working docs) mixed with plans
+6. Naming inconsistencies
+<hr>
+<h2>2. File Audit by Category</h2>
+<h3>2.1 Agent Plans (10 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>river_agent_plan.md</code></td><td>✅ Active</td><td>Main unified AI agent</td></tr>
+<tr><td><code>reader_agent_plan.md</code></td><td>✅ Active</td><td>Content analysis & memory extraction</td></tr>
+<tr><td><code>searcher_agent_plan.md</code></td><td>✅ Active</td><td>Embedding & semantic search</td></tr>
+<tr><td><code>feeder_agent_plan.md</code></td><td>✅ Active</td><td>External content ingestion</td></tr>
+<tr><td><code>asset_enrichment_agent_plan.md</code></td><td>✅ Active</td><td>Asset processing</td></tr>
+<tr><td><code>future_roadmap_life_steward_agent.md</code></td><td>⚠️ DEPRECATED</td><td>Explicitly superseded by River</td></tr>
+<tr><td><code>future_roadmap_asset_enrichment_agent.md</code></td><td>⚠️ DUPLICATE</td><td>Overlaps with asset_enrichment_agent_plan.md</td></tr>
+<tr><td><code>unified_agent_modules.md</code></td><td>✅ Active</td><td>Shared agent modules</td></tr>
+</table>
+<h3>2.2 Schema/Data Model Docs (5 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>ai_memory_evolution.md</code></td><td>✅ Active</td><td>Comprehensive schema planning</td></tr>
+<tr><td><code>ai_plan_type_immutable_memory.md</code></td><td>✅ Active</td><td>Hash-chained memory spec</td></tr>
+<tr><td><code>future_roadmap_core_taxonomy.md</code></td><td>✅ Active</td><td>Post-MVP taxonomy system</td></tr>
+<tr><td><code>tag_system_plan.md</code></td><td>✅ Active</td><td>MVP tag implementation</td></tr>
+<tr><td><code>memory_budget_architecture.md</code></td><td>✅ Active</td><td>Memory budget synthesis</td></tr>
+</table>
+<h3>2.3 Infrastructure/Deployment (6 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>corporate_services_plan.md</code></td><td>✅ Active</td><td>Cloud infrastructure</td></tr>
+<tr><td><code>vps_backup_plan.md</code></td><td>✅ Active</td><td>Backup strategy</td></tr>
+<tr><td><code>launch_plan.md</code></td><td>⚠️ REVIEW</td><td>May overlap with mvp_launch_plan.md</td></tr>
+<tr><td><code>mvp_launch_plan.md</code></td><td>✅ Active</td><td>MVP launch specifics</td></tr>
+<tr><td><code>mac_desktop_app_plan.md</code></td><td>✅ Active</td><td>Mac app architecture</td></tr>
+<tr><td><code>asset_storage_plan.md</code></td><td>✅ Active</td><td>Multi-backend storage</td></tr>
+</table>
+<h3>2.4 Feature Plans (10 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>browser_extension_plan.md</code></td><td>✅ Active</td><td>Chrome/Firefox extension</td></tr>
+<tr><td><code>chat_log_ingestion_plan.md</code></td><td>✅ Active</td><td>OpenClaw integration</td></tr>
+<tr><td><code>crypto_payments_plan.md</code></td><td>✅ Active</td><td>Cryptocurrency payments</td></tr>
+<tr><td><code>public_entry_sharing_plan.md</code></td><td>✅ Active</td><td>Public sharing feature</td></tr>
+<tr><td><code>web_content_capture_plan.md</code></td><td>✅ Active</td><td>Web clipper</td></tr>
+<tr><td><code>mvp_public_content_plan.md</code></td><td>✅ Active</td><td>E2EE + public content</td></tr>
+<tr><td><code>claude_onelist_plugin_plan.md</code></td><td>✅ Active</td><td>Claude Code plugin</td></tr>
+<tr><td><code>openclaw_memory_persistence_plan.md</code></td><td>✅ Active</td><td>OpenClaw memory</td></tr>
+<tr><td><code>onelist_website_plan.md</code></td><td>✅ Active</td><td>Corporate website</td></tr>
+<tr><td><code>static_site_desktop_updates.md</code></td><td>✅ Active</td><td>Marketing updates</td></tr>
+</table>
+<h3>2.5 Guides/Reference (3 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>ai_agent_implementation_guide.md</code></td><td>✅ Active</td><td>Best practices</td></tr>
+<tr><td><code>ai_agent_ecosystem_resources_guide.md</code></td><td>✅ Active</td><td>MCP, frameworks</td></tr>
+<tr><td><code>always_running_agents_comprehensive_guide.md</code></td><td>✅ Active</td><td>Long-running patterns</td></tr>
+</table>
+<h3>2.6 Competitive Analysis (5 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>competitive_analysis_openclaw.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>competitive_analysis_pal.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>competitive_analysis_supermemory.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>competitive_analysis_twin.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>complementary_ecosystem_strategy.md</code></td><td>✅ Active</td><td>Integration opportunities</td></tr>
+</table>
+<h3>2.7 Future/Post-MVP Features (20 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>future_roadmap.md</code></td><td>⚠️ REVIEW</td><td>Original vision, may be stale</td></tr>
+<tr><td><code>future_roadmap_2.md</code></td><td>⚠️ PARTIAL</td><td>Section 2 superseded by River</td></tr>
+<tr><td><code>future_roadmap_ai_memory_patterns.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_apple_notes_import.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_beacon_cms.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_comments_system.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_consume_later.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_email.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_entry_groups.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_evernote_import.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_forum.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_free_tier.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_habit_stacks.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_limitless.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_openclaw_install.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_notion_import.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_obsidian_import.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_xamlr.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>future_roadmap_xamlr_and_comments_requirements.md</code></td><td>✅ Active</td><td></td></tr>
+</table>
+<h3>2.8 Project Planning (4 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>project_plan.md</code></td><td>✅ Active</td><td>MVP project plan</td></tr>
+<tr><td><code>testing_roadmap.md</code></td><td>✅ Active</td><td>Testing strategy</td></tr>
+<tr><td><code>phase_3_implementation_plan.md</code></td><td>✅ Active</td><td>Phase 3 details</td></tr>
+<tr><td><code>CONVENTIONS.md</code></td><td>✅ Active</td><td>Roadmap conventions</td></tr>
+</table>
+<h3>2.9 UI Plans (9 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>ui_plan.md</code></td><td>✅ Active</td><td>Main UI plan</td></tr>
+<tr><td><code>ui/asset_enrichment_ui_plan.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>ui/feeder_ui_plan.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>ui/reader_ui_plan.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>ui/river_ui_plan.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>ui/searcher_ui_plan.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>ui/settings_ui_plan.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>ui/shared_agent_ui_components.md</code></td><td>✅ Active</td><td></td></tr>
+<tr><td><code>ui/ui_planning_prompt.md</code></td><td>⚠️ INTERNAL</td><td>Session prompt</td></tr>
+</table>
+<h3>2.10 Session/Internal Working Docs (3 files)</h3>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>implementation_session_prompt.md</code></td><td>⚠️ INTERNAL</td><td>Resume context</td></tr>
+<tr><td><code>gemini_master_context_restoration.md</code></td><td>⚠️ INTERNAL</td><td>Session snapshot</td></tr>
+<tr><td><code>use_cases.md</code></td><td>⚠️ INTERNAL</td><td>Raw conversation transcript</td></tr>
+</table>
+<hr>
+<h2>3. Issues & Recommendations</h2>
+<h3>3.1 Files to Archive (Move to <code>archive/</code>)</h3>
+<table>
+<tr><th>File</th><th>Reason</th></tr>
+<tr><td><code>future_roadmap_life_steward_agent.md</code></td><td>Explicitly marked DEPRECATED, superseded by River</td></tr>
+<tr><td><code>future_roadmap.md</code></td><td>Original vision document, largely superseded</td></tr>
+<tr><td><code>future_roadmap_2.md</code></td><td>Partially superseded (marked in doc itself)</td></tr>
+<tr><td><code>gemini_master_context_restoration.md</code></td><td>Historical session snapshot, no longer needed</td></tr>
+</table>
+<h3>3.2 Files to Merge</h3>
+<table>
+<tr><th>Source</th><th>Target</th><th>Reason</th></tr>
+<tr><td><code>future_roadmap_asset_enrichment_agent.md</code></td><td><code>asset_enrichment_agent_plan.md</code></td><td>Duplicate content - consolidate into main plan</td></tr>
+</table>
+<h3>3.3 Files Needing Human Decision</h3>
+<table>
+<tr><th>File</th><th>Issue</th><th>Options</th></tr>
+<tr><td><code>launch_plan.md</code> vs <code>mvp_launch_plan.md</code></td><td>Overlapping scope</td><td>A) Merge into one, B) Rename launch_plan to post_mvp_launch_plan</td></tr>
+<tr><td><code>future_roadmap_2.md</code></td><td>Section 2 superseded but Section 1 may still be relevant</td><td>A) Archive entire file, B) Extract Section 1 to separate doc</td></tr>
+</table>
+<h3>3.4 Internal Docs (Consider Moving to <code>_internal/</code>)</h3>
+<p>These are working documents/session prompts that probably shouldn't be in the main roadmap:</p>
+<li><code>implementation_session_prompt.md</code></li>
+<li><code>ui/ui_planning_prompt.md</code></li>
+<li><code>use_cases.md</code> (raw transcript, not a plan)</li>
+<h3>3.5 Schema Consolidation Plan</h3>
+<p>Schema information is scattered across multiple files. Consider creating <code>schema.md</code> that:
+1. Links to all schema-related docs
+2. Provides overview of data model evolution
+3. Acts as index for: <code>ai_memory_evolution.md</code>, <code>ai_plan_type_immutable_memory.md</code>, <code>tag_system_plan.md</code>, etc.</p>
+<strong>Current schema docs:</strong>
+<li><code>ai_memory_evolution.md</code> — comprehensive planning</li>
+<li><code>ai_plan_type_immutable_memory.md</code> — AI account specifics</li>
+<li><code>future_roadmap_core_taxonomy.md</code> — taxonomy system</li>
+<li><code>tag_system_plan.md</code> — MVP tags</li>
+<li><code>memory_budget_architecture.md</code> — memory tiers</li>
+<hr>
+<h2>4. Proposed New Structure</h2>
+<h3>4.1 Directory Organization (Optional)</h3>
+<p>If moving to subdirectories is desired, here's a suggested structure:</p>
+<pre><code class="language-">roadmap/
+├── CONVENTIONS.md
+├── INDEX.md (generated)
+├── agents/
+│   ├── river_agent_plan.md
+│   ├── reader_agent_plan.md
+│   ├── searcher_agent_plan.md
+│   ├── feeder_agent_plan.md
+│   ├── asset_enrichment_agent_plan.md
+│   └── unified_agent_modules.md
+├── schema/
+│   ├── ai_memory_evolution.md
+│   ├── ai_plan_type_immutable_memory.md
+│   ├── future_roadmap_core_taxonomy.md
+│   ├── tag_system_plan.md
+│   └── memory_budget_architecture.md
+├── infrastructure/
+│   ├── corporate_services_plan.md
+│   ├── vps_backup_plan.md
+│   ├── launch_plan.md
+│   ├── mvp_launch_plan.md
+│   ├── mac_desktop_app_plan.md
+│   └── asset_storage_plan.md
+├── features/
+│   ├── browser_extension_plan.md
+│   ├── chat_log_ingestion_plan.md
+│   ├── crypto_payments_plan.md
+│   ├── public_entry_sharing_plan.md
+│   ├── web_content_capture_plan.md
+│   ├── mvp_public_content_plan.md
+│   ├── claude_onelist_plugin_plan.md
+│   ├── openclaw_memory_persistence_plan.md
+│   ├── onelist_website_plan.md
+│   └── static_site_desktop_updates.md
+├── guides/
+│   ├── ai_agent_implementation_guide.md
+│   ├── ai_agent_ecosystem_resources_guide.md
+│   └── always_running_agents_comprehensive_guide.md
+├── analysis/
+│   ├── competitive_analysis_openclaw.md
+│   ├── competitive_analysis_pal.md
+│   ├── competitive_analysis_supermemory.md
+│   ├── competitive_analysis_twin.md
+│   └── complementary_ecosystem_strategy.md
+├── future/
+│   ├── future_roadmap_ai_memory_patterns.md
+│   ├── future_roadmap_apple_notes_import.md
+│   ├── future_roadmap_beacon_cms.md
+│   ├── future_roadmap_comments_system.md
+│   ├── future_roadmap_consume_later.md
+│   ├── future_roadmap_email.md
+│   ├── future_roadmap_entry_groups.md
+│   ├── future_roadmap_evernote_import.md
+│   ├── future_roadmap_forum.md
+│   ├── future_roadmap_free_tier.md
+│   ├── future_roadmap_habit_stacks.md
+│   ├── future_roadmap_limitless.md
+│   ├── future_roadmap_openclaw_install.md
+│   ├── future_roadmap_notion_import.md
+│   ├── future_roadmap_obsidian_import.md
+│   ├── future_roadmap_xamlr.md
+│   └── future_roadmap_xamlr_and_comments_requirements.md
+├── project/
+│   ├── project_plan.md
+│   ├── testing_roadmap.md
+│   └── phase_3_implementation_plan.md
+├── ui/
+│   └── (existing structure)
+├── _internal/
+│   ├── implementation_session_prompt.md
+│   ├── ui_planning_prompt.md (moved from ui/)
+│   └── use_cases.md
+└── archive/
+    ├── future_roadmap.md
+    ├── future_roadmap_2.md
+    ├── future_roadmap_life_steward_agent.md
+    └── gemini_master_context_restoration.md
+</code></pre>
+<h3>4.2 Alternative: Keep Flat Structure with Better Grouping</h3>
+<p>If reorganizing directories is too disruptive, the index generator can provide virtual grouping via better categorization on the index page.</p>
+<hr>
+<h2>5. Index Generator Improvements</h2>
+<p>The current index generator groups by:
+<li><code>future_roadmap<em></code> prefix</li>
+<li><code></em>_plan</code> suffix</li>
+<li><code><em>guide</em></code> or <code><em>implementation</em></code></li>
+<li><code>competitive<em></code> or <code>analysis</em></code></li></p>
+<strong>Improved categorization implemented:</strong>
+1. <strong>Agent Plans</strong> — <code><em>_agent_plan.md</code> + agent-related docs
+2. <strong>Schema/Data Model</strong> — memory, taxonomy, tag files
+3. <strong>Infrastructure</strong> — corporate, vps, launch, storage, desktop
+4. <strong>Features</strong> — browser, payments, sharing, clipper, plugins
+5. <strong>Guides & Reference</strong> — implementation guides, ecosystem resources
+6. <strong>Competitive Analysis</strong> — all competitive_</em> files
+7. <strong>Future Roadmap</strong> — all future_roadmap_<em> files  
+8. <strong>UI</strong> — ui/</em> subdirectory files
+9. <strong>Project Planning</strong> — project_plan, testing, conventions
+10. <strong>Other</strong> — anything not categorized
+<hr>
+<h2>6. Next Steps</h2>
+<h3>Immediate (No Risk)</h3>
+<li>[x] Update index generator with better categorization</li>
+<li>[x] Create this plan document</li>
+<h3>Requires Human Approval</h3>
+1. [ ] Archive deprecated files (Section 3.1)
+2. [ ] Merge duplicate files (Section 3.2)
+3. [ ] Decide on overlapping files (Section 3.3)
+4. [ ] Move internal docs to <code>_internal/</code> (Section 3.4)
+5. [ ] Create schema index doc (Section 3.5)
+6. [ ] Optionally reorganize into subdirectories (Section 4.1)
+<hr>
+<h2>7. Summary</h2>
+<strong>Findings:</strong>
+<li>68 total roadmap files</li>
+<li>4 files should be archived (deprecated/superseded)</li>
+<li>1 file merge recommended (duplicate content)</li>
+<li>3 files are internal working docs (not plans)</li>
+<li>Schema definitions scattered across 5+ files</li>
+<li>Good overall organization, but index page grouping needs improvement</li>
+</ul>
+<strong>Proposed Actions:</strong>
+1. ✅ Better index page categorization (done - see updated generator)
+2. Archive 4 deprecated files
+3. Merge 1 duplicate file
+4. Consider subdirectory organization for cleaner navigation
+<p>The index generator has been updated to group files by meaningful categories rather than just filename patterns.</p>
+  </article>
+</body>
+</html>

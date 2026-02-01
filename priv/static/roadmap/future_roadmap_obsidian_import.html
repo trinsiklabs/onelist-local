@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Obsidian Import &amp; Sync Roadmap - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Obsidian Import & Sync Roadmap</h1>
+<h2>Executive Summary</h2>
+<p>This roadmap defines the implementation plan for importing Obsidian vaults into Onelist, supporting both one-time bulk import and ongoing synchronization options.</p>
+<h3>Key Advantage: Native File Format</h3>
+<p>Unlike Evernote or Notion, Obsidian stores notes as <strong>plain Markdown files</strong> in a local folder (vault). This makes import significantly simpler—no proprietary format conversion needed, and sync can work via file system watching or folder upload.</p>
+<h3>Import/Sync Methods</h3>
+<table>
+<tr><th>Method</th><th>Use Case</th><th>Real-time</th><th>Complexity</th></tr>
+<tr><td>Folder Upload</td><td>One-time migration</td><td>No</td><td>Low</td></tr>
+<tr><td>Local REST API</td><td>Bi-directional sync (requires plugin)</td><td>Near real-time</td><td>Medium</td></tr>
+<tr><td>Folder Watching</td><td>Continuous sync (desktop app)</td><td>Yes</td><td>Medium</td></tr>
+<tr><td>Cloud Sync Folder</td><td>Sync via Dropbox/iCloud/etc</td><td>Periodic</td><td>Low</td></tr>
+</table>
+<h3>Key Outcomes</h3>
+<ul>
+<li><strong>Direct Markdown import</strong> (no format conversion)</li>
+<li><strong>Preserve wiki-links</strong> (<code>[[note]]</code> → Onelist internal links)</li>
+<li><strong>Import YAML frontmatter</strong> as entry metadata</li>
+<li><strong>Support nested tags</strong> and tag hierarchy</li>
+<li><strong>Optional bi-directional sync</strong> for power users</li>
+<hr>
+<h2>Table of Contents</h2>
+<p>1. <a href="#obsidian-data-model">Obsidian Data Model</a>
+2. <a href="#folder-upload-import">Folder Upload Import</a>
+3. <a href="#local-rest-api-sync">Local REST API Sync</a>
+4. <a href="#folder-watching-sync">Folder Watching Sync</a>
+5. <a href="#data-mapping">Data Mapping</a>
+6. <a href="#content-processing">Content Processing</a>
+7. <a href="#implementation-phases">Implementation Phases</a>
+8. <a href="#technical-considerations">Technical Considerations</a>
+9. <a href="#user-experience">User Experience</a></p>
+<hr>
+<h2>Obsidian Data Model</h2>
+<p>Understanding Obsidian's structure is essential for accurate import.</p>
+<h3>Vault Structure</h3>
+<p>An Obsidian vault is simply a folder containing:</p>
+<pre><code class="language-">My Vault/
+├── .obsidian/                    # Configuration (excluded from import)
+│   ├── app.json                  # App settings
+│   ├── appearance.json           # Theme settings
+│   ├── plugins/                  # Installed plugins
+│   │   └── plugin-name/
+│   │       ├── main.js
+│   │       └── manifest.json
+│   └── themes/                   # Custom themes
+├── Notes/                        # User folders
+│   ├── Daily/
+│   │   ├── 2025-01-28.md
+│   │   └── 2025-01-27.md
+│   ├── Projects/
+│   │   └── Project Alpha.md
+│   └── Ideas.md
+├── Attachments/                  # Media files
+│   ├── image.png
+│   └── document.pdf
+├── Templates/                    # Note templates
+│   └── Daily Note.md
+├── Canvas Files/
+│   └── Project Map.canvas        # JSON Canvas format
+└── README.md
+</code></pre>
+<h3>File Types</h3>
+<table>
+<tr><th>Extension</th><th>Type</th><th>Onelist Mapping</th></tr>
+<tr><td><code>.md</code></td><td>Markdown note</td><td>Entry (type: "note")</td></tr>
+<tr><td><code>.canvas</code></td><td>JSON Canvas</td><td>Entry (type: "note") + special handling</td></tr>
+<tr><td><code>.excalidraw.md</code></td><td>Excalidraw drawing</td><td>Entry + Asset</td></tr>
+<tr><td><code>.png</code>, <code>.jpg</code>, etc.</td><td>Images</td><td>Asset</td></tr>
+<tr><td><code>.pdf</code></td><td>PDF documents</td><td>Asset</td></tr>
+<tr><td><code>.mp3</code>, <code>.wav</code></td><td>Audio</td><td>Asset</td></tr>
+<tr><td><code>.mp4</code>, <code>.webm</code></td><td>Video</td><td>Asset</td></tr>
+<tr><td>Other</td><td>Attachments</td><td>Asset</td></tr>
+</table>
+<h3>Markdown Note Structure</h3>
+<pre><code class="language-markdown">---
+title: My Note Title
+date: 2025-01-28
+tags:
+  <li>project/alpha</li>
+  <li>status/active</li>
+aliases:
+  <li>Alternative Title</li>
+  <li>Another Name</li>
+cssclasses:
+  <li>wide-page</li>
+custom_property: any value
+<hr>
+<h1>My Note Title</h1>
+<p>Regular paragraph with a [[Wiki Link]] to another note.</p>
+<p>You can also link to [[Note#Heading]] or [[Note#^block-id]].</p>
+<p>Embedded content: ![[image.png]]</p>
+<p>Tags can also be inline: #tag/nested/deep</p>
+<li>[ ] Unchecked task</li>
+<li>[x] Completed task</li>
+</code></pre>code
+Code blocks work normally
+<pre><code class="language-">
+&gt; Blockquotes and other Markdown features
+</code></pre>
+<h3>YAML Frontmatter Properties</h3>
+<strong>Property Types</strong>:
+<table>
+<tr><th>Type</th><th>Example</th><th>Notes</th></tr>
+<tr><td>Text</td><td><code>author: John Doe</code></td><td>Free-form string</td></tr>
+<tr><td>List</td><td><code>tags: [a, b, c]</code></td><td>Array format</td></tr>
+<tr><td>Number</td><td><code>rating: 5</code></td><td>Integer or decimal</td></tr>
+<tr><td>Checkbox</td><td><code>completed: true</code></td><td>Boolean</td></tr>
+<tr><td>Date</td><td><code>date: 2025-01-28</code></td><td>ISO format</td></tr>
+<tr><td>DateTime</td><td><code>created: 2025-01-28T10:30:00</code></td><td>ISO format</td></tr>
+</table>
+<strong>Default Properties</strong>:
+<li><code>tags</code> - Note tags (list)</li>
+<li><code>aliases</code> - Alternative names for linking (list)</li>
+<li><code>cssclasses</code> - Custom styling classes (list)</li>
+<h3>Wiki-Link Syntax</h3>
+<table>
+<tr><th>Syntax</th><th>Description</th><th>Example</th></tr>
+<tr><td><code>[[Note]]</code></td><td>Link to note</td><td><code>[[My Note]]</code></td></tr>
+<tr><td><code>[[Note\</td><td>Display]]</code></td><td>Custom display text</td><td><code>[[My Note\</td><td>click here]]</code></td></tr>
+<tr><td><code>[[Note#Heading]]</code></td><td>Link to heading</td><td><code>[[Note#Section 1]]</code></td></tr>
+<tr><td><code>[[Note#^block-id]]</code></td><td>Link to block</td><td><code>[[Note#^abc123]]</code></td></tr>
+<tr><td><code>[[folder/Note]]</code></td><td>Link with path</td><td><code>[[projects/Alpha]]</code></td></tr>
+<tr><td><code>![[Note]]</code></td><td>Embed note</td><td>Transclusion</td></tr>
+<tr><td><code>![[image.png]]</code></td><td>Embed image</td><td>Inline display</td></tr>
+<tr><td><code>![[audio.mp3]]</code></td><td>Embed audio</td><td>Audio player</td></tr>
+</table>
+<h3>Tag Format</h3>
+<pre><code class="language-markdown"># Inline tags
+This note is about #programming and #web/frontend
+<h1>Nested tags (hierarchy via /)</h1>
+#project/alpha
+#status/in-progress
+#topic/programming/javascript
+<h1>In frontmatter</h1>
+<hr>
+tags:
+  <li>project/alpha</li>
+  <li>status/active</li>
+<hr>
+</code></pre>
+<h3>Canvas Format (JSON Canvas)</h3>
+<code>.canvas</code> files use the open <a href="https://jsoncanvas.org/">JSON Canvas</a> format:
+<pre><code class="language-json">{
+  &quot;nodes&quot;: [
+    {
+      &quot;id&quot;: &quot;abc123&quot;,
+      &quot;type&quot;: &quot;text&quot;,
+      &quot;x&quot;: 0,
+      &quot;y&quot;: 0,
+      &quot;width&quot;: 250,
+      &quot;height&quot;: 60,
+      &quot;text&quot;: &quot;Text content here&quot;
+    },
+    {
+      &quot;id&quot;: &quot;def456&quot;,
+      &quot;type&quot;: &quot;file&quot;,
+      &quot;x&quot;: 300,
+      &quot;y&quot;: 0,
+      &quot;width&quot;: 400,
+      &quot;height&quot;: 400,
+      &quot;file&quot;: &quot;Notes/My Note.md&quot;
+    },
+    {
+      &quot;id&quot;: &quot;ghi789&quot;,
+      &quot;type&quot;: &quot;link&quot;,
+      &quot;x&quot;: 0,
+      &quot;y&quot;: 200,
+      &quot;width&quot;: 400,
+      &quot;height&quot;: 300,
+      &quot;url&quot;: &quot;https://example.com&quot;
+    },
+    {
+      &quot;id&quot;: &quot;jkl012&quot;,
+      &quot;type&quot;: &quot;group&quot;,
+      &quot;x&quot;: -50,
+      &quot;y&quot;: -50,
+      &quot;width&quot;: 800,
+      &quot;height&quot;: 600,
+      &quot;label&quot;: &quot;Group Name&quot;
+    }
+  ],
+  &quot;edges&quot;: [
+    {
+      &quot;id&quot;: &quot;edge1&quot;,
+      &quot;fromNode&quot;: &quot;abc123&quot;,
+      &quot;fromSide&quot;: &quot;right&quot;,
+      &quot;toNode&quot;: &quot;def456&quot;,
+      &quot;toSide&quot;: &quot;left&quot;,
+      &quot;toEnd&quot;: &quot;arrow&quot;
+    }
+  ]
+}
+</code></pre>
+<strong>Node Types</strong>:
+<li><code>text</code> - Plain text content</li>
+<li><code>file</code> - Reference to vault file</li>
+<li><code>link</code> - External URL</li>
+<li><code>group</code> - Visual grouping container</li>
+<hr>
+<h2>Folder Upload Import</h2>
+<h3>Overview</h3>
+<p>The simplest import method: user uploads their vault folder (as ZIP or via folder picker).</p>
+<h3>Import Process</h3>
+<pre><code class="language-">1. User selects vault folder or uploads ZIP
+2. Scan folder structure
+3. Identify file types (.md, .canvas, assets)
+4. Parse each Markdown file
+   a. Extract YAML frontmatter
+   b. Extract content
+   c. Identify wiki-links
+   d. Identify embedded assets
+5. Create entries for each note
+6. Upload assets
+7. Resolve wiki-links to internal Onelist links
+8. Apply tags from frontmatter and inline
+9. Generate import report
+</code></pre>
+<h3>Implementation</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.VaultParser do
+  @moduledoc &quot;&quot;&quot;
+  Parser for Obsidian vault folders.
+  &quot;&quot;&quot;
+<p>@excluded_dirs [&quot;.obsidian&quot;, &quot;.trash&quot;, &quot;.git&quot;]
+  @markdown_extensions [&quot;.md&quot;, &quot;.markdown&quot;]
+  @canvas_extension &quot;.canvas&quot;</p>
+<p>def parse_vault(vault_path) do
+    vault_path
+    |&gt; scan_files()
+    |&gt; classify_files()
+    |&gt; parse_files()
+    |&gt; build_link_index()
+  end</p>
+<p>defp scan_files(path) do
+    Path.wildcard(Path.join(path, &quot;<strong>/<em>&quot;))
+    |&gt; Enum.reject(&amp;excluded?/1)
+    |&gt; Enum.filter(&amp;File.regular?/1)
+  end</p>
+<p>defp excluded?(path) do
+    Enum.any?(@excluded_dirs, &amp;String.contains?(path, &quot;/#{&amp;1}/&quot;))
+  end</p>
+<p>defp classify_files(files) do
+    Enum.group_by(files, fn file -&gt;
+      ext = Path.extname(file) |&gt; String.downcase()
+      cond do
+        ext in @markdown_extensions -&gt; :markdown
+        ext == @canvas_extension -&gt; :canvas
+        asset_type?(ext) -&gt; :asset
+        true -&gt; :other
+      end
+    end)
+  end</p>
+<p>defp parse_files(%{markdown: md_files, canvas: canvas_files, asset: assets}) do
+    notes = Enum.map(md_files || [], &amp;parse_markdown/1)
+    canvases = Enum.map(canvas_files || [], &amp;parse_canvas/1)</p>
+<p>%{
+      notes: notes,
+      canvases: canvases,
+      assets: assets || []
+    }
+  end
+end
+</code></pre></p>
+<h3>Markdown Parsing</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.MarkdownParser do
+  @moduledoc &quot;&quot;&quot;
+  Parser for Obsidian Markdown files with YAML frontmatter.
+  &quot;&quot;&quot;
+<p>@frontmatter_regex ~r/\A---\n(.+?)\n---\n?/s
+  @wikilink_regex ~r/!?\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/
+  @tag_regex ~r/#([a-zA-Z0-9_\-\/]+)/
+  @task_regex ~r/^(\s</em>)-\s+\[([ xX])\]\s+(.+)$/m</p>
+<p>def parse(file_path) do
+    content = File.read!(file_path)
+    filename = Path.basename(file_path, Path.extname(file_path))
+    relative_path = extract_relative_path(file_path)</p>
+<p>{frontmatter, body} = extract_frontmatter(content)</p>
+<p>%{
+      filename: filename,
+      relative_path: relative_path,
+      frontmatter: frontmatter,
+      content: body,
+      title: frontmatter[&quot;title&quot;] || filename,
+      tags: extract_all_tags(frontmatter, body),
+      aliases: frontmatter[&quot;aliases&quot;] || [],
+      wiki_links: extract_wiki_links(body),
+      embedded_assets: extract_embeds(body),
+      tasks: extract_tasks(body),
+      created_at: extract_date(frontmatter),
+      metadata: Map.drop(frontmatter, ~w(title tags aliases cssclasses))
+    }
+  end</p>
+<p>defp extract_frontmatter(content) do
+    case Regex.run(@frontmatter_regex, content) do
+      [full_match, yaml] -&gt;
+        frontmatter = YamlElixir.read_from_string!(yaml)
+        body = String.replace_prefix(content, full_match, &quot;&quot;)
+        {frontmatter, body}</p>
+<p>nil -&gt;
+        {%{}, content}
+    end
+  end</p>
+<p>defp extract_all_tags(frontmatter, body) do
+    frontmatter_tags = frontmatter[&quot;tags&quot;] || []
+    inline_tags = Regex.scan(@tag_regex, body)
+                  |&gt; Enum.map(fn [_, tag] -&gt; tag end)</p>
+<p>(frontmatter_tags ++ inline_tags)
+    |&gt; Enum.uniq()
+    |&gt; Enum.map(&amp;normalize_tag/1)
+  end</p>
+<p>defp normalize_tag(tag) do
+    # Remove leading # if present, keep hierarchy
+    tag
+    |&gt; String.trim_leading(&quot;#&quot;)
+    |&gt; String.downcase()
+  end</p>
+<p>defp extract_wiki_links(content) do
+    Regex.scan(@wikilink_regex, content)
+    |&gt; Enum.map(fn
+      [full, target] -&gt; %{target: target, display: nil, embed: String.starts_with?(full, &quot;!&quot;)}
+      [full, target, display] -&gt; %{target: target, display: display, embed: String.starts_with?(full, &quot;!&quot;)}
+    end)
+  end</p>
+<p>defp extract_embeds(content) do
+    extract_wiki_links(content)
+    |&gt; Enum.filter(&amp; &amp;1.embed)
+    |&gt; Enum.map(&amp; &amp;1.target)
+  end</p>
+<p>defp extract_tasks(content) do
+    Regex.scan(@task_regex, content)
+    |&gt; Enum.map(fn [_, indent, status, text] -&gt;
+      %{
+        text: String.trim(text),
+        completed: status in [&quot;x&quot;, &quot;X&quot;],
+        indent_level: String.length(indent) |&gt; div(2)
+      }
+    end)
+  end</p>
+<p>defp extract_date(frontmatter) do
+    date_fields = [&quot;date&quot;, &quot;created&quot;, &quot;created_at&quot;, &quot;created-at&quot;]</p>
+<p>Enum.find_value(date_fields, fn field -&gt;
+      case frontmatter[field] do
+        nil -&gt; nil
+        date when is_binary(date) -&gt; parse_date(date)
+        %Date{} = date -&gt; DateTime.new!(date, ~T[00:00:00])
+        %DateTime{} = dt -&gt; dt
+        _ -&gt; nil
+      end
+    end)
+  end</p>
+<p>defp parse_date(date_string) do
+    case DateTime.from_iso8601(date_string &lt;&gt; &quot;T00:00:00Z&quot;) do
+      {:ok, dt, _} -&gt; dt
+      _ -&gt;
+        case Date.from_iso8601(date_string) do
+          {:ok, date} -&gt; DateTime.new!(date, ~T[00:00:00])
+          _ -&gt; nil
+        end
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Local REST API Sync</h2>
+<h3>Overview</h3>
+<p>For ongoing sync, users can install the <a href="https://github.com/coddingtonbear/obsidian-local-rest-api">Obsidian Local REST API</a> community plugin, which exposes a REST API that Onelist can interact with.</p>
+<h3>Plugin Requirements</h3>
+<p>User must:
+1. Install "Local REST API" community plugin in Obsidian
+2. Enable the plugin and configure API key
+3. Provide API key and endpoint to Onelist</p>
+<h3>API Endpoints</h3>
+<p>The Local REST API exposes these endpoints:</p>
+<table>
+<tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+<tr><td><code>/vault/</code></td><td>GET</td><td>List all files in vault</td></tr>
+<tr><td><code>/vault/{path}</code></td><td>GET</td><td>Get file content</td></tr>
+<tr><td><code>/vault/{path}</code></td><td>PUT</td><td>Create/update file</td></tr>
+<tr><td><code>/vault/{path}</code></td><td>DELETE</td><td>Delete file</td></tr>
+<tr><td><code>/vault/{path}</code></td><td>PATCH</td><td>Insert content at position</td></tr>
+<tr><td><code>/periodic/daily/</code></td><td>GET</td><td>Get today's daily note</td></tr>
+<tr><td><code>/commands/</code></td><td>GET</td><td>List available commands</td></tr>
+<tr><td><code>/commands/{id}</code></td><td>POST</td><td>Execute command</td></tr>
+<tr><td><code>/search/simple/</code></td><td>POST</td><td>Search vault</td></tr>
+<tr><td><code>/active/</code></td><td>GET</td><td>Get active file</td></tr>
+</table>
+<h3>Authentication</h3>
+<pre><code class="language-">Authorization: Bearer {API_KEY}
+</code></pre>
+<p>The API key is generated by the plugin and shown in Obsidian settings.</p>
+<h3>Sync Implementation</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.RestApiClient do
+  @moduledoc &quot;&quot;&quot;
+  Client for Obsidian Local REST API plugin.
+  &quot;&quot;&quot;
+<p>def new(endpoint, api_key) do
+    %{
+      endpoint: String.trim_trailing(endpoint, &quot;/&quot;),
+      api_key: api_key
+    }
+  end</p>
+<p>def list_files(client) do
+    request(client, :get, &quot;/vault/&quot;)
+  end</p>
+<p>def get_file(client, path) do
+    request(client, :get, &quot;/vault/#{URI.encode(path)}&quot;)
+  end</p>
+<p>def update_file(client, path, content) do
+    request(client, :put, &quot;/vault/#{URI.encode(path)}&quot;, content)
+  end</p>
+<p>def delete_file(client, path) do
+    request(client, :delete, &quot;/vault/#{URI.encode(path)}&quot;)
+  end</p>
+<p>def search(client, query) do
+    request(client, :post, &quot;/search/simple/&quot;, %{query: query})
+  end</p>
+<p>defp request(client, method, path, body \\ nil) do
+    opts = [
+      headers: [
+        {&quot;Authorization&quot;, &quot;Bearer #{client.api_key}&quot;},
+        {&quot;Content-Type&quot;, &quot;application/json&quot;}
+      ]
+    ]</p>
+<p>opts = if body, do: Keyword.put(opts, :json, body), else: opts</p>
+<p>case Req.request(method, client.endpoint &lt;&gt; path, opts) do
+      {:ok, %{status: status, body: body}} when status in 200..299 -&gt;
+        {:ok, body}</p>
+<p>{:ok, %{status: 404}} -&gt;
+        {:error, :not_found}</p>
+<p>{:ok, %{status: 401}} -&gt;
+        {:error, :unauthorized}</p>
+<p>{:ok, %{status: status, body: body}} -&gt;
+        {:error, {:api_error, status, body}}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end
+end
+</code></pre></p>
+<h3>Sync Process</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.Sync do
+  @moduledoc &quot;&quot;&quot;
+  Bi-directional sync with Obsidian via Local REST API.
+  &quot;&quot;&quot;
+<p>alias Onelist.Import.Obsidian.{RestApiClient, MarkdownParser, Mapper}</p>
+<p>def sync(user_id, client) do
+    with {:ok, vault_files} &lt;- RestApiClient.list_files(client),
+         {:ok, local_state} &lt;- get_local_sync_state(user_id) do</p>
+<p># Get files from Obsidian
+      obsidian_files = parse_file_list(vault_files)</p>
+<p># Compare with local state
+      changes = detect_changes(obsidian_files, local_state)</p>
+<p># Process changes
+      process_new_files(client, user_id, changes.new)
+      process_modified_files(client, user_id, changes.modified)
+      process_deleted_files(user_id, changes.deleted)</p>
+<p># Update sync state
+      save_sync_state(user_id, obsidian_files)</p>
+<p>{:ok, %{
+        new: length(changes.new),
+        modified: length(changes.modified),
+        deleted: length(changes.deleted)
+      }}
+    end
+  end</p>
+<p>defp detect_changes(obsidian_files, local_state) do
+    obsidian_map = Map.new(obsidian_files, &amp;{&amp;1.path, &amp;1})
+    local_map = Map.new(local_state.files, &amp;{&amp;1.path, &amp;1})</p>
+<p>new = obsidian_files
+          |&gt; Enum.filter(fn f -&gt; !Map.has_key?(local_map, f.path) end)
+          |&gt; Enum.map(&amp; &amp;1.path)</p>
+<p>modified = obsidian_files
+               |&gt; Enum.filter(fn f -&gt;
+                 case Map.get(local_map, f.path) do
+                   nil -&gt; false
+                   local -&gt; f.mtime &gt; local.mtime
+                 end
+               end)
+               |&gt; Enum.map(&amp; &amp;1.path)</p>
+<p>deleted = local_state.files
+              |&gt; Enum.filter(fn f -&gt; !Map.has_key?(obsidian_map, f.path) end)
+              |&gt; Enum.map(&amp; &amp;1.path)</p>
+<p>%{new: new, modified: modified, deleted: deleted}
+  end</p>
+<p>defp process_new_files(client, user_id, paths) do
+    Enum.each(paths, fn path -&gt;
+      {:ok, content} = RestApiClient.get_file(client, path)
+      parsed = MarkdownParser.parse_content(path, content)
+      entry_attrs = Mapper.map_note_to_entry(parsed, user_id)
+      Onelist.Entries.create_entry_with_content(entry_attrs, parsed.content, [])
+    end)
+  end
+end
+</code></pre></p>
+<h3>Polling for Changes</h3>
+<p>Since the Local REST API doesn't support webhooks, Onelist would poll periodically:</p>
+<pre><code class="language-elixir">defmodule Onelist.Workers.ObsidianSyncWorker do
+  use Oban.Worker, queue: :sync, max_attempts: 3
+<p>@poll_interval_minutes 5</p>
+<p>@impl Oban.Worker
+  def perform(%Oban.Job{args: %{&quot;user_id&quot; =&gt; user_id}}) do
+    case get_obsidian_config(user_id) do
+      {:ok, config} -&gt;
+        client = RestApiClient.new(config.endpoint, config.api_key)
+        Onelist.Import.Obsidian.Sync.sync(user_id, client)</p>
+<p># Schedule next sync
+        schedule_next_sync(user_id)</p>
+<p>:ok</p>
+<p>{:error, :not_configured} -&gt;
+        :ok
+    end
+  end</p>
+<p>defp schedule_next_sync(user_id) do
+    %{&quot;user_id&quot; =&gt; user_id}
+    |&gt; new(schedule_in: @poll_interval_minutes <em> 60)
+    |&gt; Oban.insert()
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Folder Watching Sync</h2>
+<h3>Overview</h3>
+<p>For users who sync their Obsidian vault via cloud storage (Dropbox, iCloud, Google Drive, OneDrive), Onelist can watch a synced folder for changes.</p>
+<h3>Desktop App Integration</h3>
+<p>If Onelist has a desktop component (Electron, Tauri), it can use file system watchers:</p>
+<pre><code class="language-elixir"># Conceptual - would be implemented in desktop app
+defmodule Onelist.Desktop.FolderWatcher do
+  @moduledoc &quot;&quot;&quot;
+  Watches Obsidian vault folder for changes.
+  Uses fswatch/inotify/FSEvents depending on platform.
+  &quot;&quot;&quot;
+<p>def start_watching(vault_path, callback) do
+    FileSystem.subscribe(vault_path)</p>
+<p>receive do
+      {:file_event, watcher_pid, {path, events}} -&gt;
+        handle_event(path, events, callback)
+        start_watching(vault_path, callback)
+    end
+  end</p>
+<p>defp handle_event(path, events, callback) do
+    cond do
+      :created in events -&gt; callback.(:created, path)
+      :modified in events -&gt; callback.(:modified, path)
+      :deleted in events -&gt; callback.(:deleted, path)
+      :renamed in events -&gt; callback.(:renamed, path)
+      true -&gt; :ignore
+    end
+  end
+end
+</code></pre></p>
+<h3>Cloud Folder Sync</h3>
+<p>For web-only users, they can:
+1. Point Onelist to a cloud-synced folder
+2. Onelist periodically scans for changes
+3. Changes are imported automatically</p>
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.FolderSync do
+  @moduledoc &quot;&quot;&quot;
+  Sync from a local/cloud-synced Obsidian vault folder.
+  &quot;&quot;&quot;
+<p>def sync_folder(user_id, vault_path) do
+    # Scan vault
+    current_files = scan_vault(vault_path)</p>
+<p># Get previous state
+    {:ok, previous_state} = get_sync_state(user_id)</p>
+<p># Detect changes based on file hashes and mtimes
+    changes = compare_states(current_files, previous_state)</p>
+<p># Process changes
+    results = process_changes(user_id, vault_path, changes)</p>
+<p># Save new state
+    save_sync_state(user_id, current_files)</p>
+<p>{:ok, results}
+  end</p>
+<p>defp scan_vault(path) do
+    Path.wildcard(Path.join(path, &quot;</strong>/</em>.md&quot;))
+    |&gt; Enum.map(fn file -&gt;
+      stat = File.stat!(file)
+      hash = :crypto.hash(:md5, File.read!(file)) |&gt; Base.encode16()</p>
+<p>%{
+        path: Path.relative_to(file, path),
+        mtime: stat.mtime,
+        size: stat.size,
+        hash: hash
+      }
+    end)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Data Mapping</h2>
+<h3>Entity Mapping</h3>
+<table>
+<tr><th>Obsidian</th><th>Onelist</th><th>Notes</th></tr>
+<tr><td>Markdown note</td><td>Entry (type: "note")</td><td>Primary content</td></tr>
+<tr><td>Folder</td><td>Tag (optional)</td><td><code>obsidian:folder:path</code></td></tr>
+<tr><td>Tag</td><td>Tag</td><td>Direct mapping</td></tr>
+<tr><td>Nested tag</td><td>Tag</td><td><code>parent/child</code> preserved</td></tr>
+<tr><td>Alias</td><td>Entry aliases</td><td>For search</td></tr>
+<tr><td>Wiki-link</td><td>Internal link</td><td>Resolved after import</td></tr>
+<tr><td>Embedded file</td><td>Asset + embed</td><td>Inline reference</td></tr>
+<tr><td>Canvas</td><td>Entry + special view</td><td>Future consideration</td></tr>
+<tr><td>Attachment</td><td>Asset</td><td>Binary files</td></tr>
+</table>
+<h3>Note → Entry Mapping</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.Mapper do
+  @moduledoc &quot;&quot;&quot;
+  Maps Obsidian data structures to Onelist entities.
+  &quot;&quot;&quot;
+<p>def map_note_to_entry(parsed_note, user_id) do
+    %{
+      user_id: user_id,
+      title: parsed_note.title,
+      entry_type: &quot;note&quot;,
+      source_type: &quot;api&quot;,
+      content_created_at: parsed_note.created_at,
+      metadata: %{
+        &quot;obsidian&quot; =&gt; %{
+          &quot;filename&quot; =&gt; parsed_note.filename,
+          &quot;path&quot; =&gt; parsed_note.relative_path,
+          &quot;aliases&quot; =&gt; parsed_note.aliases,
+          &quot;cssclasses&quot; =&gt; parsed_note.frontmatter[&quot;cssclasses&quot;],
+          &quot;imported_at&quot; =&gt; DateTime.utc_now(),
+          &quot;custom_properties&quot; =&gt; parsed_note.metadata
+        }
+      }
+    }
+  end</p>
+<p>def map_tags(parsed_note) do
+    # Preserve tag hierarchy
+    parsed_note.tags
+    |&gt; Enum.map(fn tag -&gt;
+      # Convert obsidian nested tags to flat tags with hierarchy preserved
+      # #project/alpha stays as &quot;project/alpha&quot;
+      tag
+    end)
+  end</p>
+<p>def map_folder_to_tag(relative_path, opts \\ []) do
+    if opts[:folders_as_tags] do
+      folder = Path.dirname(relative_path)
+      if folder != &quot;.&quot; do
+        &quot;obsidian:folder:#{folder}&quot;
+      end
+    end
+  end
+end
+</code></pre></p>
+<h3>Wiki-Link Resolution</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.LinkResolver do
+  @moduledoc &quot;&quot;&quot;
+  Resolves Obsidian wiki-links to Onelist internal links.
+  &quot;&quot;&quot;
+<p>def resolve_links(content, link_index) do
+    # Pattern: [[target]] or [[target|display]] or ![[embed]]
+    wikilink_regex = ~r/(!?)\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/</p>
+<p>Regex.replace(wikilink_regex, content, fn full, embed, target, display -&gt;
+      resolve_single_link(full, embed, target, display, link_index)
+    end)
+  end</p>
+<p>defp resolve_single_link(_full, embed, target, display, link_index) do
+    # Parse target (may include #heading or #^block)
+    {note_target, anchor} = parse_target(target)</p>
+<p>case Map.get(link_index, normalize_target(note_target)) do
+      nil -&gt;
+        # Unresolved link - keep as broken link marker
+        display_text = display || target
+        &quot;<a href="obsidian://broken/#{URI.encode(target">#{display_text}</a>})&quot;</p>
+<p>entry_public_id -&gt;
+        display_text = display || target
+        anchor_suffix = if anchor, do: &quot;##{anchor}&quot;, else: &quot;&quot;</p>
+<p>if embed == &quot;!&quot; do
+          # Embed syntax - check if it's an asset or note
+          if asset_target?(target) do
+            &quot;!<a href="asset://#{entry_public_id}">#{display_text}</a>&quot;
+          else
+            &quot;![[entry:#{entry_public_id}#{anchor_suffix}]]&quot;
+          end
+        else
+          &quot;[[entry:#{entry_public_id}#{anchor_suffix}|#{display_text}]]&quot;
+        end
+    end
+  end</p>
+<p>defp parse_target(target) do
+    case String.split(target, &quot;#&quot;, parts: 2) do
+      [note] -&gt; {note, nil}
+      [note, anchor] -&gt; {note, anchor}
+    end
+  end</p>
+<p>defp normalize_target(target) do
+    target
+    |&gt; String.trim()
+    |&gt; String.downcase()
+    |&gt; String.replace(~r/\.md$/, &quot;&quot;)
+  end</p>
+<p>defp asset_target?(target) do
+    ext = Path.extname(target) |&gt; String.downcase()
+    ext in ~w(.png .jpg .jpeg .gif .webp .svg .pdf .mp3 .mp4 .wav .webm)
+  end</p>
+<p>def build_link_index(notes, entries) do
+    # Build index mapping Obsidian paths/names to Onelist entry IDs
+    notes
+    |&gt; Enum.zip(entries)
+    |&gt; Enum.flat_map(fn {note, entry} -&gt;
+      # Index by filename, path, and aliases
+      keys = [
+        normalize_target(note.filename),
+        normalize_target(note.relative_path)
+      ] ++ Enum.map(note.aliases, &amp;normalize_target/1)</p>
+<p>Enum.map(keys, &amp;{&amp;1, entry.public_id})
+    end)
+    |&gt; Map.new()
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Content Processing</h2>
+<h3>Markdown Compatibility</h3>
+<p>Obsidian Markdown is largely standard with some extensions:</p>
+<table>
+<tr><th>Feature</th><th>Obsidian</th><th>Onelist Handling</th></tr>
+<tr><td>Basic Markdown</td><td>Standard</td><td>Pass through</td></tr>
+<tr><td>Wiki-links</td><td><code>[[note]]</code></td><td>Convert to internal links</td></tr>
+<tr><td>Embeds</td><td><code>![[file]]</code></td><td>Convert to asset/embed</td></tr>
+<tr><td>Tags</td><td><code>#tag</code></td><td>Extract and index</td></tr>
+<tr><td>Tasks</td><td><code>- [ ]</code> / <code>- [x]</code></td><td>Pass through (standard)</td></tr>
+<tr><td>Callouts</td><td><code>> [!note]</code></td><td>Convert or pass through</td></tr>
+<tr><td>Math</td><td><code>$...$</code> / <code>$$...$$</code></td><td>Pass through</td></tr>
+<tr><td>Mermaid</td><td><code> </code>`<code>mermaid </code></td><td>Pass through</td></tr>
+<tr><td>Highlights</td><td><code>==text==</code></td><td>Convert to <code><mark></code></td></tr>
+<tr><td>Comments</td><td><code>%%...%%</code></td><td>Strip or preserve</td></tr>
+</table>
+<h3>Callout Conversion</h3>
+<p>Obsidian callouts use a specific syntax:</p>
+<pre><code class="language-markdown">&gt; [!note] Title
+&gt; Content here
+<p>&gt; [!warning]
+&gt; Warning content</p>
+<p>&gt; [!tip]+ Collapsible (open by default)
+&gt; Tip content</p>
+<p>&gt; [!faq]- Collapsible (closed by default)
+&gt; FAQ content
+</code></pre></p>
+<strong>Conversion Strategy</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.CalloutConverter do
+  @callout_regex ~r/^&gt;\s<em>\<a href="[+-]">!(\w+)\</a>?(?:\s+(.+))?\n((?:&gt;.</em>\n?)<em>)/m
+<p>@callout_icons %{
+    &quot;note&quot; =&gt; &quot;📝&quot;,
+    &quot;tip&quot; =&gt; &quot;💡&quot;,
+    &quot;warning&quot; =&gt; &quot;⚠️&quot;,
+    &quot;danger&quot; =&gt; &quot;🚨&quot;,
+    &quot;info&quot; =&gt; &quot;ℹ️&quot;,
+    &quot;question&quot; =&gt; &quot;❓&quot;,
+    &quot;quote&quot; =&gt; &quot;💬&quot;,
+    &quot;example&quot; =&gt; &quot;📋&quot;,
+    &quot;bug&quot; =&gt; &quot;🐛&quot;,
+    &quot;success&quot; =&gt; &quot;✅&quot;,
+    &quot;failure&quot; =&gt; &quot;❌&quot;
+  }</p>
+<p>def convert(content) do
+    Regex.replace(@callout_regex, content, fn _, type, _fold, title, body -&gt;
+      icon = Map.get(@callout_icons, String.downcase(type), &quot;📌&quot;)
+      title_text = if title, do: &quot; <strong>#{title}</strong>&quot;, else: &quot;&quot;
+      body_cleaned = body
+                     |&gt; String.split(&quot;\n&quot;)
+                     |&gt; Enum.map(&amp;String.replace_prefix(&amp;1, &quot;&gt; &quot;, &quot;&quot;))
+                     |&gt; Enum.join(&quot;\n&quot;)</p>
+<p>&quot;&quot;&quot;
+      &gt; #{icon}#{title_text}
+      &gt;
+      #{body_cleaned |&gt; String.split(&quot;\n&quot;) |&gt; Enum.map(&amp;&quot;&gt; #{&amp;1}&quot;) |&gt; Enum.join(&quot;\n&quot;)}
+      &quot;&quot;&quot;
+    end)
+  end
+end
+</code></pre></p>
+<h3>Canvas Import</h3>
+<p>Canvas files can be imported as special entries:</p>
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.CanvasParser do
+  @moduledoc &quot;&quot;&quot;
+  Parser for Obsidian .canvas files (JSON Canvas format).
+  &quot;&quot;&quot;
+<p>def parse(file_path) do
+    content = File.read!(file_path)
+    canvas = Jason.decode!(content)</p>
+<p>%{
+      filename: Path.basename(file_path, &quot;.canvas&quot;),
+      nodes: parse_nodes(canvas[&quot;nodes&quot;] || []),
+      edges: canvas[&quot;edges&quot;] || [],
+      raw_json: content
+    }
+  end</p>
+<p>defp parse_nodes(nodes) do
+    Enum.map(nodes, fn node -&gt;
+      %{
+        id: node[&quot;id&quot;],
+        type: node[&quot;type&quot;],
+        x: node[&quot;x&quot;],
+        y: node[&quot;y&quot;],
+        width: node[&quot;width&quot;],
+        height: node[&quot;height&quot;],
+        content: extract_content(node)
+      }
+    end)
+  end</p>
+<p>defp extract_content(%{&quot;type&quot; =&gt; &quot;text&quot;, &quot;text&quot; =&gt; text}), do: text
+  defp extract_content(%{&quot;type&quot; =&gt; &quot;file&quot;, &quot;file&quot; =&gt; file}), do: {:file_ref, file}
+  defp extract_content(%{&quot;type&quot; =&gt; &quot;link&quot;, &quot;url&quot; =&gt; url}), do: {:url, url}
+  defp extract_content(%{&quot;type&quot; =&gt; &quot;group&quot;, &quot;label&quot; =&gt; label}), do: {:group, label}
+  defp extract_content(_), do: nil</p>
+<p>def to_markdown(canvas) do
+    &quot;&quot;&quot;
+    # #{canvas.filename}</p>
+<p>&gt; [!info] Canvas Import
+    &gt; This entry was imported from an Obsidian canvas file.
+    &gt; Original layout and connections are preserved in metadata.</p>
+<p>## Content</p>
+<p>#{nodes_to_markdown(canvas.nodes)}</p>
+<p>## Connections</p>
+<p>#{edges_to_markdown(canvas.edges, canvas.nodes)}
+    &quot;&quot;&quot;
+  end</p>
+<p>defp nodes_to_markdown(nodes) do
+    nodes
+    |&gt; Enum.map(fn node -&gt;
+      case node.content do
+        text when is_binary(text) -&gt; &quot;- <strong>Text Node</strong>: #{text}&quot;
+        {:file_ref, file} -&gt; &quot;- <strong>File</strong>: [[#{file}]]&quot;
+        {:url, url} -&gt; &quot;- <strong>Link</strong>: <a href="#{url}">#{url}</a>&quot;
+        {:group, label} -&gt; &quot;- <strong>Group</strong>: #{label}&quot;
+        nil -&gt; nil
+      end
+    end)
+    |&gt; Enum.reject(&amp;is_nil/1)
+    |&gt; Enum.join(&quot;\n&quot;)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Implementation Phases</h2>
+<h3>Phase 1: Folder Upload Import (MVP)</h3>
+<strong>Duration</strong>: 2 weeks
+<strong>Scope</strong>:
+<li>ZIP/folder upload</li>
+<li>Markdown parsing with YAML frontmatter</li>
+<li>Wiki-link extraction (without resolution)</li>
+<li>Tag extraction (inline and frontmatter)</li>
+<li>Basic asset import</li>
+<li>Import progress tracking</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Import.Obsidian.VaultParser</code></li>
+<li><code>Onelist.Import.Obsidian.MarkdownParser</code></li>
+<li><code>Onelist.Import.Obsidian.Mapper</code></li>
+<li>Import UI in settings</li>
+<strong>User Flow</strong>:
+1. User exports vault as ZIP (or selects folder)
+2. Upload to Onelist
+3. Preview import (note count, tags, assets)
+4. Configure options
+5. Start import
+6. Review report
+<h3>Phase 2: Link Resolution & Enhanced Parsing</h3>
+<strong>Duration</strong>: 1-2 weeks
+<strong>Scope</strong>:
+<li>Wiki-link resolution (post-import)</li>
+<li>Alias support for linking</li>
+<li>Callout conversion</li>
+<li>Highlight syntax (<code>==text==</code>)</li>
+<li>Block reference handling</li>
+<li>Duplicate detection</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Import.Obsidian.LinkResolver</code></li>
+<li><code>Onelist.Import.Obsidian.CalloutConverter</code></li>
+<li>Enhanced markdown processing</li>
+<h3>Phase 3: Local REST API Integration</h3>
+<strong>Duration</strong>: 2 weeks
+<strong>Scope</strong>:
+<li>REST API client</li>
+<li>Account linking (endpoint + API key)</li>
+<li>Initial sync from API</li>
+<li>Periodic polling for changes</li>
+<li>Sync status dashboard</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Import.Obsidian.RestApiClient</code></li>
+<li><code>Onelist.Import.Obsidian.Sync</code></li>
+<li><code>Onelist.Workers.ObsidianSyncWorker</code></li>
+<li>Sync configuration UI</li>
+<strong>Prerequisites</strong>:
+<li>User must install Local REST API plugin in Obsidian</li>
+<li>User must provide API key</li>
+<h3>Phase 4: Bi-directional Sync (Optional)</h3>
+<strong>Duration</strong>: 2-3 weeks
+<strong>Scope</strong>:
+<li>Push changes back to Obsidian</li>
+<li>Conflict detection and resolution</li>
+<li>New note creation in Obsidian</li>
+<li>Tag sync</li>
+<strong>Deliverables</strong>:
+<li>Bi-directional sync logic</li>
+<li>Conflict resolution UI</li>
+<li>Push-to-Obsidian functionality</li>
+<h3>Phase 5: Canvas & Special Files</h3>
+<strong>Duration</strong>: 1-2 weeks
+<strong>Scope</strong>:
+<li>Canvas file import</li>
+<li>Excalidraw file handling</li>
+<li>Special block types</li>
+<li>Dataview query preservation (as metadata)</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Import.Obsidian.CanvasParser</code></li>
+<li>Special file handlers</li>
+<h3>Phase 6: Desktop Folder Watching (Future)</h3>
+<strong>Duration</strong>: 2-3 weeks
+<strong>Scope</strong>:
+<li>Desktop app file watcher</li>
+<li>Real-time sync</li>
+<li>Cloud folder support</li>
+<li>Background sync daemon</li>
+<strong>Prerequisites</strong>:
+<li>Onelist desktop app</li>
+<hr>
+<h2>Technical Considerations</h2>
+<h3>Performance</h3>
+<strong>Large Vaults</strong>:
+<li>Stream file processing (don't load all into memory)</li>
+<li>Batch database operations</li>
+<li>Background job processing</li>
+<li>Progress reporting for large imports</li>
+<strong>Optimization</strong>:
+<pre><code class="language-elixir">def import_vault_stream(vault_path, user_id) do
+  vault_path
+  |&gt; stream_files()
+  |&gt; Stream.chunk_every(50)  # Process in batches
+  |&gt; Stream.each(fn batch -&gt;
+    Enum.each(batch, &amp;import_file(&amp;1, user_id))
+    report_progress(length(batch))
+  end)
+  |&gt; Stream.run()
+end
+</code></pre>
+<h3>File System Considerations</h3>
+<strong>Cross-Platform Paths</strong>:
+<li>Normalize path separators</li>
+<li>Handle Unicode filenames</li>
+<li>Respect case sensitivity differences</li>
+<strong>Symlinks</strong>:
+<li>Detect and handle symbolic links</li>
+<li>Avoid infinite loops in recursive scanning</li>
+<h3>Error Handling</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Obsidian.ImportError do
+  defexception [:message, :file_path, :line_number, :recoverable]
+end
+<p>def parse_with_recovery(files) do
+  files
+  |&gt; Enum.map(fn file -&gt;
+    try do
+      {:ok, parse_file(file)}
+    rescue
+      e in YamlElixir.ParsingError -&gt;
+        {:error, %ImportError{
+          message: &quot;Invalid YAML frontmatter: #{e.message}&quot;,
+          file_path: file,
+          recoverable: true
+        }}</p>
+<p>e -&gt;
+        {:error, %ImportError{
+          message: &quot;Parse error: #{inspect(e)}&quot;,
+          file_path: file,
+          recoverable: false
+        }}
+    end
+  end)
+end
+</code></pre></p>
+<h3>Security</h3>
+<strong>File Validation</strong>:
+<li>Validate file extensions</li>
+<li>Check for path traversal attempts (<code>../</code>)</li>
+<li>Limit file sizes</li>
+<li>Scan for potentially malicious content</li>
+<strong>API Security</strong> (for Local REST API):
+<li>Store API keys encrypted</li>
+<li>Validate endpoint URLs (localhost only by default)</li>
+<li>Rate limit sync operations</li>
+<hr>
+<h2>User Experience</h2>
+<h3>Import UI</h3>
+<strong>Upload Page</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Import from Obsidian                       │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ┌─────────────────────────────────────┐   │
+│  │  📁 Drop vault folder or ZIP here   │   │
+│  │     or click to browse              │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+│  Your Obsidian vault is just a folder.     │
+│  You can ZIP it or select it directly.     │
+│                                             │
+│  ─────── or ───────                        │
+│                                             │
+│  [🔗 Connect via Local REST API]           │
+│  Enable ongoing sync (requires plugin)     │
+│                                             │
+│  Don't have the plugin?                    │
+│  Install &quot;Local REST API&quot; from Community   │
+│  Plugins in Obsidian.                      │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>Import Preview</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Import Preview: My Vault                   │
+├─────────────────────────────────────────────┤
+│                                             │
+│  📝 Notes: 423                             │
+│  🏷️  Tags: 67 (including nested)            │
+│  📎 Attachments: 156 (89 MB)               │
+│  🗂️  Folders: 12                            │
+│                                             │
+│  Options:                                   │
+│  ☑ Preserve folder structure as tags       │
+│  ☑ Import all tags (including nested)      │
+│  ☑ Resolve wiki-links after import         │
+│  ☐ Import canvas files                     │
+│  ☐ Skip template folder                    │
+│                                             │
+│  Excluded:                                  │
+│  • .obsidian/ (configuration)              │
+│  • .trash/ (deleted files)                 │
+│                                             │
+│  [Cancel]              [Start Import →]    │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>REST API Setup</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Connect Obsidian via REST API              │
+├─────────────────────────────────────────────┤
+│                                             │
+│  1. Install &quot;Local REST API&quot; plugin         │
+│     in Obsidian Community Plugins          │
+│                                             │
+│  2. Enable the plugin and copy your API key │
+│                                             │
+│  3. Enter your details below:              │
+│                                             │
+│  API Endpoint:                              │
+│  ┌─────────────────────────────────────┐   │
+│  │ https://127.0.0.1:27124             │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+│  API Key:                                   │
+│  ┌─────────────────────────────────────┐   │
+│  │ ••••••••••••••••                    │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+│  [Test Connection]                         │
+│                                             │
+│  ✅ Connected! Found 423 notes.            │
+│                                             │
+│  [Cancel]              [Save &amp; Sync →]     │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>Sync Dashboard</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Obsidian Sync                              │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ✅ Connected via Local REST API           │
+│  Endpoint: https://127.0.0.1:27124         │
+│  Last sync: 3 minutes ago                  │
+│                                             │
+│  Notes synced: 423                         │
+│  Assets synced: 156                        │
+│                                             │
+│  Sync frequency:                            │
+│  ◉ Every 5 minutes                         │
+│  ○ Every 15 minutes                        │
+│  ○ Manual only                             │
+│                                             │
+│  [Sync Now]  [View History]  [Disconnect]  │
+│                                             │
+│  Recent changes:                            │
+│  • &quot;Daily/2025-01-28&quot; modified - 3 min ago │
+│  • &quot;Projects/Alpha&quot; created - 1 hour ago   │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>Success Metrics</h2>
+<h3>Phase 1 (Folder Import)</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Parse success rate</td><td>>99% of valid Markdown</td></tr>
+<tr><td>Frontmatter extraction</td><td>100% accuracy</td></tr>
+<tr><td>Tag extraction</td><td>100% accuracy</td></tr>
+<tr><td>Import speed</td><td>>100 notes/second</td></tr>
+</table>
+<h3>Phase 3 (REST API Sync)</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Sync latency</td><td><5 minutes (polling)</td></tr>
+<tr><td>Change detection accuracy</td><td>100%</td></tr>
+<tr><td>API error rate</td><td><0.1%</td></tr>
+<tr><td>Link resolution accuracy</td><td>>99%</td></tr>
+</table>
+<hr>
+<h2>Dependencies</h2>
+<h3>External</h3>
+<li><strong>Local REST API Plugin</strong>: Community plugin (optional for sync)</li>
+<li>No official Obsidian API (file-based system)</li>
+<h3>Internal</h3>
+<li>Storage backend for assets</li>
+<li>Background job processing (Oban)</li>
+<li>User authentication</li>
+<h3>Libraries</h3>
+<pre><code class="language-elixir"># mix.exs
+defp deps do
+  [
+    # YAML parsing for frontmatter
+    {:yaml_elixir, &quot;~&gt; 2.9&quot;},
+<p># HTTP client for REST API
+    {:req, &quot;~&gt; 0.4&quot;},</p>
+<p># File system watching (desktop only)
+    {:file_system, &quot;~&gt; 0.2&quot;},  # Optional</p>
+<p># JSON parsing (built-in, but explicit)
+    {:jason, &quot;~&gt; 1.4&quot;},</p>
+<p># ZIP handling
+    # (Erlang :zip is built-in)
+  ]
+end
+</code></pre></p>
+<hr>
+<h2>References</h2>
+<h3>Obsidian Documentation</h3>
+<li><a href="https://help.obsidian.md/vault">Create a vault</a></li>
+<li><a href="https://help.obsidian.md/links">Internal links</a></li>
+<li><a href="https://help.obsidian.md/properties">Properties</a></li>
+<li><a href="https://help.obsidian.md/tags">Tags</a></li>
+<li><a href="https://help.obsidian.md/plugins/canvas">Canvas</a></li>
+<h3>JSON Canvas</h3>
+<li><a href="https://jsoncanvas.org/">JSON Canvas Specification</a></li>
+<li><a href="https://github.com/obsidianmd/jsoncanvas">GitHub Repository</a></li>
+<h3>Local REST API Plugin</h3>
+<li><a href="https://github.com/coddingtonbear/obsidian-local-rest-api">GitHub Repository</a></li>
+<li><a href="https://coddingtonbear.github.io/obsidian-local-rest-api/">API Documentation</a></li>
+<h3>Community Resources</h3>
+<li><a href="https://forum.obsidian.md/">Obsidian Forum</a></li>
+<li><a href="https://www.obsidianstats.com/">Obsidian Plugin Stats</a></li>
+<hr>
+<h2>Appendix: Obsidian Markdown Extensions</h2>
+<h3>Callout Types</h3>
+<pre><code class="language-markdown">&gt; [!note]      # Blue note
+&gt; [!abstract]  # Teal summary
+&gt; [!info]      # Blue info
+&gt; [!tip]       # Cyan tip
+&gt; [!success]   # Green success
+&gt; [!question]  # Yellow question
+&gt; [!warning]   # Orange warning
+&gt; [!failure]   # Red failure
+&gt; [!danger]    # Red danger
+&gt; [!bug]       # Red bug
+&gt; [!example]   # Purple example
+&gt; [!quote]     # Gray quote
+</code></pre>
+<h3>Task Variants</h3>
+<pre><code class="language-markdown">- [ ] Unchecked
+<li>[x] Checked</li>
+<li>[&gt;] Rescheduled (some plugins)</li>
+<li>[&lt;] Scheduled (some plugins)</li>
+<li>[-] Cancelled (some plugins)</li>
+<li>[/] In progress (some plugins)</li>
+</ul></code></pre>
+<h3>Comments</h3>
+<pre><code class="language-markdown">%%
+This is a comment.
+It won't be rendered.
+%%
+<p>Inline comment: %%hidden%%
+</code></pre></p>
+<h3>Highlights</h3>
+<pre><code class="language-markdown">==highlighted text==
+</code></pre>
+<hr>
+</em>Document created: 2026-01-28<em>
+</em>Last updated: 2026-01-28*
+  </article>
+</body>
+</html>

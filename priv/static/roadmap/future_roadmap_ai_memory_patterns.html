@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Memory Patterns for Onelist - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>AI Memory Patterns for Onelist</h1>
+<strong>Status:</strong> Core Architecture
+<strong>Date:</strong> 2026-01-28
+<h2>1. Overview</h2>
+<p>This document defines how AI agents (like OpenClaw) should use Onelist as their memory layer. It addresses the common problems with AI memory systems and provides concrete patterns for implementing efficient, hierarchical, and cost-effective memory.</p>
+<h2>2. Problems with Current AI Memory Systems</h2>
+<p>Based on analysis of OpenClaw and similar systems, current approaches suffer from:</p>
+<table>
+<tr><th>Problem</th><th>Description</th><th>Impact</th></tr>
+<tr><td><strong>Flat storage</strong></td><td>Markdown files with no structure</td><td>Poor retrieval, no relationships</td></tr>
+<tr><td><strong>Token inefficiency</strong></td><td>Full context loading ($11 for "Hi")</td><td>Prohibitive costs for 24/7 operation</td></tr>
+<tr><td><strong>No proactive retrieval</strong></td><td>LLMs fail to use memory_search tools</td><td>Missed context, poor responses</td></tr>
+<tr><td><strong>Compaction failures</strong></td><td>Incomplete summarization, hangs</td><td>Bloated context, reliability issues</td></tr>
+<tr><td><strong>No decay mechanism</strong></td><td>Old irrelevant data persists</td><td>Noise overwhelms signal</td></tr>
+<tr><td><strong>Security vulnerabilities</strong></td><td>Unencrypted local files</td><td>Data exposure risks</td></tr>
+<tr><td><strong>No versioning</strong></td><td>Edits overwrite history</td><td>Lost context, no audit trail</td></tr>
+</table>
+<h2>3. Onelist Solution Architecture</h2>
+<p>Onelist addresses these problems through structured storage, E2EE security, and a clear separation between storage (Onelist Core) and intelligence (Agents).</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ONELIST MEMORY ARCHITECTURE                          │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                           AI AGENTS                                  │   │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  │   │
+│  │  │ OpenClaw │  │ Reader  │  │Librarian│  │Searcher │  │ Planner │  │   │
+│  │  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘  │   │
+│  │       │            │            │            │            │        │   │
+│  │       └────────────┴────────────┴────────────┴────────────┘        │   │
+│  │                              │ API                                  │   │
+│  └──────────────────────────────┼──────────────────────────────────────┘   │
+│                                 │                                           │
+│  ┌──────────────────────────────┼──────────────────────────────────────┐   │
+│  │                        ONELIST CORE                                  │   │
+│  │                              │                                       │   │
+│  │  ┌───────────────────────────┴───────────────────────────────────┐  │   │
+│  │  │                         API LAYER                              │  │   │
+│  │  │  - CRUD for entries, tags, assets                             │  │   │
+│  │  │  - Hybrid search (FTS + vector)                               │  │   │
+│  │  │  - Version history                                            │  │   │
+│  │  └───────────────────────────┬───────────────────────────────────┘  │   │
+│  │                              │                                       │   │
+│  │  ┌───────────────────────────┴───────────────────────────────────┐  │   │
+│  │  │                    STORAGE LAYER                               │  │   │
+│  │  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐          │  │   │
+│  │  │  │ entries │  │  tags   │  │ assets  │  │ entry_  │          │  │   │
+│  │  │  │         │  │         │  │         │  │ links   │          │  │   │
+│  │  │  └─────────┘  └─────────┘  └─────────┘  └─────────┘          │  │   │
+│  │  │  ┌─────────────────────┐  ┌─────────────────────────────────┐│  │   │
+│  │  │  │  representations    │  │  representation_versions        ││  │   │
+│  │  │  │  (markdown, summary,│  │  (full history)                 ││  │   │
+│  │  │  │   embeddings, etc.) │  │                                 ││  │   │
+│  │  │  └─────────────────────┘  └─────────────────────────────────┘│  │   │
+│  │  └───────────────────────────────────────────────────────────────┘  │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h2>4. Memory Hierarchy Pattern</h2>
+<p>Inspired by the "bed/sheet/clothes/pillow" conceptual model, Onelist implements a four-layer memory hierarchy using entry types, tags, and metadata.</p>
+<h3>4.1 Layer Definitions</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         MEMORY HIERARCHY                                     │
+│                                                                              │
+│  Layer 1: FOUNDATIONAL (The &quot;Bed&quot;)                                          │
+│  ────────────────────────────────────                                       │
+│  Immutable core facts. Always loaded into context.                          │
+│  entry_type: 'core_memory'                                                  │
+│  tags: ['memory:foundational', 'permanent']                                 │
+│  Examples: User name, timezone, language preferences, critical rules        │
+│  Lifespan: Permanent unless explicitly changed                              │
+│                                                                              │
+│  Layer 2: PROFILE (The &quot;Sheet&quot;)                                             │
+│  ─────────────────────────────────                                          │
+│  Dynamic behavioral mirror. Updated frequently, inferred from interactions. │
+│  entry_type: 'preference' or 'behavioral_pattern'                           │
+│  tags: ['memory:profile']                                                   │
+│  metadata: { confidence: 0.85, last_observed: timestamp, source: 'inferred'}│
+│  Examples: Communication style, work patterns, recurring topics             │
+│  Lifespan: Evolves over time, low-confidence entries decay                  │
+│                                                                              │
+│  Layer 3: EPISODIC (The &quot;Clothes&quot;)                                          │
+│  ───────────────────────────────────                                        │
+│  Recent interaction context. Session and conversation memories.             │
+│  entry_type: 'memory' or 'conversation_summary'                             │
+│  tags: ['memory:episodic', 'session:{id}']                                  │
+│  metadata: { session_id, channel, participants }                            │
+│  Examples: What was discussed today, recent tasks, open threads             │
+│  Lifespan: Days to weeks, compacted into summaries                          │
+│                                                                              │
+│  Layer 4: TASK-SPECIFIC (The &quot;Pillow&quot;)                                      │
+│  ─────────────────────────────────────                                      │
+│  Derived insights for current query. Temporary, disposable.                 │
+│  entry_type: 'derived_insight' or 'working_memory'                          │
+│  tags: ['memory:working', 'task:{id}']                                      │
+│  entry_links: Links to source entries                                       │
+│  Examples: Synthesized answer, research findings, decision rationale        │
+│  Lifespan: Minutes to hours, often not persisted                            │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 Implementation with Onelist Primitives</h3>
+<table>
+<tr><th>Layer</th><th>entry_type</th><th>Tags</th><th>Metadata Fields</th><th>Retrieval</th></tr>
+<tr><td>Foundational</td><td><code>core_memory</code></td><td><code>memory:foundational</code></td><td><code>immutable: true</code></td><td>Always in context</td></tr>
+<tr><td>Profile</td><td><code>preference</code>, <code>behavioral_pattern</code></td><td><code>memory:profile</code></td><td><code>confidence</code>, <code>last_observed</code>, <code>observation_count</code></td><td>Pre-loaded based on topic</td></tr>
+<tr><td>Episodic</td><td><code>memory</code>, <code>conversation_summary</code></td><td><code>memory:episodic</code>, <code>session:{id}</code></td><td><code>session_id</code>, <code>channel</code>, <code>participants</code></td><td>Hybrid search by recency</td></tr>
+<tr><td>Task-Specific</td><td><code>derived_insight</code>, <code>working_memory</code></td><td><code>memory:working</code></td><td><code>task_id</code>, <code>ttl</code></td><td>Generated on-demand</td></tr>
+</table>
+<h3>4.3 Context Loading Strategy</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CONTEXT LOADING FOR EACH REQUEST                          │
+│                                                                              │
+│  Step 1: Load Foundational (always)                                         │
+│  ─────────────────────────────────────                                      │
+│  query: entry_type='core_memory' AND tags contains 'memory:foundational'    │
+│  tokens: ~200-500 (small, critical)                                         │
+│                                                                              │
+│  Step 2: Load Relevant Profile (topic-based)                                │
+│  ─────────────────────────────────────────────                              │
+│  query: entry_type IN ('preference', 'behavioral_pattern')                  │
+│         AND semantic_similarity(embedding, query) &gt; 0.7                     │
+│  tokens: ~300-800 (selective)                                               │
+│                                                                              │
+│  Step 3: Load Recent Episodic (recency + relevance)                         │
+│  ────────────────────────────────────────────────────                       │
+│  query: entry_type='memory'                                                 │
+│         AND content_created_at &gt; (now - 7 days)                             │
+│         AND (semantic_similarity &gt; 0.6 OR keyword_match)                    │
+│  tokens: ~500-2000 (bounded)                                                │
+│                                                                              │
+│  Step 4: Generate Task-Specific (if needed)                                 │
+│  ──────────────────────────────────────────────                             │
+│  Synthesize from retrieved memories, don't persist unless valuable          │
+│  tokens: ~200-500 (temporary)                                               │
+│                                                                              │
+│  TOTAL: ~1200-3800 tokens (vs. unbounded in naive approaches)               │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h2>5. Representation Strategy for Token Efficiency</h2>
+<p>Every memory entry should have multiple representations optimized for different use cases:</p>
+<h3>5.1 Representation Types</h3>
+<table>
+<tr><th>Type</th><th>Purpose</th><th>Token Cost</th><th>When to Use</th></tr>
+<tr><td><code>markdown</code></td><td>Full content</td><td>High</td><td>Deep retrieval, editing</td></tr>
+<tr><td><code>summary</code></td><td>Condensed version</td><td>Low</td><td>Context loading</td></tr>
+<tr><td><code>title_only</code></td><td>Just the title</td><td>Minimal</td><td>List views, quick scan</td></tr>
+<tr><td><code>embedding</code></td><td>Vector representation</td><td>N/A (not text)</td><td>Semantic search</td></tr>
+<tr><td><code>structured</code></td><td>JSON key-value pairs</td><td>Medium</td><td>Programmatic access</td></tr>
+</table>
+<h3>5.2 Agent Pattern: Request Summary First</h3>
+<pre><code class="language-python"># BAD: Loading full content into context
+memories = onelist.entries.search(query, representation='markdown')
+context = &quot;\n&quot;.join([m.content for m in memories])  # Potentially huge!
+<h1>GOOD: Load summaries, fetch full content only when needed</h1>
+memories = onelist.entries.search(query, representation='summary')
+context = &quot;\n&quot;.join([m.content for m in memories])  # Bounded size
+<h1>If more detail needed for specific memory:</h1>
+full_content = onelist.entries.get(memory_id, representation='markdown')
+</code></pre>
+<h3>5.3 Reader Agent: Summary Generation</h3>
+<p>The Reader agent should proactively generate summaries:</p>
+<pre><code class="language-">For each new entry without a 'summary' representation:
+  1. Read the 'markdown' representation
+  2. Generate a 2-3 sentence summary using LLM
+  3. Store as representation type='summary'
+  4. Store key facts as representation type='structured' (JSON)
+<p>Summary criteria:
+  <ul>
+<li>Max 100 words</li>
+  <li>Preserve key facts, dates, names</li>
+  <li>Include actionable items if present</li>
+  <li>Note emotional tone if relevant</li>
+</code></pre></p>
+<h2>6. Relevance Scoring and Decay</h2>
+<h3>6.1 Relevance Score Calculation</h3>
+<p>The Librarian agent calculates and maintains relevance scores:</p>
+<pre><code class="language-">relevance_score = (
+    recency_weight <em> recency_score +
+    access_weight </em> access_frequency_score +
+    link_weight <em> link_score +
+    explicit_weight </em> explicit_importance
+)
+<p>Where:
+  recency_score = 1.0 / (1 + days_since_created <em> decay_rate)
+  access_frequency_score = log(access_count + 1) / log(max_access + 1)
+  link_score = count(incoming_links) </em> 0.1
+  explicit_importance = metadata.importance or 0.5</p>
+<p>Default weights:
+  recency_weight = 0.3
+  access_weight = 0.3
+  link_weight = 0.2
+  explicit_weight = 0.2
+</code></pre></p>
+<h3>6.2 Decay and Archival</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         MEMORY LIFECYCLE                                     │
+│                                                                              │
+│  Active Memory                                                              │
+│  ─────────────                                                              │
+│  relevance_score &gt; 0.3                                                      │
+│  Included in search results                                                 │
+│  Tags: (normal tags)                                                        │
+│                                                                              │
+│         │ relevance drops below 0.3                                         │
+│         ▼                                                                   │
+│                                                                              │
+│  Archived Memory                                                            │
+│  ───────────────                                                            │
+│  relevance_score &lt; 0.3 AND relevance_score &gt; 0.1                           │
+│  Excluded from default search, available if explicitly requested            │
+│  Tags: add 'archived'                                                       │
+│                                                                              │
+│         │ relevance drops below 0.1 AND no incoming links                   │
+│         │ AND older than 90 days                                            │
+│         ▼                                                                   │
+│                                                                              │
+│  Candidate for Deletion                                                     │
+│  ─────────────────────                                                      │
+│  User prompted before deletion (or auto-delete if configured)               │
+│  Content may be compacted into parent summary first                         │
+│                                                                              │
+│  EXCEPTIONS:                                                                │
+│  - Foundational memories never decay                                        │
+│  - Memories with 'permanent' tag never decay                               │
+│  - Memories with incoming links decay slower                               │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>6.3 Compaction Process</h3>
+<p>When episodic memories age out, they should be compacted:</p>
+<pre><code class="language-">Daily compaction job (Librarian agent):
+  1. Find memories from 7+ days ago that aren't compacted
+  2. Group by session_id or topic cluster
+  3. Generate summary entry:
+     <li>entry_type: 'compacted_summary'</li>
+     <li>Link to original entries via entry_links</li>
+     <li>Include key facts, decisions, action items</li>
+  4. Mark originals as 'archived'
+  5. Delete originals after 90 days (keeping summary)
+<p>Weekly compaction:
+  <li>Summarize daily summaries into weekly digest</li>
+  <li>Identify patterns, recurring topics</li></p>
+<p>Monthly compaction:
+  <li>Extract enduring insights to Profile layer</li>
+  <li>Update behavioral patterns with new observations</li>
+</code></pre></p>
+<h2>7. Proactive Memory Retrieval</h2>
+<h3>7.1 The Problem with On-Demand Tools</h3>
+<p>LLMs frequently fail to call <code>memory_search</code> when they should. They either:
+<li>Forget the tool exists</li>
+<li>Don't recognize when context is needed</li>
+<li>Call it too late in the response</li></p>
+<h3>7.2 Solution: Pre-Loading Pipeline</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    PRE-LOADING PIPELINE                                      │
+│                                                                              │
+│  User Message Arrives                                                       │
+│         │                                                                   │
+│         ▼                                                                   │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  STEP 1: Intent Classification (fast, cheap model)                   │   │
+│  │  - Classify message type (question, task, social, etc.)              │   │
+│  │  - Extract entities (people, projects, dates)                        │   │
+│  │  - Estimate topics                                                   │   │
+│  └──────────────────────────────────┬──────────────────────────────────┘   │
+│                                     │                                       │
+│                                     ▼                                       │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  STEP 2: Parallel Memory Retrieval                                   │   │
+│  │  - Foundational memories (always)                                    │   │
+│  │  - Semantic search for topics                                        │   │
+│  │  - Entity-specific memories (people, projects mentioned)             │   │
+│  │  - Recent session context                                            │   │
+│  └──────────────────────────────────┬──────────────────────────────────┘   │
+│                                     │                                       │
+│                                     ▼                                       │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  STEP 3: Context Assembly                                            │   │
+│  │  - Rank memories by relevance to current query                       │   │
+│  │  - Select top-k that fit within token budget                         │   │
+│  │  - Use summaries unless detail needed                                │   │
+│  └──────────────────────────────────┬──────────────────────────────────┘   │
+│                                     │                                       │
+│                                     ▼                                       │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  STEP 4: LLM Invocation                                              │   │
+│  │  System prompt + Pre-loaded context + User message                   │   │
+│  │  Memory tool still available for follow-up queries                   │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  Latency target: 200-400ms for steps 1-3                                   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>7.3 Intent-Based Retrieval Rules</h3>
+<table>
+<tr><th>Intent</th><th>Memory Retrieval Strategy</th></tr>
+<tr><td><strong>Question about past</strong></td><td>Semantic search + temporal filter</td></tr>
+<tr><td><strong>Task request</strong></td><td>Recent context + related projects</td></tr>
+<tr><td><strong>Person mentioned</strong></td><td>All memories tagged with person</td></tr>
+<tr><td><strong>Follow-up</strong></td><td>Current session + parent thread</td></tr>
+<tr><td><strong>Scheduling</strong></td><td>Calendar entries + preferences</td></tr>
+<tr><td><strong>Emotional</strong></td><td>Tone preferences + relationship history</td></tr>
+</table>
+<h2>8. Multi-Agent Memory Access</h2>
+<h3>8.1 Agent Identification</h3>
+<p>Each agent has its own API key with scoped permissions:</p>
+<pre><code class="language-">Agent: openclaw
+  Scopes: read:all, write:memory, write:task
+  Metadata on writes: { source_agent: 'openclaw' }
+<p>Agent: reader
+  Scopes: read:all, write:representation
+  Metadata on writes: { source_agent: 'reader', operation: 'summarize' }</p>
+<p>Agent: librarian
+  Scopes: read:all, write:tag, write:metadata
+  Metadata on writes: { source_agent: 'librarian' }
+</code></pre></p>
+<h3>8.2 Conflict Resolution</h3>
+<p>When multiple agents might modify the same entry:</p>
+<pre><code class="language-">1. Optimistic locking via version field
+2. Agents should write to different fields:
+   <li>OpenClaw: content, title</li>
+   <li>Reader: representations (summary)</li>
+   <li>Librarian: tags, metadata.relevance_score</li>
+3. If conflict detected, merge or defer to most recent
+</code></pre>
+<h3>8.3 Agent Communication via Entries</h3>
+<p>Agents can communicate through Onelist:</p>
+<pre><code class="language-">Agent A creates:
+  entry_type: 'agent_task'
+  tags: ['for:librarian', 'action:organize']
+  content: &quot;Please organize memories from session X&quot;
+<p>Librarian polls for:
+  entry_type='agent_task' AND tags contains 'for:librarian'
+  Processes task, marks complete
+</code></pre></p>
+<h2>9. Security Considerations</h2>
+<h3>9.1 E2EE for All Memory</h3>
+<p>All memories are encrypted at rest and in transit:
+<li>Agent running locally: decryption happens on device</li>
+<li>Cloud sync: only encrypted blobs transmitted</li>
+<li>No plaintext memory on Onelist servers</li></p>
+<h3>9.2 Memory Access Logging</h3>
+<pre><code class="language-">All memory access logged in entries.metadata.access_log:
+  <li>timestamp</li>
+  <li>agent_id</li>
+  <li>operation (read/write)</li>
+  <li>representation accessed</li>
+<p>Enables:
+  <li>Audit trail</li>
+  <li>Access frequency for relevance scoring</li>
+  <li>Security monitoring</li>
+</code></pre></p>
+<h3>9.3 Sensitive Memory Handling</h3>
+<pre><code class="language-">For memories with tags containing 'sensitive' or 'private':
+  <li>Extra confirmation before sharing in responses</li>
+  <li>Never included in compaction summaries</li>
+  <li>Excluded from agent training data</li>
+  <li>Encrypted with additional key if configured</li>
+</code></pre>
+<h2>10. Cost Optimization Patterns</h2>
+<h3>10.1 Token Budget Management</h3>
+<pre><code class="language-python">class ContextBudget:
+    max_tokens = 4000  # Reserve rest for response
+<p>def allocate(self):
+        return {
+            'foundational': 500,    # 12.5%
+            'profile': 800,         # 20%
+            'episodic': 2000,       # 50%
+            'working': 500,         # 12.5%
+            'buffer': 200           # 5%
+        }</p>
+<p>def select_memories(self, memories, budget):
+        # Sort by relevance, select until budget exhausted
+        selected = []
+        used = 0
+        for m in sorted(memories, key=lambda x: x.relevance, reverse=True):
+            tokens = count_tokens(m.summary or m.content)
+            if used + tokens &lt;= budget:
+                selected.append(m)
+                used += tokens
+        return selected
+</code></pre></p>
+<h3>10.2 Embedding Cost Reduction</h3>
+<pre><code class="language-">Don't embed everything:
+  <li>Embed entries only when they have 'memory:' tags</li>
+  <li>Use local embedding models when privacy required</li>
+  <li>Batch embedding updates (not real-time)</li>
+  <li>Cache embeddings, only regenerate on content change</li>
+<p>Embedding strategy:
+  <li>Short entries (&lt;100 words): embed full content</li>
+  <li>Long entries: embed summary representation</li>
+  <li>Store embedding in representation type='embedding'</li>
+</code></pre></p>
+<h3>10.3 Compaction Reduces Ongoing Costs</h3>
+<pre><code class="language-">Without compaction:
+  <li>100 daily interactions × 365 days = 36,500 entries</li>
+  <li>Each query searches all = expensive</li>
+<p>With compaction:
+  <li>Daily summaries: 365 entries</li>
+  <li>Weekly digests: 52 entries</li>
+  <li>Monthly insights: 12 entries</li>
+  <li>Active recent: ~100 entries</li>
+  <li>Total searchable: ~530 entries (98.5% reduction)</li>
+</code></pre></p>
+<h2>11. Implementation Checklist</h2>
+<h3>For OpenClaw Integration</h3>
+<li>[ ] Configure Onelist API connection</li>
+<li>[ ] Migrate existing MEMORY.md to Onelist entries</li>
+<li>[ ] Implement memory hierarchy with entry types and tags</li>
+<li>[ ] Switch to summary-first context loading</li>
+<li>[ ] Implement pre-loading pipeline</li>
+<li>[ ] Configure Reader agent for automatic summarization</li>
+<li>[ ] Configure Librarian agent for decay and compaction</li>
+<li>[ ] Set up embedding generation (local or API)</li>
+<li>[ ] Implement token budget management</li>
+<li>[ ] Test cross-session memory retrieval</li>
+<h3>For New Agent Development</h3>
+<li>[ ] Review memory hierarchy patterns</li>
+<li>[ ] Implement proper entry type usage</li>
+<li>[ ] Use representations appropriately (summary vs full)</li>
+<li>[ ] Respect relevance scores in retrieval</li>
+<li>[ ] Include source_agent in all writes</li>
+<li>[ ] Handle E2EE requirements</li>
+<li>[ ] Implement graceful degradation if Onelist unavailable</li>
+<h2>12. Open Questions</h2>
+<li>[ ] <strong>Q71</strong>: Should relevance decay be configurable per user?</li>
+<li>[ ] <strong>Q72</strong>: How to handle conflicting memories (user corrects AI assumption)?</li>
+<li>[ ] <strong>Q73</strong>: Should agents have read access to each other's task queues?</li>
+<li>[ ] <strong>Q74</strong>: Optimal embedding model for memory search (local vs API)?</li>
+<li>[ ] <strong>Q75</strong>: How to handle memory migration between Onelist accounts?</li>
+</ul>
+  </article>
+</body>
+</html>

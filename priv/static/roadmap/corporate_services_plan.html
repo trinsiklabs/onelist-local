@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Corporate Services Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Corporate Services Plan</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Planning
+<strong>Priority:</strong> HIGH - Required for Cloud Sync and Web Access plans
+<hr>
+<h2>1. Executive Summary</h2>
+<p>Onelist Corporate Services is the cloud infrastructure that supports Onelist Core, Desktop, and Web Access deployments. These services are <strong>not</strong> part of the self-hosted codebase - they are operated exclusively by Onelist and provide value-added functionality for paid plans.</p>
+<h3>1.1 Services Overview</h3>
+<table>
+<tr><th>Service</th><th>Purpose</th><th>Required For</th></tr>
+<tr><td><strong>Auth</strong></td><td>Account management, token validation, plan verification</td><td>All tiers</td></tr>
+<tr><td><strong>Discovery</strong></td><td>P2P device finding, NAT hole punching</td><td>Free, Cloud Sync</td></tr>
+<tr><td><strong>Relay</strong></td><td>Webhook routing to clients behind NAT</td><td>Cloud Sync, Web Access</td></tr>
+<tr><td><strong>Vault</strong></td><td>Secure credential storage</td><td>Web Access</td></tr>
+<tr><td><strong>Sync</strong></td><td>Multi-device entry synchronization</td><td>Cloud Sync</td></tr>
+<tr><td><strong>Push</strong></td><td>Mobile/desktop push notifications</td><td>Cloud Sync, Web Access</td></tr>
+<tr><td><strong>Billing</strong></td><td>Subscription management, upgrades/downgrades</td><td>All paid tiers</td></tr>
+</table>
+<h3>1.2 Design Principles</h3>
+<p>1. <strong>Elixir-first</strong> - All services written in Elixir for consistency
+2. <strong>Minimal data retention</strong> - Services are stateless where possible
+3. <strong>Privacy-respecting</strong> - Transparent about what passes through
+4. <strong>Self-contained</strong> - No external vendor dependencies (AWS, etc.)
+5. <strong>Per-user isolation</strong> - No multi-tenant data mixing</p>
+<hr>
+<h2>2. Architecture Overview</h2>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    ONELIST CORPORATE SERVICES                                │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                         EDGE / ROUTING                               │   │
+│  │                                                                      │   │
+│  │  api.onelist.com  →  Load Balancer  →  Service Router               │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                      │                                      │
+│         ┌────────────────────────────┼────────────────────────────┐        │
+│         │                            │                            │        │
+│         ▼                            ▼                            ▼        │
+│  ┌─────────────┐             ┌─────────────┐             ┌─────────────┐  │
+│  │    Auth     │             │   Relay     │             │    Vault    │  │
+│  │             │             │             │             │             │  │
+│  │ • Tokens    │◄───────────►│ • Webhooks  │             │ • Secrets   │  │
+│  │ • Plans     │             │ • WebSocket │             │ • Encryption│  │
+│  │ • Users     │             │ • Routing   │             │ • Audit     │  │
+│  └──────┬──────┘             └──────┬──────┘             └──────┬──────┘  │
+│         │                           │                           │         │
+│         ▼                           ▼                           ▼         │
+│  ┌─────────────┐             ┌─────────────┐             ┌─────────────┐  │
+│  │  Auth DB    │             │  Relay DB   │             │  Vault DB   │  │
+│  │ (Postgres)  │             │ (Postgres)  │             │ (Postgres)  │  │
+│  └─────────────┘             └─────────────┘             └─────────────┘  │
+│                                                                              │
+│         ┌────────────────────────────┼────────────────────────────┐        │
+│         │                            │                            │        │
+│         ▼                            ▼                            ▼        │
+│  ┌─────────────┐             ┌─────────────┐             ┌─────────────┐  │
+│  │    Sync     │             │    Push     │             │   Future    │  │
+│  │             │             │             │             │             │  │
+│  │ • Entries   │             │ • APNS      │             │ • Skill Hub │  │
+│  │ • Conflicts │             │ • FCM       │             │ • Analytics │  │
+│  │ • Versions  │             │ • Desktop   │             │ • Billing   │  │
+│  └──────┬──────┘             └─────────────┘             └─────────────┘  │
+│         │                                                                   │
+│         ▼                                                                   │
+│  ┌─────────────┐                                                           │
+│  │  Sync DB    │                                                           │
+│  │ (Postgres)  │                                                           │
+│  └─────────────┘                                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>3. Auth Service (Account & Identity)</h2>
+<h3>3.1 Purpose</h3>
+<p>Central authentication, authorization, and identity management for all Onelist users. This is the <strong>only</strong> place accounts are created - all tiers (Free, Cloud Sync, Web Access) use the same central identity.</p>
+<h3>3.2 Why Central Identity?</h3>
+<p>Even free/self-hosted users need an account at onelist.my:
+<ul>
+<li>Device registration for P2P discovery</li>
+<li>Forum participation</li>
+<li>Upgrade path to paid tiers</li>
+<li>Feature announcements and communications</li></p>
+<h3>3.3 Responsibilities</h3>
+<li>User account management (registration, profile, email verification)</li>
+<li>Issue and validate service tokens</li>
+<li>Verify plan entitlements (Free, Cloud Sync, Web Access)</li>
+<li>Device registry (for P2P discovery)</li>
+<li>API key management for service-to-service auth</li>
+<h3>3.4 Account Flow</h3>
+<pre><code class="language-">1. User visits onelist.my/signup
+2. Creates account (email, username, password)
+3. Verifies email
+4. For Free tier: Downloads self-hosted package, registers device
+5. For Cloud Sync: Configures cloud storage, registers device
+6. For Web Access: VPS provisioned automatically
+</code></pre>
+<h3>3.5 What Account Provides</h3>
+<table>
+<tr><th>Feature</th><th>Free</th><th>Cloud Sync</th><th>Web Access</th></tr>
+<tr><td>Identity (username, email)</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Device registry</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Discovery service</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Forum participation</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Email communications</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Relay access</td><td>-</td><td>✓</td><td>✓</td></tr>
+<tr><td>Cloud sync</td><td>-</td><td>✓</td><td>✓</td></tr>
+<tr><td>Public pages</td><td>-</td><td>✓</td><td>✓</td></tr>
+<tr><td>Managed hosting</td><td>-</td><td>-</td><td>✓</td></tr>
+</table>
+<h3>3.6 API</h3>
+<pre><code class="language-">POST   /auth/v1/tokens              # Issue token (login)
+POST   /auth/v1/tokens/refresh      # Refresh token
+DELETE /auth/v1/tokens              # Revoke token (logout)
+GET    /auth/v1/tokens/validate     # Validate token (internal)
+<p>GET    /auth/v1/users/:id           # Get user info
+PATCH  /auth/v1/users/:id           # Update user
+GET    /auth/v1/users/:id/plan      # Get plan details</p>
+<p>POST   /auth/v1/plans/verify        # Verify plan entitlement
+</code></pre></p>
+<h3>3.7 Schema</h3>
+<pre><code class="language-sql">CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+<p>-- Plan info
+  plan VARCHAR(50) NOT NULL DEFAULT 'free',  -- free, cloud_sync, web_access
+  plan_expires_at TIMESTAMPTZ,</p>
+<p>-- Metadata
+  metadata JSONB DEFAULT '{}',</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>CREATE TABLE tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,</p>
+<p>token_hash VARCHAR(255) NOT NULL,
+  token_type VARCHAR(50) NOT NULL,  -- access, refresh, service</p>
+<p>expires_at TIMESTAMPTZ NOT NULL,
+  revoked_at TIMESTAMPTZ,</p>
+<p>-- Context
+  client_type VARCHAR(50),  -- desktop, web, api
+  client_info JSONB DEFAULT '{}',</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>CREATE INDEX tokens_user_id_idx ON tokens(user_id);
+CREATE INDEX tokens_token_hash_idx ON tokens(token_hash);
+</code></pre></p>
+<h3>3.8 Implementation</h3>
+<pre><code class="language-elixir">defmodule OnelistAuth.Tokens do
+  @moduledoc &quot;&quot;&quot;
+  Token management for Corporate Services.
+  &quot;&quot;&quot;
+<p>@access_token_ttl_hours 24
+  @refresh_token_ttl_days 30</p>
+<p>def issue(user, client_type, client_info \\ %{}) do
+    access_token = generate_token()
+    refresh_token = generate_token()</p>
+<p>Repo.transaction(fn -&gt;
+      # Create access token
+      create_token(user.id, access_token, &quot;access&quot;,
+        hours: @access_token_ttl_hours,
+        client_type: client_type,
+        client_info: client_info
+      )</p>
+<p># Create refresh token
+      create_token(user.id, refresh_token, &quot;refresh&quot;,
+        days: @refresh_token_ttl_days,
+        client_type: client_type
+      )</p>
+<p>%{
+        access_token: access_token,
+        refresh_token: refresh_token,
+        expires_in: @access_token_ttl_hours <em> 3600
+      }
+    end)
+  end</p>
+<p>def validate(token) do
+    token_hash = hash_token(token)</p>
+<p>case Repo.get_by(Token, token_hash: token_hash) do
+      nil -&gt; {:error, :invalid_token}
+      %{revoked_at: revoked} when not is_nil(revoked) -&gt; {:error, :revoked}
+      %{expires_at: exp} = t -&gt;
+        if DateTime.compare(exp, DateTime.utc_now()) == :gt do
+          {:ok, Repo.preload(t, :user)}
+        else
+          {:error, :expired}
+        end
+    end
+  end</p>
+<p>def verify_plan(user_id, required_plan) do
+    user = Repo.get!(User, user_id)</p>
+<p>plan_hierarchy = %{&quot;free&quot; =&gt; 0, &quot;cloud_sync&quot; =&gt; 1, &quot;web_access&quot; =&gt; 2}
+    user_level = Map.get(plan_hierarchy, user.plan, 0)
+    required_level = Map.get(plan_hierarchy, required_plan, 0)</p>
+<p>if user_level &gt;= required_level do
+      {:ok, user.plan}
+    else
+      {:error, :insufficient_plan, %{current: user.plan, required: required_plan}}
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>4. Discovery Service</h2>
+<h3>4.1 Purpose</h3>
+<p>Enables P2P sync for self-hosted users by facilitating device discovery across the internet. Free tier users rely on this service to find their other devices when not on the same LAN.</p>
+<h3>4.2 What Discovery Does (and Doesn't Do)</h3>
+<table>
+<tr><th>Does</th><th>Does NOT</th></tr>
+<tr><td>Store device registrations</td><td>Store user content</td></tr>
+<tr><td>Facilitate device lookup by account</td><td>Store encryption keys</td></tr>
+<tr><td>Coordinate NAT hole punching timing</td><td>Relay traffic</td></tr>
+<tr><td>Provide STUN-like functionality</td><td>Read or process sync data</td></tr>
+</table>
+<h3>4.3 Architecture</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    WAN DISCOVERY SERVICE                                     │
+│                                                                              │
+│   Device A                 Onelist Discovery              Device B          │
+│   (behind NAT)                Server                     (behind NAT)       │
+│                                                                              │
+│   1. Register              ┌───────────────┐                                │
+│      {device_id,      ────►│               │◄────  1. Register              │
+│       account_id,          │  Stores:      │       {device_id,              │
+│       connection_hints}    │  - Device IDs │        account_id,             │
+│                            │  - Account    │        connection_hints}       │
+│                            │  - Hints      │                                │
+│   2. Query peers           │               │                                │
+│      &quot;Who else is     ────►│  NO content   │                                │
+│       in my account?&quot;      │  NO keys      │                                │
+│                            │               │                                │
+│                       ◄────│               │                                │
+│   3. Receive peer info     └───────┬───────┘                                │
+│      {device_b_id,                 │                                        │
+│       hints: [...]}                │ Coordinates                            │
+│                                    │ hole punch                             │
+│   4. NAT hole punch                │ timing                                 │
+│      Both devices          ◄───────┴───────►  4. NAT hole punch             │
+│      attempt connect                          Both devices                  │
+│      simultaneously                           attempt connect               │
+│                                                                              │
+│   5. Direct P2P connection established                                      │
+│      (if hole punch succeeds)                                               │
+│                                                                              │
+│   If hole punch fails: User must use Tailscale/VPN (no relay for free)     │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.4 NAT Traversal</h3>
+<strong>STUN:</strong>
+<li>Use public STUN servers (Google, Cloudflare) or self-host</li>
+<li>Helps devices discover public IP/port</li>
+<li>Low cost, stateless</li>
+<strong>Hole Punching:</strong>
+<li>Discovery server coordinates timing</li>
+<li>Both devices attempt simultaneous connection</li>
+<li>Works for ~70-80% of home NAT configurations</li>
+<strong>Success Rates by NAT Type:</strong>
+<table>
+<tr><th>NAT Type</th><th>Hole Punch Success</th></tr>
+<tr><td>Full Cone</td><td>~95%</td></tr>
+<tr><td>Restricted Cone</td><td>~85%</td></tr>
+<tr><td>Port Restricted</td><td>~70%</td></tr>
+<tr><td>Symmetric (corporate)</td><td>~10-30%</td></tr>
+</table>
+<h3>4.5 Fallback When Hole Punch Fails</h3>
+<p>Onelist does <strong>NOT</strong> provide relay service for free tier.</p>
+<strong>User options:</strong>
+<li>Tailscale (free for personal use)</li>
+<li>WireGuard VPN</li>
+<li>Port forwarding on router</li>
+<li>Run endpoint on VPS with public IP</li>
+<li>Upgrade to Cloud Sync for relay access</li>
+<h3>4.6 API</h3>
+<pre><code class="language-">POST /api/discovery/register
+  Body: {device_id, account_id, connection_hints, signature}
+  → Registers device for discovery
+<p>GET /api/discovery/peers/{account_id}
+  Headers: Authorization (signed request)
+  → Returns list of peer devices and hints</p>
+<p>POST /api/discovery/coordinate
+  Body: {initiator_device_id, target_device_id}
+  → Coordinates hole punch timing, returns instructions</p>
+<p>DELETE /api/discovery/devices/{device_id}
+  → Unregister device
+</code></pre></p>
+<h3>4.7 Schema</h3>
+<pre><code class="language-sql">CREATE TABLE discovery_devices (
+  id UUID PRIMARY KEY,
+  account_id UUID NOT NULL,
+<p>-- Device info
+  name VARCHAR(255) NOT NULL,
+  device_type VARCHAR(50),  -- desktop, server
+  public_key BYTEA NOT NULL,  -- Ed25519 for auth</p>
+<p>-- Connection hints
+  connection_hints JSONB DEFAULT '[]',  -- [{type, ip, port}, ...]</p>
+<p>-- Status
+  last_seen_at TIMESTAMPTZ,
+  status VARCHAR(50) DEFAULT 'offline',</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>CREATE INDEX discovery_devices_account_id_idx ON discovery_devices(account_id);</p>
+<p>-- Coordination sessions (short-lived)
+CREATE TABLE hole_punch_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  initiator_device_id UUID NOT NULL,
+  target_device_id UUID NOT NULL,</p>
+<p>-- Coordination state
+  status VARCHAR(50) NOT NULL,  -- pending, coordinating, completed, failed
+  instructions JSONB,</p>
+<p>-- Short TTL
+  expires_at TIMESTAMPTZ NOT NULL,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>-- Auto-expire sessions
+CREATE INDEX hole_punch_sessions_expires_at_idx ON hole_punch_sessions(expires_at);
+</code></pre></p>
+<h3>4.8 Infrastructure Cost</h3>
+<li>Minimal (metadata only, no content)</li>
+<li>Estimated: $10-20/month for discovery server</li>
+<li>Can leverage public STUN servers (free)</li>
+<hr>
+<h2>5. Relay Service</h2>
+<h3>5.1 Purpose</h3>
+<p>Routes webhooks from external services to user's Onelist instances that may be behind NAT (desktop apps, self-hosted without public URL).</p>
+<h3>5.2 How It Works</h3>
+<pre><code class="language-">External Service (GitHub, etc.)
+         │
+         ▼
+POST https://relay.onelist.com/hooks/{user_token}
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│  Relay Service                          │
+│                                         │
+│  1. Validate user_token                 │
+│  2. Find WebSocket connection for user  │
+│  3. Forward payload via WebSocket       │
+│  4. Log event (no payload storage)      │
+└─────────────────────────────────────────┘
+         │
+         ▼
+WebSocket to user's Desktop/Self-hosted
+         │
+         ▼
+User's Onelist processes webhook locally
+</code></pre>
+<h3>5.3 API</h3>
+<pre><code class="language-"># Webhook ingestion (external services call this)
+POST   /hooks/:provider/:user_token    # Receive webhook
+<h1>WebSocket (clients connect to this)</h1>
+WS     /socket                         # Client connection
+<h1>Management (internal)</h1>
+GET    /relay/v1/connections           # List active connections
+GET    /relay/v1/stats                 # Service statistics
+</code></pre>
+<h3>5.4 Schema</h3>
+<pre><code class="language-sql">-- Minimal schema - relay is mostly stateless
+<p>CREATE TABLE webhook_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,</p>
+<p>token VARCHAR(255) NOT NULL UNIQUE,
+  provider VARCHAR(100) NOT NULL,  -- github, calendar, custom</p>
+<p>-- Verification secret (for signature validation)
+  secret_hash VARCHAR(255),</p>
+<p>enabled BOOLEAN DEFAULT true,</p>
+<p>-- Stats (updated async)
+  events_received INTEGER DEFAULT 0,
+  last_event_at TIMESTAMPTZ,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>CREATE TABLE relay_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,</p>
+<p>provider VARCHAR(100) NOT NULL,
+  event_type VARCHAR(255),</p>
+<p>-- Delivery status
+  status VARCHAR(50) NOT NULL,  -- delivered, queued, failed
+  delivered_at TIMESTAMPTZ,</p>
+<p>-- No payload storage - just metadata for debugging
+  headers_summary JSONB,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>-- Auto-delete old events (retention: 7 days)
+CREATE INDEX relay_events_inserted_at_idx ON relay_events(inserted_at);
+</code></pre></p>
+<h3>5.5 Implementation</h3>
+<pre><code class="language-elixir">defmodule OnelistRelay.WebhookController do
+  use OnelistRelay, :controller
+<p>alias OnelistRelay.{Connections, Events}</p>
+<p>def handle(conn, %{&quot;provider&quot; =&gt; provider, &quot;user_token&quot; =&gt; token}) do
+    with {:ok, webhook_config} &lt;- validate_token(token, provider),
+         :ok &lt;- verify_signature(conn, webhook_config),
+         {:ok, _} &lt;- forward_to_client(webhook_config.user_id, conn) do</p>
+<p>Events.log_delivery(webhook_config, :delivered)
+      json(conn, %{status: &quot;delivered&quot;})
+    else
+      {:error, :no_connection} -&gt;
+        # Client not connected - could queue for later
+        Events.log_delivery(webhook_config, :queued)
+        json(conn, %{status: &quot;queued&quot;, message: &quot;Client offline, will retry&quot;})</p>
+<p>{:error, reason} -&gt;
+        Events.log_delivery(webhook_config, :failed, reason)
+        send_resp(conn, 400, inspect(reason))
+    end
+  end</p>
+<p>defp forward_to_client(user_id, conn) do
+    payload = conn.body_params
+    headers = extract_relevant_headers(conn)</p>
+<p>case Connections.get(user_id) do
+      nil -&gt; {:error, :no_connection}
+      pid -&gt;
+        send(pid, {:webhook, %{payload: payload, headers: headers}})
+        {:ok, :sent}
+    end
+  end
+end</p>
+<p>defmodule OnelistRelay.ClientSocket do
+  use Phoenix.Socket</p>
+<p>alias OnelistRelay.Connections</p>
+<p>def connect(%{&quot;token&quot; =&gt; token}, socket, _connect_info) do
+    case OnelistAuth.Tokens.validate(token) do
+      {:ok, %{user: user}} -&gt;
+        # Verify plan
+        case OnelistAuth.Tokens.verify_plan(user.id, &quot;cloud_sync&quot;) do
+          {:ok, _} -&gt;
+            Connections.register(user.id, self())
+            {:ok, assign(socket, :user_id, user.id)}
+          {:error, _, _} -&gt;
+            {:error, :insufficient_plan}
+        end
+      {:error, _} -&gt;
+        {:error, :invalid_token}
+    end
+  end</p>
+<p>def handle_info({:webhook, data}, socket) do
+    push(socket, &quot;webhook&quot;, data)
+    {:noreply, socket}
+  end</p>
+<p>def terminate(_reason, socket) do
+    Connections.unregister(socket.assigns.user_id)
+    :ok
+  end
+end
+</code></pre></p>
+<h3>5.6 Privacy Documentation</h3>
+<pre><code class="language-markdown">## Relay Service Privacy
+<p>The Relay service routes webhooks to your Onelist instance.</p>
+<strong>What passes through:</strong>
+<li>Webhook payloads from external services (GitHub, Calendar, etc.)</li>
+<li>HTTP headers required for signature verification</li>
+<strong>What we store:</strong>
+<li>Delivery status (delivered, queued, failed)</li>
+<li>Timestamp and provider name</li>
+<li>Summary headers (for debugging)</li>
+<strong>What we DO NOT store:</strong>
+<li>Webhook payload contents</li>
+<li>Your code, issues, PR descriptions</li>
+<li>Any personal data from webhooks</li>
+<strong>Data retention:</strong>
+<li>Delivery logs: 7 days (auto-deleted)</li>
+<li>No payload data retained</li>
+<strong>Alternative:</strong>
+Self-hosted users can configure direct webhooks at their own domain.
+</code></pre>
+<hr>
+<h2>6. Vault Service</h2>
+<h3>6.1 Purpose</h3>
+<p>Secure credential storage for Web Access users. Provides encrypted storage with per-user key derivation, access control, and audit logging.</p>
+<h3>6.2 Design</h3>
+<li>AES-256-GCM encryption at rest</li>
+<li>Per-user key derivation (master key + user_id)</li>
+<li>Access control by component</li>
+<li>Full audit logging</li>
+<li>Key rotation support</li>
+<h3>6.3 API</h3>
+<pre><code class="language-"># Secret management
+POST   /vault/v1/secrets/:user_id/:name      # Store secret
+GET    /vault/v1/secrets/:user_id/:name      # Retrieve secret
+DELETE /vault/v1/secrets/:user_id/:name      # Delete secret
+GET    /vault/v1/secrets/:user_id            # List secrets (metadata only)
+<h1>Admin</h1>
+POST   /vault/v1/admin/rotate-key            # Rotate master key
+GET    /vault/v1/admin/audit-log             # View audit log
+</code></pre>
+<h3>6.4 Schema</h3>
+<pre><code class="language-sql">CREATE TABLE secrets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,
+  name VARCHAR(255) NOT NULL,
+<p>encrypted_value TEXT NOT NULL,
+  metadata JSONB DEFAULT '{}',
+  access_policy TEXT[] NOT NULL DEFAULT '{}',</p>
+<p>key_version INTEGER NOT NULL DEFAULT 1,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),</p>
+<p>UNIQUE(user_id, name)
+);</p>
+<p>CREATE INDEX secrets_user_id_idx ON secrets(user_id);</p>
+<p>CREATE TABLE vault_audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),</p>
+<p>event_type VARCHAR(100) NOT NULL,
+  user_id UUID,
+  secret_name VARCHAR(255),
+  caller_component VARCHAR(255),</p>
+<p>result VARCHAR(50),  -- success, denied, error
+  metadata JSONB DEFAULT '{}',</p>
+<p>ip_address INET,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>CREATE INDEX vault_audit_logs_user_id_idx ON vault_audit_logs(user_id);
+CREATE INDEX vault_audit_logs_inserted_at_idx ON vault_audit_logs(inserted_at);
+</code></pre></p>
+<h3>6.5 Implementation</h3>
+<p>See Section 7 of River Agent Plan (Recommendation 7) for full implementation details.</p>
+<hr>
+<h2>7. Sync Service</h2>
+<h3>7.1 Purpose</h3>
+<p>Synchronizes entries across multiple devices for Cloud Sync plan users. Handles conflict resolution and version tracking.</p>
+<h3>7.2 Sync Model</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         SYNC ARCHITECTURE                                    │
+│                                                                              │
+│  Desktop App              Sync Service              Web Access              │
+│  ┌──────────┐            ┌──────────┐            ┌──────────┐              │
+│  │ Local DB │◄──────────►│ Sync DB  │◄──────────►│ Cloud DB │              │
+│  └──────────┘   push/    └──────────┘   push/    └──────────┘              │
+│                 pull                    pull                                │
+│                                                                              │
+│  Each entry has:                                                            │
+│  • id (UUID, same across devices)                                           │
+│  • version (incrementing)                                                   │
+│  • updated_at (timestamp)                                                   │
+│  • sync_state (synced, pending, conflict)                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>7.3 API</h3>
+<pre><code class="language-"># Sync operations
+POST   /sync/v1/push                    # Push local changes
+POST   /sync/v1/pull                    # Pull remote changes
+GET    /sync/v1/changes?since=:version  # Get changes since version
+POST   /sync/v1/resolve                 # Resolve conflicts
+<h1>Status</h1>
+GET    /sync/v1/status                  # Sync status for user
+</code></pre>
+<h3>7.4 Schema</h3>
+<pre><code class="language-sql">CREATE TABLE sync_entries (
+  id UUID PRIMARY KEY,  -- Same ID as client
+  user_id UUID NOT NULL,
+<p>-- Entry data (encrypted at rest)
+  encrypted_data TEXT NOT NULL,</p>
+<p>-- Versioning
+  version BIGINT NOT NULL DEFAULT 1,
+  client_updated_at TIMESTAMPTZ NOT NULL,
+  server_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),</p>
+<p>-- Sync metadata
+  origin_device_id UUID NOT NULL,
+  checksum VARCHAR(64) NOT NULL,  -- For integrity verification</p>
+<p>-- Soft delete
+  deleted_at TIMESTAMPTZ,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>CREATE INDEX sync_entries_user_id_idx ON sync_entries(user_id);
+CREATE INDEX sync_entries_user_version_idx ON sync_entries(user_id, version);</p>
+<p>CREATE TABLE sync_conflicts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,
+  entry_id UUID NOT NULL,</p>
+<p>-- Both versions
+  local_data TEXT NOT NULL,
+  remote_data TEXT NOT NULL,
+  local_version BIGINT NOT NULL,
+  remote_version BIGINT NOT NULL,</p>
+<p>-- Resolution
+  resolved_at TIMESTAMPTZ,
+  resolution VARCHAR(50),  -- local_wins, remote_wins, merged, manual</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+</code></pre></p>
+<h3>7.5 Conflict Resolution</h3>
+<pre><code class="language-elixir">defmodule OnelistSync.Conflicts do
+  @moduledoc &quot;&quot;&quot;
+  Conflict detection and resolution for entry sync.
+  &quot;&quot;&quot;
+<p>@doc &quot;&quot;&quot;
+  Detect if push would create conflict.
+  &quot;&quot;&quot;
+  def detect(entry_id, client_version, server_version) do
+    cond do
+      client_version == server_version -&gt; :no_conflict
+      client_version &gt; server_version -&gt; :client_ahead  # Normal push
+      client_version &lt; server_version -&gt; :conflict      # Server has newer
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Auto-resolve conflicts where possible.
+  &quot;&quot;&quot;
+  def auto_resolve(local, remote) do
+    cond do
+      # Same content, different timestamps - no real conflict
+      content_equal?(local, remote) -&gt;
+        {:resolved, :identical, remote}</p>
+<p># Only metadata changed on one side
+      only_metadata_changed?(local, remote) -&gt;
+        {:resolved, :merged, merge_metadata(local, remote)}</p>
+<p># Non-overlapping field changes
+      can_three_way_merge?(local, remote) -&gt;
+        {:resolved, :merged, three_way_merge(local, remote)}</p>
+<p># Actual conflict - needs user decision
+      true -&gt;
+        {:conflict, :manual_required}
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>8. Push Service</h2>
+<h3>8.1 Purpose</h3>
+<p>Delivers push notifications to mobile (future) and desktop apps.</p>
+<h3>8.2 Channels</h3>
+<table>
+<tr><th>Channel</th><th>Platform</th><th>Technology</th></tr>
+<tr><td><strong>APNS</strong></td><td>iOS, macOS</td><td>Apple Push Notification Service</td></tr>
+<tr><td><strong>FCM</strong></td><td>Android</td><td>Firebase Cloud Messaging</td></tr>
+<tr><td><strong>WebPush</strong></td><td>Browsers</td><td>Web Push Protocol</td></tr>
+<tr><td><strong>Desktop</strong></td><td>macOS (native)</td><td>Direct via app WebSocket</td></tr>
+</table>
+<h3>8.3 API</h3>
+<pre><code class="language-"># Device registration
+POST   /push/v1/devices                 # Register device
+DELETE /push/v1/devices/:id             # Unregister device
+<h1>Send notification (internal only)</h1>
+POST   /push/v1/send                    # Send to user's devices
+</code></pre>
+<h3>8.4 Schema</h3>
+<pre><code class="language-sql">CREATE TABLE push_devices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,
+<p>platform VARCHAR(50) NOT NULL,  -- ios, macos, android, web
+  device_token TEXT NOT NULL,</p>
+<p>-- Metadata
+  device_name VARCHAR(255),
+  app_version VARCHAR(50),</p>
+<p>enabled BOOLEAN DEFAULT true,
+  last_used_at TIMESTAMPTZ,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),</p>
+<p>UNIQUE(user_id, device_token)
+);
+</code></pre></p>
+<hr>
+<h2>9. Billing Service</h2>
+<h3>9.1 Purpose</h3>
+<p>Manages subscription lifecycle, plan upgrades/downgrades, and integrates with payment provider (Stripe).</p>
+<h3>9.2 Upgrade Flow</h3>
+<pre><code class="language-">1. User clicks &quot;Upgrade&quot; at onelist.my
+2. Selects tier (Cloud Sync or Web Access)
+3. Stripe checkout
+4. Account upgraded immediately
+5. For Cloud Sync:
+   <li>Configure cloud storage (R2 or R2+B2)</li>
+   <li>Endpoints begin syncing to cloud</li>
+   <li>Relay access enabled</li>
+6. For Web Access:
+   <li>VPS provisioned automatically</li>
+   <li>User gets subdomain.onelist.com</li>
+   <li>Desktop/mobile sync enabled</li>
+</code></pre>
+<h3>9.3 Downgrade Flow (Paid → Free)</h3>
+<pre><code class="language-">1. User cancels subscription
+2. Subscription ends at billing period
+3. Grace period: 30 days
+   <li>Data retained in cloud</li>
+   <li>User can re-subscribe to restore</li>
+4. Notifications:
+   <li>Email at 7, 3, 1 days before deletion</li>
+   <li>App notifications</li>
+5. User ensures endpoints have all data via P2P
+6. After 30 days: cloud data deleted
+7. Public pages go offline
+8. Account reverts to free (identity preserved)
+   <li>Device registry preserved</li>
+   <li>Discovery service access preserved</li>
+   <li>Forum posts already synced to local stay with user</li>
+</code></pre>
+<h3>9.4 Tier Changes</h3>
+<table>
+<tr><th>From</th><th>To</th><th>Process</th></tr>
+<tr><td>Free</td><td>Cloud Sync</td><td>Enable relay, configure storage</td></tr>
+<tr><td>Free</td><td>Web Access</td><td>Provision VPS</td></tr>
+<tr><td>Cloud Sync</td><td>Web Access</td><td>Provision VPS, migrate sync data</td></tr>
+<tr><td>Web Access</td><td>Cloud Sync</td><td>Data migration to local, VPS deprovision (30-day grace)</td></tr>
+<tr><td>Cloud Sync</td><td>Free</td><td>Downgrade flow (30-day grace)</td></tr>
+<tr><td>Web Access</td><td>Free</td><td>VPS deprovision + downgrade flow</td></tr>
+</table>
+<h3>9.5 API</h3>
+<pre><code class="language-"># Subscription management
+GET    /billing/v1/subscription              # Current subscription
+POST   /billing/v1/subscription/upgrade      # Initiate upgrade
+POST   /billing/v1/subscription/downgrade    # Initiate downgrade
+POST   /billing/v1/subscription/cancel       # Cancel subscription
+<h1>Stripe webhooks</h1>
+POST   /billing/v1/webhooks/stripe           # Stripe events
+<h1>Admin</h1>
+GET    /billing/v1/admin/subscriptions       # List all subscriptions
+POST   /billing/v1/admin/provision           # Manual provisioning
+</code></pre>
+<h3>9.6 Schema</h3>
+<pre><code class="language-sql">CREATE TABLE subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+<p>-- Plan info
+  plan VARCHAR(50) NOT NULL,  -- free, cloud_sync, web_access
+  tier VARCHAR(50),  -- For web_access: starter, standard, pro, power</p>
+<p>-- Stripe
+  stripe_customer_id VARCHAR(255),
+  stripe_subscription_id VARCHAR(255),</p>
+<p>-- Status
+  status VARCHAR(50) NOT NULL,  -- active, canceling, past_due, canceled
+  current_period_end TIMESTAMPTZ,
+  cancel_at TIMESTAMPTZ,</p>
+<p>-- Grace period tracking
+  grace_period_end TIMESTAMPTZ,
+  data_deletion_scheduled_at TIMESTAMPTZ,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>CREATE INDEX subscriptions_user_id_idx ON subscriptions(user_id);
+CREATE INDEX subscriptions_stripe_customer_id_idx ON subscriptions(stripe_customer_id);</p>
+<p>CREATE TABLE billing_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,</p>
+<p>event_type VARCHAR(100) NOT NULL,  -- upgrade, downgrade, cancel, payment_failed
+  from_plan VARCHAR(50),
+  to_plan VARCHAR(50),</p>
+<p>metadata JSONB DEFAULT '{}',</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+</code></pre></p>
+<hr>
+<h2>10. Infrastructure</h2>
+<h3>10.1 Deployment Options</h3>
+<strong>Option A: Single VPS (MVP)</strong>
+<pre><code class="language-">┌─────────────────────────────────────────┐
+│  Single Server (e.g., Hetzner, OVH)     │
+│                                         │
+│  • All services in Docker Compose       │
+│  • Single PostgreSQL with schemas       │
+│  • Nginx reverse proxy                  │
+│  • Let's Encrypt SSL                    │
+│                                         │
+│  Cost: ~$20-50/month                    │
+└─────────────────────────────────────────┘
+</code></pre>
+<strong>Option B: Container Platform (Scale)</strong>
+<pre><code class="language-">┌─────────────────────────────────────────┐
+│  Fly.io / Railway / Render              │
+│                                         │
+│  • Each service as separate app         │
+│  • Managed PostgreSQL per service       │
+│  • Auto-scaling                         │
+│  • Built-in SSL                         │
+│                                         │
+│  Cost: Variable based on usage          │
+└─────────────────────────────────────────┘
+</code></pre>
+<strong>Option C: Kubernetes (Enterprise)</strong>
+<pre><code class="language-">┌─────────────────────────────────────────┐
+│  Self-managed K8s or managed (GKE/EKS)  │
+│                                         │
+│  • Full orchestration                   │
+│  • Service mesh                         │
+│  • Advanced monitoring                  │
+│                                         │
+│  Cost: Higher, but scales infinitely    │
+└─────────────────────────────────────────┘
+</code></pre>
+<h3>10.2 MVP Deployment (Docker Compose)</h3>
+<pre><code class="language-yaml"># corporate-services/docker-compose.yml
+version: '3.8'
+<p>services:
+  # Reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      <li>&quot;80:80&quot;</li>
+      <li>&quot;443:443&quot;</li>
+    volumes:
+      <li>./nginx.conf:/etc/nginx/nginx.conf:ro</li>
+      <li>./certs:/etc/nginx/certs:ro</li>
+    depends_on:
+      <li>auth</li>
+      <li>discovery</li>
+      <li>relay</li>
+      <li>vault</li>
+      <li>sync</li></p>
+<p># Auth Service
+  auth:
+    build: ./onelist_auth
+    environment:
+      <li>DATABASE_URL=postgres://auth:${AUTH_DB_PASS}@db:5432/auth</li>
+      <li>SECRET_KEY_BASE=${AUTH_SECRET}</li>
+    depends_on:
+      <li>db</li></p>
+<p># Discovery Service
+  discovery:
+    build: ./onelist_discovery
+    environment:
+      <li>DATABASE_URL=postgres://discovery:${DISCOVERY_DB_PASS}@db:5432/discovery</li>
+      <li>AUTH_URL=http://auth:4000</li>
+      <li>SECRET_KEY_BASE=${DISCOVERY_SECRET}</li>
+    depends_on:
+      <li>db</li>
+      <li>auth</li></p>
+<p># Relay Service
+  relay:
+    build: ./onelist_relay
+    environment:
+      <li>DATABASE_URL=postgres://relay:${RELAY_DB_PASS}@db:5432/relay</li>
+      <li>AUTH_URL=http://auth:4000</li>
+      <li>SECRET_KEY_BASE=${RELAY_SECRET}</li>
+    depends_on:
+      <li>db</li>
+      <li>auth</li></p>
+<p># Vault Service
+  vault:
+    build: ./onelist_vault
+    environment:
+      <li>DATABASE_URL=postgres://vault:${VAULT_DB_PASS}@db:5432/vault</li>
+      <li>AUTH_URL=http://auth:4000</li>
+      <li>MASTER_KEY=${VAULT_MASTER_KEY}</li>
+    depends_on:
+      <li>db</li>
+      <li>auth</li></p>
+<p># Sync Service
+  sync:
+    build: ./onelist_sync
+    environment:
+      <li>DATABASE_URL=postgres://sync:${SYNC_DB_PASS}@db:5432/sync</li>
+      <li>AUTH_URL=http://auth:4000</li>
+      <li>SECRET_KEY_BASE=${SYNC_SECRET}</li>
+    depends_on:
+      <li>db</li>
+      <li>auth</li></p>
+<p># Shared PostgreSQL (MVP - split later if needed)
+  db:
+    image: postgres:16
+    volumes:
+      <li>postgres_data:/var/lib/postgresql/data</li>
+      <li>./init-db.sql:/docker-entrypoint-initdb.d/init.sql</li>
+    environment:
+      <li>POSTGRES_PASSWORD=${DB_ROOT_PASS}</li></p>
+<p>volumes:
+  postgres_data:
+</code></pre></p>
+<h3>10.3 Domain Structure</h3>
+<pre><code class="language-">onelist.com                    # Marketing site
+onelist.my                     # Account/identity portal
+app.onelist.com                # Web Access (user instances)
+api.onelist.com                # Corporate Services API
+  /auth/</em>                      # Auth service
+  /discovery/<em>                 # Discovery service
+  /relay/</em>                     # Relay service (internal)
+  /vault/<em>                     # Vault service (internal)
+  /sync/</em>                      # Sync service
+  /billing/<em>                   # Billing service
+relay.onelist.com              # Webhook ingestion (public)
+  /hooks/:provider/:token      # Webhook endpoints
+</code></pre>
+<h3>10.4 Web Access VPS Provisioning</h3>
+<p>Each Web Access user gets their own VPS with local PostgreSQL (no external database dependencies).</p>
+<strong>Architecture:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  WEB ACCESS - PER-USER VPS                                                   │
+│                                                                              │
+│  user123.onelist.com (dedicated VPS)                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                      │   │
+│  │  ┌──────────────────┐     ┌──────────────────┐                     │   │
+│  │  │  Onelist App     │────►│  PostgreSQL      │                     │   │
+│  │  │  (Phoenix)       │     │  (Local)         │                     │   │
+│  │  │  Port 4000       │     │  Port 5432       │                     │   │
+│  │  └──────────────────┘     └──────────────────┘                     │   │
+│  │           │                        │                                │   │
+│  │           │                        ▼                                │   │
+│  │           │               ┌──────────────────┐                     │   │
+│  │           │               │  Data Volume     │                     │   │
+│  │           │               │  /var/lib/pgsql  │                     │   │
+│  │           │               └──────────────────┘                     │   │
+│  │           ▼                                                         │   │
+│  │  ┌──────────────────┐                                              │   │
+│  │  │  WebSocket to    │  (webhooks, sync)                            │   │
+│  │  │  Corporate Svcs  │                                              │   │
+│  │  └──────────────────┘                                              │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>VPS Tiers:</strong>
+<table>
+<tr><th>Tier</th><th>CPU</th><th>Memory</th><th>Storage</th><th>Target User</th><th>Est. Price</th></tr>
+<tr><td><strong>Starter</strong></td><td>1 vCPU</td><td>1 GB</td><td>20 GB</td><td>Light use, <10k entries</td><td>$5-7/mo</td></tr>
+<tr><td><strong>Standard</strong></td><td>2 vCPU</td><td>2 GB</td><td>50 GB</td><td>Moderate use, <50k entries</td><td>$12-15/mo</td></tr>
+<tr><td><strong>Pro</strong></td><td>2 vCPU</td><td>4 GB</td><td>100 GB</td><td>Power user, <200k entries</td><td>$20-25/mo</td></tr>
+<tr><td><strong>Power</strong></td><td>4 vCPU</td><td>8 GB</td><td>200 GB</td><td>Heavy use, large media, <500k entries</td><td>$40-50/mo</td></tr>
+</table>
+<strong>Resource Requirements:</strong>
+<table>
+<tr><th>Component</th><th>Memory Usage</th><th>Storage Notes</th></tr>
+<tr><td>PostgreSQL</td><td>256MB - 2GB (scales with tier)</td><td>~1KB per embedding (pgvector)</td></tr>
+<tr><td>Phoenix App</td><td>150MB - 500MB</td><td>Minimal</td></tr>
+<tr><td>OS overhead</td><td>~200MB</td><td>~2GB base</td></tr>
+<tr><td>pgvector indexes</td><td>Scales with embeddings</td><td>~6KB per 1536-dim embedding</td></tr>
+</table>
+<strong>Storage Scaling:</strong>
+<table>
+<tr><th>Content Type</th><th>Per Entry</th><th>10k entries</th><th>50k entries</th><th>200k entries</th></tr>
+<tr><td>Entry data</td><td>2 KB</td><td>20 MB</td><td>100 MB</td><td>400 MB</td></tr>
+<tr><td>Embeddings</td><td>6 KB</td><td>60 MB</td><td>300 MB</td><td>1.2 GB</td></tr>
+<tr><td>Assets (if stored)</td><td>500 KB avg</td><td>5 GB</td><td>25 GB</td><td>100 GB</td></tr>
+<tr><td>PostgreSQL overhead</td><td>30%</td><td>1.5 GB</td><td>7.5 GB</td><td>30 GB</td></tr>
+</table>
+<strong>Provisioning Implementation:</strong>
+<pre><code class="language-elixir">defmodule OnelistCorporate.WebAccess.Provisioning do
+  @moduledoc &quot;&quot;&quot;
+  Provision per-user VPS instances for Web Access.
+  &quot;&quot;&quot;
+<p>@tiers %{
+    &quot;starter&quot; =&gt; %{cpu: 1, memory_gb: 1, storage_gb: 20, pg_shared_buffers: &quot;256MB&quot;},
+    &quot;standard&quot; =&gt; %{cpu: 2, memory_gb: 2, storage_gb: 50, pg_shared_buffers: &quot;512MB&quot;},
+    &quot;pro&quot; =&gt; %{cpu: 2, memory_gb: 4, storage_gb: 100, pg_shared_buffers: &quot;1GB&quot;},
+    &quot;power&quot; =&gt; %{cpu: 4, memory_gb: 8, storage_gb: 200, pg_shared_buffers: &quot;2GB&quot;}
+  }</p>
+<p>def provision_user(user_id, tier, subdomain) do
+    spec = Map.fetch!(@tiers, tier)</p>
+<p># Create VPS via provider API (Hetzner, Vultr, etc.)
+    {:ok, server} = VPSProvider.create(%{
+      name: &quot;onelist-#{subdomain}&quot;,
+      image: &quot;onelist-base-image&quot;,
+      size: tier_to_provider_size(tier),
+      region: user_preferred_region(user_id)
+    })</p>
+<p># Configure DNS
+    {:ok, _} = DNS.create_record(%{
+      name: subdomain,
+      type: &quot;A&quot;,
+      value: server.ip_address
+    })</p>
+<p># Initialize instance
+    {:ok, _} = initialize_instance(server, user_id, subdomain, spec)</p>
+<p>{:ok, %{
+      server_id: server.id,
+      ip_address: server.ip_address,
+      url: &quot;https://#{subdomain}.onelist.com&quot;,
+      tier: tier
+    }}
+  end</p>
+<p>def upgrade_tier(user_id, new_tier) do
+    spec = Map.fetch!(@tiers, new_tier)
+    server = get_user_server(user_id)</p>
+<p># Resize VPS
+    {:ok, _} = VPSProvider.resize(server.id, tier_to_provider_size(new_tier))</p>
+<p># Adjust PostgreSQL config
+    SSHClient.run(server.ip_address, &quot;&quot;&quot;
+      # Update PostgreSQL shared_buffers
+      sed -i 's/shared_buffers = .</em>/shared_buffers = #{spec.pg_shared_buffers}/' /etc/postgresql/16/main/postgresql.conf
+      systemctl restart postgresql
+    &quot;&quot;&quot;)</p>
+<p>{:ok, new_tier}
+  end</p>
+<p>def estimate_tier(entry_count, asset_size_gb) do
+    cond do
+      entry_count &lt; 10_000 and asset_size_gb &lt; 5 -&gt; &quot;starter&quot;
+      entry_count &lt; 50_000 and asset_size_gb &lt; 25 -&gt; &quot;standard&quot;
+      entry_count &lt; 200_000 and asset_size_gb &lt; 80 -&gt; &quot;pro&quot;
+      true -&gt; &quot;power&quot;
+    end
+  end</p>
+<p>defp initialize_instance(server, user_id, subdomain, spec) do
+    db_password = generate_secure_password()
+    secret_key = generate_secret_key()
+    cloud_token = generate_cloud_token(user_id)</p>
+<p>SSHClient.run(server.ip_address, &quot;&quot;&quot;
+      # Configure PostgreSQL
+      sudo -u postgres psql -c &quot;CREATE USER onelist WITH PASSWORD '#{db_password}';&quot;
+      sudo -u postgres psql -c &quot;CREATE DATABASE onelist OWNER onelist;&quot;
+      sudo -u postgres psql -c &quot;CREATE EXTENSION vector;&quot; -d onelist</p>
+<p># Set PostgreSQL memory config
+      echo &quot;shared_buffers = #{spec.pg_shared_buffers}&quot; &gt;&gt; /etc/postgresql/16/main/postgresql.conf
+      systemctl restart postgresql</p>
+<p># Configure Onelist
+      cat &gt; /opt/onelist/.env &lt;&lt; 'EOF'
+      DATABASE_URL=postgres://onelist:#{db_password}@localhost/onelist
+      SECRET_KEY_BASE=#{secret_key}
+      PHX_HOST=#{subdomain}.onelist.com
+      ONELIST_CLOUD_TOKEN=#{cloud_token}
+      RELAY_ENABLED=true
+      EOF</p>
+<p># Run migrations
+      /opt/onelist/bin/onelist eval &quot;Onelist.Release.migrate()&quot;</p>
+<p># Start Onelist
+      systemctl enable onelist
+      systemctl start onelist
+    &quot;&quot;&quot;)
+  end
+end
+</code></pre></p>
+<strong>Upgrade Path:</strong>
+<pre><code class="language-">User signs up → Starter tier (default)
+         │
+         ▼
+Usage monitoring (entry count, storage)
+         │
+         ▼
+Approaching 80% of tier limits
+         │
+         ▼
+Alert: &quot;You're approaching your plan limits. Upgrade to Standard?&quot;
+         │
+         ▼
+User confirms upgrade
+         │
+         ▼
+VPS resized, PostgreSQL config adjusted
+(brief restart, &lt;2 min downtime)
+</code></pre>
+<hr>
+<h2>11. Security</h2>
+<h3>11.1 Service-to-Service Auth</h3>
+<pre><code class="language-elixir">defmodule OnelistCorporate.ServiceAuth do
+  @moduledoc &quot;&quot;&quot;
+  Service-to-service authentication using signed JWTs.
+  &quot;&quot;&quot;
+<p>@services ~w(auth relay vault sync push)</p>
+<p>def generate_service_token(from_service, to_service) do
+    claims = %{
+      &quot;iss&quot; =&gt; from_service,
+      &quot;aud&quot; =&gt; to_service,
+      &quot;iat&quot; =&gt; System.system_time(:second),
+      &quot;exp&quot; =&gt; System.system_time(:second) + 300  # 5 min
+    }</p>
+<p>JOSE.JWT.sign(service_key(from_service), claims)
+  end</p>
+<p>def verify_service_token(token, expected_audience) do
+    case JOSE.JWT.verify(service_keys(), token) do
+      {true, %{&quot;aud&quot; =&gt; ^expected_audience} = claims, _} -&gt;
+        {:ok, claims}
+      _ -&gt;
+        {:error, :invalid_token}
+    end
+  end
+end
+</code></pre></p>
+<h3>11.2 Encryption</h3>
+<li>All databases encrypted at rest</li>
+<li>TLS 1.3 for all connections</li>
+<li>Vault uses AES-256-GCM with per-user key derivation</li>
+<li>Sync data encrypted with user's key before storage</li>
+<h3>11.3 Monitoring & Alerts</h3>
+<pre><code class="language-yaml"># Prometheus alerts
+groups:
+  <li>name: corporate-services</li>
+    rules:
+      <li>alert: ServiceDown</li>
+        expr: up{job=~&quot;auth|relay|vault|sync&quot;} == 0
+        for: 1m
+<li>alert: HighErrorRate</li>
+        expr: rate(http_requests_total{status=~&quot;5..&quot;}[5m]) &gt; 0.1
+        for: 5m
+<li>alert: VaultAccessDenied</li>
+        expr: rate(vault_access_denied_total[5m]) &gt; 10
+        for: 5m
+</code></pre>
+<hr>
+<h2>12. Implementation Phases</h2>
+<h3>Phase 1: Foundation (MVP)</h3>
+<table>
+<tr><th>Service</th><th>Priority</th><th>Notes</th></tr>
+<tr><td>Auth</td><td>HIGH</td><td>Required for everything, includes account/identity</td></tr>
+<tr><td>Discovery</td><td>HIGH</td><td>Enables P2P sync for free tier</td></tr>
+<tr><td>Relay</td><td>HIGH</td><td>Enables webhooks for desktop</td></tr>
+<tr><td>Billing</td><td>HIGH</td><td>Subscription management, Stripe integration</td></tr>
+</table>
+<h3>Phase 2: Sync & Storage</h3>
+<table>
+<tr><th>Service</th><th>Priority</th><th>Notes</th></tr>
+<tr><td>Sync</td><td>HIGH</td><td>Multi-device cloud sync</td></tr>
+<tr><td>Vault</td><td>MEDIUM</td><td>Required for Web Access</td></tr>
+<tr><td>Push</td><td>MEDIUM</td><td>Notifications for mobile</td></tr>
+</table>
+<h3>Phase 3: Scale & Polish</h3>
+<table>
+<tr><th>Service</th><th>Priority</th><th>Notes</th></tr>
+<tr><td>Skill Hub</td><td>LOW</td><td>Skill marketplace</td></tr>
+<tr><td>Analytics</td><td>LOW</td><td>Usage insights</td></tr>
+<tr><td>Forum Service</td><td>LOW</td><td>Federated forum hosting</td></tr>
+</table>
+<hr>
+<h2>13. Cost Estimates</h2>
+<h3>Corporate Services Infrastructure (Onelist Operational Cost)</h3>
+<strong>MVP (Single VPS for all services):</strong>
+<table>
+<tr><th>Item</th><th>Cost/Month</th></tr>
+<tr><td>VPS (4 CPU, 8GB RAM)</td><td>$30</td></tr>
+<tr><td>PostgreSQL (local)</td><td>$0 (included)</td></tr>
+<tr><td>Domain & SSL</td><td>$0 (Let's Encrypt)</td></tr>
+<tr><td>Backups</td><td>$5</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>~$35/month</strong></td></tr>
+</table>
+<strong>Scale (Dedicated servers per service):</strong>
+<table>
+<tr><th>Item</th><th>Cost/Month</th></tr>
+<tr><td>Auth service VPS</td><td>$10</td></tr>
+<tr><td>Discovery service VPS</td><td>$10-20</td></tr>
+<tr><td>Relay service VPS</td><td>$15</td></tr>
+<tr><td>Vault service VPS</td><td>$15</td></tr>
+<tr><td>Sync service VPS</td><td>$20</td></tr>
+<tr><td>Push service VPS</td><td>$10</td></tr>
+<tr><td>Monitoring/Logging</td><td>$10</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>~$90-100/month</strong></td></tr>
+</table>
+<h3>Free Tier Per-User Costs (Onelist Absorbs)</h3>
+<table>
+<tr><th>Component</th><th>Cost</th><th>Notes</th></tr>
+<tr><td>Auth server</td><td>Minimal</td><td>One-time registration, occasional login</td></tr>
+<tr><td>Discovery server</td><td>~$0.001/user/mo</td><td>Metadata only, shared across all free users</td></tr>
+<tr><td>Email</td><td>~$0.001/email</td><td>Transactional + promotional</td></tr>
+<tr><td><strong>Estimated total</strong></td><td><strong>$0.01-0.05/user/mo</strong></td><td>Mostly email</td></tr>
+</table>
+<h3>Web Access Per-User VPS Costs (Passed to Users)</h3>
+<table>
+<tr><th>Tier</th><th>VPS Spec</th><th>Provider Cost</th><th>User Price</th><th>Margin</th></tr>
+<tr><td><strong>Starter</strong></td><td>1 vCPU, 1GB, 20GB</td><td>~$4-5/mo</td><td>$7-10/mo</td><td>~$3-5</td></tr>
+<tr><td><strong>Standard</strong></td><td>2 vCPU, 2GB, 50GB</td><td>~$8-10/mo</td><td>$15-18/mo</td><td>~$5-8</td></tr>
+<tr><td><strong>Pro</strong></td><td>2 vCPU, 4GB, 100GB</td><td>~$15-18/mo</td><td>$25-30/mo</td><td>~$10-12</td></tr>
+<tr><td><strong>Power</strong></td><td>4 vCPU, 8GB, 200GB</td><td>~$30-35/mo</td><td>$50-60/mo</td><td>~$15-25</td></tr>
+</table>
+<em>Note: VPS costs based on Hetzner/Vultr pricing. Margin covers provisioning, management, support, and Corporate Services access.</em>
+<h3>Cloud Sync Plan (Desktop/Self-Hosted Users)</h3>
+<table>
+<tr><th>Item</th><th>Cost/Month</th></tr>
+<tr><td>Relay access</td><td>Included</td></tr>
+<tr><td>Discovery service</td><td>Included</td></tr>
+<tr><td>Sync storage (per GB)</td><td>~$0.10</td></tr>
+<tr><td>Suggested price</td><td>$5-10/mo</td></tr>
+</table>
+<hr>
+<h2>14. Open Questions</h2>
+<li>[x] Billing integration - Stripe? Paddle? → <strong>Stripe</strong></li>
+<li>[ ] Mobile apps - Timeline for iOS/Android?</li>
+<li>[ ] Skill Hub - How to handle skill validation/security?</li>
+<li>[ ] Data residency - EU users need EU hosting?</li>
+<li>[ ] Backup strategy - Cross-region replication?</li>
+<li>[ ] Discovery service rate limits - Prevent abuse?</li>
+<li>[ ] P2P protocol library - Custom, libp2p, or adapt existing?</li>
+<hr>
+<h2>15. Related Documents</h2>
+<li><a href="./future_roadmap_free_tier.md">Free Tier Plan</a> - P2P sync protocol, self-hosted setup</li>
+<li><a href="./river_agent_plan.md">River Agent Plan</a></li>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a></li>
+<li><a href="./web_access_plan.md">Web Access Plan</a> (to be created)</li>
+<li><a href="./mac_desktop_app_plan.md">Desktop App Plan</a></li>
+</ul>
+<hr>
+<em>Last updated: 2026-01-30</em>
+<em>Status: Planning</em>
+  </article>
+</body>
+</html>

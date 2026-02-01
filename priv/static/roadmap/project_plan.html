@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist MVP Project Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist MVP Project Plan</h1>
+<h2>Project Goals (MVP)</h2>
+<p>The primary goal of the Onelist MVP is to create a lightweight, multi-user, content storage and retrieval application, serving as an "augmented memory," with the following core features:</p>
+<em> <strong>Flexible Content Ingestion & Storage:</strong> Users can create and manage "Entries," which are generic containers for information. Each Entry can have multiple "Representations" of its content (e.g., Markdown, plaintext, original URL for web clips) and associated "Assets" (e.g., images, attachments).
+  </em> <strong>Plaintext Note Taking (as an Entry type):</strong> Users can create, edit, and delete Entries of type 'note', with content stored as plain text with Markdown formatting support in a dedicated Representation.
+<em> <strong>Markdown Rendering & Editing:</strong> Markdown representations can be viewed rendered as HTML (including rendering of images linked via URLs or as Assets). A visual editor (Toast UI Editor) will be used for easier formatting. Includes output sanitization.
+</em> <strong>Robust Version Control (for Editable Representations):</strong> Changes to editable representations (e.g., Markdown content of 'note' Entries) are tracked, providing a complete history. A hybrid approach is used:
+  <em> Full snapshots of representations are stored periodically in <code>representation_versions</code> (e.g., daily, managed by Oban).
+  </em> Client-side diffs (using <code>jondot/diffy</code>) are generated and sent to the server periodically (e.g., every 1-10 minutes, configurable) to be stored in <code>representation_versions</code> between snapshots.
+  <em> Diffs have a maximum size limit (configurable, defaults to 1MB). If a change results in a diff larger than the limit, a full snapshot might be triggered.
+  </em> Optimistic locking (using <code>representations.version</code>) is used to handle concurrent edits on representation content. Optimistic locking (<code>entries.version</code>) is also used for metadata edits on the <code>entries</code> table.
+<em> <strong>API Access:</strong> A RESTful API allows external applications to interact with Entries, Representations, Assets, and other resources (create, read, update, delete) using API keys. Rate limiting will be applied.
+</em> <strong>Tagging:</strong> Users can add free-form tags to Entries and filter/search Entries by tag. Tags are user-specific. (Manual tagging only in MVP).
+<em> <strong>Multi-user Support:</strong> The application supports multiple users, each with their own set of Entries, Representations, Assets, and API keys. (No shared Entries in the MVP).
+</em> <strong>Full-Text Search:</strong> Users can search Entries based on the content of their textual Representations, using PostgreSQL's full-text search capabilities (tsvector with GIN index on relevant representation content, potentially denormalized to <code>entries</code> or queried via joins).
+<em> <strong>Security and Privacy:</strong> No compromises will be made on security or privacy. This includes using UUIDs for primary keys, never exposing internal IDs in URLs (using <code>public_id</code> for Entries), implementing robust authentication and authorization (via <code>phx.gen.auth</code>), and protecting against common web vulnerabilities.
+</em> <strong>Single-User, Multi-Tab Conflict Prevention:</strong> Use Phoenix.PubSub to detect when a user has the same editable Representation open for editing in multiple tabs/sessions, providing a "Take Control" option. Topics will be scoped to <code>representations.id</code>.
+<em> <strong>Social Login Integration:</strong> Support for third-party authentication providers (GitHub, Google, and Apple) to simplify registration and login. Users can link multiple social accounts.
+</em> <strong>Canonical URLs for Public Entries:</strong> Entries can be marked as <code>public</code>, making them accessible via a canonical, unguessable URL (e.g., <code>onelist.com/entry/[public_id]</code>).
+<h2>Guiding Principles</h2>
+<em> <strong>UI-First Development:</strong> Prioritize user interface and experience, building UI/interactions before backend logic.
+</em> <strong>Test-Driven Development (TDD):</strong> Write tests (doctests and ExUnit tests) <em>before</em> code. Human review of AI-generated tests is essential.
+<em> <strong>Doctests First:</strong> Prioritize Elixir doctests for documentation and basic testing.
+</em> <strong>Security and Privacy by Design:</strong> Paramount from the beginning of every decision. No compromises in the MVP.
+<em> <strong>Keep It Simple (for Core Functionality):</strong> Focus on MVP with core functionality, avoiding unnecessary complexity in the central Onelist application. The core is an API-first "augmented memory."
+</em> <strong>Iterative Development:</strong> Short iterations, feedback, and adjustments.
+<h2>High-Level Architecture</h2>
+<p>Onelist will follow a client-server architecture. The backend (Elixir/Phoenix) provides a web interface (LiveView) and a RESTful API. The frontend leverages LiveView and TailwindCSS. Data is persisted in PostgreSQL. External file storage (e.g., S3) will be used for <code>storage_path</code> based Representations and Assets.</p>
+<pre><code class="language-mermaid">graph LR
+    subgraph Frontend
+        A[User] --&gt; B(Browser - LiveView - Toast UI Editor);
+        B -- TailwindCSS --&gt; C(UI Elements);
+    end
+    subgraph Backend
+        B -- Phoenix Channels --&gt; D(Phoenix/Elixir);
+        D -- Ecto --&gt; E(PostgreSQL Database);
+        D -- REST API --&gt; F(External Applications);
+        D -- Oban --&gt; I(Background Jobs);
+        D -- External File Storage --&gt; GFS(S3/GCS/Local FS);
+    end
+        subgraph Monitoring
+        D--Metrics--&gt; J(Prometheus);
+        J--&gt;K(Grafana);
+    end
+    E -- Data --&gt; H(Entries, Representations, RepresentationVersions, Assets, Users, Tags, ApiKeys);
+<p>User Interaction: Via web browser with LiveView. Toast UI Editor for Markdown.
+    Backend Logic: Phoenix/Elixir handles authentication, requests, validation, business logic, database interaction (Ecto), and file storage interaction.
+    Data Persistence: PostgreSQL for structured data. External File Storage for binary content referenced in <code>representations.storage_path</code> and <code>assets.storage_path</code>.
+    API Access: External apps via RESTful API with API keys.
+    Version Control (Representations): <code>representation_versions</code> table (hybrid: snapshots + client-side diffs). Optimistic locking on <code>representations.version</code>.
+    Background Jobs: Oban for asynchronous tasks (e.g., periodic snapshots, potential future <code>public_html</code> generation).
+    Monitoring: Prometheus &amp; Grafana.
+    Logging: Centralized logging service.
+</code></pre></p>
+<h2>Technology Stack</h2>
+<em> <strong>Backend:</strong> Elixir, Phoenix Framework, LiveView
+</em> <strong>API:</strong> RESTful (external)
+<em> <strong>Database:</strong> PostgreSQL
+</em> <strong>External File Storage:</strong> S3, GCS, or similar (for <code>storage_path</code> in <code>representations</code> and <code>assets</code>)
+<em> <strong>ORM:</strong> Ecto
+</em> <strong>Markdown Library:</strong> <code>earmark</code> (with <code>HtmlSanitizeEx</code> for sanitization)
+<em> <strong>Visual Editor:</strong> Toast UI Editor
+</em> <strong>Version Control (Code):</strong> Git
+<em> <strong>Version Control (Content Logic):</strong> <code>representation_versions</code> table (hybrid: full snapshots + client-side diffs using <code>jondot/diffy</code>), Optimistic Locking on <code>representations.version</code> and <code>entries.version</code>.
+</em> <strong>Testing:</strong> Doctests, ExUnit (Unit/Integration), StreamData (Property-Based), Gatling/k6 (Performance, potentially deferred post-MVP).
+<em> <strong>Frontend:</strong> TailwindCSS
+</em> <strong>Asynchronous Jobs:</strong> Oban
+<em> <strong>Deployment:</strong> Docker (multiple containers behind Nginx)
+</em> <strong>API Rate Limiting:</strong> <code>plug_attack</code>
+<em> <strong>Monitoring:</strong> Prometheus, Grafana (using <code>prometheus_ex</code>, <code>node_exporter</code>)
+</em> <strong>Logging:</strong> Centralized logging service (e.g., Logtail, Papertrail, ELK stack)
+<em> <strong>Alerting:</strong> Prometheus Alertmanager, with Slack / PagerDuty Integration
+</em> <strong>CI/CD:</strong> GitHub Actions (basic setup)
+<em> <strong>Authentication:</strong> <code>phx.gen.auth</code> with social login (GitHub, Google, Apple)
+<h2>UI/UX Considerations</h2>
+</em> <strong>Overall Style:</strong> Functional, visually simple, usability-focused. Dark mode support required.
+<em> <strong>Key Screens (adapted for Entry/Representation model):</strong>
+  </em> <strong>Entry List:</strong> Displays a list of user's Entries (filterable by tag, searchable, sortable by <code>inserted_at</code>, <code>updated_at</code>, <code>content_created_at</code>). Includes feedback mechanism.
+  <em> <strong>Entry Viewer/Editor:</strong>
+    </em> Displays different Representations of an Entry.
+    <em> For editable Representations (e.g., Markdown of <code>entry_type='note'</code>), uses Toast UI Editor with raw Markdown toggle.
+    </em> LiveView handles real-time updates with debouncing, targeted updates.
+    <em> Robust LiveView disconnection handling, local draft saving (<code>localStorage</code>), draft conflict resolution.
+    </em> "Take Control" button for multi-tab editing conflicts (via Phoenix.PubSub on <code>representations.id</code>).
+  <em> <strong>Tag Management:</strong> Add, rename, delete user tags.
+  </em> <strong>API Key Management:</strong> Generate, view prefixes/dates, revoke keys. Display rate limits.
+  <em> <strong>User Settings:</strong> Standard <code>phx.gen.auth</code> settings.
+  </em> <strong>Authentication Screens:</strong> Login/registration with email/password and social providers.
+<h2>Development Stages (UI-First, adapted for new schema)</h2>
+<em> <strong>Phase 1: Core UI, Authentication, Basic Structure</strong>
+  </em> Setup Elixir/Phoenix project with Docker.
+  <em> Implement user authentication (<code>phx.gen.auth</code>), social logins. UI for login/registration, settings.
+  </em> Basic UI layouts (TailwindCSS), reusable UI components.
+  <em> Static UI mockups for: Entry list (dummy entries), Entry editor (Toast UI, dummy content, how to display different representation types), Tag management, API Key management.
+  </em> LiveView interactivity: Navigation, "New Entry" (note type initially), basic forms.
+  <em> LiveView disconnection handling.
+  </em> Multi-tab conflict detection UI ("Take Control" button using PubSub).
+<em> <strong>Phase 2: Backend Integration - Core Functionality (Entries, Representations, Assets)</strong>
+  </em> Data models (Ecto schemas): <code>Users</code>, <code>Entries</code> (with <code>public_id</code>, <code>entry_type</code>, <code>source_type</code>, <code>public</code>, <code>content_created_at</code>, <code>metadata</code>), <code>Representations</code> (with <code>type</code>, <code>content</code>, <code>storage_path</code>, <code>mime_type</code>, <code>metadata</code>, <code>version</code>), <code>Assets</code>, <code>ApiKeys</code>, <code>Tags</code>, <code>EntryTags</code> (join table), <code>RepresentationVersions</code>. UUIDs for PKs. Implement necessary indexes.
+  <em> Implement CRUD for Entries (initially focusing on <code>entry_type='note'</code>), their textual Representations, and Assets via web interface (LiveView).
+  </em> Integrate external file storage for <code>representations.storage_path</code> and <code>assets.storage_path</code>.
+  <em> Markdown rendering (<code>earmark</code>, <code>HtmlSanitizeEx</code>).
+  </em> Integrate Toast UI Editor with LiveView for Markdown representations, saving content with debouncing.
+  <em> Local draft saving (<code>localStorage</code>), conflict resolution on reconnection.
+  </em> Full-text search on textual representations.
+  <em> Optimistic Locking for <code>entries</code> and <code>representations</code>.
+  </em> Basic REST API for Entry, Representation, Asset CRUD.
+  <em> API rate limiting (<code>plug_attack</code>).
+</em> <strong>Phase 3: Version Control (Representations), Tagging, Public IDs, Caching</strong>
+  <em> Implement representation versioning:
+    </em> Store client-side diffs (<code>jondot/diffy</code>) in <code>RepresentationVersions</code>.
+    <em> Oban worker for periodic full snapshots.
+    </em> Handle diff size limits, error handling.
+    <em> Basic version history viewing/reverting for editable representations.
+  </em> Implement tagging: Backend logic, UI for managing tags and assigning to Entries. API endpoints.
+  <em> Search/filter Entries by tag.
+  </em> Implement <code>public_id</code> for Entries, use in URLs/API.
+  <em> Generate User and API documentation (ExDoc).
+  </em> Implement caching (e.g., ETS for user data, rendered Markdown snippets).
+<em> <strong>Phase 4: Refinement, Testing, and Feedback</strong>
+  </em> Comprehensive tests: Doctests, ExUnit (Unit/Integration), Property-based (StreamData).
+  <em> Basic performance testing (Gatling/k6) - </em>Decision needed: MVP or Post-MVP<em>.
+  </em> Refactor, address static analysis issues.
+  <em> Improve UI/UX. Implement feedback mechanism on Entry List.
+  </em> Human review of all code.
+<em> <strong>Phase 5: Deployment Preparation and Launch</strong>
+  </em> Final security review (<code>mix deps.audit</code>, <code>sobelow</code>, manual checks).
+  <em> Production environment setup.
+  </em> Deploy (Docker, Nginx).
+  <em> Automated database backups, external file storage backups.
+  </em> Monitoring (Prometheus + Grafana), logging (centralized service), alerting (Alertmanager).
+  <em> CI/CD pipeline (GitHub Actions).
+  </em> Final API rate limit configuration.
+<h2>Testing Strategy</h2>
+<em> <strong>Doctests (First Priority):</strong> For public functions.
+</em> <strong>Unit Tests (ExUnit):</strong> Individual functions/modules (parsing, validation, API logic, Oban workers, diff logic).
+<em> <strong>Integration Tests (ExUnit):</strong> Interactions (DB via Ecto, API endpoints, LiveView lifecycles).
+</em> <strong>Security Testing:</strong> Automated checks (<code>mix deps.audit</code>, <code>sobelow</code>), manual review (auth, input validation, API key handling).
+<em> <strong>Performance Testing (Gatling/k6):</strong> </em>Decision needed: MVP or Post-MVP based on resources/risk assessment.<em>
+</em> <strong>Property-Based Testing (StreamData):</strong> Selectively for functions/properties with wide input ranges.
+<em> <strong>Human Review:</strong> All code, especially AI-generated.
+<h2>Data Model (Details - MVP Foundation based on Snapshot 2025-05-02 ~1:43 PM EDT)</h2>
+</em> <strong><code>users</code>:</strong> (Managed by <code>phx.gen.auth</code>)
+  <em> <code>id</code> (uuid, primary key)
+  </em> <code>email</code> (string, unique)
+  <em> <code>hashed_password</code> (string)
+  </em> <code>inserted_at</code>, <code>updated_at</code> (timestamp)
+  <em> </em>... (other fields by <code>phx.gen.auth</code>)<em>
+</em> <strong><code>entries</code> Table:</strong>
+  <em> <code>id</code> (UUID, PK)
+  </em> <code>public_id</code> (String, Unique, Indexed): User-facing ID (e.g., nanoid).
+  <em> <code>user_id</code> (UUID, FK -> <code>users.id</code>, Indexed, Not Null)
+  </em> <code>title</code> (Text, Nullable)
+  <em> <code>version</code> (Integer, Default: 1, Not Null): Optimistic lock for <code>entries</code> metadata.
+  </em> <code>entry_type</code> (String, Not Null, Indexed): Nature of the entry (e.g., 'note', 'memory', 'photo', 'video'). Defines behavior.
+  <em> <code>source_type</code> (String, Nullable, Indexed): How entry was created (e.g., 'manual', 'web_clip', 'api', 'file_upload').
+  </em> <code>public</code> (Boolean, Default: false, Nullable, Indexed?): If true, accessible via canonical public URL.
+  <em> <code>value_tier</code> (String, Default: 'standard', Not Null, Indexed): Content retention tier - 'temporary' (auto-cleanup eligible), 'standard' (normal retention), 'valuable' (never auto-cleanup), 'archive' (low-priority, excluded from default search).
+  </em> <code>last_accessed_at</code> (TimestampTZ, Nullable, Indexed): Last time entry was viewed/accessed. Used for auto-tiering decisions.
+  <em> <code>content_created_at</code> (TimestampTZ, Nullable, Indexed): Original creation/publication date of the content itself (e.g., photo taken date). Distinct from <code>inserted_at</code>.
+  </em> <code>metadata</code> (JSONB, Nullable): Flexible key-value store for other type-specific or less-queried metadata (e.g., geolocation for photos, source URL for web clips).
+  <em> <code>search_vector</code> (tsvector, GIN index): Generated from relevant textual representations for FTS. </em>(Exact implementation TBD - might be on representations or denormalized).<em>
+  </em> <code>inserted_at</code> (TimestampTZ, Not Null): When entry was added to Onelist.
+  <em> <code>updated_at</code> (TimestampTZ, Not Null): Last update to <code>entries</code> record metadata.
+</em> <strong><code>representations</code> Table:</strong>
+  <em> <code>id</code> (UUID, PK)
+  </em> <code>entry_id</code> (UUID, FK -> <code>entries.id</code>, Indexed, Not Null)
+  <em> <code>version</code> (Integer, Default: 1, Not Null): Optimistic lock for this representation's content.
+  </em> <code>type</code> (String, Not Null, Indexed?): Format (e.g., 'markdown', 'plaintext', 'original_url', 'webarchive', 'audio_mp3', 'image_jpeg', 'public_html').
+  <em> <code>content</code> (Text, Nullable): Inline textual content. Null if <code>storage_path</code> is used.
+  </em> <code>storage_path</code> (String, Nullable): Location for externally stored content (e.g., S3 key). Null if <code>content</code> is used. <em>Requires file backend integration.</em>
+  <em> <code>mime_type</code> (String, Nullable, CHECK constraint: <code>storage_path IS NULL OR mime_type IS NOT NULL</code>): Explicit MIME type. Default to 'application/octet-stream' if <code>storage_path</code> used and unknown.
+  </em> <code>metadata</code> (JSONB, Nullable): Representation-specific details (e.g., <code>is_primary_text</code>, <code>is_archival</code>, <code>derived_from_representation_id</code>, <code>language</code>, <code>conversion_tool</code>, word count, duration).
+  <em> <code>inserted_at</code>, <code>updated_at</code> (TimestampTZ, Not Null)
+</em> <strong><code>representation_versions</code> Table:</strong>
+  <em> <code>id</code> (UUID, PK)
+  </em> <code>representation_id</code> (UUID, FK -> <code>representations.id</code>, Indexed, Not Null)
+  <em> <code>user_id</code> (UUID, FK -> <code>users.id</code>, Indexed, Not Null): User who made the change.
+  </em> <code>content</code> (Text, Nullable): Full snapshot of representation's content.
+  <em> <code>diff</code> (Text, Nullable): Diff from previous version. (NULL if <code>content</code> present, vice-versa).
+  </em> <code>version</code> (Integer, Not Null): <code>representations.version</code> <em>before</em> this change.
+  <em> <code>inserted_at</code> (TimestampTZ, Not Null)
+</em> <strong><code>assets</code> Table:</strong>
+  <em> <code>id</code> (UUID, PK)
+  </em> <code>entry_id</code> (UUID, FK -> <code>entries.id</code>, Indexed, Not Null)
+  <em> <code>representation_id</code> (UUID, FK -> <code>representations.id</code>, Indexed, Nullable): Optional link if asset is specific to one representation.
+  </em> <code>filename</code> (String, Not Null): Original filename.
+  <em> <code>mime_type</code> (String, Not Null): MIME type. Default 'application/octet-stream' if unknown.
+  </em> <code>storage_path</code> (String, Not Null): Location for stored asset file. <em>Requires file backend integration.</em>
+  <em> <code>metadata</code> (JSONB, Nullable): Asset-specific details (e.g., image dimensions, alt_text, OCR results, checksums).
+  </em> <code>inserted_at</code>, <code>updated_at</code> (TimestampTZ, Not Null)
+<em> <strong><code>tags</code> Table:</strong>
+  </em> <code>id</code> (UUID, PK)
+  <em> <code>user_id</code> (UUID, FK -> <code>users.id</code>, Indexed, Not Null)
+  </em> <code>name</code> (String, Not Null)
+  <em> <code>inserted_at</code>, <code>updated_at</code> (TimestampTZ)
+  </em> <em>(Unique constraint on <code>(user_id, name)</code>)</em>
+<em> <strong><code>entry_tags</code> Table (Join Table):</strong>
+  </em> <code>entry_id</code> (UUID, FK -> <code>entries.id</code>)
+  <em> <code>tag_id</code> (UUID, FK -> <code>tags.id</code>)
+  </em> <em>(Primary key: <code>(entry_id, tag_id)</code>)</em>
+  <em> <code>inserted_at</code> (TimestampTZ)
+</em> <strong><code>api_keys</code> Table:</strong>
+  <em> <code>id</code> (UUID, PK)
+  </em> <code>user_id</code> (UUID, FK -> <code>users.id</code>, Indexed, Not Null)
+  <em> <code>key_hash</code> (String, Unique, Indexed): Hash of the API key.
+  </em> <code>prefix</code> (String, Indexed): First few chars of key for display.
+  <em> <code>inserted_at</code> (TimestampTZ)
+  </em> <code>revoked_at</code> (TimestampTZ, Nullable)
+<h2>Monitoring, Logging, and Alerting</h2>
+<em> <strong>Monitoring:</strong> Prometheus, Grafana. Metrics for HTTP requests, DB queries, Oban jobs, system resources, LiveView processes.
+</em> <strong>Logging:</strong> Centralized, structured logging (Logtail, Papertrail, ELK, etc.).
+<em> <strong>Alerting:</strong> Prometheus Alertmanager. Rules for critical metrics, notifications via Slack/PagerDuty.
+<h2>Outstanding Questions/Concerns (MVP)</h2>
+</em> <strong>MVP Value Proposition & Marketing:</strong> The core feature set needs clear differentiation. Focus on "augmented memory," robust API, versioning, and the Elixir/LiveView foundation. <em>[User Note: [2025-02-14] Keep track of all the marketing ideas. Want to refine and definitely incorporate them into the MVP website.]</em> - This needs active work.
+<em> <strong>Timeline & Budget:</strong> Not yet defined.
+</em> <strong>Personal Constraints:</strong> Developer availability not specified.
+<em> <strong>Long-Term Scalability of LiveView:</strong> Monitor and optimize.
+</em> <strong>Archiving/Pruning of Old Representation Versions:</strong> Strategy needed for very old versions (snapshots/diffs). Current plan implies indefinite storage. MVP might not implement pruning, but policy needs consideration.
+<em> <strong>Performance Testing Scope:</strong> Firm decision needed: include basic performance testing in MVP (Phase 4) or defer post-MVP? Deferring carries risk.
+</em> <strong>Social Login Configuration:</strong> Requires registering with OAuth providers (GitHub, Google, Apple) and obtaining credentials. Apple Sign In has specific requirements.
+<em> <strong>Full-Text Search Implementation Details:</strong> Exact strategy for <code>tsvector</code> generation and indexing (e.g., on <code>entries</code> via triggers from <code>representations</code>, or direct joins) needs finalization during implementation.
+</em> <strong>External File Storage Backend Choice:</strong> Decision needed on S3, GCS, or other, and integration specifics.
+<em> <strong>Initial <code>entry_type</code>s for MVP:</strong> While the schema is flexible, MVP UI will likely focus on <code>'note'</code> and perhaps simple <code>'memory'</code> (e.g., web clip URL) types first. Scope of other types (like 'photo', 'video' beyond basic file upload) for MVP UI needs clarity. The schema supports them; UI is the question.
+<h2>Addendum: Onelist Platform Implications from Xamlr Feature Branch Planning</h2>
+<strong>Date:</strong> May 6, 2025
+<strong>Context:</strong> This addendum outlines key requirements, feature enhancements, and API capabilities that the Onelist Core platform will need to develop or support to enable the envisioned functionality of the Xamlr blogging platform (and potentially similar future integrated applications). These points have been identified during the detailed planning phase for Xamlr as a feature branch built on Onelist v2.0.
+<h3>I. Core Onelist Entry Enhancements & Metadata</h3>
+<p>1. <strong><code>'display_html'</code> Representation for All Feasible Entry Types:</strong>
+    </em> <strong>Requirement:</strong> Onelist should aim to generate and store a canonical HTML representation, to be typed/named <code>'display_html'</code>, for <strong>all feasible <code>entry_types</code></strong> (not just textual ones).
+    <em> <strong>Rationale:</strong> This provides a standard, web-renderable format that applications like Xamlr can consistently fetch via API for displaying any Onelist entry content. For non-textual types (e.g., images, audio, files, groups, habits), Onelist will define a sensible default HTML rendering.
+    </em> <strong>Current Status:</strong> Previously considered primarily for text or as <code>'public_html'</code>; this expands the scope and clarifies the naming.</p>
+<p>2. <strong>Standard Entry Metadata for Automated Publishing Control (<code>autoblog_by_tag</code>):</strong>
+    <em> <strong>Requirement:</strong> All Onelist <code>entries</code> must support a standard metadata field within their <code>entries.metadata</code> JSONB structure, e.g., <code>autoblog_by_tag</code> (String).
+    </em> <strong>Values:</strong> <code>"yes"</code> (eligible for automatic content sourcing by tag by connected apps like Xamlr), <code>"no"</code> (not eligible).
+    <em> <strong>API Support:</strong> The Onelist API must allow creating, updating, and efficiently querying/filtering entries based on the value of this <code>autoblog_by_tag</code> field.
+    </em> <strong>Rationale:</strong> Provides fine-grained, Onelist-native control over which entries are available for automated syndication by tag to platforms like Xamlr.</p>
+<p>3. <strong>Storage for Xamlr-Specific Commentary on Entry Copies:</strong>
+    <em> <strong>Requirement:</strong> When Xamlr facilitates reblogs or posts with added commentary (which results in a </em>new Onelist entry copy<em>), Onelist <code>entries</code> must be able to store this Xamlr-added commentary as distinct <code>representations</code> on the new copy.
+    </em> <strong>Mechanism:</strong> A new <code>representation.type</code> such as <code>'reblog_comment'</code> or <code>'post_commentary'</code> will be used.
+    <em> <strong>Attribution Metadata:</strong> The <code>metadata</code> of these comment <code>representations</code> must be able to store an identifier (specifically, the Onelist internal <code>id</code> (UUID) of the authoring Xamlr blog's corresponding Onelist <code>'blog_config'</code> <code>entry</code>) to enable rich attribution display by Xamlr.
+    </em> <strong>Rationale:</strong> Keeps all content, including Xamlr-generated commentary and its attribution, within Onelist entries.</p>
+<h3>II. Onelist User Account & Settings Enhancements</h3>
+<p>1. <strong>User-Configurable Defaults for <code>autoblog_by_tag</code> per Entry Type:</strong>
+    <em> <strong>Requirement:</strong> Within the main Onelist user settings, a new feature is needed to allow users to define the <strong>default <code>autoblog_by_tag</code> behavior ( "yes" or "no") for each <code>entry_type</code></strong>.
+    </em> <strong>Functionality:</strong> When a new Onelist <code>entry</code> is created, Onelist will apply this user-defined (or system default) <code>entry_type</code>-specific setting for <code>autoblog_by_tag</code>, unless an explicit override is provided during entry creation via API.
+    <em> <strong>API Access:</strong> The Onelist API must allow Xamlr (and Onelist's own settings UI) to read and manage these user preferences.
+    </em> <strong>Rationale:</strong> Gives users global control over how their different types of Onelist content are initially flagged for potential automated blogging.</p>
+<p>2. <strong>Storage for User's Global Blocked Tags List (for Xamlr):</strong>
+    <em> <strong>Requirement:</strong> Onelist needs to provide a way to store a user-specific list of "globally blocked tags." This list, managed by the user, will be fetched by Xamlr and applied as a filter across all of that user's Xamlr blogs.
+    </em> <strong>Storage:</strong> Ideally stored within Onelist, associated with the <code>User</code> object/profile (e.g., in <code>users.metadata</code> like <code>{"xamlr_user_global_blocked_tags": ["#tagA", "#tagB"]}</code> or a dedicated <code>user_preferences</code> table).
+    <em> <strong>API Access:</strong> Onelist API must allow Xamlr to read and update this list on behalf of the authenticated user.
+    </em> <strong>Scope:</strong> This blocking applies to how Xamlr filters content for display; it does not affect tag usage or visibility within Onelist itself.
+    <em> <strong>Rationale:</strong> Allows users to define broad content filtering preferences that apply across their entire Xamlr presence.</p>
+<h3>III. Onelist API Capabilities & Enhancements</h3>
+<p>1. <strong>Robust ID Handling & Fetching:</strong>
+    </em> <strong>Return of Internal IDs:</strong> When Onelist <code>entries</code> are created or copied via API (e.g., by Xamlr for drafts, reblogs), the API response <strong>must return the internal <code>entry.id</code> (UUID)</strong> to the calling application.
+    <em> <strong>Fetching by Internal ID:</strong> The Onelist API must allow authorized applications (like Xamlr) acting on behalf of a user to securely fetch full entry details and <code>representations</code> using this internal <code>entry.id</code>.
+    </em> <strong>Rationale:</strong> Allows applications like Xamlr to use stable internal IDs for their references, enhancing security by not solely relying on or exposing Onelist <code>public_id</code>s in their internal logic or for all API calls.</p>
+<p>2. <strong>Advanced Querying & Filtering for Entries:</strong>
+    <em> <strong><code>autoblog_by_tag</code> Filtering:</strong> Must efficiently filter entries based on the <code>metadata.autoblog_by_tag</code> field.
+    </em> <strong>Comprehensive Tag Queries:</strong> Support for "tags CONTAINS ANY OF [...]", "tags CONTAINS ALL OF [...]" (if needed post-MVP), and querying in conjunction with other filters like <code>public</code> status, <code>entry_type</code>, and <code>metadata</code> fields.
+    <em> <strong>Efficient JSONB Metadata Querying:</strong> If other Xamlr-specific flags or configurations are stored in <code>entry.metadata</code> (like the per-blog blocked tags list in a <code>'blog_config'</code> entry's metadata), the API needs to support performant querying on these.
+    </em> <strong>Pagination:</strong> All list-returning API endpoints must support robust and efficient pagination (cursor-based preferred).
+    <em> <strong>Rationale:</strong> To enable Xamlr (and other apps) to efficiently source content for feeds, discovery, and its "Your Content" pane.</p>
+<p>3. <strong>Entry Copying Functionality:</strong>
+    </em> <strong>Requirement:</strong> The Onelist API should ideally provide a robust way to create a new <code>entry</code> as a copy of an existing one, allowing the calling application (Xamlr) to specify:
+        <em> The source <code>entry_id</code>.
+        </em> Which <code>representations</code> from the source to copy.
+        <em> Which tags from the source to copy.
+        </em> Data for any new <code>representations</code> to be added to the copy (e.g., Xamlr reblog commentary with its attribution metadata).
+        <em> Initial metadata (like <code>autoblog_by_tag: "no"</code>) for the new copy.
+    </em> <strong>Rationale:</strong> Centralizes the logic for creating consistent copies for features like Xamlr's reblogging and "Save to Onelist," ensuring all necessary data (including commentary attribution) is correctly structured in the new Onelist entry.</p>
+<p>4. <strong>Asset Management API:</strong>
+    <em> Must allow authorized applications (like Xamlr) to upload files on behalf of the user to create Onelist <code>assets</code>.
+    </em> Must return stable, canonical, and embeddable URLs for these <code>assets</code>.
+    <em> Onelist is responsible for actual asset storage, deduplication, reference counting, and garbage collection (as future Onelist platform enhancements).
+    </em> <strong>Rationale:</strong> Enables Xamlr's editor to integrate media uploads directly into Onelist.</p>
+<h3>IV. Post-Onelist v2.0 Roadmap Consideration (Driven by Xamlr's Needs)</h3>
+<p>1. <strong>Webhook System for External Application Integration:</strong>
+    <em> <strong>Requirement:</strong> To enable more efficient cache invalidation and real-time synchronization for applications like Xamlr, Onelist should plan for the development of a webhook system post-v2.0.
+    </em> <strong>Functionality:</strong> This system would allow authenticated external applications to subscribe to events in Onelist (e.g., <code>entry</code> created/updated/deleted, tags changed on an entry matching specific criteria).
+    <em> <strong>Rationale:</strong> Reduces the need for polling, improves data freshness in connected apps, and lessens API load. This is a key long-term requirement for Xamlr's optimal performance.</p>
+<p>This addendum captures the primary ways in which the Onelist platform itself will need to evolve or ensure specific capabilities are present to fully support the envisioned Xamlr blogging platform.</p>
+<h1>Onelist - Detailed Design Snapshot (As of 2025-05-08 ~10:13 AM EDT)</h1>
+<strong>Context:</strong> This document captures the detailed state of the Onelist plan as refined during the working session on May 8, 2025 (Concord, NC). It elaborates on the core concepts, data schema, versioning approach, future planning considerations, and schema flexibility examples. It should be used alongside the original "Onelist Project Plan" and "Onelist Future Roadmap" documents to fully restore context.
+<h2>1. Core Concepts & Terminology</h2>
+</em> <strong>Overarching Vision:</strong> Onelist is fundamentally envisioned as an <strong>"augmented memory"</strong> system, designed for flexible ingestion and storage of diverse content types, serving as a reliable store accessed primarily via API for extended functionalities.
+<em> <strong>Central Entity: "Entry"</strong>:
+  </em> The core unit of content/information stored in Onelist is termed an <strong>"Entry"</strong>.
+  <em> The main database table is named <code>entries</code>.
+</em> <strong>Entry Nature (<code>entry_type</code>):</strong>
+  <em> A mandatory <code>entries.entry_type</code> field (String, Not Null) defines the conceptual nature of the entry.
+  </em> This type dictates application behavior, particularly regarding mutability and available representations.
+  <em> <strong>Example Values:</strong> <code>'memory'</code> (immutable captures), <code>'note'</code> (mutable text), </em>(Future planned: <code>'event'</code>, <code>'task'</code>, <code>'pin'</code>, <code>'bookmark'</code>, <code>'chat_channel'</code>, <code>'log_event'</code>)<em>
+</em> <strong>Entry Origin (<code>source_type</code>):</strong>
+  <em> A dedicated <code>entries.source_type</code> field (String, Nullable) is retained alongside <code>entry_type</code>.
+  </em> It tracks <em>how</em> the entry was created/ingested, useful for filtering, analytics, and context.
+  <em> <strong>Example Values:</strong> <code>'manual'</code>, <code>'web_clip'</code>, <code>'audio_import'</code>, <code>'api'</code>, <code>'rss'</code>, <code>'email_import'</code>, <code>'file_upload'</code>, <code>'limitless_import'</code>.
+<h2>2. Core Data Schema Details (MVP Foundation)</h2>
+<p>This schema provides the foundational storage layer (MVP Option A focus), designed to be robust and API-accessible.</p>
+</em> <strong><code>entries</code> Table:</strong>
+  <em> </em>Purpose:<em> Central anchor record holding common metadata.
+  </em> <em>Fields:</em>
+    <em> <code>id</code> (UUID, PK): Unique internal DB identifier. UUIDs preferred over sequential integers for global uniqueness, preventing info leakage, and better distribution.
+    </em> <code>public_id</code> (String, Unique, Indexed): User-facing unique ID (e.g., generated via nanoid) used in URLs/APIs, obscuring internal <code>id</code>.
+    <em> <code>user_id</code> (UUID, FK -> <code>users.id</code>, Indexed, Not Null): Links entry to its owner for authorization and data scoping.
+    </em> <code>title</code> (Text, Nullable): User-editable title. Nullable to allow quick capture without immediate titling. Can be auto-populated initially (e.g., from webpage <code><title></code>).
+    <em> <code>version</code> (Integer, Default: 1, Not Null): For optimistic locking </em>on this <code>entries</code> record<em> (e.g., concurrent title edits).
+    </em> <code>entry_type</code> (String, Not Null): Defines the entry's nature (e.g., 'memory', 'note'). See Core Concepts above.
+    <em> <code>source_type</code> (String, Nullable): Defines how the entry was created (e.g., 'web_clip', 'manual'). See Core Concepts above.
+    </em> <code>public</code> (Boolean, Default: false, Nullable, Indexed?): <em>[New]</em> Flag to enable direct public access via canonical URL (<code>/entry/[public_id]</code>). Independent of blog publishing.
+    <em> <code>content_created_at</code> (TimestampTZ, Nullable, Indexed): </em>[New]<em> Stores the original creation/publication timestamp of the content itself (e.g., photo capture time, article publish date), distinct from <code>inserted_at</code>. Indexed for efficient sorting/filtering by original date across relevant entry types. Nullable where not applicable/available.
+    </em> <code>inserted_at</code> (TimestampTZ, Not Null): When the entry was added to Onelist (core "log" time). Managed by Ecto.
+    <em> <code>updated_at</code> (TimestampTZ, Not Null): Last metadata update time. Managed by Ecto.
+    </em> <code>metadata</code> (JSONB, Nullable): Flexible store for other type-specific or less-queried metadata (e.g., geolocation, camera model for photos; source URL for pins/clips; Limitless ID for imports).
+<em> <strong><code>representations</code> Table:</strong>
+  </em> <em>Purpose:</em> Holds different forms/formats of content associated with an Entry. One Entry can have multiple Representations.
+  <em> </em>Fields:<em>
+    </em> <code>id</code> (UUID, PK): Unique ID for this specific representation.
+    <em> <code>entry_id</code> (UUID, FK -> <code>entries.id</code>, Indexed, Not Null): Links back to the parent Entry.
+    </em> <code>version</code> (Integer, Default: 1, Not Null): <em>Added for optimistic locking specifically on the content of editable representations</em> (e.g., for 'note' entries).
+    <em> <code>type</code> (String, Not Null, Indexed?): Defines the format of this representation. String preferred for flexibility. Examples: <code>'markdown'</code>, <code>'plaintext'</code>, <code>'original_url'</code>, <code>'webarchive'</code>, <code>'audio_mp3'</code>, <code>'audio_wav'</code>, <code>'transcription_text'</code>, <code>'image_jpeg'</code>, <code>'image_png'</code>, <code>'source_file'</code> (generic binary), <code>'public_html'</code>, </em>(future: <code>'editor_json'</code>)<em>.
+    </em> <code>content</code> (Text, Nullable): Stores inline textual content (e.g., for 'markdown', 'plaintext', 'transcription_text'). Null if content is in <code>storage_path</code>.
+    <em> <code>storage_path</code> (String, Nullable): Location identifier (e.g., S3 key, local path) for content stored externally (e.g., for 'webarchive', 'audio_mp3', 'image_jpeg'). Null if content is inline in <code>content</code>. <strong><em>Requires integration with a file storage backend (S3, GCS, local FS mount, etc.).</em></strong>
+    </em> <code>mime_type</code> (String, Nullable, CHECK constraint: <code>storage_path IS NULL OR mime_type IS NOT NULL</code>): Explicit MIME type (e.g., 'text/markdown', 'audio/mpeg', 'application/octet-stream'). Enforced via CHECK constraint to be present if <code>storage_path</code> is used. Application logic should default unknown types to <code>'application/octet-stream'</code> when <code>storage_path</code> is present.
+    <em> <code>metadata</code> (JSONB, Nullable): Flexible key-value store for representation-specific details. Examples:
+      </em> <code>is_primary_text</code> (Boolean): Flags the main human-readable text representation.
+      <em> <code>is_archival</code> (Boolean): Flags archival copies (e.g., 'webarchive').
+      </em> <code>derived_from_representation_id</code> (UUID String): Links to the source representation <em>within the same entry</em> for lineage tracking (e.g., Markdown derived from Webarchive).
+      <em> <code>derived_from_asset_id</code> (UUID String): Links to a source asset (e.g., Transcript derived from Audio Asset).
+      </em> <code>language</code> (String): Language code (e.g., 'en', 'es').
+      <em> <code>conversion_tool</code> (String): Tool used for derivation (e.g., 'pandoc 2.1.8', 'limitless_ai').
+      </em> <em>(Other potential uses: word count, duration, etc.)</em>
+    <em> <code>inserted_at</code>, <code>updated_at</code> (TimestampTZ, Not Null): Timestamps for this representation record. Managed by Ecto.
+</em> <strong><code>representation_versions</code> Table:</strong>
+  <em> </em>Purpose:<em> Stores history (snapshots/diffs) for versioned <code>representations</code> (esp. for <code>'note'</code> types). Adapts the original <code>note_versions</code> concept.
+  </em> <em>Fields:</em>
+    <em> <code>id</code> (UUID, PK): Unique ID for this historical version record.
+    </em> <code>representation_id</code> (UUID, FK -> <code>representations.id</code>, Indexed, Not Null): Links to the specific representation whose history this is.
+    <em> <code>user_id</code> (UUID, FK -> <code>users.id</code>, Indexed, Not Null): User who made the change leading to this version.
+    </em> <code>content</code> (Text, Nullable): Stores a full snapshot of the representation's content at this point in time.
+    <em> <code>diff</code> (Text, Nullable): Stores the diff from the </em>previous<em> version (e.g., using jondot/diffy). Expected to be NULL if <code>content</code> is present (snapshot) and vice-versa (diff).
+    </em> <code>version</code> (Integer, Not Null): The value of <code>representations.version</code> <em>before</em> the change that created this historical record.
+    <em> <code>inserted_at</code> (TimestampTZ, Not Null): Timestamp when this historical record was saved.
+</em> <strong><code>assets</code> Table:</strong>
+  <em> </em>Purpose:<em> Stores associated files (e.g., embedded images, attachments, audio/video files).
+  </em> <em>Fields:</em>
+    <em> <code>id</code> (UUID, PK): Unique ID for this asset record.
+    </em> <code>entry_id</code> (UUID, FK -> <code>entries.id</code>, Indexed, Not Null): Links asset to the parent Entry.
+    <em> <code>representation_id</code> (UUID, FK -> <code>representations.id</code>, Indexed, Nullable): </em>Optional<em> link to a </em>specific<em> representation record that uses/embeds this asset. Useful for explicit tracking (e.g., this image used in this Markdown version).
+    </em> <code>filename</code> (String, Not Null): Original filename of the asset (e.g., 'image.png').
+    <em> <code>mime_type</code> (String, Not Null): MIME type of the asset file (e.g., 'image/png'). Default to 'application/octet-stream' if unknown.
+    </em> <code>storage_path</code> (String, Not Null): Location identifier for the stored asset file. <strong><em>Requires integration with a file storage backend.</em></strong>
+    <em> <code>metadata</code> (JSONB, Nullable): Flexible store for asset-specific details. Examples: image dimensions (<code>{"width": ..., "height": ...}</code>), <code>alt_text</code>, OCR results (<code>{"ocr_text": ...}</code>), checksums (<code>{"sha256": ...}</code>), <code>asset_purpose</code> (<code>'thumbnail_small'</code>, <code>'thumbnail_large'</code>).
+    </em> <code>inserted_at</code>, <code>updated_at</code> (TimestampTZ, Not Null): Timestamps for this asset record. Managed by Ecto.
+<em> <strong><code>tags</code> and <code>entry_tags</code> Tables (MVP):</strong> Standard many-to-many join tables for tagging <code>entries</code>. Structure to be defined but conceptually standard.
+<h2>3. Versioning & Concurrency Strategy (Applied based on <code>entry_type</code>)</h2>
+</em> <strong>Target:</strong> Detailed versioning (snapshots, diffs via <code>representation_versions</code>) applied to <code>representations</code> of editable <code>entry_type</code>s (e.g., <code>'note'</code>). Immutability for other types enforced by application logic.
+<em> <strong>Mechanism:</strong> Optimistic locking (<code>representations.version</code>), background jobs (Oban) for snapshots, potential client-side diff generation.
+</em> <strong>Single-User Concurrency:</strong> Multi-tab "Take Control" via Phoenix PubSub scoped to <code>representations.id</code>.
+<h2>4. Foundation for Future Collaborative Editing</h2>
+<em> <strong>Goal:</strong> Facilitate future advanced real-time collaboration (Post-MVP) without overcomplicating the MVP schema.
+</em> <strong>Approach:</strong> Maintain current schema for MVP. Plan for collaboration logic (OT/CRDT) post-MVP to operate on a <strong>structured, block-based representation</strong> (likely JSON), potentially stored as an <em>additional</em> <code>representations</code> record (<code>type='editor_json'</code>). Editor choice/adaptability is key. This structured representation is also a prerequisite for granular chat features.
+<h2>5. Future Roadmap: Planned Extensions & Deferred Items</h2>
+<em> <strong>High Priority Post-MVP Phase 1: Blogging Feature via Separate Application ("Xamlr")</strong>
+  </em> <strong>Architecture:</strong> Onelist Core = memory store + API. Separate "Xamlr" app handles blogging logic (config, queue, rendering, frontend).
+  <em> <strong>Onelist Core Role:</strong> Provides API, handles <code>public</code> flag for canonical URLs. </em>Responsibility:<em> Asynchronously generate/store canonical <code>'public_html'</code> <code>representations</code> via background job (Oban), serve efficiently via API (caching may be needed).
+  </em> <strong>Xamlr App Role:</strong> Stores blog config (subdomain, source tags, schedule) & publishing state/log (<code>published_at</code>, queue status) in its <em>own DB</em>. Uses Onelist API to find/fetch entries (incl. <code>'public_html'</code>). Serves blog frontend.
+  <em> <strong>Schema Implication:</strong> <code>blogs</code> and <code>blog_publications</code> (or similar) tables are <strong>NOT</strong> part of the Onelist Core schema; they belong to the Xamlr application.
+</em> <strong>Schema Extension Pattern for Other Specialized Entry Types (Post-MVP):</strong>
+  <em> <strong>Plan:</strong> For future types like <strong>Calendar (<code>'event'</code>)</strong> and <strong>Task Manager (<code>'task'</code>)</strong> requiring </em>multiple<em> specific fields beyond <code>content_created_at</code>, the pattern is to create dedicated <strong>"side tables"</strong> (e.g., <code>event_details</code>, <code>task_details</code>) in Onelist Core with a 1-to-1 relationship to <code>entries</code> (<code>entry_id</code> as PK/FK).
+  </em> <strong>Rationale:</strong> Keeps <code>entries</code> clean, allows efficient querying on specialized, indexed fields (e.g., <code>start_time</code>, <code>end_time</code>; <code>status</code>, <code>due_date</code>). (Note: <code>content_created_at</code> in <code>entries</code> handles the common need for original timestamps directly).
+<em> <strong>Relationship Handling for Specialized Types (Post-MVP):</strong> Address complex relationships (Task Assignees, Projects, Subtasks) potentially via the deferred <code>entry_links</code> table or more specialized structures (e.g., <code>task_assignments</code> join table).
+</em> <strong>Limitless.ai Integration (Post-MVP):</strong>
+  <em> <strong>Goal:</strong> Automatically pull audio recordings and transcripts from Limitless.ai via user API key.
+  </em> <strong>Implementation:</strong>
+    <em> Store credentials securely in a new <code>external_integrations</code> table (recommended: <code>id</code>, <code>user_id</code>, <code>service_name</code>, <code>credentials</code> [encrypted], <code>last_sync_timestamp</code>, <code>sync_status</code>, <code>metadata</code>).
+    </em> Use Oban jobs to periodically fetch data via Limitless API.
+    <em> Store data in Onelist: <code>entries</code> (<code>entry_type='memory'</code>, <code>source_type='limitless_import'</code>, <code>content_created_at</code>=recording time, <code>metadata</code>={limitless\_id}), <code>assets</code> (audio file), <code>representations</code> (<code>type='transcription_text'</code>).
+  </em> <strong>Schema Impact:</strong> Requires <code>external_integrations</code> table; core content schema fits well.
+<em> <strong>Chat Integration (Future Exploration):</strong>
+  </em> <strong>Challenge:</strong> Scalability/performance concerns with storing every message as an <code>entry</code>. Threading/reactions require extensions.
+  <em> <strong>Potential Approach:</strong> Consider dedicated chat message store post-MVP. Integrate via linking chats </em>to<em> Onelist <code>entries</code>, or representing channels </em>as<em> <code>entries</code> (<code>entry_type='chat_channel'</code>). Granular (block-level) chat depends on the structured representation from Section 4.
+</em> <strong>Inter-Entry Relationships (<code>entry_links</code> Table - Deferred):</strong> Implementation deferred. Design concept (source/target IDs, <code>link_type</code>, metadata) noted.
+<em> <strong>Advanced Real-Time Collaboration (Deferred):</strong> Full Quip-style editing deferred.
+</em> <strong>HTML Representations (Future Exploration):</strong> Consider general pre-rendered HTML alongside Markdown; Consider publication-specific HTML generated by Onelist Core.
+<em> <strong>Unified Timeline View (Future Exploration):</strong> Explore mechanisms (like external apps pushing <code>log_event</code> entries via API) for a unified chronological view within Onelist UI.
+<h2>6. Schema Flexibility Example: Pinterest-Style Pinboarding</h2>
+</em> <strong>Scenario:</strong> Storing visual bookmarks ("Pins") with tags as "Boards".
+<em> <strong>Schema Mapping:</strong> <code>entry_type='pin'</code>, image in <code>assets</code>, description in <code>representations</code>, <code>source_url</code> in <code>entries.metadata</code>, Boards = <code>tags</code>/<code>entry_tags</code>.
+</em> <strong>Conclusion:</strong> Schema supports this well without modification. Effort is UI/client tools (e.g., browser extension).
+<h2>7. Schema Flexibility Example: Personal Photo/Video Library</h2>
+<em> <strong>Scenario:</strong> Storing and organizing personal photos/videos, using tags as albums. Considered an <strong>essential, core use case</strong>.
+</em> <strong>Schema Mapping:</strong>
+  <em> Media Item: <code>entries</code> record (<code>entry_type='photo'</code> or <code>'video'</code>).
+  </em> <strong>Capture Time:</strong> Stored efficiently in the indexed <code>entries.content_created_at</code> field.
+  <em> Other Metadata: Camera details, geolocation, dimensions, duration stored in <code>entries.metadata</code>.
+  </em> Media File: Primary file stored in <code>assets</code>.
+  <em> Description: User notes stored in <code>representations</code>.
+  </em> Thumbnails/Previews: Generated by background jobs (post-MVP) and stored as additional <code>assets</code>.
+  <em> Albums/Organization: Implemented via <code>tags</code>/<code>entry_tags</code>.
+</em> <strong>Conclusion:</strong> Schema provides a strong foundation. <code>entries.content_created_at</code> addresses primary date filtering needs efficiently, reducing the immediate need for a <code>media_details</code> side table. Thumbnail generation and advanced video handling are post-MVP implementation details.
+  </article>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Log Ingestion Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <hr>
+status: active
+created_at: 2026-01-30
+priority: high
+<hr>
+<h1>Chat Log Ingestion Plan</h1>
+<p>Store all OpenClaw chat logs in Onelist. <strong>All memory generation happens on the Onelist side.</strong></p>
+<p>OpenClaw = Action Layer (runs conversations, ships transcripts)
+Onelist = Memory Layer (stores, extracts, searches, retrieves)</p>
+<h2>Core Principle</h2>
+<strong>Chat logs are the original source of all memories.</strong>
+<pre><code class="language-">OpenClaw Session
+    ↓ produces
+Chat Logs (one file per hour)
+    ↓ ingest into
+Onelist Entries (stored forever, immutable)
+    ↓ Reader agent extracts
+Memories (indexed, searchable)
+    ↓ available to
+Agent Context Window
+</code></pre>
+<p>Chat logs are not throwaway artifacts — they ARE the memory. Everything else is derived.</p>
+<h2>Architecture</h2>
+<h3>Separation of Concerns</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────┐
+│                   OpenClaw (Action Layer)                        │
+│                                                                  │
+│  • Runs conversations                                            │
+│  • Executes tools                                                │
+│  • Ships raw transcripts to Onelist                              │
+│  • Queries Onelist for context when needed                       │
+│  • Does NOT handle memory extraction                             │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ POST /api/v1/chat-logs
+                              │ (raw transcript, one per hour)
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Onelist (Memory Layer)                        │
+│                                                                  │
+│  • Receives raw chat logs                                        │
+│  • Stores forever (immutable source)                             │
+│  • Automatically extracts memories (Reader agent)                │
+│  • Provides search/retrieval API                                 │
+│  • Handles all memory intelligence                               │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Key principle:</strong> OpenClaw doesn't need to understand memory. It just sends transcripts. Onelist does all the thinking.
+<h3>Data Flow</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────┐
+│                        OpenClaw Agent                            │
+│                                                                  │
+│  User message ──► Process ──► POST to Onelist (real-time)       │
+│  Agent reply  ──► Process ──► POST to Onelist (real-time)       │
+│  Tool call    ──► Process ──► POST to Onelist (real-time)       │
+│                                           │                      │
+└───────────────────────────────────────────┼──────────────────────┘
+                                            │
+                              Each message, instantly streamed
+                                            │
+                                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Onelist (Full Memory Chain)                   │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                    Ingestion Layer                        │   │
+│  │  • Receive raw chat log                                   │   │
+│  │  • Validate and store as Entry (chat_log type)           │   │
+│  │  • Trigger async processing                               │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                              │                                   │
+│                              ▼                                   │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                    Processing Layer                       │   │
+│  │  • Reader Agent analyzes conversation                     │   │
+│  │  • Extracts: facts, decisions, events, tasks              │   │
+│  │  • Creates Memory records linked to source                │   │
+│  │  • Generates embeddings for search                        │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                              │                                   │
+│                              ▼                                   │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                    Storage Layer                          │   │
+│  │  • Chat logs (immutable, forever)                         │   │
+│  │  • Memories (extracted, searchable)                       │   │
+│  │  • Embeddings (vector search)                             │   │
+│  │  • Audit log (who accessed what, when)                    │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                              │                                   │
+│                              ▼                                   │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │                    Retrieval Layer                        │   │
+│  │  • Hybrid search (semantic + keyword)                     │   │
+│  │  • Timeline queries                                       │   │
+│  │  • Context reconstruction for recovery                    │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Agent queries for context
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   OpenClaw Agent (queries back)                  │
+│                                                                  │
+│  &quot;What did we discuss about X?&quot;                                  │
+│  &quot;What tasks are open?&quot;                                          │
+│  &quot;What happened in the last session?&quot;                            │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Entry Schema for Chat Logs</h3>
+<pre><code class="language-elixir">%Entry{
+  title: &quot;Chat Log: 2026-01-30 22:00&quot;,
+  entry_type: &quot;chat_log&quot;,
+  source_type: &quot;openclaw&quot;,
+  
+  metadata: %{
+    &quot;session_id&quot; =&gt; &quot;20eeb4b0-472e-4f7f-af32-da22803ee193&quot;,
+    &quot;period&quot; =&gt; &quot;2026-01-30T22:00:00Z&quot;,
+    &quot;period_type&quot; =&gt; &quot;hour&quot;,  # or &quot;day&quot;
+    &quot;message_count&quot; =&gt; 57,
+    &quot;user_message_count&quot; =&gt; 23,
+    &quot;agent_message_count&quot; =&gt; 34,
+    &quot;tool_calls&quot; =&gt; 15,
+    &quot;channel&quot; =&gt; &quot;telegram&quot;,
+    &quot;agent_id&quot; =&gt; &quot;main&quot;,
+    &quot;closed&quot; =&gt; false,  # true when period ends
+    &quot;last_message_at&quot; =&gt; &quot;2026-01-30T22:59:45Z&quot;
+  },
+  
+  representations: [
+    %{
+      mime_type: &quot;application/jsonl&quot;,
+      content: &quot;...&quot; # Raw JSONL transcript, grows with appends
+    }
+  ]
+}
+</code></pre>
+<h3>Special Handling: Appendable Entries</h3>
+<p>Chat logs are a special case: they need to support <strong>appending</strong> during their active period.</p>
+<strong>Rules for <code>chat_log</code> entries:</strong>
+<p>1. <strong>During active period (open):</strong>
+   <ul>
+<li>Can append messages to representation</li>
+   <li>Can update metadata (counts, last_message_at)</li>
+   <li>Cannot modify existing messages</li>
+   <li>Cannot delete</li></p>
+<p>2. <strong>After period ends (closed):</strong>
+   <li>Entry becomes fully immutable</li>
+   <li>Standard trusted memory rules apply</li>
+   <li>Hash chain includes final state</li></p>
+<p>3. <strong>Implementation:</strong>
+   <pre><code class="language-elixir">   def append_to_chat_log(entry_id, message) do
+     entry = Entries.get_entry!(entry_id)
+     
+     # Only append to open chat_log entries
+     if entry.entry_type == &quot;chat_log&quot; &amp;&amp; !entry.metadata[&quot;closed&quot;] do
+       # Append message to JSONL representation
+       updated_content = entry.representations
+         |&gt; List.first()
+         |&gt; Map.get(:content)
+         |&gt; Kernel.&lt;&gt;(&quot;\n#{Jason.encode!(message)}&quot;)
+       
+       # Update entry
+       Entries.update_chat_log(entry, %{
+         content: updated_content,
+         message_count: entry.metadata[&quot;message_count&quot;] + 1,
+         last_message_at: message.timestamp
+       })
+     else
+       {:error, :entry_closed}
+     end
+   end
+   </code></pre></p>
+<p>4. <strong>Period close (hourly cron job):</strong>
+   <pre><code class="language-elixir">   def close_old_chat_logs do
+     one_hour_ago = DateTime.add(DateTime.utc_now(), -3600)
+     
+     from(e in Entry,
+       where: e.entry_type == &quot;chat_log&quot;,
+       where: fragment(&quot;metadata-&gt;&gt;'closed'&quot;) == &quot;false&quot;,
+       where: fragment(&quot;metadata-&gt;&gt;'period'::timestamp&quot;) &lt; ^one_hour_ago
+     )
+     |&gt; Repo.update_all(set: [metadata: fragment(&quot;metadata || '{\&quot;closed\&quot;: true}'&quot;)])
+   end
+   </code></pre></p>
+<h3>Memory Extraction from Chat Logs</h3>
+<strong>All memory generation happens on the Onelist side.</strong>
+<p>When a chat log entry arrives, the Reader agent automatically:</p>
+<p>1. <strong>Parses conversation structure</strong>
+   <li>Identifies user messages vs agent messages</li>
+   <li>Recognizes tool calls and results</li>
+   <li>Understands dialog flow</li></p>
+<p>2. <strong>Extracts memories by type:</strong>
+   <li><strong>Facts</strong> — Information stated or learned ("Tecto's son is dvtstalcup")</li>
+   <li><strong>Decisions</strong> — Choices made ("We'll use R2 for storage")</li>
+   <li><strong>Events</strong> — Things that happened ("Signed up for Onelist waitlist at 22:00")</li>
+   <li><strong>Tasks</strong> — Work items identified or completed</li>
+   <li><strong>Preferences</strong> — User preferences expressed ("no caps, no periods")</li>
+   <li><strong>Relationships</strong> — People, projects, connections mentioned</li></p>
+<p>3. <strong>Preserves provenance:</strong>
+   <li>Each memory links to source chat log entry</li>
+   <li>Timestamp of when it was said</li>
+   <li>Who said it (user vs agent)</li>
+   <li>Click through to see original context</li></p>
+<p>4. <strong>Deduplicates:</strong>
+   <li>Checks for similar existing memories</li>
+   <li>Updates rather than duplicates</li>
+   <li>Tracks when information changed</li></p>
+<strong>The agent never manually writes memories.</strong> They're automatically extracted from conversations. The agent just talks naturally, and Onelist remembers everything.
+<h2>Implementation Plan</h2>
+<h3>Phase 1: Manual Sync (✅ DONE)</h3>
+<li>[x] <code>sync-chat-logs.sh</code> script</li>
+<li>[x] <code>chat_log</code> entry type in Onelist</li>
+<li>[x] Sync on heartbeat via HEARTBEAT.md</li>
+<li>[x] Recovery workflow documented</li>
+<h3>Phase 2: OpenClaw Side (Simple)</h3>
+<strong>OpenClaw streams chat to Onelist in real-time.</strong>
+<h4>Option A: Stream Every Message (Preferred)</h4>
+<pre><code class="language-yaml">transcripts:
+  onelist:
+    enabled: true
+    endpoint: &quot;https://onelist.my/api/v1/chat-stream&quot;
+    apiKey: &quot;${ONELIST_API_KEY}&quot;
+    mode: realtime  # stream each message as it happens
+</code></pre>
+<p>Every message → immediate POST to Onelist. Zero lag. Always current.</p>
+<h4>Option B: Micro-batch (5-10 messages)</h4>
+<pre><code class="language-yaml">transcripts:
+  onelist:
+    enabled: true
+    endpoint: &quot;https://onelist.my/api/v1/chat-stream&quot;
+    apiKey: &quot;${ONELIST_API_KEY}&quot;
+    mode: microbatch
+    batchSize: 5  # or 10
+</code></pre>
+<p>Buffer 5-10 messages, then POST. Slight lag but fewer API calls.</p>
+<h4>Why Real-Time Streaming?</h4>
+<li><strong>Always current</strong> — Onelist has everything up to this moment</li>
+<li><strong>No batch delay</strong> — If compaction happens, nothing is lost</li>
+<li><strong>Instant recovery</strong> — Agent can query immediately after context loss</li>
+<li><strong>Event-driven</strong> — Natural fit for conversation flow</li>
+<li><strong>Simpler</strong> — No hourly files to manage, no sync state</li>
+<h4>Implementation (OpenClaw)</h4>
+<pre><code class="language-typescript">// After each message processed
+async function onMessage(message: Message) {
+  // ... existing processing ...
+  
+  // Stream to Onelist
+  if (config.transcripts.onelist.enabled) {
+    await fetch(config.transcripts.onelist.endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': <code>Bearer ${config.transcripts.onelist.apiKey}</code>,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        session_id: session.id,
+        message: message,
+        timestamp: new Date().toISOString()
+      })
+    });
+  }
+}
+</code></pre>
+<strong>That's it.</strong> One POST per message. OpenClaw's job is done.
+<h3>Phase 3: Onelist Side (All the Intelligence)</h3>
+<strong>Onelist handles the entire memory chain:</strong>
+<p>1. <strong>Stream ingestion endpoint</strong>
+   <pre><code class="language-">   POST /api/v1/chat-stream
+   
+   Body:
+   {
+     &quot;session_id&quot;: &quot;abc-123&quot;,
+     &quot;message&quot;: {
+       &quot;role&quot;: &quot;user&quot;,
+       &quot;content&quot;: &quot;...&quot;,
+       &quot;timestamp&quot;: &quot;2026-01-30T23:15:00Z&quot;
+     }
+   }
+   
+   Response:
+   { &quot;ok&quot;: true, &quot;message_id&quot;: &quot;xyz-789&quot; }
+   </code></pre>
+   
+   <li>Receives each message in real-time</li>
+   <li>Appends to session's chat log entry (or creates if first)</li>
+   <li>Lightweight, fast response</li>
+   <li>Queues memory extraction in background</li></p>
+<p>2. <strong>Background processing (Oban)</strong>
+   <li>Debounced: wait 30s after last message before processing</li>
+   <li>Or: process every N messages</li>
+   <li>Extracts memories from recent conversation chunk</li>
+   <li>Avoids re-processing same content</li></p>
+<p>3. <strong>Chat log entry structure (one per hour or day)</strong></p>
+<strong>Key:</strong> Messages append to an existing entry, not create new entries.
+   
+   <pre><code class="language-elixir">   %Entry{
+     title: &quot;Chat Log: 2026-01-30 22:00&quot;,  # or &quot;Chat Log: 2026-01-30&quot; for daily
+     entry_type: &quot;chat_log&quot;,
+     metadata: %{
+       &quot;session_id&quot; =&gt; &quot;abc-123&quot;,
+       &quot;period&quot; =&gt; &quot;2026-01-30T22:00:00Z&quot;,  # hour or day start
+       &quot;period_type&quot; =&gt; &quot;hour&quot;,  # or &quot;day&quot;
+       &quot;message_count&quot; =&gt; 157,
+       &quot;last_message_at&quot; =&gt; &quot;2026-01-30T22:59:45Z&quot;,
+       &quot;closed&quot; =&gt; false  # true when hour/day ends
+     },
+     # Messages accumulate in representation
+     representations: [%{
+       mime_type: &quot;application/jsonl&quot;,
+       content: &quot;&quot;&quot;
+       {&quot;ts&quot;:&quot;22:00:01&quot;,&quot;role&quot;:&quot;user&quot;,&quot;msg&quot;:&quot;hello&quot;}
+       {&quot;ts&quot;:&quot;22:00:05&quot;,&quot;role&quot;:&quot;assistant&quot;,&quot;msg&quot;:&quot;hi!&quot;}
+       {&quot;ts&quot;:&quot;22:01:30&quot;,&quot;role&quot;:&quot;user&quot;,&quot;msg&quot;:&quot;...&quot;}
+       ... (grows with each POST)
+       &quot;&quot;&quot;
+     }]
+   }
+   </code></pre>
+<p>4. <strong>Append endpoint</strong>
+   <pre><code class="language-">   POST /api/v1/chat-stream/append
+   
+   Body:
+   {
+     &quot;session_id&quot;: &quot;abc-123&quot;,
+     &quot;message&quot;: {
+       &quot;role&quot;: &quot;user&quot;,
+       &quot;content&quot;: &quot;hello&quot;,
+       &quot;timestamp&quot;: &quot;2026-01-30T22:15:00Z&quot;
+     }
+   }
+   
+   Behavior:
+   1. Find or create chat_log entry for current hour/day
+   2. Append message to representation content
+   3. Update metadata (message_count, last_message_at)
+   4. Return success
+   
+   Response:
+   { &quot;ok&quot;: true, &quot;entry_id&quot;: &quot;xyz&quot;, &quot;message_count&quot;: 158 }
+   </code></pre></p>
+<p>5. <strong>Period rollover</strong>
+   <li>When hour/day changes, close current entry (<code>closed: true</code>)</li>
+   <li>Next message creates new entry for new period</li>
+   <li>Old entries become immutable (standard trusted memory rules apply)</li></p>
+<pre><code class="language-">   22:59:59 → append to &quot;Chat Log: 2026-01-30 22:00&quot;
+   23:00:01 → close old entry, create &quot;Chat Log: 2026-01-30 23:00&quot;
+   </code></pre>
+<p>2. <strong>Reader Agent enhancement</strong>
+   <li>Detect <code>chat_log</code> entry type</li>
+   <li>Parse conversation structure</li>
+   <li>Extract memories automatically</li>
+   <li>Link memories to source with timestamps</li></p>
+<p>3. <strong>Conversation-aware extraction</strong>
+   <li>Understand user vs agent turns</li>
+   <li>Extract facts from what user said</li>
+   <li>Extract decisions from what agent concluded</li>
+   <li>Track tasks created and completed</li>
+   <li>Note preferences expressed</li></p>
+<p>4. <strong>Storage</strong>
+   <li>Chat logs immutable forever</li>
+   <li>Memories linked to source</li>
+   <li>Full audit trail</li></p>
+<h3>Phase 4: Retrieval & Recovery</h3>
+<p>1. <strong>Agent queries Onelist for context</strong>
+   <pre><code class="language-">   GET /api/v1/search?query=what did we discuss about X
+   GET /api/v1/memories?since=2026-01-30T22:00
+   GET /api/v1/chat-logs?last=3
+   </code></pre></p>
+<p>2. <strong>Automatic context recovery</strong>
+   <li>After compaction, agent queries recent memories</li>
+   <li>Onelist returns relevant context</li>
+   <li>Agent continues seamlessly</li></p>
+<p>3. <strong>Timeline view</strong>
+   <li>See what was discussed when</li>
+   <li>Navigate by date/hour</li>
+   <li>Drill down to original transcript</li></p>
+<h3>Phase 5: Advanced Features</h3>
+<p>1. <strong>Conversation threading</strong>
+   <li>Link related conversations across sessions</li>
+   <li>Track topics over time</li></p>
+<p>2. <strong>Provenance UI</strong>
+   <li>Click any memory to see source</li>
+   <li>View original conversation context</li></p>
+<p>3. <strong>Cross-agent memory</strong>
+   <li>Multiple agents share Onelist account</li>
+   <li>Unified memory across all conversations</li></p>
+<h2>API Endpoints</h2>
+<h3>Sync Chat Log</h3>
+<pre><code class="language-">POST /api/v1/chat-logs
+Authorization: Bearer {api_key}
+Content-Type: application/json
+<p>{
+  &quot;session_id&quot;: &quot;20eeb4b0-472e-4f7f-af32-da22803ee193&quot;,
+  &quot;hour&quot;: &quot;2026-01-30T22:00:00Z&quot;,
+  &quot;messages&quot;: [...],
+  &quot;metadata&quot;: {
+    &quot;channel&quot;: &quot;telegram&quot;,
+    &quot;agent_id&quot;: &quot;main&quot;
+  }
+}
+</code></pre></p>
+<h3>Query Chat History</h3>
+<pre><code class="language-">GET /api/v1/chat-logs?since=2026-01-30T00:00:00Z&amp;until=2026-01-31T00:00:00Z
+Authorization: Bearer {api_key}
+</code></pre>
+<h3>Find Last Memory Write</h3>
+<pre><code class="language-">GET /api/v1/memories?source_type=chat_log&amp;limit=1&amp;sort=desc
+Authorization: Bearer {api_key}
+</code></pre>
+<h2>Storage Considerations</h2>
+<h3>Size Estimates</h3>
+<table>
+<tr><th>Activity Level</th><th>Messages/Hour</th><th>Size/Hour</th><th>Size/Day</th><th>Size/Month</th></tr>
+<tr><td>Light</td><td>10</td><td>~50 KB</td><td>~1.2 MB</td><td>~36 MB</td></tr>
+<tr><td>Moderate</td><td>50</td><td>~250 KB</td><td>~6 MB</td><td>~180 MB</td></tr>
+<tr><td>Heavy</td><td>200</td><td>~1 MB</td><td>~24 MB</td><td>~720 MB</td></tr>
+</table>
+<h3>Retention Policy</h3>
+<li><strong>Never delete</strong> — Chat logs are source material</li>
+<li><strong>Compress after 30 days</strong> — GZIP old entries</li>
+<li><strong>Archive after 1 year</strong> — Move to cold storage (optional)</li>
+<h3>Storage Cost (Onelist pricing)</h3>
+<p>At $0.015/GB/month (R2):
+<li>Light user: $0.0005/month</li>
+<li>Moderate user: $0.003/month  </li>
+<li>Heavy user: $0.01/month</li></p>
+<strong>Negligible cost</strong> — store everything forever.
+<h2>Recovery Workflow</h2>
+<h3>With Real-Time Streaming: Instant Recovery</h3>
+<p>Because every message is streamed to Onelist immediately:</p>
+<pre><code class="language-">1. Compaction happens (context truncated)
+<p>2. Agent wakes with summary</p>
+<p>3. Query Onelist for recent messages:
+   GET /api/v1/chat-stream?session_id=abc&amp;last=50
+   → Returns: last 50 messages (everything up to this moment)</p>
+<p>4. Full context recovered instantly
+   → Nothing was ever lost
+</code></pre></p>
+<strong>The key insight:</strong> With real-time streaming, there's no "gap" between what was said and what Onelist knows. Onelist always has everything.
+<h3>Automated Recovery</h3>
+<p>OpenClaw could automatically:
+1. Detect compaction occurred (context shorter than expected)
+2. Query Onelist: "give me last N messages for this session"
+3. Inject into context as "previous conversation"
+4. Agent continues seamlessly — doesn't even notice compaction happened</p>
+<pre><code class="language-typescript">// After compaction detected
+if (context.wasCompacted) {
+  const recent = await onelist.getChatStream(session.id, { last: 100 });
+  context.prepend({
+    role: 'system',
+    content: <code>Previous conversation:\n${formatMessages(recent)}</code>
+  });
+}
+</code></pre>
+<h2>Success Criteria</h2>
+<p>1. <strong>No memory loss</strong> — Every conversation preserved in Onelist
+2. <strong>Full recovery</strong> — Agent can reconstruct context after compaction
+3. <strong>Searchable history</strong> — Find any past conversation
+4. <strong>Memory provenance</strong> — Every memory traces to source
+5. <strong>Minimal latency</strong> — Sync doesn't slow down conversation</p>
+<h2>Timeline</h2>
+<table>
+<tr><th>Phase</th><th>Duration</th><th>Deliverables</th></tr>
+<tr><td>Phase 1</td><td>✅ Done</td><td>Manual sync, recovery workflow</td></tr>
+<tr><td>Phase 2</td><td>1 week</td><td>OpenClaw PR for auto-sync</td></tr>
+<tr><td>Phase 3</td><td>2 weeks</td><td>Reader agent chat processing</td></tr>
+<tr><td>Phase 4</td><td>Ongoing</td><td>Advanced features</td></tr>
+</table>
+<h2>Open Questions</h2>
+<p>1. Should chat logs be encrypted at rest in Onelist?
+2. Should users be able to delete chat history? (violates "never delete" principle)
+3. How to handle multi-user conversations (group chats)?
+4. Should memories extracted from chat be marked as "auto-extracted"?</p>
+<h2>Related Documents</h2>
+<li><code>openclaw_memory_persistence_plan.md</code> — Original problem statement</li>
+<li><code>skills/memory-recovery/</code> — Current implementation</li>
+<li><code>reader_agent_plan.md</code> — Memory extraction system</li>
+</ul>
+  </article>
+</body>
+</html>

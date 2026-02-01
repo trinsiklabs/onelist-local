@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings UI Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Settings UI Plan</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Active
+<strong>Parent:</strong> ui_plan.md
+<hr>
+<h2>1. Settings Philosophy</h2>
+<h3>1.1 Core Principles</h3>
+<table>
+<tr><th>Principle</th><th>Implementation</th></tr>
+<tr><td><strong>Auto-Save</strong></td><td>All settings auto-save and apply immediately</td></tr>
+<tr><td><strong>No Floating UI</strong></td><td>No floating toasts/notifications; use inline confirmations</td></tr>
+<tr><td><strong>Hover for Details</strong></td><td>Desktop hover states for additional context</td></tr>
+<tr><td><strong>Sensible Defaults</strong></td><td>Everything works out of the box</td></tr>
+<tr><td><strong>User Configurable</strong></td><td>Power users can customize extensively</td></tr>
+</table>
+<h3>1.2 Save Behavior</h3>
+<ul>
+<li>Settings save immediately on change</li>
+<li>Inline confirmation: Brief "Saved" text appears next to changed control, fades after 2s</li>
+<li>No explicit Save/Cancel buttons</li>
+<li>Revert option: "Reset to defaults" per section</li>
+<hr>
+<h2>2. Agent Color Scheme</h2>
+<h3>2.1 Default Agent Colors</h3>
+<table>
+<tr><th>Agent</th><th>Default Color</th><th>Hex</th><th>Usage</th></tr>
+<tr><td><strong>Reader</strong></td><td>Blue</td><td><code>#3B82F6</code></td><td>Memory extraction, summaries, tags</td></tr>
+<tr><td><strong>Searcher</strong></td><td>Amber</td><td><code>#F59E0B</code></td><td>Search, retrieval, RAG</td></tr>
+<tr><td><strong>Feeder</strong></td><td>Orange</td><td><code>#F97316</code></td><td>Web clips, imports, RSS</td></tr>
+<tr><td><strong>River</strong></td><td>Purple</td><td><code>#8B5CF6</code></td><td>Chat, GTD, orchestration</td></tr>
+<tr><td><strong>Asset Enrichment</strong></td><td>Cyan</td><td><code>#06B6D4</code></td><td>Media processing, transcription</td></tr>
+<tr><td><strong>Librarian</strong></td><td>Green</td><td><code>#10B981</code></td><td>Tag management, organization</td></tr>
+<tr><td><strong>Researcher</strong></td><td>Red</td><td><code>#EF4444</code></td><td>External research, citations</td></tr>
+<tr><td><strong>Writer</strong></td><td>Indigo</td><td><code>#6366F1</code></td><td>Content generation</td></tr>
+</table>
+<h3>2.2 Color Configuration UI</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Agent Colors                                                    [Reset All] │
+│  ───────────────────────────────────────────────────────────────────────────│
+│                                                                              │
+│  Customize how agents appear throughout the app.                            │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  [●] Reader                                         [■ Blue    ▼]   │   │
+│  │      Memory extraction, summaries, tag suggestions                   │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  [●] Searcher                                       [■ Amber   ▼]   │   │
+│  │      Search and retrieval                                            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  [●] Feeder                                         [■ Orange  ▼]   │   │
+│  │      Web clips, imports                                              │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ... more agents ...                                                        │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.3 Color Dropdown Options</h3>
+<p>Predefined palette (prevents accessibility issues):
+<li>Blue (<code>#3B82F6</code>)</li>
+<li>Amber (<code>#F59E0B</code>)</li>
+<li>Orange (<code>#F97316</code>)</li>
+<li>Purple (<code>#8B5CF6</code>)</li>
+<li>Cyan (<code>#06B6D4</code>)</li>
+<li>Green (<code>#10B981</code>)</li>
+<li>Red (<code>#EF4444</code>)</li>
+<li>Indigo (<code>#6366F1</code>)</li>
+<li>Pink (<code>#EC4899</code>)</li>
+<li>Slate (<code>#64748B</code>)</li></p>
+<hr>
+<h2>3. Settings Page Structure</h2>
+<h3>3.1 Navigation</h3>
+<pre><code class="language-">/settings
+├── /settings/general          → Display, language, date format
+├── /settings/agents           → Agent-specific settings (tabbed by agent)
+│   ├── ?tab=reader
+│   ├── ?tab=searcher
+│   ├── ?tab=feeder
+│   └── ...
+├── /settings/appearance       → Theme, agent colors, density
+├── /settings/storage          → Storage backends, BYOB
+├── /settings/notifications    → Email, in-app notifications
+├── /settings/api              → API keys
+└── /settings/advanced         → Debug, export, danger zone
+</code></pre>
+<h3>3.2 Settings Section Component</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Section Title                                           [Reset to Defaults] │
+│  ───────────────────────────────────────────────────────────────────────────│
+│  Brief description of what these settings control.                          │
+│                                                                              │
+│  Setting Label                                                              │
+│  Helper text explaining the setting                    [Control]            │
+│                                                                   Saved ✓   │
+│                                                                              │
+│  Another Setting                                                            │
+│  More helper text                                      [Control]            │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.3 Control Types</h3>
+<table>
+<tr><th>Control</th><th>Appearance</th><th>Behavior</th></tr>
+<tr><td><strong>Toggle</strong></td><td>Switch</td><td>Immediate apply</td></tr>
+<tr><td><strong>Dropdown</strong></td><td>Select with chevron</td><td>Immediate apply on selection</td></tr>
+<tr><td><strong>Slider</strong></td><td>Track with handle + value label</td><td>Apply on release</td></tr>
+<tr><td><strong>Radio Group</strong></td><td>Vertical stack of options</td><td>Immediate apply</td></tr>
+<tr><td><strong>Number Input</strong></td><td>Input with +/- buttons</td><td>Apply on blur or Enter</td></tr>
+<tr><td><strong>Text Input</strong></td><td>Standard input</td><td>Apply on blur or Enter</td></tr>
+</table>
+<hr>
+<h2>4. Inline Save Confirmation</h2>
+<h3>4.1 Behavior</h3>
+<p>1. User changes a setting
+2. Setting applies immediately
+3. "Saved" text appears inline (right-aligned, muted color)
+4. Text fades out after 2 seconds
+5. If error: "Failed to save" in red, with retry on next change</p>
+<h3>4.2 Visual</h3>
+<pre><code class="language-">Auto-process new entries                              [━━━━━●] On
+                                                            Saved ✓
+<p>Extraction model                                    [Claude Haiku ▼]
+                                                            Saved ✓
+</code></pre></p>
+<hr>
+<h2>5. Hover States (Desktop Only)</h2>
+<h3>5.1 When to Use Hover</h3>
+<table>
+<tr><th>Element</th><th>Hover Content</th></tr>
+<tr><td>Setting label</td><td>Extended description/help</td></tr>
+<tr><td>Agent name</td><td>Agent capabilities summary</td></tr>
+<tr><td>Confidence score</td><td>"Based on X factors"</td></tr>
+<tr><td>Processing status</td><td>Detailed progress info</td></tr>
+<tr><td>Cost display</td><td>Breakdown of costs</td></tr>
+<tr><td>Error indicator</td><td>Full error message</td></tr>
+</table>
+<h3>5.2 Hover Behavior</h3>
+<li>Delay: 300ms before showing</li>
+<li>Position: Above or below element (avoid viewport edges)</li>
+<li>Max width: 300px</li>
+<li>Dismiss: On mouse leave or click elsewhere</li>
+<li>Mobile: Tap to toggle (not hover)</li>
+<hr>
+<h2>6. Database Schema</h2>
+<pre><code class="language-sql">CREATE TABLE user_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+<p>-- General
+  theme VARCHAR(20) DEFAULT 'system',  -- 'light', 'dark', 'system'
+  density VARCHAR(20) DEFAULT 'comfortable',  -- 'compact', 'comfortable', 'spacious'
+  date_format VARCHAR(20) DEFAULT 'relative',  -- 'relative', 'absolute', 'iso'</p>
+<p>-- Agent colors (JSONB for flexibility)
+  agent_colors JSONB DEFAULT '{}',  -- {&quot;reader&quot;: &quot;#3B82F6&quot;, ...}</p>
+<p>-- Notification preferences
+  email_digest VARCHAR(20) DEFAULT 'daily',  -- 'none', 'daily', 'weekly'</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),</p>
+<p>UNIQUE(user_id)
+);
+</code></pre></p>
+<hr>
+<h2>7. Related Documents</h2>
+<li><a href="../ui_plan.md">UI Plan</a> - Master UI document</li>
+<li><a href="./reader_ui_plan.md">Reader Agent UI</a> - Reader-specific settings</li>
+<li><a href="./river_ui_plan.md">River Agent UI</a> - River-specific settings</li>
+</ul>
+<hr>
+<em>Last updated: 2026-01-30</em>
+  </article>
+</body>
+</html>

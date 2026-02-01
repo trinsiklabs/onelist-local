@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Application UI Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Application UI Plan</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Active - MVP Priority
+<strong>Platforms:</strong> Web (Phoenix LiveView) + Desktop (Native Shell with WebView)
+<hr>
+<h2>Table of Contents</h2>
+<p>1. <a href="#1-design-philosophy">Design Philosophy</a>
+2. <a href="#2-design-system">Design System</a>
+3. <a href="#3-information-architecture">Information Architecture</a>
+4. <a href="#4-core-layouts">Core Layouts</a>
+5. <a href="#5-feature-modules">Feature Modules</a>
+6. <a href="#6-data-visibility-principles">Data Visibility Principles</a>
+7. <a href="#7-component-library">Component Library</a>
+8. <a href="#8-responsive-design">Responsive Design</a>
+9. <a href="#9-accessibility">Accessibility</a>
+10. <a href="#10-implementation-plan">Implementation Plan</a></p>
+<hr>
+<h2>1. Design Philosophy</h2>
+<h3>1.1 Core Principles</h3>
+<table>
+<tr><th>Principle</th><th>Description</th></tr>
+<tr><td><strong>Transparency</strong></td><td>All user data visible, including AI-generated content (memories, suggestions)</td></tr>
+<tr><td><strong>Clarity</strong></td><td>Clean, minimal interface with clear visual hierarchy</td></tr>
+<tr><td><strong>Trust</strong></td><td>Users always know what's happening with their data</td></tr>
+<tr><td><strong>Progressive Disclosure</strong></td><td>Simple by default, power features available on demand</td></tr>
+<tr><td><strong>Consistency</strong></td><td>Same visual language across web and desktop</td></tr>
+</table>
+<h3>1.2 User Mental Model</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         USER'S SECOND BRAIN                                  │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │  ENTRIES (What I saved)                                               │   │
+│  │  • Notes I wrote                                                      │   │
+│  │  • Articles I clipped                                                 │   │
+│  │  • Files I uploaded                                                   │   │
+│  │  • Imports from other apps                                            │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                         │
+│                                    ▼                                         │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │  MEMORIES (What the AI learned) - READ-ONLY                           │   │
+│  │  • Facts extracted from entries                                       │   │
+│  │  • Preferences detected                                               │   │
+│  │  • Events and observations                                            │   │
+│  │  • Relationships between facts                                        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                         │
+│                                    ▼                                         │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │  AGENTS (AI that helps)                                               │   │
+│  │  • Reader: Extracts memories, suggests tags                           │   │
+│  │  • Searcher: Finds relevant content                                   │   │
+│  │  • Enrichment: Transcribes, describes, OCRs                           │   │
+│  │  • River: Answers questions (future)                                  │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>1.3 Design Goals</h3>
+<p>1. <strong>Every piece of data is visible</strong> - Users can see entries, memories, tags, enrichments, processing status
+2. <strong>AI is transparent</strong> - Users see what AI extracted, can accept/reject suggestions
+3. <strong>Clean default experience</strong> - Power features tucked away until needed
+4. <strong>Fast and responsive</strong> - Instant feedback, optimistic updates, smooth animations
+5. <strong>Works offline</strong> - Desktop app functions without internet (sync when available)</p>
+<hr>
+<h2>2. Design System</h2>
+<h3>2.1 Color Palette</h3>
+<pre><code class="language-css">/<em> Primary Colors </em>/
+--color-primary: #2563EB;        /<em> Blue - Main actions, links </em>/
+--color-primary-hover: #1D4ED8;  /<em> Blue hover state </em>/
+--color-primary-light: #EFF6FF;  /<em> Blue-50 - Backgrounds </em>/
+<p>/<em> Secondary Colors </em>/
+--color-secondary: #7C3AED;      /<em> Purple - AI/OpenClaw features </em>/
+--color-secondary-hover: #6D28D9;
+--color-secondary-light: #F5F3FF;</p>
+<p>/<em> Semantic Colors </em>/
+--color-success: #10B981;        /<em> Green - Completed, available </em>/
+--color-warning: #F59E0B;        /<em> Amber - Pending, coming soon </em>/
+--color-error: #EF4444;          /<em> Red - Errors, destructive </em>/
+--color-info: #3B82F6;           /<em> Blue - Information </em>/</p>
+<p>/<em> Neutral Colors </em>/
+--color-text: #1E293B;           /<em> Slate-800 - Primary text </em>/
+--color-text-muted: #64748B;     /<em> Slate-500 - Secondary text </em>/
+--color-text-subtle: #94A3B8;    /<em> Slate-400 - Tertiary text </em>/
+--color-border: #E2E8F0;         /<em> Slate-200 - Borders </em>/
+--color-border-light: #F1F5F9;   /<em> Slate-100 - Subtle borders </em>/
+--color-bg: #FFFFFF;             /<em> White - Main background </em>/
+--color-bg-subtle: #F8FAFC;      /<em> Slate-50 - Secondary bg </em>/
+--color-bg-dark: #0F172A;        /<em> Slate-900 - Dark mode/footer </em>/</p>
+<p>/<em> Memory Type Colors (for badges) </em>/
+--color-memory-fact: #3B82F6;       /<em> Blue </em>/
+--color-memory-preference: #8B5CF6; /<em> Purple </em>/
+--color-memory-event: #10B981;      /<em> Green </em>/
+--color-memory-observation: #F59E0B;/<em> Amber </em>/
+--color-memory-decision: #EF4444;   /<em> Red </em>/
+</code></pre></p>
+<h3>2.2 Typography</h3>
+<pre><code class="language-css">/<em> Font Families </em>/
+--font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+--font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+<p>/<em> Font Sizes </em>/
+--text-xs: 0.75rem;    /<em> 12px - Labels, badges </em>/
+--text-sm: 0.875rem;   /<em> 14px - Captions, secondary </em>/
+--text-base: 1rem;     /<em> 16px - Body text </em>/
+--text-lg: 1.125rem;   /<em> 18px - Large body </em>/
+--text-xl: 1.25rem;    /<em> 20px - Small headings </em>/
+--text-2xl: 1.5rem;    /<em> 24px - Section headings </em>/
+--text-3xl: 1.875rem;  /<em> 30px - Page headings </em>/
+--text-4xl: 2.25rem;   /<em> 36px - Hero headings </em>/</p>
+<p>/<em> Font Weights </em>/
+--font-normal: 400;
+--font-medium: 500;
+--font-semibold: 600;
+--font-bold: 700;</p>
+<p>/<em> Line Heights </em>/
+--leading-tight: 1.25;
+--leading-normal: 1.5;
+--leading-relaxed: 1.625;
+</code></pre></p>
+<h3>2.3 Spacing Scale</h3>
+<pre><code class="language-css">/<em> Based on 4px increments </em>/
+--space-1: 0.25rem;   /<em> 4px </em>/
+--space-2: 0.5rem;    /<em> 8px </em>/
+--space-3: 0.75rem;   /<em> 12px </em>/
+--space-4: 1rem;      /<em> 16px </em>/
+--space-5: 1.25rem;   /<em> 20px </em>/
+--space-6: 1.5rem;    /<em> 24px </em>/
+--space-8: 2rem;      /<em> 32px </em>/
+--space-10: 2.5rem;   /<em> 40px </em>/
+--space-12: 3rem;     /<em> 48px </em>/
+--space-16: 4rem;     /<em> 64px </em>/
+--space-20: 5rem;     /<em> 80px </em>/
+--space-24: 6rem;     /<em> 96px </em>/
+</code></pre>
+<h3>2.4 Border Radius</h3>
+<pre><code class="language-css">--radius-sm: 0.25rem;   /<em> 4px - Small elements </em>/
+--radius-md: 0.375rem;  /<em> 6px - Buttons, inputs </em>/
+--radius-lg: 0.5rem;    /<em> 8px - Cards </em>/
+--radius-xl: 0.75rem;   /<em> 12px - Large cards </em>/
+--radius-2xl: 1rem;     /<em> 16px - Modals, panels </em>/
+--radius-full: 9999px;  /<em> Pills, avatars </em>/
+</code></pre>
+<h3>2.5 Shadows</h3>
+<pre><code class="language-css">--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+</code></pre>
+<hr>
+<h2>3. Information Architecture</h2>
+<h3>3.1 Primary Navigation Structure</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  ONELIST                                                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  📥 Inbox              ← New/unprocessed entries                            │
+│  📚 Library            ← All entries (browsable, filterable)                │
+│  🧠 Memories           ← AI-extracted atomic facts (read-only)              │
+│  🔍 Search             ← Unified search across entries + memories           │
+│  🏷️ Tags               ← Tag management and browsing                        │
+│                                                                              │
+│  ─────────────────────                                                       │
+│                                                                              │
+│  ➕ Quick Add          ← Create note, clip URL, upload file                 │
+│  📊 Activity           ← Processing status, agent activity log              │
+│                                                                              │
+│  ─────────────────────                                                       │
+│                                                                              │
+│  ⚙️ Settings           ← User preferences, storage, integrations            │
+│  👤 Account            ← Profile, billing, API keys                         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.2 Page Hierarchy</h3>
+<pre><code class="language-">/                           → Dashboard (Inbox summary + recent activity)
+├── /inbox                  → Inbox view (unprocessed entries)
+├── /library                → Library view (all entries)
+│   └── /library/:id        → Entry detail view
+├── /memories               → Memories view (all AI-extracted memories)
+│   └── /memories/:id       → Memory detail (linked to source entry)
+├── /search                 → Search interface
+├── /tags                   → Tag management
+│   └── /tags/:name         → Entries with tag
+├── /activity               → Agent activity log
+├── /settings               → Settings
+│   ├── /settings/general   → General preferences
+│   ├── /settings/reader    → Reader agent config
+│   ├── /settings/storage   → Storage backends
+│   ├── /settings/sources   → Connected sources (Feeder)
+│   └── /settings/api       → API keys
+└── /account                → Account management
+    ├── /account/profile    → User profile
+    └── /account/billing    → Billing &amp; usage
+</code></pre>
+<h3>3.3 Entry Detail Information Hierarchy</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  ENTRY DETAIL VIEW                                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  [Header]                                                                    │
+│  ├── Title (editable)                                                        │
+│  ├── Entry type badge (note, article, document, audio, video, image)        │
+│  ├── Source info (web clip URL, import source, upload date)                 │
+│  └── Actions (edit, share, delete, more...)                                 │
+│                                                                              │
+│  [Content Area - Tabbed]                                                     │
+│  ├── Content Tab (default)                                                   │
+│  │   └── Rendered markdown/HTML representation                              │
+│  ├── Memories Tab                                                            │
+│  │   └── AI-extracted atomic memories from this entry                       │
+│  ├── Assets Tab (if has attachments)                                        │
+│  │   └── Images, files, audio/video with enrichment status                  │
+│  └── History Tab                                                             │
+│      └── Version history, edits                                             │
+│                                                                              │
+│  [Sidebar - Metadata]                                                        │
+│  ├── Tags (with suggestions from Reader)                                     │
+│  │   └── Suggested tags: [Accept] [Reject]                                  │
+│  ├── Dates                                                                   │
+│  │   ├── Created: Jan 30, 2026                                              │
+│  │   ├── Updated: Jan 30, 2026                                              │
+│  │   └── Content date: Jan 29, 2026 (if different)                          │
+│  ├── Processing Status                                                       │
+│  │   ├── Reader: ✓ Processed (12 memories)                                  │
+│  │   ├── Embeddings: ✓ Indexed                                              │
+│  │   └── Enrichment: ✓ Completed                                            │
+│  └── Related Entries                                                         │
+│      └── Semantically similar entries                                       │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>4. Core Layouts</h2>
+<h3>4.1 Application Shell</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  HEADER BAR (56px)                                                   │    │
+│  │  [Logo]        [Search] ─────────────────────  [Add] [Notifications]│    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│  ┌───────────┬─────────────────────────────────────────────────────────┐    │
+│  │           │                                                          │    │
+│  │  SIDEBAR  │                    MAIN CONTENT                          │    │
+│  │  (240px)  │                                                          │    │
+│  │           │                                                          │    │
+│  │  Nav      │                                                          │    │
+│  │  Items    │                                                          │    │
+│  │           │                                                          │    │
+│  │           │                                                          │    │
+│  │           │                                                          │    │
+│  │           │                                                          │    │
+│  │  ───────  │                                                          │    │
+│  │           │                                                          │    │
+│  │  Settings │                                                          │    │
+│  │  Account  │                                                          │    │
+│  │           │                                                          │    │
+│  └───────────┴─────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 List View Layout (Library, Inbox, Memories)</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  [Page Title]                                              [View] [Filters] │
+│                                                                              │
+│  ┌─ Filter Bar ─────────────────────────────────────────────────────────┐   │
+│  │  [All Types ▼] [All Tags ▼] [Date Range ▼]  [Sort: Recent ▼]        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Entry Card ─────────────────────────────────────────────────────────┐   │
+│  │  [Type Icon]  Title of the Entry                           [3 days]  │   │
+│  │               Preview text of the content...                          │   │
+│  │               [tag-1] [tag-2]                      [✓ 5 memories]    │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Entry Card ─────────────────────────────────────────────────────────┐   │
+│  │  [Type Icon]  Another Entry Title                          [1 week]  │   │
+│  │               More preview text here...                               │   │
+│  │               [tag-3]                                 [⏳ Processing] │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ... more cards ...                                                          │
+│                                                                              │
+│  ┌─ Pagination ─────────────────────────────────────────────────────────┐   │
+│  │                    [←] Page 1 of 24 [→]                               │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.3 Detail View Layout (Entry, Memory)</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  [← Back to Library]                                                         │
+│                                                                              │
+│  ┌─ Main Content (70%) ───────────────────────┬─ Sidebar (30%) ─────────┐   │
+│  │                                             │                         │   │
+│  │  [Article] Understanding Elixir Processes  │  METADATA                │   │
+│  │  ─────────────────────────────────────     │  ─────────────────────   │   │
+│  │  https://example.com/elixir-processes      │  Created: Jan 30, 2026   │   │
+│  │                                             │  Source: Web Clip        │   │
+│  │  [Content] [Memories] [Assets] [History]   │                         │   │
+│  │  ─────────────────────────────────────     │  TAGS                    │   │
+│  │                                             │  ─────────────────────   │   │
+│  │  Elixir processes are lightweight and      │  [elixir] [programming]  │   │
+│  │  isolated. Each process has its own        │                         │   │
+│  │  heap and garbage collector...             │  💡 Suggested:           │   │
+│  │                                             │  [concurrency] [Accept]  │   │
+│  │  ## Key Concepts                           │  [beam] [Accept]         │   │
+│  │                                             │                         │   │
+│  │  - Processes are cheap to create           │  PROCESSING              │   │
+│  │  - Message passing is the only way...      │  ─────────────────────   │   │
+│  │                                             │  ✓ Reader: 8 memories    │   │
+│  │                                             │  ✓ Embeddings: Indexed   │   │
+│  │                                             │                         │   │
+│  │                                             │  RELATED                 │   │
+│  │                                             │  ─────────────────────   │   │
+│  │                                             │  • GenServer Basics      │   │
+│  │                                             │  • OTP Principles        │   │
+│  └─────────────────────────────────────────────┴─────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.4 Memories Tab View (within Entry Detail)</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  [Content] [Memories ●] [Assets] [History]                                   │
+│  ─────────────────────────────────────────────────────────────────────────   │
+│                                                                              │
+│  8 memories extracted from this entry                    [View All User     │
+│                                                           Memories →]       │
+│                                                                              │
+│  ┌─ Memory Card ────────────────────────────────────────────────────────┐   │
+│  │  [FACT]  Elixir processes are lightweight, with each process using   │   │
+│  │          approximately 2KB of memory initially.                       │   │
+│  │                                                                       │   │
+│  │  Confidence: 95%  •  Extracted: Jan 30, 2026                         │   │
+│  │  Entities: [Elixir]                                                  │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Memory Card ────────────────────────────────────────────────────────┐   │
+│  │  [FACT]  Processes in Elixir communicate only through message        │   │
+│  │          passing, ensuring isolation and fault tolerance.             │   │
+│  │                                                                       │   │
+│  │  Confidence: 92%  •  Extracted: Jan 30, 2026                         │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Memory Card (Superseded) ───────────────────────────────────────────┐   │
+│  │  [FACT]  ~~Each process has 1KB initial memory~~                     │   │
+│  │          Superseded by newer memory ↑                                │   │
+│  │                                                                       │   │
+│  │  ⚠️ This memory has been superseded                                  │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>5. Feature Modules</h2>
+<h3>5.1 Inbox Module</h3>
+<strong>Purpose:</strong> Surface new and unprocessed entries for user attention.
+<strong>Components:</strong>
+<ul>
+<li>Inbox count badge in sidebar</li>
+<li>Unprocessed entries list</li>
+<li>Quick actions (process now, archive, tag)</li>
+<li>Bulk actions (process all, tag all)</li>
+<strong>States:</strong>
+<li>Empty inbox celebration</li>
+<li>Processing in progress</li>
+<li>Items awaiting attention</li>
+<h3>5.2 Library Module</h3>
+<strong>Purpose:</strong> Browse and manage all entries.
+<strong>Views:</strong>
+<li>List view (default)</li>
+<li>Grid view (for visual content)</li>
+<li>Table view (for power users)</li>
+<strong>Features:</strong>
+<li>Multi-select for bulk operations</li>
+<li>Inline editing of titles</li>
+<li>Drag-and-drop reordering (future)</li>
+<li>Keyboard navigation</li>
+<strong>Filters:</strong>
+<li>Entry type (note, article, document, audio, video, image)</li>
+<li>Tags (multi-select)</li>
+<li>Date range</li>
+<li>Processing status</li>
+<li>Has memories / Has assets</li>
+<h3>5.3 Memories Module</h3>
+<strong>Purpose:</strong> Browse all AI-extracted memories with full transparency.
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  🧠 Memories                                                    [Export]    │
+│  ─────────────────────────────────────────────────────────────────────────   │
+│  Your AI has extracted 1,247 memories from 234 entries                      │
+│                                                                              │
+│  ┌─ Filter Bar ─────────────────────────────────────────────────────────┐   │
+│  │  [All Types ▼] [All Sources ▼] [Current Only ☑️]  [Sort: Recent ▼]   │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Memory Type Breakdown ──────────────────────────────────────────────┐   │
+│  │  Facts: 823  │  Events: 201  │  Preferences: 156  │  Other: 67       │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Memory Card ────────────────────────────────────────────────────────┐   │
+│  │  [PREFERENCE]  User prefers dark mode for coding environments        │   │
+│  │                                                                       │   │
+│  │  Source: &quot;My Dev Setup Notes&quot;  •  Confidence: 94%                    │   │
+│  │  Extracted: Jan 28, 2026                                             │   │
+│  │                                                       [View Source →]│   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Memory Card ────────────────────────────────────────────────────────┐   │
+│  │  [EVENT]  Team meeting scheduled for Friday at 2pm in Room A         │   │
+│  │                                                                       │   │
+│  │  Source: &quot;Weekly Standup Notes&quot;  •  Confidence: 98%                  │   │
+│  │  Temporal: &quot;Friday&quot; → 2026-01-31 14:00                               │   │
+│  │  Entities: [Team] [Room A]                                           │   │
+│  │                                                       [View Source →]│   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Features:</strong>
+<li>Filter by memory type (fact, preference, event, observation, decision)</li>
+<li>Filter by source entry</li>
+<li>Toggle: Show current only vs. include superseded</li>
+<li>Link to source entry</li>
+<li>Memory timeline view (chronological)</li>
+<li>Entity extraction display</li>
+<li>Confidence scores visible</li>
+<strong>Read-Only Notice:</strong>
+<pre><code class="language-">┌──────────────────────────────────────────────────────────────────────────┐
+│  ℹ️ Memories are automatically extracted by AI and cannot be edited.    │
+│     To correct a memory, edit the source entry and re-process.          │
+└──────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.4 Search Module</h3>
+<strong>Purpose:</strong> Unified search across entries and memories.
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  🔍 Search                                                                   │
+│  ─────────────────────────────────────────────────────────────────────────   │
+│                                                                              │
+│  ┌─ Search Input ───────────────────────────────────────────────────────┐   │
+│  │  🔍 What did I learn about Elixir processes?                         │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Search Options ─────────────────────────────────────────────────────┐   │
+│  │  Search in: [● Entries] [● Memories] [○ Both]                        │   │
+│  │  Mode: [Semantic ▼]  Filters: [Add Filter +]                         │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  Found 12 results (8 entries, 4 memories)                     0.23 seconds  │
+│                                                                              │
+│  ── MEMORIES ──────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  ┌─ Memory Result ──────────────────────────────────────────────────────┐   │
+│  │  [FACT] Elixir processes communicate only through message passing    │   │
+│  │         [MATCH: 94%]                                                  │   │
+│  │  Source: &quot;Understanding Elixir Processes&quot;        [View Memory →]     │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ── ENTRIES ───────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  ┌─ Entry Result ───────────────────────────────────────────────────────┐   │
+│  │  [Article] Understanding Elixir Processes           [MATCH: 89%]     │   │
+│  │  ...processes are lightweight and isolated. Each process has...      │   │
+│  │  [elixir] [programming]                              [View Entry →]  │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.5 Tags Module</h3>
+<strong>Purpose:</strong> Manage tags and browse by tag.
+<strong>Features:</strong>
+<li>Tag list with entry counts</li>
+<li>Tag suggestions from Reader</li>
+<li>Merge duplicate tags</li>
+<li>Rename tags</li>
+<li>Delete unused tags</li>
+<li>Tag hierarchy (future)</li>
+<h3>5.6 Activity Module</h3>
+<strong>Purpose:</strong> Full transparency into AI agent activity.
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  📊 Activity                                                [Clear All]     │
+│  ─────────────────────────────────────────────────────────────────────────   │
+│                                                                              │
+│  ┌─ Activity Summary ───────────────────────────────────────────────────┐   │
+│  │  Today: 12 entries processed  •  47 memories extracted  •  $0.02     │   │
+│  │  This month: 234 entries  •  1,247 memories  •  $0.89 total cost     │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Filter ─────────────────────────────────────────────────────────────┐   │
+│  │  [All Agents ▼] [All Status ▼] [Today ▼]                             │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ── TODAY ─────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  ┌─ Activity Item ──────────────────────────────────────────────────────┐   │
+│  │  ✓ Reader Agent processed &quot;Weekly Meeting Notes&quot;           2 min ago │   │
+│  │    Extracted 5 memories  •  Suggested 2 tags  •  Cost: $0.001        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Activity Item ──────────────────────────────────────────────────────┐   │
+│  │  ✓ Enrichment Agent transcribed &quot;Interview Recording&quot;      5 min ago │   │
+│  │    Duration: 23:45  •  Speakers: 2  •  Cost: $0.05                   │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Activity Item ──────────────────────────────────────────────────────┐   │
+│  │  ⏳ Reader Agent processing &quot;Research Paper on LLMs&quot;      in progress│   │
+│  │    Chunking content...                                               │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─ Activity Item (Error) ──────────────────────────────────────────────┐   │
+│  │  ✗ Enrichment Agent failed on &quot;Corrupted Audio File&quot;       1 hr ago  │   │
+│  │    Error: Unable to decode audio format            [Retry] [Dismiss] │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.7 Settings Module</h3>
+<strong>Sections:</strong>
+<p>1. <strong>General Settings</strong>
+   <li>Display preferences (theme, density)</li>
+   <li>Default entry type</li>
+   <li>Date/time format</li>
+   <li>Language</li></p>
+<p>2. <strong>Reader Agent Settings</strong>
+   <li>Auto-process on create/update toggles</li>
+   <li>Extraction model selection</li>
+   <li>Memory extraction settings</li>
+   <li>Tag suggestion preferences</li>
+   <li>Compaction settings (future)</li></p>
+<p>3. <strong>Enrichment Settings</strong>
+   <li>Enable/disable by asset type</li>
+   <li>Transcription settings</li>
+   <li>OCR settings</li>
+   <li>Budget/spending cap</li></p>
+<p>4. <strong>Storage Settings</strong>
+   <li>Current storage backend</li>
+   <li>BYOB configuration</li>
+   <li>Mirror status</li>
+   <li>Storage usage</li></p>
+<p>5. <strong>Connected Sources</strong>
+   <li>List of integrations</li>
+   <li>Connect new source</li>
+   <li>Sync frequency</li>
+   <li>Import history</li></p>
+<p>6. <strong>API Keys</strong>
+   <li>Generate new key</li>
+   <li>List existing keys (partial)</li>
+   <li>Revoke keys</li></p>
+<hr>
+<h2>6. Data Visibility Principles</h2>
+<h3>6.1 Complete Transparency</h3>
+<strong>Every piece of data the system holds about the user must be visible:</strong>
+<table>
+<tr><th>Data Type</th><th>Location</th><th>User Can...</th></tr>
+<tr><td>Entries</td><td>Library</td><td>View, Edit, Delete</td></tr>
+<tr><td>Memories</td><td>Memories page + Entry detail</td><td>View only (edit source to change)</td></tr>
+<tr><td>Tag suggestions</td><td>Entry detail sidebar</td><td>Accept, Reject</td></tr>
+<tr><td>Embeddings</td><td>Not shown directly</td><td>Inferred via search quality</td></tr>
+<tr><td>Processing status</td><td>Activity page + Entry detail</td><td>View, Retry failed</td></tr>
+<tr><td>Costs</td><td>Activity page + Settings</td><td>View, Set caps</td></tr>
+<tr><td>Agent activity</td><td>Activity page</td><td>View full log</td></tr>
+<tr><td>Storage usage</td><td>Settings</td><td>View breakdown</td></tr>
+<tr><td>API usage</td><td>Settings</td><td>View history</td></tr>
+</table>
+<h3>6.2 Memory Visibility Rules</h3>
+<strong>All memories extracted by AI are visible to users:</strong>
+<p>1. <strong>Per-Entry View:</strong> Memories tab shows all memories from that entry
+2. <strong>Global View:</strong> Memories page shows all memories across all entries
+3. <strong>Superseded Memories:</strong> Shown with strikethrough and explanation
+4. <strong>Confidence Scores:</strong> Always visible
+5. <strong>Source Link:</strong> Every memory links back to source entry
+6. <strong>Entities:</strong> Extracted entities shown as chips
+7. <strong>Temporal Resolution:</strong> Show original expression + resolved date</p>
+<strong>Read-Only Rationale:</strong>
+<li>Memories are derived data, not primary data</li>
+<li>Editing memories would create inconsistency with source</li>
+<li>To "fix" a memory, user edits source entry → triggers re-processing</li>
+<h3>6.3 Processing Transparency</h3>
+<strong>Users always know what's being processed:</strong>
+<p>1. <strong>Queue Visibility:</strong> "3 items processing" indicator
+2. <strong>Progress Display:</strong> Real-time progress for long operations
+3. <strong>Cost Display:</strong> Per-operation and cumulative costs shown
+4. <strong>Error Visibility:</strong> Failed operations shown with retry option
+5. <strong>Model Attribution:</strong> Which AI model processed each item</p>
+<hr>
+<h2>7. Component Library</h2>
+<h3>7.1 Navigation Components</h3>
+<h4>Sidebar Navigation</h4>
+<pre><code class="language-html">&lt;nav class=&quot;sidebar&quot;&gt;
+  &lt;div class=&quot;nav-section&quot;&gt;
+    &lt;a href=&quot;/inbox&quot; class=&quot;nav-item active&quot;&gt;
+      &lt;span class=&quot;nav-icon&quot;&gt;📥&lt;/span&gt;
+      &lt;span class=&quot;nav-label&quot;&gt;Inbox&lt;/span&gt;
+      &lt;span class=&quot;nav-badge&quot;&gt;3&lt;/span&gt;
+    &lt;/a&gt;
+    &lt;a href=&quot;/library&quot; class=&quot;nav-item&quot;&gt;
+      &lt;span class=&quot;nav-icon&quot;&gt;📚&lt;/span&gt;
+      &lt;span class=&quot;nav-label&quot;&gt;Library&lt;/span&gt;
+    &lt;/a&gt;
+    &lt;!-- ... --&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;
+</code></pre>
+<h4>Breadcrumb</h4>
+<pre><code class="language-html">&lt;nav class=&quot;breadcrumb&quot;&gt;
+  &lt;a href=&quot;/library&quot;&gt;Library&lt;/a&gt;
+  &lt;span class=&quot;separator&quot;&gt;/&lt;/span&gt;
+  &lt;span class=&quot;current&quot;&gt;Entry Title&lt;/span&gt;
+&lt;/nav&gt;
+</code></pre>
+<h3>7.2 Card Components</h3>
+<h4>Entry Card</h4>
+<pre><code class="language-html">&lt;article class=&quot;entry-card&quot;&gt;
+  &lt;div class=&quot;entry-card-icon&quot;&gt;📄&lt;/div&gt;
+  &lt;div class=&quot;entry-card-content&quot;&gt;
+    &lt;h3 class=&quot;entry-card-title&quot;&gt;Entry Title&lt;/h3&gt;
+    &lt;p class=&quot;entry-card-preview&quot;&gt;Preview text...&lt;/p&gt;
+    &lt;div class=&quot;entry-card-tags&quot;&gt;
+      &lt;span class=&quot;tag&quot;&gt;tag-1&lt;/span&gt;
+      &lt;span class=&quot;tag&quot;&gt;tag-2&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;entry-card-meta&quot;&gt;
+    &lt;span class=&quot;entry-card-date&quot;&gt;3 days ago&lt;/span&gt;
+    &lt;span class=&quot;entry-card-memories&quot;&gt;✓ 5 memories&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/article&gt;
+</code></pre>
+<h4>Memory Card</h4>
+<pre><code class="language-html">&lt;article class=&quot;memory-card&quot;&gt;
+  &lt;div class=&quot;memory-card-type memory-type-fact&quot;&gt;FACT&lt;/div&gt;
+  &lt;div class=&quot;memory-card-content&quot;&gt;
+    &lt;p&gt;The extracted memory content goes here...&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;memory-card-meta&quot;&gt;
+    &lt;span class=&quot;memory-confidence&quot;&gt;Confidence: 94%&lt;/span&gt;
+    &lt;span class=&quot;memory-date&quot;&gt;Extracted: Jan 30, 2026&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;memory-card-entities&quot;&gt;
+    &lt;span class=&quot;entity&quot;&gt;Entity Name&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;a href=&quot;/library/123&quot; class=&quot;memory-card-source&quot;&gt;View Source →&lt;/a&gt;
+&lt;/article&gt;
+</code></pre>
+<h3>7.3 Form Components</h3>
+<h4>Text Input</h4>
+<pre><code class="language-html">&lt;div class=&quot;form-field&quot;&gt;
+  &lt;label for=&quot;title&quot; class=&quot;form-label&quot;&gt;Title&lt;/label&gt;
+  &lt;input type=&quot;text&quot; id=&quot;title&quot; class=&quot;form-input&quot; placeholder=&quot;Enter title...&quot;&gt;
+  &lt;p class=&quot;form-hint&quot;&gt;Brief description of your entry&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>Tag Input</h4>
+<pre><code class="language-html">&lt;div class=&quot;tag-input&quot;&gt;
+  &lt;div class=&quot;tag-input-tags&quot;&gt;
+    &lt;span class=&quot;tag tag-removable&quot;&gt;existing-tag &lt;button&gt;×&lt;/button&gt;&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;input type=&quot;text&quot; class=&quot;tag-input-field&quot; placeholder=&quot;Add tag...&quot;&gt;
+  &lt;div class=&quot;tag-suggestions&quot;&gt;
+    &lt;button class=&quot;tag-suggestion&quot;&gt;suggested-tag&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>7.4 Status Components</h3>
+<h4>Badge</h4>
+<pre><code class="language-html">&lt;span class=&quot;badge badge-success&quot;&gt;Completed&lt;/span&gt;
+&lt;span class=&quot;badge badge-warning&quot;&gt;Processing&lt;/span&gt;
+&lt;span class=&quot;badge badge-error&quot;&gt;Failed&lt;/span&gt;
+&lt;span class=&quot;badge badge-info&quot;&gt;3 new&lt;/span&gt;
+</code></pre>
+<h4>Memory Type Badge</h4>
+<pre><code class="language-html">&lt;span class=&quot;memory-type memory-type-fact&quot;&gt;FACT&lt;/span&gt;
+&lt;span class=&quot;memory-type memory-type-preference&quot;&gt;PREFERENCE&lt;/span&gt;
+&lt;span class=&quot;memory-type memory-type-event&quot;&gt;EVENT&lt;/span&gt;
+&lt;span class=&quot;memory-type memory-type-observation&quot;&gt;OBSERVATION&lt;/span&gt;
+&lt;span class=&quot;memory-type memory-type-decision&quot;&gt;DECISION&lt;/span&gt;
+</code></pre>
+<h4>Processing Status</h4>
+<pre><code class="language-html">&lt;div class=&quot;processing-status&quot;&gt;
+  &lt;div class=&quot;processing-item processing-complete&quot;&gt;
+    &lt;span class=&quot;processing-icon&quot;&gt;✓&lt;/span&gt;
+    &lt;span class=&quot;processing-label&quot;&gt;Reader: 8 memories&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;processing-item processing-pending&quot;&gt;
+    &lt;span class=&quot;processing-icon&quot;&gt;⏳&lt;/span&gt;
+    &lt;span class=&quot;processing-label&quot;&gt;Embeddings: Indexing...&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3>7.5 Modal Components</h3>
+<h4>Confirmation Modal</h4>
+<pre><code class="language-html">&lt;div class=&quot;modal&quot;&gt;
+  &lt;div class=&quot;modal-backdrop&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;modal-content&quot;&gt;
+    &lt;h2 class=&quot;modal-title&quot;&gt;Delete Entry?&lt;/h2&gt;
+    &lt;p class=&quot;modal-body&quot;&gt;
+      This will permanently delete the entry and its 5 extracted memories.
+    &lt;/p&gt;
+    &lt;div class=&quot;modal-actions&quot;&gt;
+      &lt;button class=&quot;btn btn-secondary&quot;&gt;Cancel&lt;/button&gt;
+      &lt;button class=&quot;btn btn-danger&quot;&gt;Delete&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h4>Tag Suggestion Modal</h4>
+<pre><code class="language-html">&lt;div class=&quot;suggestion-card&quot;&gt;
+  &lt;div class=&quot;suggestion-header&quot;&gt;
+    &lt;span class=&quot;suggestion-icon&quot;&gt;💡&lt;/span&gt;
+    &lt;span class=&quot;suggestion-title&quot;&gt;Suggested Tags&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;suggestion-list&quot;&gt;
+    &lt;div class=&quot;suggestion-item&quot;&gt;
+      &lt;span class=&quot;tag&quot;&gt;elixir&lt;/span&gt;
+      &lt;span class=&quot;suggestion-confidence&quot;&gt;94% confident&lt;/span&gt;
+      &lt;div class=&quot;suggestion-actions&quot;&gt;
+        &lt;button class=&quot;btn btn-sm btn-success&quot;&gt;Accept&lt;/button&gt;
+        &lt;button class=&quot;btn btn-sm btn-ghost&quot;&gt;Reject&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<hr>
+<h2>8. Responsive Design</h2>
+<h3>8.1 Breakpoints</h3>
+<pre><code class="language-css">/<em> Mobile first </em>/
+/<em> Default: 0 - 639px </em>/
+<p>/<em> Tablet </em>/
+@media (min-width: 640px) { /<em> sm </em>/ }</p>
+<p>/<em> Small desktop </em>/
+@media (min-width: 768px) { /<em> md </em>/ }</p>
+<p>/<em> Desktop </em>/
+@media (min-width: 1024px) { /<em> lg </em>/ }</p>
+<p>/<em> Large desktop </em>/
+@media (min-width: 1280px) { /<em> xl </em>/ }
+</code></pre></p>
+<h3>8.2 Layout Adaptations</h3>
+<table>
+<tr><th>Breakpoint</th><th>Sidebar</th><th>Content</th><th>Entry Detail</th></tr>
+<tr><td>Mobile (<640px)</td><td>Hidden (hamburger)</td><td>Full width</td><td>Stacked (sidebar below)</td></tr>
+<tr><td>Tablet (640-1023px)</td><td>Collapsed icons</td><td>Expanded</td><td>Stacked</td></tr>
+<tr><td>Desktop (≥1024px)</td><td>Full (240px)</td><td>Remaining</td><td>Side-by-side</td></tr>
+</table>
+<h3>8.3 Mobile-Specific Patterns</h3>
+<p>1. <strong>Bottom Navigation Bar:</strong> Primary nav moves to bottom on mobile
+2. <strong>Pull-to-Refresh:</strong> On list views
+3. <strong>Swipe Actions:</strong> Swipe entry cards for quick actions
+4. <strong>Full-Screen Modals:</strong> Modals become full-screen sheets
+5. <strong>Floating Action Button:</strong> Quick add button floats bottom-right</p>
+<hr>
+<h2>9. Accessibility</h2>
+<h3>9.1 Standards</h3>
+<li>WCAG 2.1 Level AA compliance</li>
+<li>Keyboard navigable</li>
+<li>Screen reader compatible</li>
+<li>Reduced motion support</li>
+<h3>9.2 Implementation</h3>
+<p>1. <strong>Semantic HTML:</strong> Proper heading hierarchy, landmarks, lists
+2. <strong>ARIA Labels:</strong> For icons, actions, dynamic content
+3. <strong>Focus Management:</strong> Visible focus states, logical tab order
+4. <strong>Color Contrast:</strong> All text meets 4.5:1 ratio minimum
+5. <strong>Alt Text:</strong> All images have descriptive alt text
+6. <strong>Error Announcements:</strong> Form errors announced to screen readers</p>
+<h3>9.3 Keyboard Shortcuts</h3>
+<table>
+<tr><th>Shortcut</th><th>Action</th></tr>
+<tr><td><code>Cmd/Ctrl + K</code></td><td>Open search</td></tr>
+<tr><td><code>Cmd/Ctrl + N</code></td><td>New entry</td></tr>
+<tr><td><code>Cmd/Ctrl + S</code></td><td>Save current entry</td></tr>
+<tr><td><code>Escape</code></td><td>Close modal/sidebar</td></tr>
+<tr><td><code>J/K</code></td><td>Navigate list items</td></tr>
+<tr><td><code>Enter</code></td><td>Open selected item</td></tr>
+<tr><td><code>?</code></td><td>Show keyboard shortcuts</td></tr>
+</table>
+<hr>
+<h2>10. Implementation Plan</h2>
+<h3>10.1 Phase 1: Foundation (Week 1)</h3>
+<li>[ ] Set up Tailwind CSS with design tokens</li>
+<li>[ ] Create base HTML templates</li>
+<li>[ ] Build component library (static HTML/CSS)</li>
+<li>[ ] Implement application shell layout</li>
+<li>[ ] Build navigation components</li>
+<h3>10.2 Phase 2: Core Views (Week 2)</h3>
+<li>[ ] Library list view</li>
+<li>[ ] Entry detail view with tabs</li>
+<li>[ ] Memories tab within entry detail</li>
+<li>[ ] Tag sidebar with suggestions</li>
+<li>[ ] Processing status indicators</li>
+<h3>10.3 Phase 3: Memories & Search (Week 3)</h3>
+<li>[ ] Global Memories page</li>
+<li>[ ] Memory cards with all metadata</li>
+<li>[ ] Search interface</li>
+<li>[ ] Search results display</li>
+<li>[ ] Filter components</li>
+<h3>10.4 Phase 4: Activity & Settings (Week 4)</h3>
+<li>[ ] Activity log page</li>
+<li>[ ] Settings pages</li>
+<li>[ ] Modal components</li>
+<li>[ ] Form components</li>
+<li>[ ] Error states</li>
+<h3>10.5 Phase 5: Polish & Integration (Week 5)</h3>
+<li>[ ] Responsive testing</li>
+<li>[ ] Accessibility audit</li>
+<li>[ ] Dark mode (future)</li>
+<li>[ ] Animation polish</li>
+<li>[ ] Phoenix LiveView integration</li>
+</ul>
+<hr>
+<h2>Appendix A: Wireframe Reference</h2>
+<p>See <code>/static_prototype/</code> directory for static HTML/CSS prototypes of all views.</p>
+<h2>Appendix B: Icon Reference</h2>
+<p>Using emoji for MVP simplicity, can upgrade to icon library (Heroicons, Lucide) later:</p>
+<table>
+<tr><th>Concept</th><th>Emoji</th><th>Alt Icon</th></tr>
+<tr><td>Inbox</td><td>📥</td><td>inbox</td></tr>
+<tr><td>Library</td><td>📚</td><td>book-open</td></tr>
+<tr><td>Memories</td><td>🧠</td><td>cpu / sparkles</td></tr>
+<tr><td>Search</td><td>🔍</td><td>search</td></tr>
+<tr><td>Tags</td><td>🏷️</td><td>tag</td></tr>
+<tr><td>Activity</td><td>📊</td><td>activity</td></tr>
+<tr><td>Settings</td><td>⚙️</td><td>cog</td></tr>
+<tr><td>Note</td><td>📝</td><td>file-text</td></tr>
+<tr><td>Article</td><td>📄</td><td>newspaper</td></tr>
+<tr><td>Document</td><td>📁</td><td>file</td></tr>
+<tr><td>Audio</td><td>🎵</td><td>volume-2</td></tr>
+<tr><td>Video</td><td>🎬</td><td>video</td></tr>
+<tr><td>Image</td><td>🖼️</td><td>image</td></tr>
+</table>
+<hr>
+<em>Document created: 2026-01-30</em>
+<em>Last updated: 2026-01-30</em>
+<em>Status: Ready for Prototyping</em>
+  </article>
+</body>
+</html>

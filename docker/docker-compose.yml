@@ -1,0 +1,104 @@
+# Onelist Local - Base Configuration
+# 
+# This is the core Onelist system: entries, memory, API
+# Add optional components with additional compose files:
+#   -f docker-compose.openclaw.yml   → OpenClaw + Reader + Searcher
+#   -f docker-compose.agents.yml     → All agents (River, etc.)
+#   -f docker-compose.web.yml        → Web UI
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # PostgreSQL with pgvector
+  # ===========================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: onelist-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: onelist
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-onelist_local_dev}
+      POSTGRES_DB: onelist_local
+    volumes:
+      - onelist_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U onelist"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - onelist
+
+  # ===========================================
+  # Onelist Core (API only)
+  # ===========================================
+  onelist:
+    image: ghcr.io/onelist/onelist-local:latest
+    container_name: onelist-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: postgres://onelist:${DB_PASSWORD:-onelist_local_dev}@postgres:5432/onelist_local
+      
+      # Phoenix
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      PHX_HOST: ${PHX_HOST:-localhost}
+      PORT: 4000
+      
+      # OpenAI for embeddings
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      
+      # Mode
+      ONELIST_MODE: local
+      ONELIST_SINGLE_USER: "true"
+      ONELIST_WEB_ENABLED: "false"
+      
+    ports:
+      - "${ONELIST_PORT:-4000}:4000"
+    volumes:
+      - onelist_uploads:/app/uploads
+      - onelist_config:/app/config/runtime
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - onelist
+
+  # ===========================================
+  # Setup (runs once)
+  # ===========================================
+  setup:
+    image: ghcr.io/onelist/onelist-local:latest
+    container_name: onelist-setup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://onelist:${DB_PASSWORD:-onelist_local_dev}@postgres:5432/onelist_local
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+    command: |
+      sh -c '
+        echo "🌊 Running Onelist setup..."
+        mix ecto.create 2>/dev/null || true
+        mix ecto.migrate
+        echo "✅ Database ready!"
+      '
+    networks:
+      - onelist
+    profiles:
+      - setup
+
+volumes:
+  onelist_pgdata:
+  onelist_uploads:
+  onelist_config:
+
+networks:
+  onelist:
+    name: onelist-network

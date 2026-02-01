@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Addendum: Onelist Core Platform Enhancement - Core Taxonomy System - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Addendum: Onelist Core Platform Enhancement - Core Taxonomy System</h1>
+<strong>Status:</strong> Post-MVP (Planned for Onelist v2.0)
+<strong>Date:</strong> May 23, 2025 (Updated: 2026-01-29)
+<strong>Priority:</strong> Medium - Post-MVP Enhancement
+<strong>Context:</strong> This addendum details a foundational "Core Taxonomy System" for Onelist. This system will provide a structured, flexible way to categorize and apply specific statuses or attributes (terms) to Onelist <code>entries</code> by organizing these terms into distinct taxonomies. It enhances Onelist's organizational capabilities beyond free-form tagging, enabling more intelligent features and automation.
+<blockquote><strong>MVP Decision (2026-01-29):</strong> The MVP will use an enhanced simple tags system with hierarchical convention (colon syntax), colors, bulk operations, and advanced filtering. The full Core Taxonomy System (Topics, Consumption Status, Marks) will be implemented post-MVP when needed for agent integration. See <a href="./tag_system_plan.md">Tag System Plan</a> for MVP implementation.</blockquote>
+<hr>
+<h2>1. Goal & Vision</h2>
+<p>To establish an extensible system for applying structured metadata (terms) to Onelist <code>entries</code> by organizing these terms into distinct <strong>taxonomies</strong>. This moves beyond simple free-form tagging ("Topics") to include system-defined and eventually user-defined vocabularies for specific purposes like tracking consumption status ("Consumption Status") or applying actionable or descriptive "Marks." This system will enhance organization, search, filtering, and enable more intelligent automation and AI interactions across the Onelist platform.</p>
+<hr>
+<h2>2. Core Components & Data Model</h2>
+<em> <strong>A. <code>taxonomies</code> Table (New Core Table):</strong>
+  </em> <code>id</code> (UUID, PK)
+  <em> <code>name</code> (String, Unique, Not Null - e.g., "Topics", "Consumption Status", "Marks", "Project Stages_UserX")
+  </em> <code>description</code> (Text, Nullable)
+  <em> <code>owner_user_id</code> (UUID, FK to <code>users.id</code>, Nullable): NULL for system-wide taxonomies. Stores user ID for user-created taxonomies (Post-MVP feature).
+  </em> <code>is_system_taxonomy</code> (Boolean, Default: <code>false</code>, Not Null): True for "Topics," "Consumption Status," "Marks."
+  <em> <code>is_terms_locked</code> (Boolean, Default: <code>false</code>, Not Null): If true, only system/admin can add/edit terms in this taxonomy (e.g., for core "Consumption Status" terms). "Topics" would have this as <code>false</code>.
+  </em> <code>created_at</code>, <code>updated_at</code> (Timestamps)
+  <em> <strong>Seed Data (MVP):</strong>
+    </em> <code>{name: "Topics", is_system_taxonomy: true, is_terms_locked: false}</code>
+    <em> <code>{name: "Consumption Status", is_system_taxonomy: true, is_terms_locked: true}</code>
+    </em> <code>{name: "Marks", is_system_taxonomy: true, is_terms_locked: true}</code>
+<em> <strong>B. <code>terms</code> Table (Replaces/Evolves current <code>tags</code> table):</strong>
+  </em> <code>id</code> (UUID, PK)
+  <em> <code>taxonomy_id</code> (UUID, FK to <code>taxonomies.id</code>, Indexed, Not Null)
+  </em> <code>name</code> (String, Not Null - e.g., "elixir", "to_consume", "action_needed"). The term name itself (e.g., "to_consume", not "status_to_consume").
+  <em> <code>description</code> (Text, Nullable)
+  </em> <code>is_system_term</code> (Boolean, Default: <code>false</code>): True for predefined core terms in system taxonomies.
+  <em> <code>creator_user_id</code> (UUID, FK to <code>users.id</code>, Nullable): For user-created terms in non-locked taxonomies like "Topics."
+  </em> Unique constraint: <code>(taxonomy_id, name)</code>
+  <em> <strong>Seed Data (MVP):</strong>
+    </em> For "Consumption Status" taxonomy: <code>to_consume</code>, <code>in_progress</code>, <code>consumed</code>, <code>consumption_archived</code> (all <code>is_system_term=true</code>).
+    <em> For "Marks" taxonomy (initial seed, admin-extendable): <code>action_needed</code>, <code>important</code>, <code>idea</code>, <code>decision</code>, <code>commitment</code>, <code>follow_up</code>, <code>question</code>, <code>to_review</code> (all <code>is_system_term=true</code>).
+    </em> The "Topics" taxonomy starts empty of system terms.
+<em> <strong>C. <code>entry_applied_terms</code> Table (New Join Table - Replaces <code>entry_tags</code>):</strong>
+  </em> Links <code>entries</code> to <code>terms</code> from various taxonomies, specifying the user if the application of the term is user-specific.
+  <em> <code>id</code> (UUID, PK)
+  </em> <code>entry_id</code> (UUID, FK to <code>entries.id</code>, Indexed, Not Null)
+  <em> <code>term_id</code> (UUID, FK to <code>terms.id</code>, Indexed, Not Null)
+  </em> <code>user_id</code> (UUID, FK to <code>users.id</code>, Indexed, <strong>Nullable</strong>):
+    <em> <strong>Not Null</strong> for terms from user-specific application taxonomies like "Consumption Status" or "Marks."
+    </em> <strong>Null</strong> for terms from taxonomies that apply globally to an entry by its owner, like "Topics."
+  <em> <code>applied_at</code> (TimestampTZ, Default: CURRENT_TIMESTAMP)
+  </em> <code>metadata</code> (JSONB, Nullable): e.g., for a "decision" mark, could store who participated or the source of the decision if it was AI-generated; <strong>all AI-initiated applications of terms should log relevant context here (e.g., agent_id, reason/trigger).</strong>
+  <em> Unique constraint: <code>(entry_id, term_id, user_id)</code> (allowing NULL for <code>user_id</code>).
+</em>Migration Note:<em> Existing <code>tags</code> become <code>terms</code> in the "Topics" <code>taxonomy</code>. Existing <code>entry_tags</code> become <code>entry_applied_terms</code> with <code>user_id=NULL</code> and <code>term_id</code> pointing to a "Topics" term.
+</em> <strong>D. Impact on <code>user_entry_consumption_states</code> Table:</strong>
+  <em> This table (from the "Content Consumption Tracking" plan) <strong>no longer needs <code>consumption_status_term_id</code></strong>. The status is handled by applying a term from the "Consumption Status" taxonomy to the entry via <code>entry_applied_terms</code> (with the relevant <code>user_id</code>).
+  </em> It remains essential for <code>progress_percentage</code>, <code>fully_consumed_at</code>, etc.
+<hr>
+<h2>3. Key Functionalities & API Support</h2>
+<em> <strong>Taxonomy Management (Admin/System):</strong> API for Onelist admins to manage system <code>taxonomies</code> and their core <code>terms</code>.
+</em> <strong>Term Management (User - for "Topics" and future User-Defined Taxonomies):</strong> Users can manage terms in their accessible, non-locked taxonomies (primarily "Topics" for MVP).
+<em> <strong>Applying/Removing Terms to Entries:</strong>
+  </em> API endpoints to apply/remove a <code>term</code> to/from an <code>entry</code> (creating/deleting <code>entry_applied_terms</code> records). For terms requiring a <code>user_id</code>, it must be provided.
+<em> <strong>Querying Entries by Terms:</strong> Onelist API must allow efficient querying of <code>entries</code> based on applied <code>terms</code> from any taxonomy, including combinations (e.g., "topic 'elixir' AND mark 'action_needed' for current user").
+</em> <strong>Retrieving Applied Terms for an Entry:</strong> API to get all applied terms (grouped by taxonomy) for an <code>entry</code> (and for a specific user where applicable).
+<hr>
+<h2>4. UI/UX Considerations</h2>
+<em> <strong>Displaying Terms:</strong> Clearly display applied terms on entries, visually distinguishing them by taxonomy:
+  </em> <strong>"Topics" (User Tags):</strong> Displayed as standard tags.
+  <em> <strong>"Consumption Status":</strong> When an entry is in a consumption view, its status (e.g., 'to_consume', 'in_progress X%', 'consumed'), along with estimated time to consume/remaining, should be displayed prominently, potentially in a header that scrolls out of view or can be configured by the user to hover/stick at the top.
+  </em> <strong>"Marks":</strong> Displayed similarly to topic tags but in their own visually distinct group/section on the entry's display (e.g., under a "Marks" heading).
+<em> <strong>Applying Terms:</strong> Intuitive UI for users to add/remove topic tags. Simple UI for applying marks. Consumption status primarily managed by the "Content Consumption Tracking" feature's UI.
+</em> <strong>Filtering & Searching:</strong> Advanced search/filter UIs to find entries based on these structured taxonomy terms.
+<em> <strong>Onelist Settings:</strong>
+  </em> UI for users to manage their default <code>autoblog_by_tag</code> per <code>entry_type</code>.
+  <em> (Post-MVP) UI for users to potentially create and manage their own custom taxonomies and terms.
+<hr>
+<h2>5. Integration with other Onelist 2.0 Features</h2>
+</em> <strong>Content Consumption Tracking:</strong> Directly uses the "Consumption Status" taxonomy via <code>entry_applied_terms</code>.
+<em> <strong>Searcher Agent:</strong> Will index applied terms from all relevant taxonomies.
+</em> <strong>Onelist AI & Virtual Assistant Agent:</strong> Can leverage structured marks and statuses for intelligent understanding, task generation, and automation (e.g., VA agent applying a <code>'decision'</code> mark).
+<em> <strong>Entry Groups:</strong> Filters within groups can use these taxonomy terms.
+</em> <strong>Xamlr:</strong> Could leverage "Marks" or other future taxonomies for content organization/display.
+<hr>
+<h2>6. MVP Scope for Core Taxonomy System (within Onelist 2.0)</h2>
+<em> Implement <code>taxonomies</code> table with seed data for "Topics," "Consumption Status," and "Marks" (all <code>is_system_taxonomy=true</code>).
+</em> Implement <code>terms</code> table (refactored <code>tags</code> table) with seed data for "Consumption Status" (e.g., <code>to_consume</code>, <code>in_progress</code>, <code>consumed</code>, <code>consumption_archived</code>) and "Marks" (e.g., <code>action_needed</code>, <code>important</code>, <code>idea</code>, <code>decision</code>, <code>commitment</code>). These system terms are in <code>is_terms_locked=true</code> taxonomies initially. "Topics" taxonomy has <code>is_terms_locked=false</code>.
+<em> Implement <code>entry_applied_terms</code> table.
+</em> <strong>Migrate existing <code>tags</code> and <code>entry_tags</code> data</strong> to the new structure.
+<em> <strong>API Support:</strong> Basic API for applying/removing terms (from "Topics" for users; system applies "Consumption Status" terms via Content Consumption feature) and querying entries by these terms.
+</em> <strong>UI Integration:</strong>
+  <em> Existing tagging UI for "Topics" continues to work, backed by the new model.
+  </em> "Content Consumption Tracking" MVP feature uses the "Consumption Status" taxonomy.
+  <em> Basic UI to </em>display<em> "Marks" on an entry (user UI for </em>applying* marks can be Post-MVP or part of a dedicated "Marks" feature UI, with AI/VA applying them initially).
+<hr>
+  </article>
+</body>
+</html>

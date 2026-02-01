@@ -1,0 +1,35 @@
+# Onelist Local - Web UI
+#
+# Adds:
+#   - LiveView web dashboard
+#   - River chat interface
+#   - Entry browser
+#   - GTD task management UI
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.web.yml up -d
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # Update onelist to enable web UI
+  # ===========================================
+  onelist:
+    environment:
+      # Enable web UI
+      ONELIST_WEB_ENABLED: "true"
+      
+      # LiveView config
+      ONELIST_LIVE_VIEW_SIGNING_SALT: ${LIVE_VIEW_SALT:-generate_on_setup}
+      
+      # Session config
+      ONELIST_SESSION_COOKIE_NAME: "_onelist_local"
+      
+    # Web UI uses same port as API
+    # Access at http://localhost:4000/app
+
+networks:
+  onelist:
+    external: true
+    name: onelist-network

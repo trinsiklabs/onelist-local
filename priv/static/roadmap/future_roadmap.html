@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Future Roadmap - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Future Roadmap</h1>
+<p>This document outlines the vision for Onelist development after the MVP launch, focusing on extending its capabilities as an "augmented memory" system, primarily through API-driven services and core enhancements.</p>
+<h2>Architectural Vision</h2>
+<em> <strong>Core Onelist:</strong> The central "digital memory," providing robust, versioned storage for "Entries" (diverse content types like notes, memories, media, etc.), their "Representations," and "Assets." Its primary interface for advanced functionality is its API. No complex AI functionality within Core Onelist itself.
+</em> <strong>Independent Services (Daemons/External Apps):</strong> Loosely coupled services/applications that interact with Onelist exclusively via its API. Each performs specific functions.
+<em> <strong>Unix Philosophy:</strong> Services should be small, focused tools that do one thing well.
+</em> <strong>Asynchronous Communication:</strong> Services likely triggered by events (e.g., new Entry creation, API call) or operate on schedules, communicating asynchronously (e.g., via Onelist API, webhooks, or potentially a message queue like RabbitMQ/Kafka if direct inter-service comms are needed outside Onelist).
+<em> <strong>Technology Stack:</strong> Core Onelist remains Elixir/Phoenix. Daemons/external apps can be built in any language (Python common for LLM-based services).
+</em> <strong>Deployment:</strong> Containerized (Docker), potentially managed on Kubernetes for scalability and resilience.
+<h2>Potential Daemons and Functions (Interacting via Onelist API)</h2>
+<p>1. <strong>Onelist Feeder (Daemon):</strong>
+    <em> Fetches content from external sources (RSS initially, others later).
+    </em> Creates new Entries in Onelist via API with fetched content and appropriate <code>entry_type</code> and <code>source_type</code>.
+    <em> Performs basic formatting/cleanup before API submission.</p>
+<p>2. <strong>Onelist Reader (Daemon):</strong> (Operates on existing Entries via API)
+    </em> Summarizes Entry content (textual representations).
+    <em> Extracts key takeaways, phrases.
+    </em> Suggests tags (adds suggestions to Entry metadata or a dedicated system, doesn't auto-apply).
+    <em> Detects topics, writing style.
+    </em> <em>Pricing Model Consideration:</em> Potential for subscription or per-use fees.</p>
+<p>3. <strong>Onelist Librarian (Daemon):</strong> (Operates on user's tag data via API)
+    <em> Analyzes existing tags for an account.
+    </em> Suggests tag merges/splits.
+    <em> Optional: Enforces tag consistency (warnings for similar spellings).
+    </em> Calculates tag weights/relevance (algorithm TBD).</p>
+<p>4. <strong>Onelist Researcher (Daemon):</strong> (Triggered by user request, interacts with external sources)
+    <em> Retrieves related content from external sources based on an Entry or query.
+    </em> Creates new draft Entries in Onelist with retrieved content, citations, source links.</p>
+<p>5. <strong>Onelist Writer (Daemon):</strong> (AI-powered writing assistance via API)
+    <em> Generates outlines based on topic/Entry.
+    </em> Drafts content for sections.
+    <em> Assists with citations.</p>
+<p>6. <strong>Onelist Planner (Daemon):</strong> (Analyzes Entries via API)
+    </em> Identifies actionable items from Entry content.
+    <em> Helps structure items into plans (outputs as new Entry or structured data).</p>
+<p>7. <strong>Onelist "Jarvis" (Daemon - Long-Term Vision):</strong> (Advanced conversational interface via API)
+    </em> Natural Language Query Processing over user's Onelist Entries.
+    <em> Information retrieval & synthesis from multiple Entries.
+    </em> Briefing generation. Dialogue management.
+    <em> <strong>UPDATE</strong>: Jarvis has evolved into <strong>"River"</strong> - the unified Onelist AI that combines query/synthesis capabilities with GTD-based life management and proactive assistance. See <a href="./future_roadmap_river_agent.md">River Agent Roadmap</a> for the comprehensive plan.</p>
+<p>8. <strong>Onelist Searcher (Daemon):</strong> (Enhances core search via API)
+    </em> Pre-analysis/deeper indexing of Entries for advanced search.
+    <em> Implements semantic search, vector search (embeddings generated by AI model).
+    </em> Intelligently surfaces relevant Entries.</p>
+<h2>Specific Post-MVP Features & Enhancements</h2>
+<p>1. <strong>High Priority Post-MVP Phase 1: Public Entries & Blogging ("Xamlr")</strong>
+    <em> <strong>Core Entry Sharing (Already Built):</strong>
+        </em> Schema has <code>public_id</code> (21-char URL-safe random ID) and <code>public</code> boolean
+        <em> User toggles entry public → accessible at <code>onelist.my/[username]/[public_id]</code>
+        </em> Uses pre-generated HTML representation (maintained for all entries)
+        <em> No Beacon required - direct DB lookup and rendering
+    </em> <strong>Beacon CMS (Corporate & Advanced Sites):</strong>
+        <em> Corporate pages: <code>onelist.my/[slug]</code> (via Beacon)
+        </em> User Beacon sites (future): <code>onelist.my/[username]/site/<em></code> or <code>[username].onelist.my/</code>
+        </em> VM tier users: Can run full Beacon-managed sites
+    <em> <strong>Architecture:</strong> Onelist Core is the content store. "Xamlr" (a separate future application) handles advanced blogging-specific functionality (scheduling, themes, etc.).
+    </em> <strong>Onelist Core Role:</strong>
+        <em> Provides API for CRUD and querying of <code>entries</code>, <code>representations</code>, <code>assets</code>, <code>tags</code>.
+        </em> Handles user authentication.
+        <em> Serves public entries at canonical URLs (core) or via Beacon CMS (advanced sites).
+        </em> <strong>Responsibility:</strong> Asynchronously generate (via Oban job) and store an <code>'html'</code> <code>representations</code> record for entries. This pre-rendered HTML is available via API and used for public sharing.
+    <em> <strong>Comments on Public Entries:</strong>
+        </em> Comments stored as entries with <code>entry_type='comment'</code>, linked via <code>entry_links</code>
+        <em> Commenters with accounts: reply stored in their Onelist + copy in author's Onelist (federated)
+        </em> Anonymous comments: stored only in author's Onelist
+    <em> <strong>Xamlr Application Role (Advanced Blogging):</strong>
+        </em> Manages blog configurations (subdomain, source tags from Onelist, schedule rules, themes, etc.) in its <em>own</em> database.
+        <em> Uses Onelist API to find Entries matching configured tags.
+        </em> Manages its <em>own</em> publishing queue, schedule state, and publication logs (<code>published_at</code> timestamp) in its <em>own</em> database.
+        <em> Renders and serves the public-facing blog website using the fetched content and its own templating/theming.
+    </em> <strong>Schema Implication:</strong> <code>blogs</code> and <code>blog_publications</code> tables, themes, and blog-specific settings are <strong>NOT</strong> part of the Onelist Core schema; they belong to the Xamlr application.</p>
+<p>2. <strong>Schema Extension Pattern for Specialized Entry Types:</strong>
+    <em> <strong>Plan:</strong> For future <code>entry_type</code>s requiring multiple, specific, performance-critical, or heavily indexed fields (e.g., <strong>Calendar Events (<code>entry_type='event'</code>)</strong>, <strong>Task Management (<code>entry_type='task'</code>)</strong>), create dedicated <strong>"side tables"</strong> in Onelist Core (e.g., <code>event_details</code>, <code>task_details</code>).
+    </em> <strong>Structure:</strong> These tables will have a one-to-one relationship with <code>entries</code> (using <code>entries.id</code> as PK/FK) and hold the specialized fields (e.g., <code>event_details.start_time</code>, <code>event_details.end_time</code>, <code>event_details.recurrence_rule</code>; <code>task_details.status</code>, <code>task_details.due_date</code>, <code>task_details.priority</code>).
+    <em> <strong>Rationale:</strong> Keeps the core <code>entries</code> table lean and generic, allows for efficient querying and indexing of specialized data, demonstrates extensibility. The <code>entries.content_created_at</code> field handles one common case, but side tables remain the pattern for more complex needs.</p>
+<p>3. <strong>Inter-Entry Relationships (<code>entry_links</code> Table):</strong>
+    </em> <strong>Purpose:</strong> Implement a dedicated table (e.g., <code>entry_links</code>) to model relationships <em>between</em> different <code>entries</code>.
+    <em> <strong>Structure:</strong> <code>id</code> (UUID, PK), <code>source_entry_id</code> (UUID, FK-><code>entries</code>), <code>target_entry_id</code> (UUID, FK-><code>entries</code>), <code>link_type</code> (String, Not Null, Indexed, e.g., 'derived_from', 'cites', 'related_to', 'contains_task', 'task_for', 'thread_parent'), <code>metadata</code> (JSONB, Nullable), timestamps.
+    </em> <strong>Use Cases:</strong> Linking tasks to notes, notes derived from web clips, representing subtasks, comment threads on entries.</p>
+<p>4. <strong>Advanced Real-Time Collaborative Editing:</strong>
+    <em> <strong>Goal:</strong> Support Quip-style, multi-user, granular, real-time editing for compatible <code>entry_type</code>s and <code>representations</code>.
+    </em> <strong>Approach:</strong> This is a complex post-MVP feature.
+        <em> Requires a structured, block-based document model at the application level for the content being edited.
+        </em> This structured data (e.g., JSON describing blocks with stable IDs) would be stored as a <em>new</em> representation <code>type</code> (e.g., <code>'editor_json'</code>) alongside existing ones (like Markdown) in the <code>representations</code> table.
+        <em> Operational Transformation (OT) or Conflict-free Replicated Data Types (CRDT) logic will operate on this structured representation.
+        </em> Editor component (e.g., Toast UI or alternative) must support or be adaptable to this structured data model and collaboration protocols.</p>
+<p>5. <strong>Chat Integration:</strong>
+    <em> <strong>Challenge:</strong> Storing individual, high-volume chat messages as <code>entries</code> might have scalability/performance issues. Features like threading and reactions would also require schema extensions (e.g., using <code>entry_links</code>, a dedicated <code>reactions</code> table).
+    </em> <strong>Potential Approach:</strong>
+        <em> <strong>Optimized Message Store:</strong> For high-volume channels, consider a dedicated, optimized schema and potentially different storage technology for the messages themselves.
+        </em> <strong>Integration with Onelist:</strong>
+            <em> <strong>Entry-Specific Chat:</strong> Link chat threads </em>to<em> existing Onelist <code>entries</code> using <code>entry_links</code> (discussion </em>about<em> an Entry).
+            </em> <strong>Channel as Entry:</strong> A chat channel itself could be an <code>entries</code> record (<code>entry_type='chat_channel'</code>), storing channel metadata. Actual messages might reside in the optimized store but link back to this channel Entry ID.
+            <em> <strong>Granular Chat (within an Entry):</strong> For chat anchored to specific elements (paragraphs, headings) </em>within<em> an Entry's content, the block-based representation (<code>type='editor_json'</code>) planned for collaborative editing is a prerequisite. Blocks would need stable IDs, and chat messages would link to <code>entry_id</code> and <code>block_id</code>. This is highly complex and depends on editor capabilities.
+    </em> <strong>Status:</strong> Requires significant design exploration post-MVP, balancing deep integration vs. performance needs.</p>
+<p>6. <strong>Core Search Functionality Enhancements (within Onelist Core):</strong>
+    <em> <strong>Fuzzy Matching:</strong> (e.g., Levenshtein distance) for typos/variations.
+    </em> <strong>Stemming/Lemmatization:</strong> Language-specific, during indexing/querying.
+    <em> <strong>Search Suggestions:</strong> Typeahead based on titles, tags.
+    </em> <strong>Advanced Pagination:</strong> For large result sets.
+    <em> <strong>More Sorting Options:</strong> Beyond relevance, <code>content_created_at</code>, <code>updated_at</code>, title.
+    </em> <strong>Wildcard Searches.</strong>
+    <em> <strong>Dedicated Search Engine Integration (Long-term):</strong> For very large scale, explore Elasticsearch/OpenSearch if <code>Onelist Searcher</code> daemon and PG FTS prove insufficient.</p>
+<p>7. <strong>Personal Photo/Video Library Enhancements:</strong>
+    </em> The MVP schema with <code>entry_type='photo'/'video'</code>, <code>assets</code> for files, and <code>entries.content_created_at</code> provides a strong base.
+    <em> Post-MVP: Background jobs for generating thumbnails/previews (stored as additional <code>assets</code> linked to the Entry), extracting more metadata (EXIF, video duration/resolution) into <code>entries.metadata</code> or <code>assets.metadata</code>. Advanced searching/filtering based on this richer metadata.</p>
+<p>8. <strong>HTML Representations & Unified Timeline:</strong>
+    </em> <strong>General HTML Representations:</strong> Systematically generate and store a <code>'public_html'</code> or <code>'display_html'</code> representation alongside Markdown for common <code>entry_type</code>s to improve performance for read-only views or sharing.
+    <em> <strong>Unified Timeline View:</strong> Explore mechanisms for external applications (like Xamlr, or future daemons) to push significant events (e.g., blog post published, task completed, new photo batch imported) back into Onelist Core. These could be stored as <code>entries</code> with <code>entry_type='log_event'</code> and appropriate <code>source_type</code>, allowing a unified chronological view of activity related to the user's "augmented memory" within the Onelist UI.</p>
+<p>9. <strong>User-Deployable Forums:</strong>
+    </em> <strong>Architecture:</strong> Forum is a "view" into tagged Onelist entries, rendered via Beacon CMS.
+    <em> <strong>Key Features:</strong>
+        </em> Any user can deploy a forum under their namespace (<code>onelist.my/[username]/forum/</code> or <code>[username].onelist.my/forum/</code>)
+        <em> Topics and replies are Onelist entries (<code>entry_type='forum_topic'</code>, <code>entry_type='forum_reply'</code>)
+        </em> Categories implemented as tags (e.g., <code>forum:general</code>, <code>forum:help</code>)
+        <em> "Promote to Forum" - turn any existing entry into a forum topic
+        </em> Federated replies - participants own their replies in their own Onelist
+        <em> Anonymous posting supported
+    </em> <strong>Use Cases:</strong> Community forums, Q&A boards, discussion groups
+    <em> <strong>See:</strong> <code>future_roadmap_forum.md</code> for full specification</p>
+<h2>Architectural Considerations and Open Questions (Post-MVP)</h2>
+</em> <strong>Data Flow (Asynchronous Eventing):</strong> How will services be efficiently notified of relevant changes in Onelist Core?
+  <em> <strong>Webhooks:</strong> Onelist API could offer webhooks for specific events (e.g., new Entry created with certain tags, Entry marked public). External services subscribe to these.
+  </em> <strong>Message Queue (e.g., RabbitMQ, Kafka):</strong> For more complex scenarios or higher volume, Onelist Core could publish events to a message queue, and services consume from it. Adds infrastructure complexity.
+  <em> Polling the API is less efficient and generally discouraged for event-driven actions.
+</em> <strong>Standardized Metadata Format for Services:</strong> If daemons need to read/write structured metadata (e.g., AI analysis results) within <code>entries.metadata</code> or <code>representations.metadata</code>, a clear, versioned JSON schema or convention should be defined in API documentation.
+<em> <strong>Tag Weighting Algorithm (Librarian):</strong> Specific algorithm(s) for tag weights (frequency, co-occurrence, graph-based) need definition.
+</em> <strong>Content Retrieval Ethics & Legality (Researcher):</strong> Define policies for external data sources, web scraping, API terms of service, and source attribution.
+<em> <strong>Deployment and Management of Services:</strong> How will independent daemons be deployed, managed, scaled, monitored alongside Core Onelist? Kubernetes is a candidate but adds operational overhead.
+</em> <strong>Authentication/Authorization for Services/Daemons:</strong> How will services securely authenticate with the Onelist API? Per-user API keys with specific scopes for service usage, requiring robust key management and potentially OAuth flows for services acting on behalf of users.
+<em> <strong>Inter-service Error Handling & Resilience:</strong> Strategies for retries, dead-letter queues, user notifications if a daemon fails processing or an API call chain is disrupted.
+</em> <strong>Conflict Resolution (Service Interactions):</strong> The MVP's optimistic locking is for user edits. How will conflicts be handled if multiple services (or a user and a service) attempt to modify the same Entry/Representation, especially if operating asynchronously? Services might need to be designed for idempotency or use specific fields/flags to coordinate.
+<em> <strong>Archiving/Pruning of Old Representation Versions:</strong> Revisit from MVP. Define clear policies and mechanisms (e.g., time-based deletion, tiered storage, options for paid longer retention). This becomes more critical as data grows.
+</em> <strong>Hybrid Frontend Approach (Core Onelist):</strong> Post-MVP, for highly complex UI sections (e.g., advanced dashboards, intricate editors for specific <code>entry_type</code>s), evaluate if LiveView alone is sufficient or if a hybrid approach (selectively using a client-side framework like React/Vue for those parts) is beneficial.
+<em> <strong>Aggressive LiveView Optimization (Core Onelist):</strong> Continuously implement LiveView best practices (efficient components, <code>phx-update</code>, minimizing state, JS Hooks).
+</em> <strong>Detailed Monitoring Plan (Core Onelist & Services):</strong> Expand monitoring to cover health, performance, resource consumption, API usage patterns, and costs of each independent daemon/service.
+<h2>To Research</h2>
+<em> <https://obsidian.md/plugins> and the entire obsidian ecosystem for how it is architected to support plugins
+</em> Support adding a featured photo metatag to each entry by default if at all possible, in order to cleanly support pinterest-style board views
+  </article>
+</body>
+</html>

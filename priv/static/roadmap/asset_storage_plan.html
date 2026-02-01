@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Management with Flexible Multi-Backend Storage - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Asset Management with Flexible Multi-Backend Storage</h1>
+<h2>Overview</h2>
+<p>Implement a flexible asset storage system supporting multiple backends (local filesystem, S3, GCS, S3-compatible services) with mirroring capabilities across providers. Supports both Onelist-provided cloud storage and user-provided buckets (BYOB - Bring Your Own Bucket).</p>
+<h2>Requirements</h2>
+<h3>MVP Requirements</h3>
+<ul>
+<li><strong>Multiple Backends</strong>: Local, S3, GCS, S3-compatible (Cloudflare R2, Backblaze B2, MinIO, DigitalOcean Spaces)</li>
+<li><strong>Mirroring</strong>: Async replication to multiple backends including local</li>
+<li><strong>Flexibility</strong>: Runtime-configurable primary and mirror backends</li>
+<li><strong>Resilience</strong>: Fallback to mirrors when primary fails, retry logic for failures</li>
+<li><strong>E2EE Support</strong>: Client-side encryption before upload (for zero-knowledge cloud sync)</li>
+<li><strong>Tiered Sync</strong>: Support for stub/thumbnail-only local sync to save space</li>
+<li><strong>BYOB (Bring Your Own Bucket)</strong>: Backend support for user-provided cloud storage</li>
+<h3>Future Requirements (Post-MVP)</h3>
+<li><strong>BYOB Paid Plan UI</strong>: User-facing settings UI for connecting their own buckets</li>
+<li><strong>BYOB Pricing Integration</strong>: Discounts/billing adjustments for BYOB users</li>
+<li><strong>Multi-Cloud Redundancy</strong>: Users can configure multiple cloud backends (e.g., R2 + B2) for asset redundancy</li>
+<hr>
+<h2>Architecture</h2>
+<h3>Module Structure</h3>
+<pre><code class="language-">lib/onelist/storage/
+├── storage.ex              # Main facade context
+├── behaviour.ex            # Storage backend behaviour
+├── backends/
+│   ├── local.ex            # Local filesystem
+│   ├── s3.ex               # AWS S3 / S3-compatible (R2, B2, Spaces, MinIO)
+│   ├── gcs.ex              # Google Cloud Storage
+│   └── encrypted.ex        # E2EE wrapper for any backend
+├── mirror.ex               # Mirroring coordinator
+├── tiered_sync.ex          # Stub/thumbnail sync for space optimization
+├── user_bucket.ex          # BYOB credential resolution
+└── path_generator.ex       # Storage path generation
+<p>lib/onelist/workers/
+├── storage_mirror_worker.ex    # Async mirror sync
+├── storage_cleanup_worker.ex   # Retry failed mirrors
+└── thumbnail_worker.ex         # Generate thumbnails/stubs for tiered sync</p>
+<p>lib/onelist/entries/
+├── asset_mirror.ex         # Mirror tracking schema
+└── user_storage_config.ex  # User's BYOB configuration
+</code></pre></p>
+<hr>
+<h2>Implementation Plan</h2>
+<h3>Part 1: Dependencies and Migrations</h3>
+<strong>mix.exs additions:</strong>
+<pre><code class="language-elixir">{:ex_aws, &quot;~&gt; 2.5&quot;},
+{:ex_aws_s3, &quot;~&gt; 2.5&quot;},
+{:sweet_xml, &quot;~&gt; 0.7&quot;},
+{:hackney, &quot;~&gt; 1.20&quot;},
+{:mime, &quot;~&gt; 2.0&quot;}
+</code></pre>
+<strong>Migrations:</strong>
+1. <code>create_asset_mirrors</code> - Track mirror sync status per backend
+2. <code>add_storage_fields_to_assets</code> - Add <code>primary_backend</code>, <code>checksum</code> to assets
+<h3>Part 2: Storage Behaviour</h3>
+<strong>File:</strong> <code>lib/onelist/storage/behaviour.ex</code>
+<pre><code class="language-elixir">@callback put(path, content, opts) :: {:ok, metadata} | {:error, reason}
+@callback get(path) :: {:ok, binary} | {:error, reason}
+@callback delete(path) :: :ok | {:error, reason}
+@callback exists?(path) :: boolean()
+@callback presigned_url(path, opts) :: {:ok, url} | {:error, reason}
+@callback head(path) :: {:ok, metadata} | {:error, reason}
+@callback backend_id() :: atom()
+</code></pre>
+<h3>Part 3: Backend Implementations</h3>
+<strong>Local Backend</strong> (<code>lib/onelist/storage/backends/local.ex</code>)
+<li>Production-ready filesystem storage for self-hosted/on-premises deployments</li>
+<li>Stores files in configurable root directory</li>
+<li>Generates direct URL paths or presigned tokens for downloads</li>
+<li>Full CRUD operations on filesystem</li>
+<li>Ideal for: privacy compliance, air-gapped environments, edge deployments</li>
+<strong>S3 Backend</strong> (<code>lib/onelist/storage/backends/s3.ex</code>)
+<li>Uses ExAws for S3 operations</li>
+<li>Supports custom endpoints for S3-compatible services</li>
+<li>Presigned URL generation with configurable expiry</li>
+<li>Works with: AWS S3, Cloudflare R2, Backblaze B2, DigitalOcean Spaces, MinIO, Wasabi</li>
+<strong>S3-Compatible Service Notes:</strong>
+<table>
+<tr><th>Service</th><th>Endpoint Format</th><th>Notes</th></tr>
+<tr><td><strong>AWS S3</strong></td><td><code>s3.{region}.amazonaws.com</code></td><td>Standard, full feature support</td></tr>
+<tr><td><strong>Cloudflare R2</strong></td><td><code>{account_id}.r2.cloudflarestorage.com</code></td><td>No egress fees, S3-compatible</td></tr>
+<tr><td><strong>Backblaze B2</strong></td><td><code>s3.{region}.backblazeb2.com</code></td><td>Low cost, S3-compatible API</td></tr>
+<tr><td><strong>DigitalOcean Spaces</strong></td><td><code>{region}.digitaloceanspaces.com</code></td><td>Simple, CDN included</td></tr>
+<tr><td><strong>MinIO</strong></td><td>User-configured</td><td>Self-hosted, on-premises</td></tr>
+<tr><td><strong>Wasabi</strong></td><td><code>s3.{region}.wasabisys.com</code></td><td>No egress fees, hot storage</td></tr>
+</table>
+<strong>GCS Backend</strong> (<code>lib/onelist/storage/backends/gcs.ex</code>)
+<li>Uses Google Cloud Storage API</li>
+<li>Service account authentication</li>
+<strong>Encrypted Backend Wrapper</strong> (<code>lib/onelist/storage/backends/encrypted.ex</code>)
+<li>Wraps any backend with client-side E2EE</li>
+<li>Encrypts content before upload, decrypts after download</li>
+<li>Uses user's encryption key (derived from password, never sent to server)</li>
+<li>Enables zero-knowledge cloud storage</li>
+<li><strong>Exception:</strong> Does NOT apply to <code>html_public</code> representations (see Public Content section)</li>
+<pre><code class="language-elixir">defmodule Onelist.Storage.Backends.Encrypted do
+  @moduledoc &quot;&quot;&quot;
+  Wraps any storage backend with client-side E2EE.
+  Content is encrypted before upload and decrypted after download.
+  The cloud provider never sees plaintext content.
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Storage.Behaviour</p>
+<p>def put(path, content, opts) do
+    inner_backend = Keyword.fetch!(opts, :inner_backend)
+    encryption_key = Keyword.fetch!(opts, :encryption_key)</p>
+<p>with {:ok, encrypted} &lt;- Onelist.Encryption.encrypt(content, encryption_key),
+         {:ok, metadata} &lt;- inner_backend.put(path, encrypted, opts) do
+      {:ok, Map.put(metadata, :encrypted, true)}
+    end
+  end</p>
+<p>def get(path, opts) do
+    inner_backend = Keyword.fetch!(opts, :inner_backend)
+    encryption_key = Keyword.fetch!(opts, :encryption_key)</p>
+<p>with {:ok, encrypted} &lt;- inner_backend.get(path),
+         {:ok, content} &lt;- Onelist.Encryption.decrypt(encrypted, encryption_key) do
+      {:ok, content}
+    end
+  end</p>
+<p># ... other callbacks delegate to inner_backend
+end
+</code></pre></p>
+<h3>Part 4: AssetMirror Schema</h3>
+<strong>File:</strong> <code>lib/onelist/entries/asset_mirror.ex</code>
+<table>
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>asset_id</code></td><td>uuid</td><td>Parent asset reference</td></tr>
+<tr><td><code>backend</code></td><td>string</td><td>Backend identifier (s3, local, gcs, r2, b2)</td></tr>
+<tr><td><code>storage_path</code></td><td>string</td><td>Path in this backend</td></tr>
+<tr><td><code>status</code></td><td>string</td><td>pending, syncing, synced, failed</td></tr>
+<tr><td><code>sync_mode</code></td><td>string</td><td>full, stub, thumbnail (for tiered sync)</td></tr>
+<tr><td><code>synced_at</code></td><td>datetime</td><td>Last successful sync</td></tr>
+<tr><td><code>error_message</code></td><td>text</td><td>Last error if failed</td></tr>
+<tr><td><code>retry_count</code></td><td>integer</td><td>Number of retry attempts</td></tr>
+<tr><td><code>encrypted</code></td><td>boolean</td><td>Whether content is E2EE</td></tr>
+</table>
+<h3>Part 5: Storage Context (Facade)</h3>
+<strong>File:</strong> <code>lib/onelist/storage/storage.ex</code>
+<p>Main functions:
+<li><code>store(entry_id, filename, content, opts)</code> - Upload and queue mirrors</li>
+<li><code>retrieve(asset)</code> - Get content (fallback to mirrors)</li>
+<li><code>presigned_url(asset, opts)</code> - Generate download URL</li>
+<li><code>delete(asset)</code> - Delete from all backends</li></p>
+<h3>Part 6: Mirroring System</h3>
+<strong>Mirror Coordinator</strong> (<code>lib/onelist/storage/mirror.ex</code>)
+<li><code>queue_mirrors(asset)</code> - Queue Oban jobs for each mirror backend</li>
+<li><code>sync_to_backend(asset, mirror, backend)</code> - Perform actual sync</li>
+<li><code>mirror_status(asset)</code> - Return sync status across all backends</li>
+<strong>Mirror Worker</strong> (<code>lib/onelist/workers/storage_mirror_worker.ex</code>)
+<li>Oban worker for async mirror operations</li>
+<li>Handles both sync and delete operations</li>
+<li>Max 5 retry attempts with exponential backoff</li>
+<h3>Part 6b: Tiered Sync (Space Optimization)</h3>
+<strong>File:</strong> <code>lib/onelist/storage/tiered_sync.ex</code>
+<p>For space-constrained local storage (Mac app, mobile), sync stubs instead of full assets:</p>
+<pre><code class="language-elixir">defmodule Onelist.Storage.TieredSync do
+  @moduledoc &quot;&quot;&quot;
+  Tiered sync strategy for space-constrained local storage.
+<li>Text/small files: Full content locally</li>
+  <li>Images: Thumbnail locally, full in cloud</li>
+  <li>Audio: Waveform preview locally, full in cloud</li>
+  <li>Video: Poster frame locally, full in cloud</li>
+  &quot;&quot;&quot;
+<p>def sync_to_local(asset, opts \\ []) do
+    max_local_size = Keyword.get(opts, :max_local_size, 1_000_000)  # 1MB default</p>
+<p>cond do
+      asset.size &lt;= max_local_size -&gt;
+        # Small file: sync full content
+        {:ok, :full}</p>
+<p>image?(asset.mime_type) -&gt;
+        # Generate and store thumbnail only
+        {:ok, thumb} = generate_thumbnail(asset, max_size: 800)
+        store_stub(asset, thumb, :thumbnail)</p>
+<p>audio?(asset.mime_type) -&gt;
+        # Store waveform preview
+        {:ok, waveform} = generate_waveform(asset)
+        store_stub(asset, waveform, :waveform)</p>
+<p>video?(asset.mime_type) -&gt;
+        # Store poster frame
+        {:ok, poster} = extract_poster_frame(asset)
+        store_stub(asset, poster, :poster)</p>
+<p>true -&gt;
+        # Unknown type: metadata only
+        store_stub(asset, nil, :metadata_only)
+    end
+  end</p>
+<p>def fetch_full(asset, opts) do
+    # Download from cloud, decrypt if needed, return full content
+    backend = get_cloud_backend(asset, opts)</p>
+<p>with {:ok, content} &lt;- backend.get(asset.storage_path, opts) do
+      if asset.encrypted do
+        Onelist.Encryption.decrypt(content, opts[:encryption_key])
+      else
+        {:ok, content}
+      end
+    end
+  end
+end
+</code></pre></p>
+<strong>Thumbnail Worker</strong> (<code>lib/onelist/workers/thumbnail_worker.ex</code>)
+<li>Generates thumbnails/stubs asynchronously</li>
+<li>Uses ImageMagick/libvips for images</li>
+<li>Uses FFmpeg for video poster frames</li>
+<li>Stores stubs in local backend</li>
+<h3>Part 6c: BYOB (Bring Your Own Bucket)</h3>
+<blockquote><strong>Note:</strong> BYOB backend support is MVP. User-facing UI for paid plans is post-MVP.</blockquote>
+<strong>Schema:</strong> <code>lib/onelist/entries/user_storage_config.ex</code>
+<table>
+<tr><th>Field</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>id</code></td><td>uuid</td><td>Primary key</td></tr>
+<tr><td><code>user_id</code></td><td>uuid</td><td>FK to users</td></tr>
+<tr><td><code>provider</code></td><td>string</td><td>s3, r2, b2, gcs, spaces, wasabi, minio</td></tr>
+<tr><td><code>bucket_name</code></td><td>string</td><td>User's bucket name</td></tr>
+<tr><td><code>region</code></td><td>string</td><td>Bucket region</td></tr>
+<tr><td><code>endpoint</code></td><td>string</td><td>Custom endpoint (for S3-compatible)</td></tr>
+<tr><td><code>credentials</code></td><td>binary</td><td>Encrypted access key + secret</td></tr>
+<tr><td><code>is_active</code></td><td>boolean</td><td>Whether to use this config</td></tr>
+<tr><td><code>verified_at</code></td><td>datetime</td><td>Last successful connection test</td></tr>
+<tr><td><code>metadata</code></td><td>jsonb</td><td>Provider-specific settings</td></tr>
+</table>
+<strong>BYOB Flow:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────┐
+│                    USER STORAGE SETUP UI                            │
+│  ┌───────────────────────────────────────────────────────────────┐ │
+│  │  Cloud Storage Provider:                                       │ │
+│  │  ┌─────────────────────────────────────────────────────────┐  │ │
+│  │  │  ○ Onelist Cloud (we manage everything)    [Recommended] │  │ │
+│  │  │  ○ Cloudflare R2 (bring your own)                        │  │ │
+│  │  │  ○ Backblaze B2 (bring your own)                         │  │ │
+│  │  │  ○ AWS S3 (bring your own)                               │  │ │
+│  │  │  ○ Other S3-compatible (advanced)                        │  │ │
+│  │  └─────────────────────────────────────────────────────────┘  │ │
+│  └───────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────┘
+<p>▼ (if BYOB selected)</p>
+<p>┌─────────────────────────────────────────────────────────────────────┐
+│                    CLOUDFLARE R2 SETUP                              │
+│  ┌───────────────────────────────────────────────────────────────┐ │
+│  │  Account ID:     [________________________]                   │ │
+│  │  Access Key ID:  [________________________]                   │ │
+│  │  Secret Key:     [________________________]                   │ │
+│  │  Bucket Name:    [________________________]                   │ │
+│  │                                                                │ │
+│  │  [Test Connection]                                            │ │
+│  │                                                                │ │
+│  │  ✓ Connection successful! Bucket is accessible.               │ │
+│  │                                                                │ │
+│  │  [Save Configuration]                                         │ │
+│  └───────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre></p>
+<strong>Storage Resolution Logic:</strong>
+<pre><code class="language-elixir">defmodule Onelist.Storage.UserBucket do
+  @moduledoc &quot;&quot;&quot;
+  Resolves storage backend based on user configuration.
+  Falls back to Onelist-provided storage if no BYOB configured.
+  &quot;&quot;&quot;
+<p>def get_backend_for_user(user_id) do
+    case get_active_config(user_id) do
+      nil -&gt;
+        # No BYOB: use Onelist-provided storage
+        {:ok, :onelist_cloud, default_config()}</p>
+<p>%UserStorageConfig{provider: &quot;r2&quot;} = config -&gt;
+        {:ok, :s3, r2_config(config)}</p>
+<p>%UserStorageConfig{provider: &quot;b2&quot;} = config -&gt;
+        {:ok, :s3, b2_config(config)}</p>
+<p>%UserStorageConfig{provider: &quot;s3&quot;} = config -&gt;
+        {:ok, :s3, s3_config(config)}</p>
+<p>%UserStorageConfig{provider: &quot;gcs&quot;} = config -&gt;
+        {:ok, :gcs, gcs_config(config)}
+    end
+  end</p>
+<p>defp r2_config(config) do
+    credentials = decrypt_credentials(config.credentials)
+    %{
+      bucket: config.bucket_name,
+      region: &quot;auto&quot;,
+      endpoint: &quot;https://#{config.metadata[&quot;account_id&quot;]}.r2.cloudflarestorage.com&quot;,
+      access_key_id: credentials.access_key_id,
+      secret_access_key: credentials.secret_access_key
+    }
+  end</p>
+<p>defp b2_config(config) do
+    credentials = decrypt_credentials(config.credentials)
+    %{
+      bucket: config.bucket_name,
+      region: config.region,
+      endpoint: &quot;https://s3.#{config.region}.backblazeb2.com&quot;,
+      access_key_id: credentials.access_key_id,
+      secret_access_key: credentials.secret_access_key
+    }
+  end
+end
+</code></pre></p>
+<strong>Pricing Implications:</strong>
+<table>
+<tr><th>Storage Option</th><th>Asset Storage Cost</th><th>Who Pays Cloud Provider</th></tr>
+<tr><td>Onelist Cloud</td><td>$0.02-0.03/GB/mo</td><td>User pays Onelist</td></tr>
+<tr><td>BYOB (R2/B2/S3)</td><td>$0 from Onelist</td><td>User pays provider directly</td></tr>
+</table>
+<strong>BYOB Benefits for Users:</strong>
+<li>Control over data location/jurisdiction</li>
+<li>Potentially lower costs (R2 has no egress fees)</li>
+<li>Use existing cloud credits/contracts</li>
+<li>Data portability (bucket is theirs)</li>
+<strong>BYOB Benefits for Onelist:</strong>
+<li>Lower infrastructure costs</li>
+<li>Reduced liability for data storage</li>
+<li>Appeals to enterprise/privacy-conscious users</li>
+<h3>Part 7: API Endpoints</h3>
+<strong>Asset Routes:</strong>
+<pre><code class="language-">POST   /api/v1/entries/:entry_id/assets          # Upload asset
+GET    /api/v1/entries/:entry_id/assets          # List assets
+DELETE /api/v1/entries/:entry_id/assets/:id      # Delete asset
+GET    /api/v1/assets/:id/download               # Get presigned URL (or full for BYOB)
+GET    /api/v1/assets/:id/thumbnail              # Get thumbnail/stub
+GET    /api/v1/assets/:id/mirror-status          # Get mirror status
+POST   /api/v1/assets/:id/fetch-full             # Trigger full download from cloud
+</code></pre>
+<strong>User Storage Config Routes (API ready, UI post-MVP):</strong>
+<pre><code class="language-">GET    /api/v1/user/storage-config               # Get current storage config
+POST   /api/v1/user/storage-config               # Create/update BYOB config
+DELETE /api/v1/user/storage-config               # Remove BYOB, revert to Onelist Cloud
+POST   /api/v1/user/storage-config/test          # Test BYOB credentials
+GET    /api/v1/user/storage-usage                # Get storage usage stats
+</code></pre>
+<h3>Part 8: Configuration</h3>
+<strong>config/config.exs:</strong>
+<pre><code class="language-elixir">config :onelist, Onelist.Storage,
+  primary_backend: :local,
+  mirror_backends: [],
+  enable_e2ee: false,
+  enable_tiered_sync: false,
+  max_local_asset_size: 1_000_000  # 1MB - larger files get stubs
+<p>config :onelist, Onelist.Storage.Backends.Local,
+  root_path: &quot;priv/static/uploads&quot;
+</code></pre></p>
+<strong>config/runtime.exs (production - Onelist Cloud):</strong>
+<pre><code class="language-elixir"># For Onelist-provided cloud storage (Tier 1 users without BYOB)
+config :onelist, Onelist.Storage,
+  primary_backend: :local,
+  mirror_backends: [:encrypted_s3],  # E2EE before upload
+  enable_e2ee: true,
+  enable_tiered_sync: true
+<h1>Onelist-managed R2 bucket (our infrastructure)</h1>
+config :onelist, Onelist.Storage.Backends.S3,
+  bucket: System.get_env(&quot;ONELIST_R2_BUCKET&quot;),
+  region: &quot;auto&quot;,
+  endpoint: System.get_env(&quot;ONELIST_R2_ENDPOINT&quot;),
+  access_key_id: System.get_env(&quot;ONELIST_R2_ACCESS_KEY&quot;),
+  secret_access_key: System.get_env(&quot;ONELIST_R2_SECRET_KEY&quot;)
+</code></pre>
+<strong>Cloudflare R2 (BYOB or Onelist-managed):</strong>
+<pre><code class="language-elixir">config :onelist, Onelist.Storage.Backends.S3,
+  bucket: &quot;user-bucket-name&quot;,
+  region: &quot;auto&quot;,
+  endpoint: &quot;https://{account_id}.r2.cloudflarestorage.com&quot;,
+  access_key_id: &quot;R2_ACCESS_KEY&quot;,
+  secret_access_key: &quot;R2_SECRET_KEY&quot;
+</code></pre>
+<strong>Backblaze B2 (BYOB):</strong>
+<pre><code class="language-elixir">config :onelist, Onelist.Storage.Backends.S3,
+  bucket: &quot;user-bucket-name&quot;,
+  region: &quot;us-west-004&quot;,  # or eu-central-003, etc.
+  endpoint: &quot;https://s3.us-west-004.backblazeb2.com&quot;,
+  access_key_id: &quot;B2_KEY_ID&quot;,
+  secret_access_key: &quot;B2_APPLICATION_KEY&quot;
+</code></pre>
+<strong>VM Tier (no E2EE needed - we control the server):</strong>
+<pre><code class="language-elixir">config :onelist, Onelist.Storage,
+  primary_backend: :s3,  # Direct to cloud, no encryption wrapper
+  mirror_backends: [:local],
+  enable_e2ee: false,
+  enable_tiered_sync: false  # VM has plenty of storage
+</code></pre>
+<hr>
+<h2>Files to Create</h2>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>lib/onelist/storage/behaviour.ex</code></td><td>Backend interface definition</td></tr>
+<tr><td><code>lib/onelist/storage/storage.ex</code></td><td>Main context facade</td></tr>
+<tr><td><code>lib/onelist/storage/backends/local.ex</code></td><td>Local filesystem backend</td></tr>
+<tr><td><code>lib/onelist/storage/backends/s3.ex</code></td><td>S3/S3-compatible backend (R2, B2, Spaces, etc.)</td></tr>
+<tr><td><code>lib/onelist/storage/backends/gcs.ex</code></td><td>Google Cloud Storage backend</td></tr>
+<tr><td><code>lib/onelist/storage/backends/encrypted.ex</code></td><td>E2EE wrapper for any backend</td></tr>
+<tr><td><code>lib/onelist/storage/mirror.ex</code></td><td>Mirror coordination</td></tr>
+<tr><td><code>lib/onelist/storage/tiered_sync.ex</code></td><td>Stub/thumbnail sync for space optimization</td></tr>
+<tr><td><code>lib/onelist/storage/user_bucket.ex</code></td><td>BYOB credential resolution</td></tr>
+<tr><td><code>lib/onelist/storage/path_generator.ex</code></td><td>Storage path generation</td></tr>
+<tr><td><code>lib/onelist/entries/asset_mirror.ex</code></td><td>Mirror tracking schema</td></tr>
+<tr><td><code>lib/onelist/entries/user_storage_config.ex</code></td><td>User's BYOB configuration</td></tr>
+<tr><td><code>lib/onelist/workers/storage_mirror_worker.ex</code></td><td>Async mirror worker</td></tr>
+<tr><td><code>lib/onelist/workers/storage_cleanup_worker.ex</code></td><td>Cleanup/retry worker</td></tr>
+<tr><td><code>lib/onelist/workers/thumbnail_worker.ex</code></td><td>Generate thumbnails/stubs</td></tr>
+<tr><td><code>lib/onelist_web/controllers/api/v1/asset_controller.ex</code></td><td>Asset API</td></tr>
+<tr><td><code>lib/onelist_web/controllers/api/v1/asset_json.ex</code></td><td>Asset JSON view</td></tr>
+<tr><td><code>lib/onelist_web/controllers/api/v1/user_storage_controller.ex</code></td><td>BYOB config API</td></tr>
+<tr><td><code>priv/repo/migrations/<em>_create_asset_mirrors.exs</code></td><td>Mirror table</td></tr>
+<tr><td><code>priv/repo/migrations/</em>_create_user_storage_configs.exs</code></td><td>BYOB config table</td></tr>
+<tr><td><code>priv/repo/migrations/<em>_add_storage_fields_to_assets.exs</code></td><td>Asset updates</td></tr>
+<tr><td><code>test/onelist/storage/</em>_test.exs</code></td><td>Storage tests</td></tr>
+<tr><td><code>test/onelist_web/controllers/api/v1/asset_controller_test.exs</code></td><td>API tests</td></tr>
+<tr><td><strong>FUTURE (Paid Plan UI):</strong></td></tr>
+<tr><td><code>lib/onelist_web/live/settings/storage_live.ex</code></td><td>BYOB setup UI for paid users</td></tr>
+</table>
+<h2>Files to Modify</h2>
+<table>
+<tr><th>File</th><th>Changes</th></tr>
+<tr><td><code>mix.exs</code></td><td>Add ex_aws, mime, image processing deps</td></tr>
+<tr><td><code>lib/onelist/entries/asset.ex</code></td><td>Add primary_backend, checksum, encrypted, mirrors assoc</td></tr>
+<tr><td><code>lib/onelist_web/router.ex</code></td><td>Add asset and storage config routes</td></tr>
+<tr><td><code>config/config.exs</code></td><td>Storage configuration</td></tr>
+<tr><td><code>config/dev.exs</code></td><td>Dev storage config</td></tr>
+<tr><td><code>config/test.exs</code></td><td>Test storage mock config</td></tr>
+<tr><td><code>config/runtime.exs</code></td><td>Production storage config</td></tr>
+<tr><td><code>test/support/mocks.ex</code></td><td>Add storage mock</td></tr>
+</table>
+<hr>
+<h2>Implementation Sequence</h2>
+<h3>MVP Implementation</h3>
+<p>1. <strong>Dependencies & Migrations</strong> - Add deps, create migrations
+2. <strong>Behaviour & Local Backend</strong> - Core abstraction + local implementation
+3. <strong>Storage Context</strong> - Main facade with store/retrieve/delete
+4. <strong>S3 Backend</strong> - S3 and S3-compatible support (R2, B2, Spaces, etc.)
+5. <strong>Mirror System</strong> - AssetMirror schema, Mirror coordinator, Oban workers
+6. <strong>API Endpoints</strong> - Asset controller and routes
+7. <strong>Tests</strong> - Unit and integration tests
+8. <strong>Encrypted Backend</strong> - E2EE wrapper for zero-knowledge cloud sync
+9. <strong>Tiered Sync</strong> - Thumbnail/stub generation for space optimization
+10. <strong>BYOB Backend</strong> - UserStorageConfig schema, credential management, API endpoints</p>
+<h3>Future (Post-MVP)</h3>
+<p>11. <strong>BYOB Paid Plan UI</strong> - User-facing settings UI for connecting buckets
+12. <strong>Multi-Cloud Redundancy</strong> - Support multiple cloud backends per user for asset redundancy
+13. <strong>GCS Backend</strong> (optional) - Google Cloud Storage support</p>
+<hr>
+<h2>Verification</h2>
+<pre><code class="language-bash"># Run tests
+MIX_ENV=test mix test test/onelist/storage/
+MIX_ENV=test mix test test/onelist_web/controllers/api/v1/asset_controller_test.exs
+<h1>Manual testing</h1>
+<h1>1. Upload file</h1>
+curl -X POST -H &quot;Authorization: Bearer $API_KEY&quot; \
+  -F &quot;file=@test.jpg&quot; \
+  http://localhost:4000/api/v1/entries/$ENTRY_ID/assets
+<h1>2. Get download URL</h1>
+curl -H &quot;Authorization: Bearer $API_KEY&quot; \
+  http://localhost:4000/api/v1/assets/$ASSET_ID/download
+<h1>3. Check mirror status</h1>
+curl -H &quot;Authorization: Bearer $API_KEY&quot; \
+  http://localhost:4000/api/v1/assets/$ASSET_ID/mirror-status
+</code></pre>
+<hr>
+<h2>Storage Path Format</h2>
+<pre><code class="language-">assets/{year}/{month}/{day}/{entry_id_prefix}/{uuid}_{sanitized_filename}
+<p>Example: assets/2026/01/28/abc123de/550e8400-e29b_photo.jpg
+</code></pre></p>
+<hr>
+<h2>Error Handling</h2>
+<table>
+<tr><th>Error Type</th><th>Behavior</th></tr>
+<tr><td>Primary backend fails</td><td>Fallback to synced mirrors</td></tr>
+<tr><td>Mirror sync fails</td><td>Retry via Oban (max 5 attempts)</td></tr>
+<tr><td>Checksum mismatch</td><td>Reject sync, mark failed</td></tr>
+<tr><td>Delete fails</td><td>Log error, continue with other backends</td></tr>
+</table>
+<hr>
+<h2>Public Content and E2EE</h2>
+<h3>The E2EE/Public Content Constraint</h3>
+<strong>Critical Architecture Rule:</strong> Public content cannot be end-to-end encrypted.
+<p>E2EE means only the user's devices can decrypt content. Public content (pages, forum posts, blog posts) must be readable by anyone without the user's keys.</p>
+<h3>Simplified Architecture: All in PostgreSQL</h3>
+<p>Both encrypted and unencrypted representations are stored in the same PostgreSQL table:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  representations table:                                                      │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │ entry_id │ type        │ encrypted │ content                        │    │
+│  │──────────│─────────────│───────────│────────────────────────────────│    │
+│  │ abc123   │ markdown    │ true      │ &lt;AES-256-GCM encrypted blob&gt;   │    │
+│  │ abc123   │ summary     │ true      │ &lt;AES-256-GCM encrypted blob&gt;   │    │
+│  │ abc123   │ html_public │ false     │ &lt;h1&gt;My Post&lt;/h1&gt;&lt;p&gt;Hello...    │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  Access control at query level:                                             │
+│  - Private reps (encrypted=true): Only return to authenticated owner        │
+│  - html_public: Return to anyone if entry.public = true                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Why not separate storage buckets?</strong>
+<li>Adds complexity without clear benefit at MVP scale</li>
+<li>PostgreSQL can handle both encrypted and plaintext content</li>
+<li>Access control is enforced at the application/query level</li>
+<li>Cloudflare CDN in front of the app handles caching (see below)</li>
+<h3>html_public Generation: Always In Sync</h3>
+<p>The <code>html_public</code> representation is generated on every content change, not when toggling to public:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  CONTENT CHANGE (create/update)                                              │
+│       │                                                                      │
+│       ▼                                                                      │
+│  Generate/update ALL representations:                                        │
+│  ├── markdown (encrypted) ──────► Private, for user's local search          │
+│  ├── summary (encrypted) ───────► Private, AI-generated                     │
+│  └── html_public (plaintext) ───► Always generated, always ready            │
+│                                                                              │
+│  TOGGLE TO PUBLIC                                                            │
+│       │                                                                      │
+│       ▼                                                                      │
+│  Just flip entry.public = true                                              │
+│  html_public already exists ──► Now accessible at public URL                │
+│                                                                              │
+│  TOGGLE TO PRIVATE                                                           │
+│       │                                                                      │
+│       ▼                                                                      │
+│  Just flip entry.public = false                                             │
+│  html_public still exists ───► But no longer served                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Benefits:</strong>
+<li>Toggling public/private is instant (just a permission change)</li>
+<li>No async job needed at toggle time</li>
+<li>Content is always ready for publishing</li>
+<h3>Traffic Scaling: Cloudflare CDN</h3>
+<p>For public page traffic, use Cloudflare CDN in front of the application:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  PUBLIC PAGE REQUEST FLOW                                                    │
+│                                                                              │
+│  User ──► Cloudflare Edge ──┬──► (cache HIT) ──► Return cached HTML         │
+│                             │                                                │
+│                             └──► (cache MISS) ──► Phoenix ──► PostgreSQL    │
+│                                                        │                     │
+│                                                        ▼                     │
+│                                        Return html_public, cache at edge    │
+│                                                                              │
+│  Cache invalidation:                                                        │
+│  - Content changes ──► Purge URL via Cloudflare API                         │
+│  - Entry made private ──► Purge URL                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Why this is sufficient:</strong>
+<li>Cache HITs never touch the server (fast, cheap)</li>
+<li>Cache MISSes are just a PostgreSQL query (still fast)</li>
+<li>Cloudflare handles global distribution</li>
+<li>Simple architecture, single source of truth</li>
+<h3>Post-MVP Consideration: R2 Direct Serving</h3>
+<p>Serving <code>html_public</code> directly from Cloudflare R2 (bypassing the app entirely) may be considered post-MVP if:
+<li>Millions of public pages with unpredictable access patterns</li>
+<li>Want to serve without running the app (static export)</li>
+<li>Extreme cost optimization needed</li></p>
+<p>For MVP and likely well beyond, Cloudflare CDN in front of PostgreSQL is sufficient.</p>
+<h3>User Consent Flow</h3>
+<p>When making content public, the UI clearly informs:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MAKE ENTRY PUBLIC                                         │
+│                                                                              │
+│  ⚠️  This will make your entry publicly accessible                          │
+│                                                                              │
+│  • Public entries are stored UNENCRYPTED so anyone can view them            │
+│  • Images and files in this entry will also be publicly accessible          │
+│  • Your private copy remains end-to-end encrypted                           │
+│  • You can make it private again at any time                                │
+│                                                                              │
+│  Public URL: onelist.my/username/abc123xyz                                  │
+│                                                                              │
+│                    [Cancel]  [Make Public]                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Affected Features</h3>
+<table>
+<tr><th>Feature</th><th>Public Representation</th><th>Private Representation</th></tr>
+<tr><td>Public pages</td><td><code>html_public</code> (plaintext, in PostgreSQL)</td><td><code>markdown</code> (E2EE)</td></tr>
+<tr><td>Forum topics</td><td><code>html_public</code> (plaintext)</td><td><code>markdown</code> (E2EE)</td></tr>
+<tr><td>Forum replies</td><td><code>html_public</code> (plaintext)</td><td><code>markdown</code> (E2EE)</td></tr>
+<tr><td>Xamlr blog posts</td><td><code>display_html</code> (plaintext)</td><td><code>markdown</code> (E2EE)</td></tr>
+<tr><td>Beacon CMS pages</td><td>Full content (plaintext)</td><td>N/A (CMS is public)</td></tr>
+</table>
+<hr>
+<h2>Public Assets: On-Demand Decryption</h2>
+<h3>The Problem</h3>
+<p>Assets (images, files) are E2EE encrypted. When an entry with embedded assets is made public, viewers need to access those assets without the user's encryption key.</p>
+<strong>E2EE is non-negotiable.</strong> Assets are always encrypted by default. Public copies are only created on-demand when explicitly needed.
+<h3>Architecture: Reference-Counted Public Copies</h3>
+<p>When an entry goes public, its linked assets are decrypted and uploaded to Cloudflare R2 public storage. The public URL is stored as asset metadata. Reference counting ensures cleanup when no longer needed.</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  ASSET SCHEMA ADDITIONS                                                      │
+│                                                                              │
+│  assets table:                                                               │
+│  ├── id, filename, mime_type, storage_path, encrypted, ...                  │
+│  ├── public_url (string, nullable) ────► URL in R2 public bucket            │
+│  └── public_entry_ids (array of uuids) ─► Entries referencing this publicly │
+│                                                                              │
+│  When public_entry_ids is empty → public_url should be null                 │
+│  When public_entry_ids has entries → public_url points to R2                │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Workflow: Entry Goes Public</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  MAKING ENTRY PUBLIC                                                         │
+│                                                                              │
+│  1. User clicks &quot;Make Public&quot;                                               │
+│                                                                              │
+│  2. System identifies linked assets in the entry                            │
+│     - Parse markdown/html for asset references                              │
+│     - Include directly attached assets                                      │
+│                                                                              │
+│  3. For each linked asset:                                                  │
+│     │                                                                        │
+│     ├── IF asset.public_url exists:                                         │
+│     │   └── Just add entry.id to asset.public_entry_ids                     │
+│     │       (asset already public, reuse existing URL)                      │
+│     │                                                                        │
+│     └── IF asset.public_url is null:                                        │
+│         ├── Client decrypts asset with user's key                           │
+│         ├── Upload plaintext to R2 public bucket                            │
+│         ├── Store URL in asset.public_url                                   │
+│         └── Add entry.id to asset.public_entry_ids                          │
+│                                                                              │
+│  4. Generate html_public with public_url references                         │
+│                                                                              │
+│  5. Set entry.public = true                                                 │
+│                                                                              │
+│  6. Purge Cloudflare CDN cache for this entry                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Workflow: Entry Goes Private</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  MAKING ENTRY PRIVATE                                                        │
+│                                                                              │
+│  1. User clicks &quot;Make Private&quot;                                              │
+│                                                                              │
+│  2. Set entry.public = false                                                │
+│                                                                              │
+│  3. For each linked asset:                                                  │
+│     │                                                                        │
+│     ├── Remove entry.id from asset.public_entry_ids                         │
+│     │                                                                        │
+│     └── IF asset.public_entry_ids is now empty:                             │
+│         ├── Delete file from R2 public bucket                               │
+│         └── Set asset.public_url = null                                     │
+│         (No other public entries reference this asset)                      │
+│                                                                              │
+│  4. Purge Cloudflare CDN cache for this entry                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Reference Counting Example</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  SCENARIO: Same image in multiple entries                                    │
+│                                                                              │
+│  Asset: cat.jpg                                                             │
+│  ├── encrypted_path: &quot;private/abc123/cat.jpg.enc&quot;                           │
+│  ├── public_url: null                                                       │
+│  └── public_entry_ids: []                                                   │
+│                                                                              │
+│  Entry A (private) references cat.jpg                                       │
+│  Entry B (private) references cat.jpg                                       │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  User makes Entry A public:                                                 │
+│  ├── Decrypt cat.jpg, upload to R2                                          │
+│  ├── public_url: &quot;https://pub.r2.onelist.my/cat-abc123.jpg&quot;                 │
+│  └── public_entry_ids: [entry_a_id]                                         │
+│                                                                              │
+│  User makes Entry B public:                                                 │
+│  ├── public_url already exists, reuse it                                    │
+│  └── public_entry_ids: [entry_a_id, entry_b_id]                             │
+│                                                                              │
+│  User makes Entry A private:                                                │
+│  ├── Remove entry_a_id from public_entry_ids                                │
+│  └── public_entry_ids: [entry_b_id]  (still has refs, keep public copy)    │
+│                                                                              │
+│  User makes Entry B private:                                                │
+│  ├── Remove entry_b_id from public_entry_ids                                │
+│  ├── public_entry_ids: []  (empty!)                                         │
+│  ├── Delete from R2 public bucket                                           │
+│  └── public_url: null                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>User Consent: Full Disclosure</h3>
+<strong>Critical:</strong> Users must be clearly informed when assets will leave the encrypted envelope.
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MAKE ENTRY PUBLIC                                         │
+│                                                                              │
+│  ⚠️  This entry contains 3 images that will be made public                  │
+│                                                                              │
+│  When you make this entry public:                                           │
+│                                                                              │
+│  • The entry text will be stored UNENCRYPTED                                │
+│  • These files will be DECRYPTED and stored at public URLs:                 │
+│                                                                              │
+│    📷 vacation-photo.jpg (2.3 MB)                                           │
+│    📷 family-dinner.jpg (1.8 MB)                                            │
+│    📄 notes.pdf (450 KB)                                                    │
+│                                                                              │
+│  • Anyone with the link can view these files                                │
+│  • Your private copies remain end-to-end encrypted                          │
+│  • Making this entry private again will remove the public copies            │
+│                                                                              │
+│  Public URL: onelist.my/username/abc123xyz                                  │
+│                                                                              │
+│                    [Cancel]  [Make Public]                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Storage Architecture</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  DUAL BUCKET ARCHITECTURE                                                    │
+│                                                                              │
+│  PRIVATE BUCKET (E2EE):                         PUBLIC BUCKET (R2):         │
+│  ├── assets/2026/01/28/abc/cat.jpg.enc         ├── cat-abc123.jpg           │
+│  ├── assets/2026/01/28/def/doc.pdf.enc         └── doc-def456.pdf           │
+│  └── ...                                                                     │
+│                                                                              │
+│  - All assets encrypted with user's key        - Plaintext, world-readable  │
+│  - Only user's devices can decrypt             - CDN-cached at edge          │
+│  - Never exposed to public                     - Only exists when needed     │
+│                                                                              │
+│  Asset record links both:                                                   │
+│  ├── storage_path: &quot;assets/2026/01/28/abc/cat.jpg.enc&quot; (always)            │
+│  └── public_url: &quot;https://pub.r2.../cat-abc123.jpg&quot; (when public)          │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Public URL Generation</h3>
+<p>Public URLs should be:
+<li>Unguessable (include random component)</li>
+<li>Stable (same asset = same URL, for CDN caching)</li>
+<li>Independent of entry (asset may be in multiple entries)</li></p>
+<pre><code class="language-">Format: https://pub.r2.onelist.my/{random_id}-{filename}
+<p>Example: https://pub.r2.onelist.my/x7k9m2p4-vacation-photo.jpg</p>
+<p>The random_id is generated once when first published and stored with the asset.
+</code></pre></p>
+<h3>Database Schema Changes</h3>
+<pre><code class="language-elixir"># Migration: add_public_fields_to_assets
+<p>alter table(:assets) do
+  add :public_url, :string
+  add :public_entry_ids, {:array, :binary_id}, default: []
+  add :public_random_id, :string  # For stable URL generation
+end</p>
+<p>create index(:assets, [:public_url], where: &quot;public_url IS NOT NULL&quot;)
+</code></pre></p>
+<h3>Implementation Notes</h3>
+<p>1. <strong>Async processing</strong>: Decrypting and uploading large assets should be async (Oban job) to avoid blocking the UI. Show progress indicator.</p>
+<p>2. <strong>Failure handling</strong>: If public upload fails, entry should not be made public. Retry logic needed.</p>
+<p>3. <strong>Orphan cleanup</strong>: Background job to find assets with <code>public_url</code> but empty <code>public_entry_ids</code> and clean up.</p>
+<p>4. <strong>Entry deletion</strong>: When a public entry is deleted, same logic as "make private" - decrement refs, cleanup if zero.</p>
+<p>5. <strong>Asset deletion</strong>: If user deletes an asset entirely, also delete public copy if exists.</p>
+<hr>
+<h2>Configuration Examples</h2>
+<h3>By Deployment Model</h3>
+<strong>Mac App / iOS App (Tier 1 - Zero Knowledge):</strong>
+<pre><code class="language-elixir"># Local primary, E2EE mirror to cloud, tiered sync for space
+primary_backend: :local
+mirror_backends: [:encrypted_s3]  # Wrapped with E2EE
+enable_e2ee: true
+enable_tiered_sync: true
+max_local_asset_size: 1_000_000  # 1MB, larger = stub only
+</code></pre>
+<strong>Self-hosted Docker (Privacy-First):</strong>
+<pre><code class="language-elixir"># All data on-premises, optional encrypted cloud backup
+primary_backend: :local
+mirror_backends: []  # or [:encrypted_s3] for backup
+enable_e2ee: true  # if using cloud backup
+</code></pre>
+<strong>VM Tier (Onelist-Managed):</strong>
+<pre><code class="language-elixir"># Cloud primary, we control the server, no E2EE needed
+primary_backend: :s3
+mirror_backends: [:local]
+enable_e2ee: false
+enable_tiered_sync: false  # VM has ample storage
+</code></pre>
+<strong>OpenClaw Sidecar:</strong>
+<pre><code class="language-elixir"># Local primary (alongside OpenClaw files), E2EE to cloud
+primary_backend: :local
+mirror_backends: [:encrypted_s3]
+enable_e2ee: true
+enable_tiered_sync: true  # Save space on OpenClaw host
+</code></pre>
+<h3>By Cloud Provider</h3>
+<strong>Onelist Cloud (We Manage R2):</strong>
+<pre><code class="language-elixir"># Default for users without BYOB
+config :onelist, Onelist.Storage.Backends.S3,
+  bucket: System.get_env(&quot;ONELIST_R2_BUCKET&quot;),
+  region: &quot;auto&quot;,
+  endpoint: System.get_env(&quot;ONELIST_R2_ENDPOINT&quot;),
+  access_key_id: System.get_env(&quot;ONELIST_R2_ACCESS_KEY&quot;),
+  secret_access_key: System.get_env(&quot;ONELIST_R2_SECRET_KEY&quot;)
+</code></pre>
+<strong>BYOB: Cloudflare R2:</strong>
+<pre><code class="language-elixir"># User's own R2 bucket - no egress fees!
+config :onelist, Onelist.Storage.Backends.S3,
+  bucket: &quot;my-onelist-assets&quot;,
+  region: &quot;auto&quot;,
+  endpoint: &quot;https://abc123def456.r2.cloudflarestorage.com&quot;,
+  access_key_id: &quot;user_r2_key&quot;,
+  secret_access_key: &quot;user_r2_secret&quot;
+</code></pre>
+<strong>BYOB: Backblaze B2:</strong>
+<pre><code class="language-elixir"># User's own B2 bucket - very low cost
+config :onelist, Onelist.Storage.Backends.S3,
+  bucket: &quot;my-onelist-backup&quot;,
+  region: &quot;us-west-004&quot;,
+  endpoint: &quot;https://s3.us-west-004.backblazeb2.com&quot;,
+  access_key_id: &quot;user_b2_key_id&quot;,
+  secret_access_key: &quot;user_b2_application_key&quot;
+</code></pre>
+<strong>BYOB: AWS S3:</strong>
+<pre><code class="language-elixir"># User's own S3 bucket - enterprise/existing infrastructure
+config :onelist, Onelist.Storage.Backends.S3,
+  bucket: &quot;company-onelist-storage&quot;,
+  region: &quot;us-east-1&quot;,
+  # No custom endpoint needed for AWS
+  access_key_id: &quot;AKIA...&quot;,
+  secret_access_key: &quot;...&quot;
+</code></pre>
+<strong>BYOB: DigitalOcean Spaces:</strong>
+<pre><code class="language-elixir">config :onelist, Onelist.Storage.Backends.S3,
+  bucket: &quot;my-onelist-space&quot;,
+  region: &quot;nyc3&quot;,
+  endpoint: &quot;https://nyc3.digitaloceanspaces.com&quot;,
+  access_key_id: &quot;DO_SPACES_KEY&quot;,
+  secret_access_key: &quot;DO_SPACES_SECRET&quot;
+</code></pre>
+<strong>BYOB: Wasabi:</strong>
+<pre><code class="language-elixir"># No egress fees, hot storage pricing
+config :onelist, Onelist.Storage.Backends.S3,
+  bucket: &quot;onelist-wasabi&quot;,
+  region: &quot;us-east-1&quot;,
+  endpoint: &quot;https://s3.us-east-1.wasabisys.com&quot;,
+  access_key_id: &quot;WASABI_KEY&quot;,
+  secret_access_key: &quot;WASABI_SECRET&quot;
+</code></pre>
+<strong>Self-hosted MinIO:</strong>
+<pre><code class="language-elixir"># On-premises object storage
+config :onelist, Onelist.Storage.Backends.S3,
+  bucket: &quot;onelist&quot;,
+  region: &quot;us-east-1&quot;,  # MinIO ignores this
+  endpoint: &quot;https://minio.internal.company.com:9000&quot;,
+  access_key_id: &quot;minio_admin&quot;,
+  secret_access_key: &quot;minio_password&quot;
+</code></pre>
+<hr>
+<h2>Storage Provider Comparison</h2>
+<table>
+<tr><th>Provider</th><th>Egress Fees</th><th>Storage Cost</th><th>Best For</th></tr>
+<tr><td><strong>Cloudflare R2</strong></td><td>None</td><td>$0.015/GB/mo</td><td>Default BYOB recommendation</td></tr>
+<tr><td><strong>Backblaze B2</strong></td><td>$0.01/GB</td><td>$0.006/GB/mo</td><td>Lowest cost storage</td></tr>
+<tr><td><strong>Wasabi</strong></td><td>None</td><td>$0.0069/GB/mo</td><td>Hot storage, no egress</td></tr>
+<tr><td><strong>AWS S3</strong></td><td>$0.09/GB</td><td>$0.023/GB/mo</td><td>Enterprise, existing infra</td></tr>
+<tr><td><strong>DigitalOcean Spaces</strong></td><td>$0.01/GB over 1TB</td><td>$5/mo for 250GB</td><td>Simple, includes CDN</td></tr>
+<tr><td><strong>MinIO</strong></td><td>N/A (self-hosted)</td><td>Hardware cost</td><td>Air-gapped, on-premises</td></tr>
+</table>
+<strong>Recommendation for Onelist Cloud:</strong> Cloudflare R2 (no egress = predictable costs for us)
+<hr>
+<hr>
+<h2>Onelist Storage Tiers</h2>
+<h3>MVP: Two-Tier Model</h3>
+<p>Users choose ONE of these options:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    STORAGE TIER SELECTION                                   │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  ○ Standard Storage                                    $X.XX/GB/mo   │   │
+│  │    • Cloudflare R2                                                   │   │
+│  │    • Fast, no egress fees                                            │   │
+│  │    • Single region                                                   │   │
+│  │                                                                      │   │
+│  │  ○ Redundant Storage (Recommended)                     $Y.YY/GB/mo   │   │
+│  │    • Cloudflare R2 (primary)                                         │   │
+│  │    • Backblaze B2 (backup)                                           │   │
+│  │    • Automatic failover                                              │   │
+│  │    • Geographic redundancy                                           │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<table>
+<tr><th>Tier</th><th>Providers</th><th>Price</th><th>Use Case</th></tr>
+<tr><td><strong>Standard</strong></td><td>R2 only</td><td>$0.02/GB/mo</td><td>Cost-conscious, trust single provider</td></tr>
+<tr><td><strong>Redundant</strong></td><td>R2 + B2</td><td>$0.035/GB/mo</td><td>Data safety, disaster recovery</td></tr>
+</table>
+<strong>How Redundant tier works:</strong>
+<li>Uploads go to R2 first (fast)</li>
+<li>Async mirror to B2 (background Oban job)</li>
+<li>Downloads try R2 first, fallback to B2 if unavailable</li>
+<li>Both copies E2EE encrypted</li>
+<h3>Future: BYOB Combinations (Post-MVP)</h3>
+<p>When BYOB launches, users can mix our storage with their own:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    BYOB STORAGE OPTIONS (FUTURE)                            │
+│                                                                              │
+│  Onelist Storage:                      Your Storage (BYOB):                 │
+│  ┌─────────────────────────────────┐   ┌─────────────────────────────────┐ │
+│  │  ☑ Standard (R2)        $0.02   │   │  ☐ Add your own bucket          │ │
+│  │  ☐ Redundant (R2+B2)    $0.035  │   │    Provider: [Cloudflare R2 ▼]  │ │
+│  │  ☐ None                 $0      │   │    Bucket:   [_______________]  │ │
+│  └─────────────────────────────────┘   │    [+ Add another bucket]       │ │
+│                                        └─────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Pricing Scenarios (Future):</strong>
+<table>
+<tr><th>Onelist Storage</th><th>BYOB Buckets</th><th>Monthly Cost</th></tr>
+<tr><td>Standard (R2)</td><td>None</td><td>$0.02/GB</td></tr>
+<tr><td>Redundant (R2+B2)</td><td>None</td><td>$0.035/GB</td></tr>
+<tr><td>Standard (R2)</td><td>+1 user bucket</td><td>$0.02/GB + user pays their provider</td></tr>
+<tr><td>Redundant (R2+B2)</td><td>+1 user bucket</td><td>$0.035/GB + user pays their provider</td></tr>
+<tr><td>None</td><td>1 user bucket</td><td>Base fee only (no storage charge)</td></tr>
+<tr><td>None</td><td>2+ user buckets</td><td>Base fee only (user manages redundancy)</td></tr>
+</table>
+<strong>Migration Off Our Buckets:</strong>
+<table>
+<tr><th>Scenario</th><th>Migration Fee</th><th>Notes</th></tr>
+<tr><td>Standard → BYOB only</td><td>$0.01/GB one-time</td><td>Egress from R2 is free</td></tr>
+<tr><td>Redundant → BYOB only</td><td>$0.02/GB one-time</td><td>Covers B2 egress</td></tr>
+<tr><td>Keep partial (e.g., keep R2, drop B2)</td><td>Free</td><td>No data movement</td></tr>
+</table>
+<strong>Why charge migration fees?</strong>
+<li>B2 has egress costs (~$0.01/GB)</li>
+<li>Covers operational overhead</li>
+<li>Discourages churn gaming</li>
+<li>Still cheaper than most providers</li>
+<hr>
+<h2>Future: Multi-Cloud Redundancy Architecture</h2>
+<p>Technical details for how multi-cloud redundancy works:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MULTI-CLOUD REDUNDANCY (FUTURE)                          │
+│                                                                              │
+│  User configures:                                                           │
+│  • Primary: Cloudflare R2 (fast, no egress)                                 │
+│  • Secondary: Backblaze B2 (cheap, disaster recovery)                       │
+│                                                                              │
+│  ┌─────────────────┐                                                        │
+│  │  Asset Upload   │                                                        │
+│  └────────┬────────┘                                                        │
+│           │                                                                  │
+│           ▼                                                                  │
+│  ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐       │
+│  │  Local Storage  │────►│  Cloudflare R2  │────►│  Backblaze B2   │       │
+│  │  (immediate)    │     │  (primary sync) │     │  (secondary)    │       │
+│  └─────────────────┘     └─────────────────┘     └─────────────────┘       │
+│                                                                              │
+│  Download priority: Local → R2 → B2                                         │
+│  If R2 fails: automatic fallback to B2                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Use Cases:</strong>
+<li><strong>Disaster recovery</strong>: Primary cloud goes down, secondary has copy</li>
+<li><strong>Geographic redundancy</strong>: R2 in US, B2 in EU</li>
+<li><strong>Vendor independence</strong>: Not locked into single provider</li>
+<li><strong>Cost optimization</strong>: Hot storage (R2) + cold archive (B2/Glacier)</li>
+</ul>
+<strong>Schema Extension (Future):</strong>
+<pre><code class="language-elixir"># user_storage_configs becomes plural - users can have multiple
+<h1>Each config has a <code>priority</code> and <code>role</code> field</h1>
+<p>%UserStorageConfig{
+  user_id: &quot;...&quot;,
+  provider: &quot;r2&quot;,
+  role: :primary,        # :primary, :secondary, :archive
+  priority: 1,           # Lower = higher priority for reads
+  sync_mode: :full,      # :full, :async, :on_demand
+  # ...
+}</p>
+<p>%UserStorageConfig{
+  user_id: &quot;...&quot;,
+  provider: &quot;b2&quot;,
+  role: :secondary,
+  priority: 2,
+  sync_mode: :async,     # Sync happens in background after primary
+  # ...
+}
+</code></pre></p>
+<strong>Configuration Example (Future):</strong>
+<pre><code class="language-elixir"># User with R2 primary + B2 backup
+config :onelist, Onelist.Storage,
+  primary_backend: :local,
+  cloud_backends: [
+    {:r2, priority: 1, sync: :immediate},
+    {:b2, priority: 2, sync: :async}
+  ],
+  enable_e2ee: true
+</code></pre>
+  </article>
+</body>
+</html>

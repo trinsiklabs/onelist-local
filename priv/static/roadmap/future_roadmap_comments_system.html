@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Feature Branch Plan: Comments System (Reddit-Style Functionality) - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Feature Branch Plan: Comments System (Reddit-Style Functionality)</h1>
+<strong>Document Version:</strong> May 23, 2025 (Reflecting detailed user feedback and <code>origin_entry_id</code>)
+<strong>Feature Branch:</strong> Comments System (Reddit-Style Functionality)
+<strong>Baseline System:</strong> Onelist v2.0 (MVP + Completed Future Roadmap including "Onelist AI" Global Assistant, Entry Groups, <code>entry_links</code>, <code>origin_entry_id</code> field in <code>entries</code> table, etc.) + "Entry Groups" + "Content Consumption Tracking & Engagement" feature branches conceptually complete.
+<strong>Location Context:</strong> Concord, North Carolina, United States (as of May 23, 2025, ~3:22 PM EDT)
+<h2>1. Feature Branch Goal & Vision</h2>
+<p>The "Comments System" aims to enable rich, threaded discussions around Onelist <code>entries</code>, transforming them into focal points for conversation, collaboration, and knowledge refinement, closely mirroring Reddit-style community interaction. This feature will allow any <code>entry</code> to be commentable, with comments themselves being Onelist <code>entries</code> capable of receiving further replies and engagement (votes, follows). When combined with "Entry Groups" (acting as communities or "subreddits"), this system will facilitate dynamic community interaction, content discovery through various sorting mechanisms, and specialized use cases like collaborative work boards with controlled transparency. The goal is to fully consume Reddit-style conversational functionality within Onelist.</p>
+<hr>
+<h2>2. Core Entities & Data Model Changes/Additions (within Onelist Core)</h2>
+<em> <strong>A. Comment as an <code>entry</code>:</strong>
+  </em> <code>entry_type</code>: A new type, <code>'comment'</code>.
+  <em> <code>entries.title</code>: <strong>Comments will NOT have titles.</strong> Their context is derived from the parent entry/comment.
+  </em> <code>entries.representations</code>: Will contain the comment body (e.g., Markdown, rendered to <code>'display_html'</code> by Onelist).
+  <em> <code>entries.origin_entry_id</code> (UUID, Nullable, FK to <code>entries.id</code>, Indexed): This existing field in the <code>entries</code> table will be populated. For a <code>'comment'</code> entry, it stores the <code>id</code> of the ultimate root <code>entry</code> that started the comment thread. This allows efficient retrieval of all comments for a top-level post.
+  </em> Comments are always commentable, enabling indefinite threading (data model wise).
+<em> <strong>B. Threaded Conversation Structure (via <code>entry_links</code>):</strong>
+  </em> The <code>entry_links</code> table is critical for managing comment threads.
+  <em> <strong>Linking Comment to Parent:</strong>
+    </em> <code>source_entry_id</code>: The <code>id</code> of the parent <code>entry</code> (which could be the original post or another <code>'comment'</code> entry).
+    <em> <code>target_entry_id</code>: The <code>id</code> of the new <code>'comment'</code> entry being posted.
+    </em> <code>link_type</code>: A specific type like <strong><code>'comment_on'</code></strong>. This type works for both top-level comments on an original entry and for replies to existing comments.
+    <em> <code>metadata</code> (JSONB on <code>entry_links</code>):
+      </em> <code>created_at</code> (Timestamp): For default chronological sorting of replies under a parent before other sort orders (like "Best") are applied.
+      <em> <code>thread_depth</code> (Integer, Optional but Recommended): Stores the nesting level of the comment relative to the top-level entry of its thread. Useful for UI rendering decisions (indentation, applying display limits in specific views).
+</em> <strong>C. New Table: <code>user_entry_votes</code></strong> (Applies to any commentable <code>entry</code>, including original posts and <code>'comment'</code> entries)
+  <em> <code>id</code> (UUID, PK)
+  </em> <code>user_id</code> (UUID, FK to <code>users.id</code>, Indexed, Not Null)
+  <em> <code>entry_id</code> (UUID, FK to <code>entries.id</code>, Indexed, Not Null - this can be the ID of the original post </em>or<em> a <code>'comment'</code> entry)
+  </em> <code>vote_type</code> (Integer, e.g., <code>1</code> for upvote, <code>-1</code> for downvote).
+  <em> <code>voted_at</code> (TimestampTZ, Not Null)
+  </em> <strong>Unique constraint:</strong> <code>(user_id, entry_id)</code>
+  <em> </em>Note:<em> Aggregate vote scores (e.g., <code>entries.metadata.vote_score</code>) for <code>entry_type='comment'</code> and other commentable entries should be considered for denormalization for performance in sorting, or calculated efficiently.
+</em> <strong>D. New Table: <code>user_comment_follows</code></strong> (Post-MVP, for notifications on replies)
+  <em> <code>id</code> (UUID, PK)
+  </em> <code>user_id</code> (UUID, FK to <code>users.id</code>, Indexed, Not Null)
+  <em> <code>comment_entry_id</code> (UUID, FK to <code>entries.id</code> where <code>entry_type='comment'</code>, Indexed, Not Null)
+  </em> <code>followed_at</code> (TimestampTZ, Not Null)
+  <em> <strong>Unique constraint:</strong> <code>(user_id, comment_entry_id)</code>
+</em> <strong>E. Entry Group Enhancements (for Subreddit-like Functionality):</strong>
+  <em> The <code>'group'</code> <code>entry</code>'s <code>metadata</code> or a dedicated <code>representation</code> will store settings relevant to its function as a community/board:
+    </em> <code>default_comment_sort_mode_for_group_posts</code> (String, e.g., 'best', 'new', 'top', 'controversial', 'old', 'qa' - default to 'best' for Reddit-style groups).
+    <em> <code>content_submission_rules</code> (Text/Markdown, displayable rules for the group).
+    </em> <code>moderator_user_ids</code> (Array of user_ids, Post-MVP if moderation roles are implemented).
+    <em> <strong><code>auto_mark_new_entries_for_consumption</code></strong> (Boolean, Default: <code>false</code>): This is a <strong>user-configurable setting for the group by default</strong>. It <strong>can be forced to <code>true</code> by an employer or an admin of a work-context board</strong> (Post-MVP, requires User Relationships).
+      </em> <strong>Warning on Join (MVP if forced setting is possible, else Post-MVP):</strong> When a user accepts an invitation to join a group with such forced settings, a modal warning must clearly state these enforced settings.
+    <em> <strong><code>consumption_progress_transparency_level</code></strong> (String, e.g., <code>'none'</code>, <code>'members_see_all'</code>, <code>'admin_see_all'</code>): For work contexts, defines visibility of consumption progress for entries within this group (Post-MVP, requires User Relationships).
+<hr>
+<h2>3. Key Functionalities</h2>
+</em> <strong>A. Commenting on Entries (MVP):</strong>
+  <em> <strong>Universal Commenting:</strong> All Onelist <code>entries</code>, regardless of <code>entry_type</code>, are always commentable by default (unless a specific entry type has overriding rules, e.g. 'event' notes). The term used in the UI for comments might vary by context (e.g., "notes" on a calendar event, "discussion" on a document), but the underlying mechanism is creating linked <code>'comment'</code> entries.
+  </em> Users can post new top-level comments on an entry.
+  <em> Users can reply to existing comments, creating threads.
+  </em> Comment editor will likely be a simple Markdown editor (consistent with Onelist/Xamlr).
+<em> <strong>B. Contextual Reply Depth Restrictions (MVP for Events, Post-MVP for Documents):</strong>
+  </em> <strong>Default (e.g., in Entry Groups/Boards):</strong> Unlimited reply depth in the data model.
+  <em> <strong>"Notes" on <code>'event'</code> entries (MVP):</strong> For <code>entry_type='event'</code>, comments (displayed as "Notes" in the UI) <strong>do not allow replies to themselves</strong> (effectively, thread depth is limited to top-level "notes" on the event).
+  </em> <strong>Comments in Document Side-Pane (Post-MVP):</strong> For document-like entries viewed with a comment side-pane, the UI may visually limit the displayed nesting depth of replies (e.g., to 1 or 2 levels) for readability, with options to expand or view the full thread.
+<em> <strong>C. Viewing Threaded Comments (MVP & Post-MVP):</strong>
+  </em> <strong>Display (MVP):</strong> Display comments in a nested, threaded structure using indentation or similar visual cues.
+  <em> <strong>Context-Specific Default Sort Order & Options (MVP for UI hooks & simple sorts, algorithms evolve):</strong>
+    </em> <strong>Entry Groups (Reddit-style boards):</strong> Default sort for comments on posts within these groups is <strong>"Best"</strong>.
+    <em> <strong>Document Contexts (e.g., notes, articles):</strong> Default sort for comments is <strong>"Old"</strong> (oldest first).
+    </em> <strong>"Notes" on <code>'event'</code> entries:</strong> Only display in <strong>"Old"</strong> order.
+  <em> <strong>Sort Options Dropdown (MVP):</strong> A UI dropdown for comment threads will offer sort options: "Best," "Top" (by net votes), "New" (chronological), "Controversial" (e.g., high activity, mixed votes - algorithm Post-MVP), "Old," and "Q&A" (prioritizes replies that answer questions - algorithm Post-MVP). For MVP, "Best" and "Controversial" might use simpler proxy algorithms (like "Top" or "Hot") or fall back to "Top"/"New" until advanced algorithms are implemented post-MVP.
+  </em> <strong>Scroll Behavior in Document Context (Post-MVP):</strong> When opening comments for a document, the view should ideally scroll to the bottom of the comments (if sorted by "Old") or to the most recently read comment by the user.
+  <em> <strong>Lazy loading for long comment threads (MVP).</strong>
+</em> <strong>D. Voting on Posts & Comments (MVP):</strong>
+  <em> UI for upvoting/downvoting on original <code>entries</code> (those acting as posts) and on <code>'comment'</code> <code>entries</code>.
+  </em> Display aggregate vote scores.
+<em> <strong>E. Following Individual Comments (Post-MVP):</strong>
+  </em> Button/action to "follow" a specific comment.
+  <em> Notification system integration (a separate Onelist core feature) to alert users to new replies on their followed comments.
+</em> <strong>F. Entry Group as Community/Board:</strong>
+  <em> (As previously defined, entries in the group are "posts").
+  </em> <strong>View/Sort Modes for Group Content (Posts) (MVP for New/Top, Post-MVP for others):</strong>
+    <em> "New": Sorts entries in the group by creation date/date added (descending). (MVP)
+    </em> "Top": Sorts entries by their aggregate vote score over a selected time period. (MVP for basic version)
+    <em> "Hot," "Best," "Rising," "Controversial": Implement algorithms post-MVP.
+  </em> <strong>Integration with Content Consumption Tracking:</strong> (As previously defined: <code>auto_mark_new_entries_for_consumption</code> group setting, ability to view group in "Consumption List" mode).
+<em> <strong>G. Work Context - Consumption Progress Transparency (Post-MVP, requires "User Relationships" feature branch):</strong> (As previously defined).
+</em> <strong>H. Personal Comments/Annotations (MVP):</strong> Users can comment on their own private entries as a form of note-taking.
+<hr>
+<h2>4. UI/UX Considerations</h2>
+<em> <strong>Comment Display:</strong> Clear visual hierarchy for threads, indentation, UI cues for thread depth, options to collapse/expand threads or individual comments.
+</em> <strong>Voting UI:</strong> Unobtrusive but accessible up/down vote buttons; clear display of net scores.
+<em> <strong>Comment Editor:</strong> Simple, embedded Markdown editor for posting and replying.
+</em> <strong>Entry Group Views:</strong> Clear UI selectors for different sort modes for posts within a group (New, Hot, Top, etc.) and for comments on those posts.
+<em> <strong>Notifications (Post-MVP):</strong> Manageable notifications for replies to followed comments.
+</em> <strong>Moderation Tools (Post-MVP):</strong> For group moderators to manage comments and posts.
+<hr>
+<h2>5. Integration with Onelist v2.0 & Other Feature Branches</h2>
+<em> <strong>Onelist Core:</strong> Deeply utilizes <code>entries</code> (for comments, with <code>origin_entry_id</code>), <code>entry_links</code> (for threading), <code>users</code> (for votes, comment follows). The <code>origin_entry_id</code> is a core <code>entries</code> table feature.
+</em> <strong>Entry Groups:</strong> Serve as the "subreddits" or community boards where much of this comment interaction will occur. Group settings will control default comment sort orders and consumption tracking behaviors.
+<em> <strong>Content Consumption Tracking:</strong> Individual <code>'comment'</code> <code>entries</code> can themselves be tracked for consumption (read/unread status). Visibility of who read comments in shared contexts is a post-MVP goal.
+</em> <strong>User Relationships (Future Branch):</strong> Essential for advanced permissioning in work-context groups (e.g., forced consumption transparency, moderator roles).
+<em> <strong>Notifications System (Future Onelist Core Feature):</strong> Needed for "follow comment" and other social alerts.
+</em> <strong>Onelist AI (Global Assistant):</strong>
+  <em> (Post-MVP) Could be used to summarize long comment threads.
+  </em> (Post-MVP) Could offer reply suggestions.
+  <em> (Future Evolution - Audible AI Conversations as Comments): Ability to initiate an audible conversation with "Onelist AI" about a specific entry, with options to save the entire transcribed conversation as a new <code>'comment'</code> entry or have "Onelist AI" summarize it and post that summary as a <code>'comment'</code> entry.
+<hr>
+<h2>6. MVP for "Comments System (Reddit-Style Functionality)" Feature Branch</h2>
+</em> Implement the <code>'comment'</code> <code>entry_type</code> (no title, <code>origin_entry_id</code> populated).
+<em> <strong>Basic Threaded Comments:</strong>
+  </em> Allow adding top-level comments to any comment-enabled <code>entry</code> (all entries by default, with specific UI for "Notes" on <code>'event'</code> entries).
+  <em> Allow replying to existing comments (threads stored via <code>entry_links</code> with <code>link_type='comment_on'</code>).
+  </em> <strong>Contextual Reply Depth (MVP):</strong> No replies for "Notes" on <code>'event'</code> entries. Unlimited depth for other contexts in the data model.
+<em> <strong>Basic Voting System:</strong>
+  </em> Implement <code>user_entry_votes</code> table.
+  <em> UI for upvoting/downvoting on original posts and on comments.
+  </em> Display aggregate vote scores.
+<em> <strong>Comment Display & Sorting (MVP):</strong>
+  </em> Basic threaded display with indentation.
+  <em> For Entry Groups ("Boards"): Default comment sort is "New" or "Top." UI provides dropdown for all sort options (Best, Top, New, Controversial, Old, Q&A), with non-MVP algorithms gracefully falling back or being disabled.
+  </em> For "Notes" on <code>'event'</code> entries: Displayed oldest first.
+<em> <strong>Entry Groups as "Boards" (MVP - relevant comment features):</strong>
+  </em> Allow comments on entries posted to groups.
+  <em> Implement <strong>"New"</strong> and basic <strong>"Top"</strong> (by raw votes) sort modes for </em>posts<em> within a group.
+  </em> Group setting for <code>auto_mark_new_entries_for_consumption</code> (user-configurable, no admin force in MVP).
+<em> Universal commentability, with UI term potentially varying by context (e.g., "Notes" for events).
+<hr>
+<h2>7. Future Evolution within this Branch</h2>
+</em> Implement full algorithms for "Best," "Hot," "Rising," "Controversial," "Q&A" sorting for both posts within groups and comments within threads.
+<em> "Follow Comment" feature with notifications.
+</em> Advanced moderation tools for Entry Group admins/moderators.
+<em> User profiles showing comment history, karma/vote scores (if karma system is desired).
+</em> Onelist AI integration for comment summarization, reply suggestions, and processing audible conversations into comments.
+<em> Document side-pane view for comments with configurable limited depth display.
+</em> Admin/Employer forcing of <code>auto_mark_new_entries_for_consumption</code> on groups and associated warning modal.
+<em> Full realization of work-context transparency for consumption progress on comments (depends on "User Relationships" branch and comment read tracking).
+</em> Rules for automatic comment collapsing based on scores, depth, or user preferences.
+<hr>
+<h2>8. Risks/Challenges</h2>
+<em> <strong>Performance:</strong> Handling deeply nested threads, calculating/denormalizing vote scores, and serving various sorted views efficiently will be critical.
+</em> <strong>Moderation:</strong> A vital and complex area for any system with user-generated comments, especially in public/shared groups. Requires tools and policies (largely post-MVP for advanced tools).
+<em> <strong>Complexity of Sorting Algorithms:</strong> Reddit-style algorithms ("Best," "Hot," etc.) are non-trivial to implement and tune effectively.
+</em> <strong>User Experience:</strong> Presenting threaded conversations, voting, and multiple sort/filter options in an intuitive and usable manner across different contexts (boards, documents, events).
+<em> <strong>Notification Management:</strong> Ensuring notifications (e.g., for comment replies) are useful and not overwhelming.
+</em> <strong>Scalability:</strong> The volume of comments and votes can grow exponentially, requiring a scalable backend architecture.
+<ul>
+<li><strong>Preventing Abuse:</strong> Addressing voting manipulation, spam, and harmful content in comments.</li>
+</ul>
+  </article>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Feature Branch Plan: Content Consumption Tracking &amp; Engagement (Revised) - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Feature Branch Plan: Content Consumption Tracking & Engagement (Revised)</h1>
+<strong>Document Version:</strong> May 23, 2025 (Revised to integrate with Core Taxonomy System)
+<strong>Feature Branch:</strong> Content Consumption Tracking & Engagement
+<strong>Baseline System:</strong> Onelist v2.0 (MVP + Completed Future Roadmap including "Onelist AI" Global Assistant, Entry Groups, <code>entry_links</code>, and the <strong>Core Taxonomy System</strong> with "Topics," "Consumption Status," and "Marks" taxonomies).
+<strong>Location Context:</strong> Concord, North Carolina, United States (as of May 23, 2025, ~4:24 PM EDT)
+<h2>1. Feature Branch Goal & Vision</h2>
+<p>The "Content Consumption Tracking & Engagement" feature aims to provide Onelist users with a robust system to explicitly mark <code>entries</code> for later consumption, meticulously track their engagement progress across various content types, and intelligently prompt for next actions upon completion. This feature transforms Onelist from a passive information store into an active partner in the user's learning, productivity, and knowledge synthesis workflows, leveraging AI to suggest further steps. It utilizes the Core Taxonomy System for managing consumption statuses.</p>
+<hr>
+<h2>2. Core Entities & Data Model Changes/Additions (within Onelist Core)</h2>
+<em> <strong>A. Table: <code>user_entry_consumption_states</code></strong> (Tracks progress and specific consumption metadata, status itself is via Core Taxonomy System)
+  </em> <code>id</code> (UUID, PK)
+  <em> <code>user_id</code> (UUID, FK to <code>users.id</code>, Indexed, Not Null)
+  </em> <code>entry_id</code> (UUID, FK to <code>entries.id</code>, Indexed, Not Null)
+  <em> <code>progress_percentage</code> (Numeric, e.g., DECIMAL(5,2) or FLOAT, Range: 0.00-100.00, Default: 0.00, Indexed, Not Null): Stores granular consumption progress (e.g., scroll depth for text, playback percentage for media). <code>100.00</code> signifies fully consumed.
+  </em> <code>fully_consumed_at</code> (TimestampTZ, Nullable): Timestamp when <code>progress_percentage</code> first reached 100.00.
+  <em> <code>last_progress_timestamp</code> (TimestampTZ, Not Null, Default: CURRENT_TIMESTAMP, Updates on progress change): Timestamp of the last progress update.
+  </em> <code>saved_for_consumption_at</code> (TimestampTZ, Not Null, Default: CURRENT_TIMESTAMP): Timestamp when explicitly marked by the user for consumption.
+  <em> <code>last_known_position_details</code> (JSONB, optional): For storing specific resumption points (e.g., exact scroll coordinates/element for text, specific timestamp in seconds for audio/video).
+  </em> <strong>Unique constraint:</strong> <code>(user_id, entry_id)</code>
+  <em> <strong>Note:</strong> The actual status (e.g., 'to_consume', 'in_progress', 'consumed', 'consumption_archived') is now managed by applying the appropriate <code>term</code> from the "Consumption Status" <code>taxonomy</code> to the <code>entry</code> for the specific <code>user_id</code> via the <code>entry_applied_terms</code> table (part of the Core Taxonomy System).
+</em> <strong>B. "Consumption Status" Taxonomy (Provided by Core Taxonomy System):</strong>
+  <em> This system taxonomy will include predefined, locked <code>terms</code> such as:
+    </em> <code>to_consume</code>
+    <em> <code>in_progress</code>
+    </em> <code>consumed</code>
+    <em> <code>consumption_archived</code>
+  </em> These terms are applied to <code>entries</code> on a per-user basis using the <code>entry_applied_terms</code> table.
+<hr>
+<h2>3. Key Functionalities</h2>
+<em> <strong>A. Explicit "Save for Later Consumption" Action (MVP):</strong>
+  </em> Users must explicitly mark an <code>entry</code> to add it to their "Consume Later" list.
+  <em> This action:
+        1. Creates or updates a record in <code>user_entry_consumption_states</code> (setting <code>saved_for_consumption_at</code>, resetting <code>progress_percentage</code> to 0 if re-saving).
+        2. Applies the <code>'to_consume'</code> <code>term</code> (from the "Consumption Status" taxonomy) to the <code>entry</code> for that <code>user_id</code> via the <code>entry_applied_terms</code> table.
+  </em> <em>Shared Content Context (Post-MVP):</em> Entries shared <em>to</em> a user will be automatically processed as if this action was taken by the recipient.
+<em> <strong>B. Progress Tracking & Status Update (MVP - initial focus on scrollable text, then other media):</strong>
+  </em> <strong>Automatic Status Update on Open (MVP):</strong> When an entry is opened in "consumption mode":
+    <em> A <code>user_entry_consumption_states</code> record is created if one doesn't exist for that user/entry.
+    </em> If the current applied "Consumption Status" <code>term</code> for the user/entry is <code>'to_consume'</code> (or no status term is yet applied), the system applies the <code>'in_progress'</code> <code>term</code> via <code>entry_applied_terms</code>.
+  <em> <strong>Granular Progress Tracking (MVP for text):</strong> Client-side logic tracks scroll percentage for textual <code>'display_html'</code> (to two decimal places for <code>progress_percentage</code>) or media playback percentage (post-MVP for media). Updates are sent to the Onelist backend to update <code>progress_percentage</code> and <code>last_known_position_details</code> in <code>user_entry_consumption_states</code>.
+  </em> <strong>Marking as "Consumed" (MVP):</strong> When <code>progress_percentage</code> reaches 100.00:
+    <em> The system updates the applied "Consumption Status" <code>term</code> for that user/entry to <code>'consumed'</code> via <code>entry_applied_terms</code>.
+    </em> The <code>fully_consumed_at</code> field in <code>user_entry_consumption_states</code> is timestamped.
+  <em> <strong>State Reload on Open (MVP):</strong> Restore user to their <code>last_known_position_details</code> or approximate <code>progress_percentage</code> when re-opening "in-progress" content.
+</em> <strong>C. AI-Driven "Next Steps" & Summary Prompt upon 100% Consumption (MVP / Early Post-MVP):</strong>
+  <em> Upon an entry's "Consumption Status" <code>term</code> for the user becoming <code>'consumed'</code>:
+        1. <strong>Onelist AI Generated Summary (Optional - MVP if AI framework allows):</strong> (As previously defined).
+        2. <strong>Onelist AI Prompt for Next Actions (MVP prompts, advanced actions Post-MVP):</strong> (As previously defined, including generating tasks, adding reflections/comments, adding to mindmaps, merging insights into living papers).
+</em> <strong>D. Estimated Time to Consume (MVP for text):</strong> (As previously defined).
+<em> <strong>E. "Consumption List" View Mode & Management (MVP):</strong>
+  </em> A dedicated "Consumption List" view mode in Onelist.
+  <em> Shows consumption-oriented information (status derived from applied "Consumption Status" <code>term</code>, <code>progress_percentage</code>, estimated time).
+  </em> Opens entries in a dedicated "consumption mode."
+  <em> Allows filtering by the applied "Consumption Status" <code>term</code> (e.g., entries where current user has applied <code>'to_consume'</code>, <code>'in_progress'</code>, etc.).
+</em> <strong>F. Archiving Consumed Items (MVP):</strong>
+  <em> <strong>Auto-Archive with User Override:</strong> When an entry's "Consumption Status" <code>term</code> for the user becomes <code>'consumed'</code> and the user exits consumption mode/AI prompt:
+    </em> The system indicates the item will be auto-archived (i.e., its applied "Consumption Status" <code>term</code> will be updated to <code>'consumption_archived'</code> via <code>entry_applied_terms</code>).
+    <em> The user <strong>must have a clear option to prevent this auto-archival</strong>, keeping the <code>'consumed'</code> term applied and the item in their active consumption list.
+  </em> The "Consumption List" view will allow filtering to show/hide items with an applied <code>'consumption_archived'</code> status term for the user.
+<em> <strong>G. Shared Entry Integration & Progress Visibility (Post-MVP - dependent on Onelist Sharing & Relationships):</strong>
+  </em> <strong>Automatic Addition to Consume List:</strong> Entries shared <em>to</em> a user automatically have the <code>'to_consume'</code> term applied for the recipient via <code>entry_applied_terms</code>, and a <code>user_entry_consumption_states</code> record created.
+  <em> <strong>Progress Visibility for Sharer:</strong> (As previously defined, subject to future "Relationship Types").
+  </em> <strong>UI Indicators & "Shared Only" Filter for Shared Content:</strong> (As previously defined - general Onelist UI enhancements).
+<hr>
+<h2>4. UI/UX Considerations within Onelist</h2>
+<em> (Largely as previously defined, with "status" now referring to terms from the "Consumption Status" taxonomy).
+</em> <strong>Consumption Mode:</strong> Interface optimized for consumption, with integrated progress tracking and clear visual cues for the current "Consumption Status" term.
+<hr>
+<h2>5. Onelist UI - Configurable View Modes (Broader Onelist Enhancement Required by this Feature)</h2>
+<em> (Requirement remains as previously defined for a general Onelist configurable view mode system, of which "Consumption List" is one mode).
+<hr>
+<h2>6. MVP for "Content Consumption Tracking & Engagement" Feature Branch (Revised with Taxonomy Integration)</h2>
+</em> <strong>Data Model:</strong>
+  <em> Implement <code>user_entry_consumption_states</code> table (fields: <code>user_id</code>, <code>entry_id</code>, decimal <code>progress_percentage</code>, <code>fully_consumed_at</code>, <code>last_progress_timestamp</code>, <code>saved_for_consumption_at</code>, <code>last_known_position_details</code>).
+  </em> This feature relies on the <strong>Core Taxonomy System</strong> being in place, specifically the "Consumption Status" <code>taxonomy</code> and its predefined <code>terms</code> (<code>'to_consume'</code>, <code>'in_progress'</code>, <code>'consumed'</code>, <code>'consumption_archived'</code>). Status is applied/queried via <code>entry_applied_terms</code>.
+<em> <strong>Explicit "Save for Later Consumption" Action:</strong> Creates <code>user_entry_consumption_states</code> record AND applies the <code>'to_consume'</code> <code>term</code> to the entry for the user.
+</em> <strong>Scroll Tracking for Text & Progress/Status Update:</strong> Implemented as described in 3.B. Updates <code>progress_percentage</code> in <code>user_entry_consumption_states</code> and the applied "Consumption Status" <code>term</code> in <code>entry_applied_terms</code>.
+<em> <strong>State Reload on Open:</strong> Restore scroll position for "in-progress" textual entries.
+</em> <strong>Basic UI Indicators:</strong> Display consumption status (from applied taxonomy term) and <code>progress_percentage</code>.
+<em> <strong>"Consumption List" View Mode (Basic Implementation):</strong> Selectable view mode showing consumption info, opening entries in "consumption mode," and allowing filtering by applied "Consumption Status" <code>terms</code>.
+</em> <strong>Estimated Time to Read (for text).</strong>
+<em> <strong>Archiving (Auto with Override):</strong> Upon status becoming <code>'consumed'</code>, prompt indicates auto-archive (updates applied term to <code>'consumption_archived'</code>); user can override to keep <code>'consumed'</code> term.
+</em> <strong>AI Summary & Next Steps Prompt (Basic):</strong> On 100% consumption (<code>'consumed'</code> status), AI presents summary (if enabled) and prompts for user-added thoughts (MVP saves these simply, e.g., as a new linked note).
+<hr>
+<h2>7. Future Evolution within this Branch</h2>
+<em> (Largely as previously defined: Full AI "Next Steps," comprehensive media tracking, Relationship/Comments/Marks integration, Mobile/Extension support, Smart Suggestions, Periodic Review Prompts).
+</em> The integration with "Marks Taxonomy" becomes clearer: consumed items might automatically get certain marks, or AI might suggest marks as a "next step."
+<hr>
+<h2>8. Risks/Challenges</h2>
+<em> (Largely as previously defined, with the understanding that the taxonomy system provides a more robust foundation for status management).
+</em> <strong>Performance of Taxonomy Queries:</strong> Ensuring efficient querying of <code>entry_applied_terms</code> in combination with other filters.
+<hr>
+<h2>Future Considerations</h2>
+<em> <https://lifehacker.com/tech/flyleaf-is-the-best-read-it-later-app-for-apple-users>
+<h3>To explore</h3>
+</em> Leveraging data from consume later items for
+  <em> Discovery for other users
+    </em> By tag as well as in general
+  <ul>
+<li>Email newsletter</li>
+</ul>
+  </article>
+</body>
+</html>

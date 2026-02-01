@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Enrichment Agent UI Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Asset Enrichment Agent UI Plan</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Active
+<strong>Parent:</strong> ui_plan.md
+<strong>Related:</strong> shared_agent_ui_components.md, settings_ui_plan.md, reader_ui_plan.md
+<hr>
+<h2>1. Overview</h2>
+<p>This document defines UI components specific to the Asset Enrichment Agent. For shared agent UI patterns (processing status, activity items, cost display), see <code>shared_agent_ui_components.md</code>.</p>
+<strong>Asset Enrichment Responsibilities:</strong>
+<ul>
+<li>Audio/video transcription (Whisper)</li>
+<li>Image description and OCR</li>
+<li>Action item extraction from transcripts</li>
+<li>Decision extraction from transcripts</li>
+<li>Tag suggestions based on content</li>
+<strong>Enrichment Types:</strong>
+<li><strong>Transcript</strong>: Full text with timed segments</li>
+<li><strong>Description</strong>: AI-generated image/video description</li>
+<li><strong>OCR</strong>: Extracted text from images/PDFs</li>
+<li><strong>Extracted Items</strong>: Action items, decisions (become linked entries)</li>
+<hr>
+<h2>2. Transcript Viewer</h2>
+<p>Displays transcription results for audio/video assets with speaker diarization, read-along highlighting, and inline editing.</p>
+<h3>2.1 Full Transcript View</h3>
+<p>Located in entry detail under the asset or in a dedicated tab. Displayed as a data table with timestamp, speaker, and transcript columns. Supports speaker identification, word-level highlighting during playback, and user editing.</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Transcript                                    [Edit Mode]  [Download] [Copy]│
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  Duration: 23:45  •  Language: English  •  450 words  •  3 speakers         │
+│                                                                              │
+│  │ Time   │ Speaker      │ Transcript                                      │
+│  ├────────┼──────────────┼──────────────────────────────────────────────────┤
+│  │ 0:00   │ Sarah (You)  │ Hello everyone, welcome to today's meeting.     │
+│  │        │              │ We're here to discuss the Q4 budget and         │
+│  │        │              │ upcoming product launch.                        │
+│  ├────────┼──────────────┼──────────────────────────────────────────────────┤
+│  │ 0:15   │ Sarah (You)  │ First, let's review the numbers from last       │
+│  │        │              │ quarter. John, can you share your screen?       │
+│  ├────────┼──────────────┼──────────────────────────────────────────────────┤
+│  │ 0:32   │ John         │ Sure, let me pull up the spreadsheet. As you    │
+│  │        │              │ can see, we exceeded our targets by 12% in the  │
+│  │        │              │ North region.                                   │
+│  ├────────┼──────────────┼──────────────────────────────────────────────────┤
+│  │ 1:05   │ Sarah (You)  │ That's excellent. What about the South region?  │
+│  ├────────┼──────────────┼──────────────────────────────────────────────────┤
+│  │ 1:12   │ Speaker 3    │ South region was slightly below target, about   │
+│  │        │              │ 3% under. But we identified the issue and have  │
+│  │        │              │ a plan for Q1.                                  │
+│  └────────┴──────────────┴──────────────────────────────────────────────────┘
+│                                                                              │
+│  ┌─ Player ────────────────────────────────────────────────────────────────┐│
+│  │  [◀◀] [▶ Play]  [▶▶]    ━━━━━━●━━━━━━━━━━━━━━━━━━━  5:32 / 23:45       ││
+│  │                                                                          ││
+│  │  🔊 ━━━━●━━━    Speed: [1x ▼]    [Auto-scroll ●]                        ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  💡 3 action items extracted                              [View Items →]    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Column behavior:</strong>
+<li><strong>Time</strong>: Click to jump to segment start</li>
+<li><strong>Speaker</strong>: Click to edit/identify (inline dropdown)</li>
+<li><strong>Transcript</strong>: Click any word to jump to that word; widest column, text wraps</li>
+<h3>2.2 Read-Along Highlighting (During Playback)</h3>
+<p>When audio is playing, transcript highlights in sync:</p>
+<pre><code class="language-">│ Time   │ Speaker      │ Transcript                                      │
+├────────┼──────────────┼──────────────────────────────────────────────────┤
+│ 0:32   │ John         │ Sure, let me pull up the spreadsheet. As you    │ ← current
+│   ▶    │              │ can see, we ▌exceeded▐ our targets by 12% in    │   segment
+│        │              │ the North region.        ↑                      │   highlighted
+├────────┼──────────────┼──────────────────────────────────────current word
+│ 1:05   │ Sarah (You)  │ That's excellent. What about the South region?  │
+├────────┼──────────────┼──────────────────────────────────────────────────┤
+</code></pre>
+<strong>Highlighting behavior:</strong>
+<li>Current row/segment has subtle background highlight</li>
+<li>Current word has stronger highlight (▌word▐ shown above as example)</li>
+<li>▶ indicator in Time column shows active segment</li>
+<li>Transcript auto-scrolls to keep current segment visible</li>
+<li>User can toggle auto-scroll off to browse freely</li>
+<h3>2.3 Click Behavior</h3>
+<table>
+<tr><th>Click Target</th><th>Action</th></tr>
+<tr><td>Timestamp <code>[0:32]</code></td><td>Jump to start of that segment</td></tr>
+<tr><td>Any word in transcript</td><td>Jump to that exact word's timestamp</td></tr>
+<tr><td>Speaker name</td><td>Open person entity (if linked) or offer to identify</td></tr>
+</table>
+<h3>2.4 Speaker Identification</h3>
+<p>Speakers are detected via voice diarization. Click any speaker name to edit inline.</p>
+<table>
+<tr><th>Speaker State</th><th>Display</th><th>Click Action</th></tr>
+<tr><td>Recognized (linked to Person entity)</td><td><code>John</code> or <code>Sarah (You)</code></td><td>View person or change</td></tr>
+<tr><td>Unrecognized</td><td><code>Speaker 1</code>, <code>Speaker 2</code>, etc.</td><td>Edit inline</td></tr>
+</table>
+<strong>Inline Speaker Edit:</strong>
+<pre><code class="language-">│ Time   │ Speaker      │ Transcript                                      │
+├────────┼──────────────┼──────────────────────────────────────────────────┤
+│ 0:32   │ John         │ Sure, let me pull up the spreadsheet...         │
+├────────┼──────────────┼──────────────────────────────────────────────────┤
+│ 1:12   │ ┌──────────────────────────┐ South region was slightly below   │
+│        │ │ Speaker 3             ✕ │ target, about 3% under. But we    │
+│        │ ├──────────────────────────┤ identified the issue and have a   │
+│        │ │ 🔍 Search people...      │ plan for Q1.                      │
+│        │ ├──────────────────────────┤                                   │
+│        │ │ Recent:                  │                                   │
+│        │ │   Sarah                  │                                   │
+│        │ │   Mike                   │                                   │
+│        │ │   John                   │                                   │
+│        │ ├──────────────────────────┤                                   │
+│        │ │ + Create new person      │                                   │
+│        │ └──────────────────────────┘                                   │
+├────────┼──────────────┼──────────────────────────────────────────────────┤
+</code></pre>
+<strong>Behavior:</strong>
+<li>Click speaker name → inline dropdown appears</li>
+<li>Type to search existing people or enter new name</li>
+<li>Selecting a person links voiceprint to that person</li>
+<li>All voiceprints are automatically remembered for future transcripts</li>
+<li>Future transcripts auto-identify speakers based on learned voiceprints</li>
+<h3>2.5 Edit Mode</h3>
+<p>User can correct transcription errors:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Transcript                                      [Done Editing]  [Cancel]   │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  ⚠️ Edit mode: Click any cell to correct. Changes are saved automatically.  │
+│                                                                              │
+│  │ Time   │ Speaker      │ Transcript                              │       │
+│  ├────────┼──────────────┼──────────────────────────────────────────┼───────┤
+│  │ 0:32   │ John         │ ┌──────────────────────────────────────┐ │  [▶]  │
+│  │        │              │ │ Sure, let me pull up the spreadsheet.│ │       │
+│  │        │              │ │ As you can see, we exceeded our      │ │       │
+│  │        │              │ │ targets by 12% in the North region.  │ │       │
+│  │        │              │ └──────────────────────────────────────┘ │       │
+│  ├────────┼──────────────┼──────────────────────────────────────────┼───────┤
+│  │ 1:05   │ Sarah (You)  │ That's excellent. What about the South   │  [▶]  │
+│  │        │              │ region?                                  │       │
+│  └────────┴──────────────┴──────────────────────────────────────────┴───────┘
+│                                                                              │
+│  ┌─ Player ────────────────────────────────────────────────────────────────┐│
+│  │  [◀◀] [▶ Play]  [▶▶]    ━━━━━━●━━━━━━━━━━━━━━━━━━━  5:32 / 23:45       ││
+│  │                                                                          ││
+│  │  🔊 ━━━━●━━━    Speed: [0.75x ▼]   ← slower for editing                 ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Edit features:</strong>
+<li>Click any transcript cell to edit inline (shows as editable text area)</li>
+<li>Click speaker cell to change speaker assignment</li>
+<li>[▶] button per row plays that segment's audio</li>
+<li>Slower playback speed (0.5x, 0.75x) helpful for editing</li>
+<li>Changes auto-save</li>
+<li>Edit history preserved (can revert)</li>
+<h3>2.6 Compact View (Sidebar)</h3>
+<p>When space is limited, shows condensed view with mini player:</p>
+<pre><code class="language-">┌─ Transcript ───────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  ✅ Transcribed • 23:45 • 450 words • 3 speakers                           │
+│                                                                              │
+│  [0:32] John                                                                │
+│  Sure, let me pull up the spreadsheet. As you can ▌see▐, we exceeded       │
+│  our targets by 12% in the North region.                                    │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ [▶]  ━━━━━━●━━━━━━━━━━━━━  5:32 / 23:45    [1x ▼]                      ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│                                               [View Full Transcript →]      │
+└──────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Compact view features:</strong>
+<li>Shows current segment only (auto-updates during playback)</li>
+<li>Mini player with play/pause, scrubber, speed control</li>
+<li>Click to expand to full view</li>
+<li>Word-level highlighting still works</li>
+<h3>2.7 Processing State</h3>
+<p>While transcription is in progress:</p>
+<pre><code class="language-">┌─ Transcript ───────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  ⏳ Transcribing...                                                         │
+│                                                                              │
+│  ████████████████░░░░░░░░░░░░░░░░  45%                                     │
+│                                                                              │
+│  Processing: 10:45 of 23:45                                                 │
+│  Speakers detected: 3                                                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.8 Playback Speed Options</h3>
+<pre><code class="language-">Speed: [1x ▼]
+       ├── 0.5x   (for careful editing)
+       ├── 0.75x
+       ├── 1x     (normal)
+       ├── 1.25x
+       ├── 1.5x
+       └── 2x     (quick review)
+</code></pre>
+<hr>
+<h2>3. Image Enrichment Display</h2>
+<h3>3.1 Description + OCR View</h3>
+<p>Displayed in entry detail for image assets.</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Asset Enrichment                                                           │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  ┌─ Description ───────────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  A whiteboard with handwritten notes about project planning.            ││
+│  │  Contains a flowchart showing three phases: Research, Design,           ││
+│  │  and Implementation. Arrow connections between boxes indicate           ││
+│  │  dependencies. Blue and red markers used for emphasis.                  ││
+│  │                                                                          ││
+│  │  Confidence: 94%                                            [Edit]      ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─ Extracted Text (OCR) ──────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  Phase 1: Research                                                      ││
+│  │  - User interviews                                                      ││
+│  │  - Competitive analysis                                                 ││
+│  │  - Requirements doc                                                     ││
+│  │                                                                          ││
+│  │  Phase 2: Design                                                        ││
+│  │  - Wireframes                                                           ││
+│  │  - Prototype                                                            ││
+│  │  - User testing                                                         ││
+│  │                                                                          ││
+│  │  Confidence: 89%                                   [Edit]  [Copy]       ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─ Detected Elements ─────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  People:      [Sarah ×]  [Speaker 1 ×]                    [+ Add as tag]││
+│  │  Objects:     [whiteboard ×]  [marker ×]  [flowchart ×]   [+ Add as tag]││
+│  │  Activities:  [project planning ×]  [brainstorming ×]     [+ Add as tag]││
+│  │  Scene:       [office ×]  [meeting room ×]                [+ Add as tag]││
+│  │                                                                          ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.2 OCR Edit Mode (with Image Preview)</h3>
+<p>When editing OCR text, show source image region alongside:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Edit Extracted Text                                [Done Editing] [Cancel] │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  ┌─ Source Image ──────────────────┐  ┌─ Extracted Text ──────────────────┐│
+│  │                                  │  │                                    ││
+│  │   ┌─────────────────────┐       │  │  Phase 1: Research                 ││
+│  │   │ Phase 1: Research   │       │  │  - User interviews                 ││
+│  │   │ ==================  │       │  │  - Competitive analysis            ││
+│  │   │ - User interviews   │ ←     │  │  - Requirements doc█               ││
+│  │   │ - Competitive       │  pans │  │                    ↑               ││
+│  │   │   analysis          │  to   │  │              cursor position       ││
+│  │   │ - Requirements doc  │ match │  │                                    ││
+│  │   └─────────────────────┘       │  │  Phase 2: Design                   ││
+│  │                                  │  │  - Wireframes                      ││
+│  │   [Zoom +] [Zoom -] [Reset]     │  │  - Prototype                       ││
+│  │                                  │  │  - User testing                    ││
+│  └──────────────────────────────────┘  │                                    ││
+│                                        │  Phase 3: Implementation           ││
+│  Image pans automatically to show      │  - Sprint planning                 ││
+│  the region matching your cursor       │  - Development                     ││
+│  position in the text.                 │  - QA                              ││
+│                                        │                                    ││
+│                                        └────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Edit features:</strong>
+<li>Side-by-side image and text view</li>
+<li>Image auto-pans to show region matching cursor position in text</li>
+<li>Highlighted text shows corresponding bounding box on image</li>
+<li>Zoom controls for image detail</li>
+<li>Changes auto-save</li>
+<h3>3.3 Detected Elements Detail</h3>
+<p>Each detection category can be expanded for more detail:</p>
+<pre><code class="language-">┌─ Detected Elements ─────────────────────────────────────────────────────────┐
+│                                                                              │
+│  ▼ People (2)                                                               │
+│    ┌────────────────────────────────────────────────────────────────────┐  │
+│    │ ┌──────┐  Sarah                                                     │  │
+│    │ │ face │  Confidence: 92% • Linked to: Sarah Chen                  │  │
+│    │ │ crop │  [View Person]  [Unlink]                     [Add as tag] │  │
+│    │ └──────┘                                                            │  │
+│    │                                                                      │  │
+│    │ ┌──────┐  Unknown Person                                            │  │
+│    │ │ face │  Confidence: 78%                                           │  │
+│    │ │ crop │  [Identify]  [Ignore]                        [Add as tag] │  │
+│    │ └──────┘                                                            │  │
+│    └────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  ▶ Objects (3)      [whiteboard]  [marker]  [flowchart]                    │
+│  ▶ Activities (2)   [project planning]  [brainstorming]                    │
+│  ▶ Scene (2)        [office]  [meeting room]                               │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Detection categories:</strong>
+<table>
+<tr><th>Category</th><th>Description</th><th>Linkable To</th></tr>
+<tr><td>People</td><td>Detected faces, linked to Person entities</td><td>Person entries</td></tr>
+<tr><td>Objects</td><td>Physical items visible in image</td><td>Object tags</td></tr>
+<tr><td>Activities</td><td>Actions/activities being performed</td><td>Activity tags</td></tr>
+<tr><td>Scene</td><td>Location, setting, environment</td><td>Location tags</td></tr>
+<tr><td>Text (OCR)</td><td>Extracted text regions</td><td>— (shown separately)</td></tr>
+</table>
+<strong>Tag integration:</strong>
+<li>Click <code>[Add as tag]</code> to add detection as tag on the entry</li>
+<li>Click <code>[× item]</code> to dismiss/remove that detection</li>
+<li>Bulk action: <code>[Add all as tags]</code> at category level</li>
+<h3>3.4 Inline Badge (Compact)</h3>
+<p>For list views, show enrichment status as badges:</p>
+<pre><code class="language-">│ whiteboard_photo.jpg │ Image │ [OCR] [Described] [2 people] │ 2 min ago │
+</code></pre>
+<p>Badge meanings:
+<li><code>[OCR]</code> - Text extracted</li>
+<li><code>[Described]</code> - AI description generated</li>
+<li><code>[2 people]</code> - People detected (count)</li>
+<li><code>[⏳]</code> - Processing in progress</li></p>
+<hr>
+<h2>4. Extracted Items Section</h2>
+<p>Displays tasks, decisions, quotes, and other items extracted from content. Extracted items become full entries (e.g., tasks) linked back to the source.</p>
+<h3>4.1 Extracted Items Data Table</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Extracted Items (5)                            [All Types ▼]  [Status ▼]   │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  │ Time  │ Type     │ Content                       │ Owner │ Confidence   │
+│  ├───────┼──────────┼───────────────────────────────┼───────┼──────────────┤
+│  │ 1:05  │ Task     │ Follow up with Sarah about    │ John  │ █████████░89%│
+│  │       │          │ Q2 budget                     │       │              │
+│  ├───────┼──────────┼───────────────────────────────┼───────┼──────────────┤
+│  │ 3:22  │ Task     │ Send competitive analysis to  │ Sarah │ ███████░░░75%│
+│  │       │          │ the team                      │       │              │
+│  ├───────┼──────────┼───────────────────────────────┼───────┼──────────────┤
+│  │ 8:32  │ Decision │ Launch date set for March     │ —     │ █████████░94%│
+│  │       │          │ 15th                          │       │              │
+│  ├───────┼──────────┼───────────────────────────────┼───────┼──────────────┤
+│  │ 12:45 │ Task     │ Schedule user testing         │ Mike  │ █████████░91%│
+│  │       │          │ sessions for next week        │       │              │
+│  ├───────┼──────────┼───────────────────────────────┼───────┼──────────────┤
+│  │ 15:10 │ Decision │ Using React Native for        │ —     │ ████████░░82%│
+│  │       │          │ mobile app                    │       │              │
+│  └───────┴──────────┴───────────────────────────────┴───────┴──────────────┘
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 Column Definitions</h3>
+<table>
+<tr><th>Column</th><th>Description</th><th>Click Behavior</th></tr>
+<tr><td><strong>Time</strong></td><td>Timestamp in source audio/video</td><td>Jump to that point in playback</td></tr>
+<tr><td><strong>Type</strong></td><td>Task, Decision, Quote, etc.</td><td>Filter by type</td></tr>
+<tr><td><strong>Content</strong></td><td>Extracted text (widest column)</td><td>Open/expand item detail</td></tr>
+<tr><td><strong>Owner</strong></td><td>Person responsible (for tasks)</td><td>View Person entity (if linked)</td></tr>
+<tr><td><strong>Confidence</strong></td><td>Extraction confidence indicator</td><td>—</td></tr>
+</table>
+<h3>4.3 Row Expansion (Detail View)</h3>
+<p>Clicking a row expands inline for more detail:</p>
+<pre><code class="language-">│ Time  │ Type     │ Content                       │ Owner │ Confidence   │
+├───────┼──────────┼───────────────────────────────┼───────┼──────────────┤
+│ 1:05  │ Task     │ Follow up with Sarah about    │ John  │ █████████░89%│
+│   ▼   │          │ Q2 budget                     │       │              │
+├───────┴──────────┴───────────────────────────────┴───────┴──────────────┤
+│                                                                          │
+│  Context: &quot;John, can you follow up with Sarah about the Q2 budget       │
+│  concerns she raised? We need that resolved before the board meeting.&quot;  │
+│                                                                          │
+│  Status: ☐ Not yet created as task                                      │
+│                                                                          │
+│  [▶ Play from 1:05]  [Create Task]  [Edit]  [Dismiss]                   │
+│                                                                          │
+├───────┬──────────┬───────────────────────────────┬───────┬──────────────┤
+│ 3:22  │ Task     │ Send competitive analysis to  │ Sarah │ ███████░░░75%│
+</code></pre>
+<h3>4.4 Extracted Item Types</h3>
+<table>
+<tr><th>Type</th><th>Entry Type</th><th>Description</th></tr>
+<tr><td><strong>Task</strong></td><td><code>task</code></td><td>Action items, to-dos, follow-ups</td></tr>
+<tr><td><strong>Decision</strong></td><td><code>note</code> (with decision metadata)</td><td>Choices made, agreements reached</td></tr>
+<tr><td><strong>Quote</strong></td><td><code>note</code> (with quote metadata)</td><td>Notable statements worth capturing</td></tr>
+<tr><td><strong>Commitment</strong></td><td><code>task</code> (waiting_for)</td><td>Promises made by others</td></tr>
+<tr><td><strong>Question</strong></td><td><code>note</code> (with question metadata)</td><td>Unresolved questions raised</td></tr>
+</table>
+<em>Additional types may be added over time.</em>
+<h3>4.5 Owner Column Behavior</h3>
+<li><strong>Known Person</strong>: Shows name as link → click to view Person entity</li>
+<li><strong>Unknown</strong>: Shows name as text → click to link to existing or create Person</li>
+<li><strong>Unspecified</strong>: Shows "—"</li>
+<pre><code class="language-">│ Owner  │
+├────────┤
+│ John   │  ← Linked to Person entity (clickable)
+│ Sarah  │  ← Linked to Person entity (clickable)
+│ &quot;Tom&quot;  │  ← Unknown, click to identify/link
+│ —      │  ← No owner specified
+</code></pre>
+<h3>4.6 Confidence Display</h3>
+<p>Visual indicator with percentage bar and color:</p>
+<table>
+<tr><th>Range</th><th>Display</th><th>Color</th><th>Meaning</th></tr>
+<tr><td>85-100%</td><td>█████████░ 92%</td><td>Green</td><td>High confidence</td></tr>
+<tr><td>60-84%</td><td>███████░░░ 72%</td><td>Yellow</td><td>Review suggested</td></tr>
+<tr><td>< 60%</td><td>████░░░░░░ 45%</td><td>Red</td><td>Review recommended</td></tr>
+</table>
+<h3>4.7 Filter Dropdowns</h3>
+<strong>Type Filter:</strong>
+<pre><code class="language-">[All Types ▼]
+├── All Types (5)
+├── Tasks (3)
+├── Decisions (2)
+├── Quotes (0)
+└── Commitments (0)
+</code></pre>
+<strong>Status Filter:</strong>
+<pre><code class="language-">[Status ▼]
+├── All
+├── Pending (not yet created)
+├── Created (linked to entry)
+└── Dismissed
+</code></pre>
+<hr>
+<h2>5. Quality/Confidence Indicators</h2>
+<p>Consistent quality display across all enrichment types using percentage bars with color coding.</p>
+<h3>5.1 Confidence Bar Standard</h3>
+<p>All confidence/quality indicators use this format:</p>
+<pre><code class="language-">Confidence: ████████░░ 89%    (green)
+Confidence: ██████░░░░ 62%    (yellow)
+Confidence: ███░░░░░░░ 34%    (red)
+</code></pre>
+<strong>Color thresholds:</strong>
+<table>
+<tr><th>Range</th><th>Color</th><th>Meaning</th></tr>
+<tr><td>85-100%</td><td>Green</td><td>High quality, no review needed</td></tr>
+<tr><td>60-84%</td><td>Yellow</td><td>Acceptable, review suggested</td></tr>
+<tr><td>< 60%</td><td>Red</td><td>Low quality, review recommended</td></tr>
+</table>
+<h3>5.2 Enrichment Quality Data Table</h3>
+<p>Quality information displayed as expandable rows nested under each enrichment:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Enrichment Results                                                         │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  │ Type        │ Status    │ Confidence        │ Cost   │ Duration │       │
+│  ├─────────────┼───────────┼───────────────────┼────────┼──────────┤       │
+│  │ ▶ Transcript│ ✅ Complete│ ████████░░ 87%   │ $0.04  │ 45s      │       │
+│  ├─────────────┼───────────┼───────────────────┼────────┼──────────┤       │
+│  │ ▶ Tasks (3) │ ✅ Complete│ ███████░░░ 72%   │ $0.01  │ 3s       │       │
+│  ├─────────────┼───────────┼───────────────────┼────────┼──────────┤       │
+│  │ ▶ Decisions │ ✅ Complete│ █████████░ 91%   │ $0.01  │ 2s       │       │
+│  └─────────────┴───────────┴───────────────────┴────────┴──────────┘       │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.3 Expanded Quality Detail (with Issues)</h3>
+<p>Expanding a row shows quality breakdown and any issues:</p>
+<pre><code class="language-">│ Type        │ Status    │ Confidence        │ Cost   │ Duration │       │
+├─────────────┼───────────┼───────────────────┼────────┼──────────┤       │
+│ ▼ Transcript│ ✅ Complete│ ████████░░ 87%   │ $0.04  │ 45s      │       │
+├─────────────┴───────────┴───────────────────┴────────┴──────────┴───────┤
+│                                                                          │
+│  Quality Breakdown:                                                      │
+│  ├─ Speech clarity:     █████████░ 92%                                  │
+│  ├─ Speaker separation: ███████░░░ 74%                                  │
+│  ├─ Language detection: ██████████ 99%  (English)                       │
+│  └─ Background noise:   ████████░░ 81%  (low noise)                     │
+│                                                                          │
+│  ┌─ Issues (2) ────────────────────────────────────────────────────────┐│
+│  │                                                                      ││
+│  │  │ Segment     │ Issue                        │ Impact    │         ││
+│  │  ├─────────────┼──────────────────────────────┼───────────┤         ││
+│  │  │ 3:20 - 4:15 │ Audio quality degraded       │ ██░░ Low  │ [Jump]  ││
+│  │  ├─────────────┼──────────────────────────────┼───────────┤         ││
+│  │  │ 12:00-12:30 │ Overlapping speakers         │ ███░ Med  │ [Jump]  ││
+│  │  └─────────────┴──────────────────────────────┴───────────┴─────────┘│
+│  │                                                                      ││
+│  └──────────────────────────────────────────────────────────────────────┘│
+│                                                                          │
+│  Processing: Whisper large-v3 • Processed Jan 30, 2026 at 10:45 AM      │
+│                                                                          │
+│  [Mark as Reviewed]  [Re-process]  [View Full Transcript]               │
+│                                                                          │
+├─────────────┬───────────┬───────────────────┬────────┬──────────┬───────┤
+│ ▶ Tasks (3) │ ✅ Complete│ ███████░░░ 72%   │ $0.01  │ 3s       │       │
+</code></pre>
+<h3>5.4 Quality Signals by Enrichment Type</h3>
+<strong>Audio/Video Transcription:</strong>
+<table>
+<tr><th>Signal</th><th>Description</th></tr>
+<tr><td>Speech clarity</td><td>How clear/audible the speech is</td></tr>
+<tr><td>Speaker separation</td><td>Diarization accuracy (multiple speakers)</td></tr>
+<tr><td>Language detection</td><td>Confidence in detected language</td></tr>
+<tr><td>Background noise</td><td>Level of interference</td></tr>
+<tr><td>Audio bitrate</td><td>Source quality indicator</td></tr>
+</table>
+<strong>Image OCR:</strong>
+<table>
+<tr><th>Signal</th><th>Description</th></tr>
+<tr><td>Text clarity</td><td>How legible the text is</td></tr>
+<tr><td>Handwriting vs typed</td><td>Detection of handwritten content (harder)</td></tr>
+<tr><td>Image resolution</td><td>Source quality indicator</td></tr>
+<tr><td>Lighting/contrast</td><td>Affects readability</td></tr>
+</table>
+<strong>Image Description:</strong>
+<table>
+<tr><th>Signal</th><th>Description</th></tr>
+<tr><td>Scene complexity</td><td>Simple vs complex image</td></tr>
+<tr><td>Object detection</td><td>Confidence in identified objects</td></tr>
+<tr><td>Face detection</td><td>Confidence in identified people</td></tr>
+</table>
+<strong>Extracted Items (Tasks, Decisions):</strong>
+<table>
+<tr><th>Signal</th><th>Description</th></tr>
+<tr><td>Extraction confidence</td><td>How certain the item is correctly identified</td></tr>
+<tr><td>Owner identification</td><td>Confidence in assigned owner</td></tr>
+<tr><td>Context clarity</td><td>How clear the surrounding context is</td></tr>
+</table>
+<h3>5.5 Additional Quality Metadata</h3>
+<p>Shown in expanded detail view:</p>
+<table>
+<tr><th>Metadata</th><th>Example</th><th>Purpose</th></tr>
+<tr><td><strong>Model used</strong></td><td>Whisper large-v3</td><td>Transparency on processing</td></tr>
+<tr><td><strong>Processing time</strong></td><td>45s</td><td>Performance indicator</td></tr>
+<tr><td><strong>Cost</strong></td><td>$0.04</td><td>Budget tracking</td></tr>
+<tr><td><strong>Processed at</strong></td><td>Jan 30, 10:45 AM</td><td>Audit trail</td></tr>
+<tr><td><strong>Edit history</strong></td><td>"Edited by user"</td><td>Shows manual corrections made</td></tr>
+<tr><td><strong>Source quality</strong></td><td>128kbps / 1920x1080</td><td>Input quality affects output</td></tr>
+</table>
+<h3>5.6 Review Status Indicator</h3>
+<p>Enrichments that need review show status:</p>
+<pre><code class="language-">│ Type        │ Status         │ Confidence        │ Cost   │ Duration │
+├─────────────┼────────────────┼───────────────────┼────────┼──────────┤
+│ ▶ Transcript│ ⚠️ Needs Review│ █████░░░░░ 52%   │ $0.04  │ 45s      │
+│ ▶ OCR       │ ✅ Reviewed    │ ███████░░░ 68%   │ $0.01  │ 2s       │
+│ ▶ Tasks (3) │ ✅ Complete    │ █████████░ 91%   │ $0.01  │ 3s       │
+</code></pre>
+<strong>Status values:</strong>
+<li>✅ Complete - High confidence, no review needed</li>
+<li>✅ Reviewed - User has reviewed and confirmed</li>
+<li>⚠️ Needs Review - Low confidence, review suggested</li>
+<li>⏳ Processing - Still in progress</li>
+<li>❌ Failed - Processing failed</li>
+<hr>
+<h2>6. Asset Enrichment Settings</h2>
+<p>Located at <code>/settings/agents?tab=asset-enrichment</code></p>
+<h3>6.1 Settings Layout</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Asset Enrichment Settings                                  [Reset All]     │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  ┌─ General ───────────────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  Auto-enrich new assets                            [━━━━━●] On          ││
+│  │  Automatically process uploaded assets                                  ││
+│  │                                                                          ││
+│  │  Maximum enrichment tier                               [Tier 2 ▼]       ││
+│  │  Higher tiers cost more but extract more information                    ││
+│  │                                                                          ││
+│  │  Tier 0: Instant (free) - file info, dimensions                         ││
+│  │  Tier 1: Accessibility - transcription, OCR, alt text                   ││
+│  │  Tier 2: Standard - descriptions, tags, summaries                       ││
+│  │  Tier 3: Deep - action items, decisions, entities                       ││
+│  │                                                                          ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─ Image Processing ──────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  Enable image enrichment                           [━━━━━●] On          ││
+│  │                                                                          ││
+│  │  Generate descriptions                             [━━━━━●] On          ││
+│  │  AI-generated description of image content                              ││
+│  │                                                                          ││
+│  │  Extract text (OCR)                                [━━━━━●] On          ││
+│  │  Extract text from screenshots, photos of documents                     ││
+│  │                                                                          ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─ Audio Processing ──────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  Enable audio enrichment                           [━━━━━●] On          ││
+│  │                                                                          ││
+│  │  Transcribe audio                                  [━━━━━●] On          ││
+│  │  Convert speech to searchable text                                      ││
+│  │                                                                          ││
+│  │  Extract action items (Tier 3)                     [━━━━━●] On          ││
+│  │  Identify tasks and to-dos from transcripts                             ││
+│  │                                                                          ││
+│  │  Maximum audio duration                        [───────●───] 60 min     ││
+│  │                                                10 min         120 min   ││
+│  │  Longer files will be truncated                                         ││
+│  │                                                                          ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─ Video Processing ──────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  Enable video enrichment                           [━━━━━●] On          ││
+│  │                                                                          ││
+│  │  Extract audio track                               [━━━━━●] On          ││
+│  │  Transcribe audio from video files                                      ││
+│  │                                                                          ││
+│  │  Maximum video duration                        [───────●───] 30 min     ││
+│  │                                                10 min         60 min    ││
+│  │                                                                          ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─ Document Processing ───────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  Enable document enrichment                        [━━━━━●] On          ││
+│  │                                                                          ││
+│  │  Extract text from PDFs                            [━━━━━●] On          ││
+│  │  Make PDF content searchable                                            ││
+│  │                                                                          ││
+│  │  OCR scanned documents                             [━━━━━●] On          ││
+│  │  Extract text from scanned/image PDFs (slower)                          ││
+│  │                                                                          ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─ Budget ────────────────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  Daily enrichment budget                                                ││
+│  │  ┌───────────────────────────────────────────────────────────────────┐  ││
+│  │  │ $1.00                                                             │  ││
+│  │  └───────────────────────────────────────────────────────────────────┘  ││
+│  │  Leave empty for unlimited • Estimated: ~200 images or 2 hrs audio/day ││
+│  │                                                                          ││
+│  │  Spent today: $0.23 of $1.00 (23%)                                      ││
+│  │  ████████░░░░░░░░░░░░░░░░░░░░░░                                         ││
+│  │                                                                          ││
+│  │  Alert at: [50%] [80%] [95%]                                            ││
+│  │                                                                          ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>6.2 Tier Explanation Tooltip</h3>
+<p>On hover over tier selector:</p>
+<pre><code class="language-">┌─ Enrichment Tiers ─────────────────────────────────────────┐
+│                                                             │
+│  Tier 0 - Instant (Free)                                   │
+│  • File type, dimensions, EXIF data, duration              │
+│  • Always runs automatically                                │
+│                                                             │
+│  Tier 1 - Accessibility (~$0.001-0.01/asset)               │
+│  • Alt text, transcription, basic OCR                      │
+│  • Makes content accessible and searchable                  │
+│                                                             │
+│  Tier 2 - Standard (~$0.01-0.05/asset)                     │
+│  • Full descriptions, tag suggestions, summaries           │
+│  • Richer understanding of content                          │
+│                                                             │
+│  Tier 3 - Deep Analysis (~$0.05-0.20/asset)                │
+│  • Action items, decisions, entity extraction              │
+│  • Best for meeting recordings, voice memos                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>7. Asset Enrichment Queue</h2>
+<p>View of all assets and their enrichment status. Accessible from:
+<li>Settings: Link in Asset Enrichment settings section</li>
+<li>Main app: <code>/assets</code> or via Assets nav item</li></p>
+<h3>7.1 Queue Data Table</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Asset Enrichment Queue                                     [View: All ▼]   │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  Processing: 2  •  Pending: 5  •  Completed today: 23  •  Failed: 1        │
+│                                                                              │
+│  │ Asset                  │ Type  │ Status      │ Progress        │ Cost   │
+│  ├────────────────────────┼───────┼─────────────┼─────────────────┼────────┤
+│  │ team_meeting_jan30.mp3 │ Audio │ ⏳ Processing│ ████████░░ 78%  │ $0.03  │
+│  │                        │       │ Transcribing│                 │        │
+│  ├────────────────────────┼───────┼─────────────┼─────────────────┼────────┤
+│  │ whiteboard_photo.jpg   │ Image │ ⏳ Processing│ ██████░░░░ 60%  │ $0.002 │
+│  │                        │       │ OCR         │                 │        │
+│  ├────────────────────────┼───────┼─────────────┼─────────────────┼────────┤
+│  │ voice_memo_ideas.m4a   │ Audio │ ○ Pending   │ Queued #1       │ ~$0.02 │
+│  ├────────────────────────┼───────┼─────────────┼─────────────────┼────────┤
+│  │ screenshot_2026.png    │ Image │ ○ Pending   │ Queued #2       │ ~$0.001│
+│  ├────────────────────────┼───────┼─────────────┼─────────────────┼────────┤
+│  │ project_notes.pdf      │ Doc   │ ○ Pending   │ Queued #3       │ ~$0.01 │
+│  ├────────────────────────┼───────┼─────────────┼─────────────────┼────────┤
+│  │ corrupted_file.mp3     │ Audio │ ❌ Failed    │ Decode error    │ $0.00  │
+│  ├────────────────────────┼───────┼─────────────┼─────────────────┼────────┤
+│  │ old_recording.wav      │ Audio │ ✅ Complete  │ ██████████ 100% │ $0.05  │
+│  │                        │       │ 2 hrs ago   │                 │        │
+│  └────────────────────────┴───────┴─────────────┴─────────────────┴────────┘
+│                                                                              │
+│                                               Showing 1-7 of 31  [Load More]│
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>7.2 Column Definitions</h3>
+<table>
+<tr><th>Column</th><th>Description</th></tr>
+<tr><td><strong>Asset</strong></td><td>File name, links to entry</td></tr>
+<tr><td><strong>Type</strong></td><td>Audio, Image, Video, Doc</td></tr>
+<tr><td><strong>Status</strong></td><td>Processing, Pending, Complete, Failed</td></tr>
+<tr><td><strong>Progress</strong></td><td>Progress bar or queue position or completion time</td></tr>
+<tr><td><strong>Cost</strong></td><td>Actual cost (complete) or estimated (pending)</td></tr>
+</table>
+<h3>7.3 View Filter</h3>
+<pre><code class="language-">[View: All ▼]
+├── All
+├── Processing (2)
+├── Pending (5)
+├── Completed
+├── Failed (1)
+└── Needs Review
+</code></pre>
+<h3>7.4 Row Expansion (Detail)</h3>
+<pre><code class="language-">│ Asset                  │ Type  │ Status      │ Progress        │ Cost   │
+├────────────────────────┼───────┼─────────────┼─────────────────┼────────┤
+│ ▼ team_meeting_jan30   │ Audio │ ⏳ Processing│ ████████░░ 78%  │ $0.03  │
+├────────────────────────┴───────┴─────────────┴─────────────────┴────────┤
+│                                                                          │
+│  Enrichments in progress:                                                │
+│  ├─ Transcription      ████████░░ 78%   Whisper large-v3                │
+│  ├─ Speaker detection  ████████████ Done   3 speakers                    │
+│  └─ Task extraction    ○ Pending (after transcription)                   │
+│                                                                          │
+│  Source entry: &quot;Team Meeting - Jan 30&quot;                    [View Entry]  │
+│  Started: 2 min ago • ETA: ~30 sec remaining                            │
+│                                                                          │
+│  [Cancel]  [Pause]                                                       │
+│                                                                          │
+├────────────────────────┬───────┬─────────────┬─────────────────┬────────┤
+</code></pre>
+<h3>7.5 Failed Row Expansion</h3>
+<pre><code class="language-">│ ▼ corrupted_file.mp3   │ Audio │ ❌ Failed    │ Decode error    │ $0.00  │
+├────────────────────────┴───────┴─────────────┴─────────────────┴────────┤
+│                                                                          │
+│  Error: Unable to decode audio format                                    │
+│                                                                          │
+│  Details: File appears to be corrupted or in an unsupported format.     │
+│  Tried: FFmpeg decode, direct Whisper input                             │
+│                                                                          │
+│  Source entry: &quot;Voice Memo - Corrupted&quot;                   [View Entry]  │
+│  Attempted: Today at 9:15 AM                                            │
+│                                                                          │
+│  [Retry]  [Retry with Different Settings]  [Dismiss]                    │
+│                                                                          │
+├────────────────────────┬───────┬─────────────┬─────────────────┬────────┤
+</code></pre>
+<h3>7.6 Bulk Actions</h3>
+<p>Available when rows are selected:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  ☑ 3 selected                          [Cancel Selected]  [Retry Selected] │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>7.7 Link from Settings</h3>
+<p>In the Asset Enrichment Settings, add link to queue:</p>
+<pre><code class="language-">┌─ Budget ────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  Daily enrichment budget: $1.00                                             │
+│  Spent today: $0.23 of $1.00 (23%)                                          │
+│  ████████░░░░░░░░░░░░░░░░░░░░░░                                             │
+│                                                                              │
+│  Processing: 2 assets  •  Pending: 5 assets           [View Queue →]       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>8. Activity Log Items</h2>
+<p>Asset Enrichment contributes to the unified activity log. Activity log defaults to list view with card view available as toggle.</p>
+<h3>8.1 List View (Default)</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Activity                               [All Agents ▼]  [List ●] [Cards ○] │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  │ Time     │ Agent      │ Action                    │ Entry        │ Cost  │
+│  ├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│  │ 2 min    │ Asset      │ Transcribed               │ Team Meeting │ $0.04 │
+│  │ ago      │ Enrichment │ 23:45 • 450 words         │ Jan 30       │       │
+│  ├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│  │ 5 min    │ Asset      │ Extracted 3 action items  │ Team Meeting │ $0.01 │
+│  │ ago      │ Enrichment │                           │ Jan 30       │       │
+│  ├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│  │ 10 min   │ Asset      │ Described + OCR           │ whiteboard_  │ $0.002│
+│  │ ago      │ Enrichment │ 142 words extracted       │ photo.jpg    │       │
+│  ├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│  │ 15 min   │ Asset      │ ❌ Failed: Decode error    │ corrupted_   │ $0.00 │
+│  │ ago      │ Enrichment │                           │ audio.mp3    │       │
+│  └──────────┴────────────┴───────────────────────────┴──────────────┴───────┘
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>8.2 Row Expansion</h3>
+<pre><code class="language-">│ Time     │ Agent      │ Action                    │ Entry        │ Cost  │
+├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│ ▼ 2 min  │ Asset      │ Transcribed               │ Team Meeting │ $0.04 │
+│   ago    │ Enrichment │ 23:45 • 450 words         │ Jan 30       │       │
+├──────────┴────────────┴───────────────────────────┴──────────────┴───────┤
+│                                                                          │
+│  Enrichment details:                                                     │
+│  ├─ Transcription    ████████░░ 87%    Whisper large-v3                 │
+│  ├─ Speakers         3 detected        Sarah, John, Speaker 3           │
+│  └─ Tasks extracted  3 items           [View Tasks]                     │
+│                                                                          │
+│  [View Entry]  [View Transcript]                                        │
+│                                                                          │
+├──────────┬────────────┬───────────────────────────┬──────────────┬───────┤
+</code></pre>
+<h3>8.3 Failed Row Expansion</h3>
+<pre><code class="language-">│ ▼ 15 min │ Asset      │ ❌ Failed: Decode error    │ corrupted_   │ $0.00 │
+│   ago    │ Enrichment │                           │ audio.mp3    │       │
+├──────────┴────────────┴───────────────────────────┴──────────────┴───────┤
+│                                                                          │
+│  Error: Unable to decode audio format                                    │
+│  File appears to be corrupted or in an unsupported format.              │
+│                                                                          │
+│  [View Entry]  [Retry]  [Dismiss]                                       │
+│                                                                          │
+├──────────┬────────────┬───────────────────────────┬──────────────┬───────┤
+</code></pre>
+<h3>8.4 Card View (Alternative)</h3>
+<p>Toggle to card view for visual browsing:</p>
+<pre><code class="language-">[List ○] [Cards ●]
+<p>┌─────────────────────────┐  ┌─────────────────────────┐
+│ [●] Asset Enrichment    │  │ [●] Asset Enrichment    │
+│                         │  │                         │
+│ Transcribed             │  │ Extracted 3 action      │
+│ &quot;Team Meeting Jan 30&quot;   │  │ items                   │
+│                         │  │ &quot;Team Meeting Jan 30&quot;   │
+│ 23:45 • 450 words       │  │                         │
+│ $0.04          2 min ago│  │ $0.01          5 min ago│
+│                         │  │                         │
+│ [View Entry →]          │  │ [View Items →]          │
+└─────────────────────────┘  └─────────────────────────┘</p>
+<p>┌─────────────────────────┐  ┌─────────────────────────┐
+│ [●] Asset Enrichment    │  │ [●] Asset Enrichment    │
+│                         │  │                         │
+│ Described + OCR         │  │ ❌ Failed                │
+│ &quot;whiteboard_photo.jpg&quot;  │  │ &quot;corrupted_audio.mp3&quot;   │
+│                         │  │                         │
+│ 142 words extracted     │  │ Decode error            │
+│ $0.002        10 min ago│  │              15 min ago │
+│                         │  │                         │
+│ [View Entry →]          │  │ [Retry]  [Dismiss]      │
+└─────────────────────────┘  └─────────────────────────┘
+</code></pre></p>
+<hr>
+<h2>9. Review Queue Items</h2>
+<p>Low-confidence enrichments appear in unified Review Queue. All review items use list view format.</p>
+<h3>9.1 Transcription Review List</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Transcription Reviews                                [All ▼]  [List ●]    │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  │ Entry                  │ Issues            │ Confidence     │ Actions   │
+│  ├────────────────────────┼───────────────────┼────────────────┼───────────┤
+│  │ Voice Memo - Project   │ Background noise, │ ██████░░░░ 62% │ [Review]  │
+│  │ Ideas                  │ unclear words     │                │           │
+│  ├────────────────────────┼───────────────────┼────────────────┼───────────┤
+│  │ Phone Call - Client    │ Low audio quality │ █████░░░░░ 54% │ [Review]  │
+│  ├────────────────────────┼───────────────────┼────────────────┼───────────┤
+│  │ Interview Recording    │ Overlapping       │ ██████░░░░ 68% │ [Review]  │
+│  │                        │ speakers          │                │           │
+│  └────────────────────────┴───────────────────┴────────────────┴───────────┘
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>9.2 Transcription Review Expanded</h3>
+<pre><code class="language-">│ Entry                  │ Issues            │ Confidence     │ Actions   │
+├────────────────────────┼───────────────────┼────────────────┼───────────┤
+│ ▼ Voice Memo - Project │ Background noise, │ ██████░░░░ 62% │           │
+│   Ideas                │ unclear words     │                │           │
+├────────────────────────┴───────────────────┴────────────────┴───────────┤
+│                                                                          │
+│  Preview:                                                                │
+│  &quot;So I was thinking about the [unclear] project and how we might        │
+│   [unclear] the approach to better serve our customers...&quot;              │
+│                                                                          │
+│  [Confirm as Correct]  [Edit Transcript]  [Re-transcribe]  [Dismiss]   │
+│                                                                          │
+├────────────────────────┬───────────────────┬────────────────┬───────────┤
+│ Phone Call - Client    │ Low audio quality │ █████░░░░░ 54% │ [Review]  │
+</code></pre>
+<h3>9.3 Action Item Review List</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Extracted Action Items Review                        [All ▼]  [List ●]    │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  From: &quot;Team Meeting Jan 30&quot;                              3 items to review │
+│                                                                              │
+│  │ ☐ │ Action Item                      │ Owner   │ Confidence     │       │
+│  ├───┼──────────────────────────────────┼─────────┼────────────────┼───────┤
+│  │ ☑ │ Follow up with Sarah about Q2    │ John    │ █████████░ 89% │[Reject│
+│  │   │ budget                           │         │                │       │
+│  ├───┼──────────────────────────────────┼─────────┼────────────────┼───────┤
+│  │ ☑ │ Send competitive analysis to     │ Sarah   │ ███████░░░ 75% │[Reject│
+│  │   │ the team                         │         │                │       │
+│  ├───┼──────────────────────────────────┼─────────┼────────────────┼───────┤
+│  │ ☐ │ Maybe look into the new vendor   │ Unknown │ ████░░░░░░ 45% │[Reject│
+│  │   │ ⚠️ Low confidence                 │         │                │       │
+│  └───┴──────────────────────────────────┴─────────┴────────────────┴───────┘
+│                                                                              │
+│  ☑ 2 selected                              [Accept Selected]    [Dismiss]  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>9.4 Action Item Row Expansion</h3>
+<pre><code class="language-">│ ☐ │ Action Item                      │ Owner   │ Confidence     │       │
+├───┼──────────────────────────────────┼─────────┼────────────────┼───────┤
+│ ▼ │ Maybe look into the new vendor   │ Unknown │ ████░░░░░░ 45% │       │
+│   │ ⚠️ Low confidence                 │         │                │       │
+├───┴──────────────────────────────────┴─────────┴────────────────┴───────┤
+│                                                                          │
+│  Context: &quot;...and maybe we should look into the new vendor that         │
+│  Tom mentioned last week, but I'm not sure if that's a priority.&quot;       │
+│                                                                          │
+│  Source: 12:45 in transcript                           [▶ Play from here]│
+│                                                                          │
+│  [Accept as Task]  [Edit]  [Not an Action Item]                         │
+│                                                                          │
+├───┬──────────────────────────────────┬─────────┬────────────────┬───────┤
+</code></pre>
+<hr>
+<h2>10. Empty States</h2>
+<h3>10.1 No Enrichments Yet</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│                              🎨                                             │
+│                                                                              │
+│                     No enrichments available                                │
+│                                                                              │
+│       Upload images, audio, or documents to see them enriched.             │
+│                                                                              │
+│                         [Upload Asset]                                      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>10.2 Enrichment Disabled</h3>
+<pre><code class="language-">┌─ Asset Enrichment ─────────────────────────────────────────────────────────┐
+│                                                                              │
+│  ○ Enrichment disabled                                                      │
+│                                                                              │
+│  Auto-enrichment is turned off for this asset type.                        │
+│                                                                              │
+│  [Enable in Settings]  [Enrich This Asset]                                 │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>10.3 Budget Exceeded</h3>
+<pre><code class="language-">┌─ Asset Enrichment ─────────────────────────────────────────────────────────┐
+│                                                                              │
+│  ⚠️ Daily budget reached                                                    │
+│                                                                              │
+│  You've used $1.00 of your $1.00 daily enrichment budget.                  │
+│  Enrichment will resume tomorrow or when you increase your budget.         │
+│                                                                              │
+│  [Increase Budget]  [View Spending]                                        │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>11. Integration with Audio Player</h2>
+<p>When an entry has both an audio asset and a transcript, they integrate:</p>
+<h3>11.1 Synchronized View</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Meeting Recording - Jan 30                                                 │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  ┌─ Audio Player ──────────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  [◀◀] [▶ Play] [▶▶]   ━━━━━━━━━━━━●━━━━━━━━━━━━━━━━━  5:32 / 23:45     ││
+│  │                                                                          ││
+│  │  🔊 ━━━━●━━━    Speed: [1x ▼]    [Auto-scroll ●]    [CC]                ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+│  ┌─ Transcript ────────────────────────────────────────────────────────────┐│
+│  │                                                                          ││
+│  │  │ Time  │ Speaker     │ Transcript                                     ││
+│  │  ├───────┼─────────────┼─────────────────────────────────────────────────┤│
+│  │  │ 5:20  │ Sarah (You) │ So I think we should focus on the customer    ││
+│  │  │       │             │ feedback from last quarter before making any   ││
+│  │  │       │             │ decisions.                                     ││
+│  │  ├───────┼─────────────┼─────────────────────────────────────────────────┤│
+│  │  │ 5:32  │ John        │ ▶ That's a great point. Let me pull up the    ││ ← playing
+│  │  │  ▶    │             │ survey ▌results▐.                              ││
+│  │  ├───────┼─────────────┼─────────────────────────────────────────────────┤│
+│  │  │ 5:45  │ Sarah (You) │ Perfect. While you do that, I'll share my     ││
+│  │  │       │             │ notes from the customer calls I did last week.││
+│  │  └───────┴─────────────┴─────────────────────────────────────────────────┘│
+│  │                                                                          ││
+│  └──────────────────────────────────────────────────────────────────────────┘│
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Behavior:</strong>
+<li>Current segment row highlighted, <code>▶</code> marker in Time column</li>
+<li>Current word highlighted (▌word▐) during playback</li>
+<li>Click timestamp to jump to segment start</li>
+<li>Click any word to jump to that word</li>
+<li>Click speaker name to view/edit Person entity</li>
+<li>Auto-scroll keeps current segment visible (toggle available)</li>
+<h3>11.2 Playback Speed Options</h3>
+<pre><code class="language-">Speed: [1x ▼]
+       ├── 0.5x   (careful editing)
+       ├── 0.75x
+       ├── 1x     (normal)
+       ├── 1.25x
+       ├── 1.5x
+       └── 2x     (quick review)
+</code></pre>
+<hr>
+<h2>12. Related Documents</h2>
+<li><a href="./shared_agent_ui_components.md">Shared Agent UI</a> - Processing status, activity items, cost display</li>
+<li><a href="./settings_ui_plan.md">Settings UI Plan</a> - Auto-save, agent colors</li>
+<li><a href="./reader_ui_plan.md">Reader UI Plan</a> - Audio player patterns (shared)</li>
+<li><a href="../asset_enrichment_agent_plan.md">Asset Enrichment Agent Plan</a> - Technical specification</li>
+</ul>
+<hr>
+<em>Last updated: 2026-01-30</em>
+  </article>
+</body>
+</html>

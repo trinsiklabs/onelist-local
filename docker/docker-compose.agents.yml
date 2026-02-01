@@ -1,0 +1,40 @@
+# Onelist Local - All Agents
+#
+# Adds:
+#   - River agent (conversational AI assistant)
+#   - Asset Enrichment agent (audio/video transcription)
+#   - Additional specialized agents
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.agents.yml up -d
+#
+# Note: Most users should use --with-openclaw instead.
+# This is for advanced setups that want all agent capabilities.
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # Update onelist to enable all agents
+  # ===========================================
+  onelist:
+    environment:
+      # River - Conversational AI
+      ONELIST_RIVER_ENABLED: "true"
+      
+      # Asset Enrichment - Transcription, OCR
+      ONELIST_ASSET_ENRICHMENT_ENABLED: "true"
+      
+      # Reader - Memory extraction (also in openclaw overlay)
+      ONELIST_READER_ENABLED: "true"
+      
+      # Searcher - Semantic search (also in openclaw overlay)
+      ONELIST_SEARCHER_ENABLED: "true"
+      
+      # Oban job processing for agents
+      ONELIST_OBAN_QUEUES: "default,reader,searcher,enrichment,river"
+
+networks:
+  onelist:
+    external: true
+    name: onelist-network

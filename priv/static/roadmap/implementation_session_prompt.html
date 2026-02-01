@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>River Agent Plan - Implementation Session Prompt - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>River Agent Plan - Implementation Session Prompt</h1>
+<strong>Last Updated:</strong> 2026-01-30
+<strong>Purpose:</strong> Resume context for continuing River Agent plan alignment and implementation work
+<hr>
+<h2>Session Context</h2>
+<p>This prompt captures the state of an ongoing effort to align the River Agent plan with best practice guides and consolidate related documents.</p>
+<h3>Workflow Established</h3>
+<p>When analyzing documents for alignment:
+1. Present one issue/gap at a time
+2. Provide options (A, B, C typically)
+3. Wait for user decision
+4. After user confirms "ready", integrate the decision into <code>river_agent_plan.md</code>
+5. Move to next issue only after user explicitly confirms</p>
+<h3>Key Files</h3>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>roadmap/river_agent_plan.md</code></td><td>Main River Agent architecture document (~16,000+ lines)</td></tr>
+<tr><td><code>roadmap/ai_agent_implementation_guide.md</code></td><td>Best practices for AI agents</td></tr>
+<tr><td><code>roadmap/always_running_agents_comprehensive_guide.md</code></td><td>OpenClaw patterns for long-running agents</td></tr>
+<tr><td><code>roadmap/competitive_analysis_pal.md</code></td><td>PAL vs Onelist comparison (created this session)</td></tr>
+<tr><td><code>roadmap/competitive_analysis_supermemory.md</code></td><td>Reference for comparison document style</td></tr>
+</table>
+<hr>
+<h2>Completed Alignment Work</h2>
+<h3>1. AI Agent Implementation Guide Alignment</h3>
+<strong>Commit:</strong> <code>d8c66de</code>
+<p>Added Sections 35.0.8 - 35.0.19 covering:
+<ul>
+<li>Tool validation and schema</li>
+<li>Cost tracking integration</li>
+<li>Error handling patterns</li>
+<li>Production readiness checklist</li>
+<li>KERNEL prompts</li>
+<li>12-factor agent principles</li>
+<li>Long-running operation patterns</li></p>
+<h3>2. Always-Running Agents Guide Alignment</h3>
+<strong>Commit:</strong> <code>d92b850</code>
+<p>Added Sections 35.0.20 - 35.0.25 covering:
+<li>35.0.20: Skills Architecture (SKILL.md compatible)</li>
+<li>35.0.21: Event-Driven Architecture</li>
+<li>35.0.22: Sandboxing & Blast Radius (4 trust levels, 3 executor types)</li>
+<li>35.0.23: OWASP Agentic Security (LLM Top 10 mapping)</li>
+<li>35.0.24: Memory Lifecycle & Decay Strategy</li>
+<li>35.0.25: Multi-Agent Orchestration</li></p>
+<h3>3. PAL Enhancement Plan Merge</h3>
+<strong>Commit:</strong> <code>aaaae6b</code>
+<p>Merged content from <code>river_agent_future_roadmap.md</code> (now deleted):
+<li>35.0.26: Adaptive Complexity Assessment (Post-MVP)</li>
+<li>35.0.27: Plan-Execute-Verify Cycle (Post-MVP)</li>
+<li>35.0.28: Continuous Learning System (Post-MVP)</li>
+<li>35.0.29: PAL Configuration (Post-MVP)</li></p>
+<p>Created <code>competitive_analysis_pal.md</code> documenting what was adopted vs what Onelist already does better.</p>
+<hr>
+<h2>River Agent Plan Structure</h2>
+<p>The plan uses hierarchical section numbering. Key sections:</p>
+<table>
+<tr><th>Section</th><th>Topic</th></tr>
+<tr><td>1-10</td><td>Core architecture, data model, conversations</td></tr>
+<tr><td>11-20</td><td>GTD integration, tools, proactive behavior</td></tr>
+<tr><td>21-24</td><td>Workers, scheduling, tick system</td></tr>
+<tr><td>25</td><td>Entries-based data model (alternative to new tables)</td></tr>
+<tr><td>26-34</td><td>Various features (briefings, domains, etc.)</td></tr>
+<tr><td>35.0.x</td><td><strong>Alignment sections</strong> (implementation guide, always-running, PAL)</td></tr>
+<tr><td>35.1+</td><td>Open questions and future considerations</td></tr>
+<tr><td>36+</td><td>Privacy, security, API</td></tr>
+</table>
+<h3>Section 35.0.x Index (Alignment Decisions)</h3>
+<table>
+<tr><th>Section</th><th>Source</th><th>Topic</th></tr>
+<tr><td>35.0.8</td><td>AI Agent Guide</td><td>Tool Validation</td></tr>
+<tr><td>35.0.9</td><td>AI Agent Guide</td><td>Production Readiness</td></tr>
+<tr><td>35.0.10</td><td>AI Agent Guide</td><td>Tool Schema</td></tr>
+<tr><td>35.0.11</td><td>AI Agent Guide</td><td>Cost Tracking</td></tr>
+<tr><td>35.0.12</td><td>AI Agent Guide</td><td>Error Handling</td></tr>
+<tr><td>35.0.13</td><td>AI Agent Guide</td><td>Observability</td></tr>
+<tr><td>35.0.14</td><td>AI Agent Guide</td><td>Rate Limiting</td></tr>
+<tr><td>35.0.15</td><td>AI Agent Guide</td><td>Graceful Degradation</td></tr>
+<tr><td>35.0.16</td><td>AI Agent Guide</td><td>KERNEL Prompts</td></tr>
+<tr><td>35.0.17</td><td>AI Agent Guide</td><td>12-Factor Principles</td></tr>
+<tr><td>35.0.18</td><td>AI Agent Guide</td><td>Long-Running Patterns</td></tr>
+<tr><td>35.0.19</td><td>AI Agent Guide</td><td>Atomic Operations</td></tr>
+<tr><td>35.0.20</td><td>Always-Running Guide</td><td>Skills Architecture</td></tr>
+<tr><td>35.0.21</td><td>Always-Running Guide</td><td>Event-Driven Architecture</td></tr>
+<tr><td>35.0.22</td><td>Always-Running Guide</td><td>Sandboxing & Blast Radius</td></tr>
+<tr><td>35.0.23</td><td>Always-Running Guide</td><td>OWASP Security</td></tr>
+<tr><td>35.0.24</td><td>Always-Running Guide</td><td>Memory Lifecycle</td></tr>
+<tr><td>35.0.25</td><td>Always-Running Guide</td><td>Multi-Agent Orchestration</td></tr>
+<tr><td>35.0.26</td><td>PAL Enhancement</td><td>Complexity Assessment</td></tr>
+<tr><td>35.0.27</td><td>PAL Enhancement</td><td>Plan-Execute-Verify</td></tr>
+<tr><td>35.0.28</td><td>PAL Enhancement</td><td>Continuous Learning</td></tr>
+<tr><td>35.0.29</td><td>PAL Enhancement</td><td>PAL Configuration</td></tr>
+</table>
+<hr>
+<h2>Design Principles Established</h2>
+<p>These principles were established through alignment discussions:</p>
+<p>1. <strong>Entries for Everything</strong> - Store all data as entries rather than creating new tables
+2. <strong>Minimal New Tables</strong> - Only create tables when entries can't work (e.g., memories table)
+3. <strong>SKILL.md Compatibility</strong> - Support OpenClaw skill format while using entries internally
+4. <strong>Trust Levels for Sandboxing</strong> - 0=internal, 1=trusted external, 2=user, 3=imported
+5. <strong>Post-MVP for PAL Features</strong> - Complexity assessment and learning are enhancements, not MVP
+6. <strong>Standard APIs Suffice</strong> - No dedicated endpoints when filtered queries work</p>
+<hr>
+<h2>Potential Next Steps</h2>
+<h3>Additional Alignment Opportunities</h3>
+<p>1. <strong>Reader Agent Plan</strong> - Check alignment with memory architecture decisions
+2. <strong>Searcher Agent Plan</strong> - Verify consistency with River's search integration
+3. <strong>Feeder Agent Plan</strong> - Confirm coordination patterns match Section 35.0.25</p>
+<h3>Implementation Work</h3>
+<p>1. <strong>MVP Features</strong> - Identify what's MVP vs Post-MVP in river_agent_plan.md
+2. <strong>Migration Planning</strong> - Create migrations for any needed schema changes
+3. <strong>Module Structure</strong> - Define actual Elixir module organization</p>
+<h3>Documentation Cleanup</h3>
+<p>1. <strong>Section 35.1+</strong> - Review open questions, close resolved ones
+2. <strong>Cross-References</strong> - Ensure related documents reference each other
+3. <strong>Competitive Analyses</strong> - May need similar docs for other comparisons</p>
+<hr>
+<h2>How to Resume</h2>
+<p>1. Read this prompt for context
+2. Ask user what they want to work on:
+   <li>Continue alignment with another guide?</li>
+   <li>Start implementation of specific sections?</li>
+   <li>Review and clean up existing content?</li>
+</ul>3. Follow the established workflow (one item at a time, wait for confirmation)</p>
+<hr>
+<h2>Git State</h2>
+<p>Recent commits on main branch:
+<pre><code class="language-">aaaae6b docs: Merge PAL enhancement patterns into River Agent plan
+d92b850 docs: Add Always-Running Agents Guide alignment to River Agent plan
+d8c66de docs: Add AI Agent Implementation Guide alignment to River Agent plan
+</code></pre></p>
+<p>The branch is ahead of origin/main by multiple commits (not yet pushed).</p>
+<hr>
+<em>This prompt was generated to preserve session context for future continuation.</em>
+  </article>
+</body>
+</html>

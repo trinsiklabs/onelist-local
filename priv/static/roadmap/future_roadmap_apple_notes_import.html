@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apple Notes Import &amp; Sync Roadmap - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Apple Notes Import & Sync Roadmap</h1>
+<h2>Executive Summary</h2>
+<p>This roadmap defines the implementation plan for importing Apple Notes into Onelist. Unlike other note-taking apps, Apple Notes presents significant challenges due to Apple's closed ecosystem and lack of public API.</p>
+<h3>Key Challenges</h3>
+<table>
+<tr><th>Challenge</th><th>Impact</th></tr>
+<tr><td>No public API</td><td>Cannot programmatically access notes</td></tr>
+<tr><td>Limited export options</td><td>Native export only supports PDF (one at a time)</td></tr>
+<tr><td>Proprietary storage format</td><td>Notes stored as gzipped protobuf blobs</td></tr>
+<tr><td>Platform restrictions</td><td>AppleScript only works on macOS</td></tr>
+<tr><td>Encrypted notes</td><td>Locked notes require password to decrypt</td></tr>
+</table>
+<h3>Import Methods</h3>
+<table>
+<tr><th>Method</th><th>Platform</th><th>Automation</th><th>Complexity</th></tr>
+<tr><td>Third-party exporter app</td><td>macOS</td><td>Semi-automated</td><td>Low</td></tr>
+<tr><td>AppleScript automation</td><td>macOS</td><td>Automated</td><td>Medium</td></tr>
+<tr><td>SQLite database parsing</td><td>macOS/iOS backup</td><td>Automated</td><td>High</td></tr>
+<tr><td>iOS Shortcuts export</td><td>iOS/iPadOS</td><td>Manual trigger</td><td>Medium</td></tr>
+<tr><td>Manual PDF export</td><td>All</td><td>Manual</td><td>Very Low</td></tr>
+</table>
+<h3>Ongoing Sync Reality</h3>
+<strong>Ongoing sync is not feasible</strong> with Apple Notes due to the lack of any API or webhook system. Users must manually trigger exports periodically. This is a fundamental limitation of Apple's closed ecosystem.
+<hr>
+<h2>Table of Contents</h2>
+<p>1. <a href="#apple-notes-data-model">Apple Notes Data Model</a>
+2. <a href="#import-methods">Import Methods</a>
+3. <a href="#third-party-exporter-apps">Third-Party Exporter Apps</a>
+4. <a href="#applescript-automation">AppleScript Automation</a>
+5. <a href="#sqlite-database-parsing">SQLite Database Parsing</a>
+6. <a href="#ios-shortcuts-export">iOS Shortcuts Export</a>
+7. <a href="#data-mapping">Data Mapping</a>
+8. <a href="#content-conversion">Content Conversion</a>
+9. <a href="#implementation-phases">Implementation Phases</a>
+10. <a href="#technical-considerations">Technical Considerations</a>
+11. <a href="#user-experience">User Experience</a></p>
+<hr>
+<h2>Apple Notes Data Model</h2>
+<h3>Note Features</h3>
+<p>Apple Notes supports rich content types:</p>
+<table>
+<tr><th>Feature</th><th>Description</th><th>Import Consideration</th></tr>
+<tr><td>Rich text</td><td>Bold, italic, underline, strikethrough</td><td>Convert to Markdown</td></tr>
+<tr><td>Headings</td><td>Title, Heading, Subheading, Body</td><td>Map to Markdown headers</td></tr>
+<tr><td>Checklists</td><td>Interactive checkboxes</td><td>Convert to <code>- [ ]</code> / <code>- [x]</code></td></tr>
+<tr><td>Tables</td><td>Grid-based data</td><td>Convert to Markdown tables</td></tr>
+<tr><td>Drawings</td><td>Apple Pencil sketches</td><td>Export as PNG/PDF</td></tr>
+<tr><td>Scanned documents</td><td>OCR-capable scans</td><td>Export as PDF/images</td></tr>
+<tr><td>Handwriting</td><td>Handwritten notes</td><td>Export as images</td></tr>
+<tr><td>Audio recordings</td><td>Voice memos (iOS 18+)</td><td>Export as audio files</td></tr>
+<tr><td>Photos/Videos</td><td>Embedded media</td><td>Export as assets</td></tr>
+<tr><td>Web links</td><td>URL attachments</td><td>Preserve as links</td></tr>
+<tr><td>File attachments</td><td>PDFs, documents</td><td>Export as assets</td></tr>
+<tr><td>Tags</td><td>#tag format (iOS 15+)</td><td>Map to Onelist tags</td></tr>
+<tr><td>Folders</td><td>Hierarchical organization</td><td>Map to tags</td></tr>
+<tr><td>Locked notes</td><td>Password-encrypted</td><td>Requires password</td></tr>
+</table>
+<h3>Storage Structure</h3>
+<strong>Database Location (macOS)</strong>:
+<pre><code class="language-">~/Library/Group Containers/group.com.apple.notes/
+├── NoteStore.sqlite           # Main database
+├── NoteStore.sqlite-shm       # Shared memory file
+├── NoteStore.sqlite-wal       # Write-ahead log
+├── Media/                     # Attachments
+│   └── {UUID}/               # Per-note attachment folders
+│       ├── image.png
+│       └── scan.pdf
+└── Previews/                  # Thumbnail previews
+</code></pre>
+<strong>iOS Backup Location</strong>:
+<pre><code class="language-">{backup}/
+├── 4f/
+│   └── 4f98687d8ab0d6d1a371110e6b7300f6e465bef2  # NoteStore.sqlite (hashed)
+└── ...
+</code></pre>
+<h3>Database Schema</h3>
+<strong>Key Tables</strong>:
+<table>
+<tr><th>Table</th><th>Purpose</th></tr>
+<tr><td><code>ZICCLOUDSYNCINGOBJECT</code></td><td>Main note metadata</td></tr>
+<tr><td><code>ZICNOTEDATA</code></td><td>Note content (protobuf blob)</td></tr>
+<tr><td><code>ZICLOCATION</code></td><td>Location data</td></tr>
+<tr><td><code>ZICFOLDER</code></td><td>Folder structure</td></tr>
+<tr><td><code>ZICACCOUNT</code></td><td>Account information</td></tr>
+</table>
+<strong>Important Columns</strong>:
+<pre><code class="language-sql">-- Note metadata
+ZICCLOUDSYNCINGOBJECT:
+  <ul>
+<li>Z_PK              -- Primary key</li>
+  <li>ZTITLE1           -- Note title</li>
+  <li>ZSNIPPET          -- Preview text</li>
+  <li>ZCREATIONDATE     -- Created timestamp</li>
+  <li>ZMODIFICATIONDATE1 -- Modified timestamp</li>
+  <li>ZFOLDER           -- Parent folder FK</li>
+  <li>ZACCOUNT          -- Account FK</li>
+  <li>ZIDENTIFIER       -- CloudKit UUID</li>
+<p>-- Note content
+ZICNOTEDATA:
+  <li>Z_PK              -- Primary key</li>
+  <li>ZNOTE             -- Note FK</li>
+  <li>ZDATA             -- GZipped protobuf content</li>
+</code></pre></p>
+<h3>Protobuf Structure</h3>
+<p>Note content is stored as a gzipped Protocol Buffer:</p>
+<pre><code class="language-protobuf">message NoteStoreProto {
+  message Document {
+    int32 version = 1;
+    Note note = 2;
+  }
+<p>message Note {
+    string note_text = 2;
+    repeated AttributeRun attribute_run = 5;
+  }</p>
+<p>message AttributeRun {
+    int32 length = 1;
+    // Formatting attributes
+    ParagraphStyle paragraph_style = 2;
+    Font font = 3;
+    int32 font_weight = 5;
+    bool underline = 6;
+    bool strikethrough = 7;
+    int32 superscript = 8;
+    string link = 9;
+    Color color = 10;
+    AttachmentInfo attachment_info = 12;
+  }
+}
+</code></pre></p>
+<h3>Encrypted Notes</h3>
+<p>Locked notes use strong encryption:</p>
+<li><strong>Key Derivation</strong>: PBKDF2 with SHA-256</li>
+<li><strong>Encryption</strong>: AES-GCM (128-bit)</li>
+<li><strong>Storage</strong>: Encrypted blob in database</li>
+<li><strong>Unlock</strong>: Requires user password, Face ID, or Touch ID</li>
+<strong>Limitation</strong>: Onelist cannot decrypt locked notes without the user's password.
+<hr>
+<h2>Import Methods</h2>
+<h3>Method Comparison</h3>
+<table>
+<tr><th>Method</th><th>Pros</th><th>Cons</th></tr>
+<tr><td><strong>Exporter App</strong></td><td>Easy, handles attachments</td><td>Requires app purchase, macOS only</td></tr>
+<tr><td><strong>AppleScript</strong></td><td>Automatable, free</td><td>macOS only, attachment handling tricky</td></tr>
+<tr><td><strong>SQLite Parsing</strong></td><td>Works on backups, most complete</td><td>Complex, forensic-level</td></tr>
+<tr><td><strong>iOS Shortcuts</strong></td><td>Works on iOS</td><td>Manual, limited batch size</td></tr>
+<tr><td><strong>Manual PDF</strong></td><td>Works everywhere</td><td>Extremely tedious, loses structure</td></tr>
+</table>
+<h3>Recommended Approach</h3>
+<p>For most users:
+1. <strong>Primary</strong>: Third-party exporter app (Exporter, notes-exporter)
+2. <strong>Fallback</strong>: AppleScript automation for macOS users
+3. <strong>Advanced</strong>: SQLite parsing for complete extraction</p>
+<hr>
+<h2>Third-Party Exporter Apps</h2>
+<h3>Exporter (Mac App Store)</h3>
+<strong>Link</strong>: <a href="https://apps.apple.com/us/app/exporter/id1099120373">Exporter on Mac App Store</a>
+<strong>Features</strong>:
+<li>Exports all notes as Markdown or HTML</li>
+<li>Preserves folder structure</li>
+<li>Handles attachments (images, videos, audio)</li>
+<li>Simple one-click export</li>
+<strong>Output Structure</strong>:
+<pre><code class="language-">Export/
+├── iCloud/
+│   ├── Folder 1/
+│   │   ├── Note Title.md
+│   │   └── Note Title/
+│   │       └── image.png
+│   └── Folder 2/
+│       └── Another Note.md
+└── On My Mac/
+    └── Local Note.md
+</code></pre>
+<h3>notes-exporter (Open Source)</h3>
+<strong>Link</strong>: <a href="https://github.com/storizzi/notes-exporter">GitHub - storizzi/notes-exporter</a>
+<strong>Features</strong>:
+<li>Multiple output formats: HTML, Markdown, PDF, DOCX, plain text</li>
+<li>Extracts images to local folders</li>
+<li>Incremental export (tracks changes)</li>
+<li>Open source and free</li>
+<strong>Requirements</strong>:
+<li>macOS</li>
+<li>Python 3</li>
+<li>Pandoc (for DOCX)</li>
+<li>Chrome (for PDF)</li>
+<strong>Usage</strong>:
+<pre><code class="language-bash"># Clone and setup
+git clone https://github.com/storizzi/notes-exporter.git
+cd notes-exporter
+pip install -r requirements.txt
+<h1>Export all notes as Markdown</h1>
+python notes_exporter.py --format markdown --output ~/notes-export
+</code></pre>
+<h3>Onelist Integration</h3>
+<p>Users export with third-party tool, then upload to Onelist:</p>
+<pre><code class="language-elixir">defmodule Onelist.Import.AppleNotes.ExporterImport do
+  @moduledoc &quot;&quot;&quot;
+  Import notes exported by third-party Apple Notes exporter apps.
+  Supports Markdown and HTML exports with attachments.
+  &quot;&quot;&quot;
+<p>def import_export_folder(folder_path, user_id) do
+    folder_path
+    |&gt; scan_exported_notes()
+    |&gt; Enum.map(&amp;parse_exported_note/1)
+    |&gt; Enum.map(&amp;create_entry(&amp;1, user_id))
+  end</p>
+<p>defp scan_exported_notes(path) do
+    Path.wildcard(Path.join(path, &quot;<strong>/<em>.{md,html}&quot;))
+    |&gt; Enum.map(fn file -&gt;
+      %{
+        path: file,
+        attachment_folder: find_attachment_folder(file),
+        format: detect_format(file)
+      }
+    end)
+  end</p>
+<p>defp find_attachment_folder(note_path) do
+    # Attachment folder has same name as note (without extension)
+    folder = Path.rootname(note_path)
+    if File.dir?(folder), do: folder, else: nil
+  end</p>
+<p>defp parse_exported_note(%{path: path, format: :markdown} = note) do
+    content = File.read!(path)</p>
+<p>%{
+      title: extract_title(content, path),
+      content: content,
+      attachments: scan_attachments(note.attachment_folder),
+      source_path: path
+    }
+  end</p>
+<p>defp parse_exported_note(%{path: path, format: :html} = note) do
+    content = File.read!(path)
+    markdown = convert_html_to_markdown(content)</p>
+<p>%{
+      title: extract_title_from_html(content, path),
+      content: markdown,
+      attachments: scan_attachments(note.attachment_folder),
+      source_path: path
+    }
+  end
+end
+</code></pre></p>
+<hr>
+<h2>AppleScript Automation</h2>
+<h3>Overview</h3>
+<p>AppleScript can access the Notes app directly on macOS, enabling automated export.</p>
+<h3>Notes AppleScript Classes</h3>
+<table>
+<tr><th>Class</th><th>Description</th></tr>
+<tr><td><code>application "Notes"</code></td><td>The Notes app</td></tr>
+<tr><td><code>account</code></td><td>iCloud, On My Mac, etc.</td></tr>
+<tr><td><code>folder</code></td><td>Note folders</td></tr>
+<tr><td><code>note</code></td><td>Individual notes</td></tr>
+<tr><td><code>attachment</code></td><td>Files attached to notes</td></tr>
+</table>
+<h3>Note Properties</h3>
+<pre><code class="language-applescript">-- Available note properties
+note:
+  <li>name           -- Note title</li>
+  <li>id             -- Unique identifier</li>
+  <li>container      -- Parent folder</li>
+  <li>creation date  -- When created</li>
+  <li>modification date -- When modified</li>
+  <li>body           -- HTML content</li>
+  <li>plaintext      -- Text-only content</li>
+  <li>attachments    -- List of attachments</li>
+</code></pre>
+<h3>Export Script</h3>
+<pre><code class="language-applescript">-- Export all notes to Markdown files
+tell application &quot;Notes&quot;
+    set outputFolder to (path to desktop as text) &amp; &quot;Notes Export:&quot;
+<p>repeat with acct in accounts
+        set acctName to name of acct</p>
+<p>repeat with fldr in folders of acct
+            set fldrName to name of fldr</p>
+<p>repeat with nt in notes of fldr
+                set noteName to name of nt
+                set noteBody to body of nt
+                set noteDate to modification date of nt</p>
+<p>-- Create folder structure
+                set folderPath to outputFolder &amp; acctName &amp; &quot;:&quot; &amp; fldrName &amp; &quot;:&quot;
+                do shell script &quot;mkdir -p &quot; &amp; quoted form of POSIX path of folderPath</p>
+<p>-- Convert HTML to Markdown (basic)
+                set mdContent to my htmlToMarkdown(noteBody)</p>
+<p>-- Write file
+                set filePath to folderPath &amp; noteName &amp; &quot;.md&quot;
+                my writeToFile(mdContent, filePath)</p>
+<p>-- Handle attachments
+                repeat with att in attachments of nt
+                    -- Export attachment
+                    set attName to name of att
+                    -- Note: Attachment export is limited in AppleScript
+                end repeat
+            end repeat
+        end repeat
+    end repeat
+end tell</p>
+<p>on htmlToMarkdown(htmlText)
+    -- Basic HTML to Markdown conversion
+    -- Use pandoc for better results
+    set mdText to do shell script &quot;echo &quot; &amp; quoted form of htmlText &amp; &quot; | pandoc -f html -t markdown&quot;
+    return mdText
+end htmlToMarkdown</p>
+<p>on writeToFile(theContent, thePath)
+    set fileRef to open for access thePath with write permission
+    write theContent to fileRef
+    close access fileRef
+end writeToFile
+</code></pre></p>
+<h3>Limitations</h3>
+<li></strong>Attachments<strong>: AppleScript has limited access to attachment data</li>
+<li></strong>Formatting<strong>: Some rich formatting may be lost</li>
+<li></strong>Drawings<strong>: Cannot export drawings/handwriting</li>
+<li></strong>Performance<strong>: Slow for large note libraries</li>
+<li></strong>Locked notes<strong>: Cannot access encrypted content</li>
+<h3>Onelist Helper App Concept</h3>
+<p>A macOS helper app could automate the export process:</p>
+<pre><code class="language-swift">// Conceptual Swift implementation using NSAppleScript
+import Foundation
+import AppKit
+<p>class NotesExporter {
+    func exportAllNotes(to outputURL: URL) async throws -&gt; [ExportedNote] {
+        let script = &quot;&quot;&quot;
+        tell application &quot;Notes&quot;
+            set allNotes to {}
+            repeat with acct in accounts
+                repeat with fldr in folders of acct
+                    repeat with nt in notes of fldr
+                        set noteData to {|name|: name of nt, |body|: body of nt, |folder|: name of fldr, |account|: name of acct}
+                        set end of allNotes to noteData
+                    end repeat
+                end repeat
+            end repeat
+            return allNotes
+        end tell
+        &quot;&quot;&quot;</p>
+<p>let appleScript = NSAppleScript(source: script)
+        var error: NSDictionary?
+        let result = appleScript?.executeAndReturnError(&amp;error)</p>
+<p>// Parse result and create files
+        // ...
+    }
+}
+</code></pre></p>
+<hr>
+<h2>SQLite Database Parsing</h2>
+<h3>Overview</h3>
+<p>The most complete extraction method involves parsing the NoteStore.sqlite database directly. This is the approach used by forensic tools.</p>
+<h3>Requirements</h3>
+<li>Access to <code>NoteStore.sqlite</code> (from macOS or iOS backup)</li>
+<li>Ruby 3.0+ (for apple_cloud_notes_parser)</li>
+<li>Or custom Elixir implementation</li>
+<h3>Using apple_cloud_notes_parser</h3>
+</strong>Link<strong>: <a href="https://github.com/threeplanetssoftware/apple_cloud_notes_parser">GitHub - threeplanetssoftware/apple_cloud_notes_parser</a>
+<pre><code class="language-bash"># Install
+git clone https://github.com/threeplanetssoftware/apple_cloud_notes_parser.git
+cd apple_cloud_notes_parser
+bundle install
+<h1>Parse database</h1>
+ruby notes_cloud_ripper.rb \
+  --file ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite \
+  --output-dir ./export
+<h1>Output includes:</h1>
+<h1>- CSV files (accounts, folders, notes, attachments)</h1>
+<h1>- HTML files for each note</h1>
+<h1>- Extracted media files</h1>
+</code></pre>
+<h3>Custom Elixir Implementation</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.AppleNotes.DatabaseParser do
+  @moduledoc &quot;&quot;&quot;
+  Parser for Apple Notes NoteStore.sqlite database.
+  Extracts notes by parsing gzipped protobuf blobs.
+  &quot;&quot;&quot;
+<p>@notes_query &quot;&quot;&quot;
+  SELECT
+    n.Z_PK as id,
+    n.ZTITLE1 as title,
+    n.ZSNIPPET as snippet,
+    n.ZCREATIONDATE as created,
+    n.ZMODIFICATIONDATE1 as modified,
+    n.ZIDENTIFIER as uuid,
+    f.ZTITLE2 as folder,
+    a.ZNAME as account,
+    d.ZDATA as content_blob
+  FROM ZICCLOUDSYNCINGOBJECT n
+  LEFT JOIN ZICCLOUDSYNCINGOBJECT f ON n.ZFOLDER = f.Z_PK
+  LEFT JOIN ZICCLOUDSYNCINGOBJECT a ON n.ZACCOUNT = a.Z_PK
+  LEFT JOIN ZICNOTEDATA d ON d.ZNOTE = n.Z_PK
+  WHERE n.ZTYPEUTI = 'com.apple.notes.note'
+    AND n.ZMARKFORDELETION != 1
+  &quot;&quot;&quot;</p>
+<p>def parse_database(db_path) do
+    {:ok, conn} = Exqlite.Sqlite3.open(db_path)
+    {:ok, stmt} = Exqlite.Sqlite3.prepare(conn, @notes_query)</p>
+<p>notes = fetch_all_notes(conn, stmt)</p>
+<p>Exqlite.Sqlite3.close(conn)</p>
+<p>{:ok, notes}
+  end</p>
+<p>defp fetch_all_notes(conn, stmt) do
+    case Exqlite.Sqlite3.step(conn, stmt) do
+      {:row, row} -&gt;
+        note = parse_row(row)
+        [note | fetch_all_notes(conn, stmt)]
+      :done -&gt;
+        []
+    end
+  end</p>
+<p>defp parse_row([id, title, snippet, created, modified, uuid, folder, account, content_blob]) do
+    %{
+      id: id,
+      title: title || &quot;Untitled&quot;,
+      snippet: snippet,
+      created_at: apple_timestamp_to_datetime(created),
+      modified_at: apple_timestamp_to_datetime(modified),
+      uuid: uuid,
+      folder: folder,
+      account: account,
+      content: parse_content_blob(content_blob)
+    }
+  end</p>
+<p>defp apple_timestamp_to_datetime(nil), do: nil
+  defp apple_timestamp_to_datetime(timestamp) do
+    # Apple timestamps are seconds since 2001-01-01
+    apple_epoch = ~U[2001-01-01 00:00:00Z]
+    DateTime.add(apple_epoch, round(timestamp), :second)
+  end</p>
+<p>defp parse_content_blob(nil), do: nil
+  defp parse_content_blob(blob) do
+    # Decompress gzip
+    case :zlib.gunzip(blob) do
+      {:ok, decompressed} -&gt;
+        # Parse protobuf
+        parse_protobuf(decompressed)
+      _ -&gt;
+        nil
+    end
+  rescue
+    _ -&gt; nil
+  end</p>
+<p>defp parse_protobuf(data) do
+    # Use protobuf library to parse
+    # The structure follows Apple's NoteStoreProto schema
+    case AppleNotes.NoteStoreProto.decode(data) do
+      {:ok, proto} -&gt;
+        extract_text_and_formatting(proto)
+      _ -&gt;
+        nil
+    end
+  end
+end
+</code></pre></p>
+<h3>Protobuf Definition</h3>
+<pre><code class="language-protobuf">// apple_notes.proto
+syntax = &quot;proto3&quot;;
+<p>message NoteStoreProto {
+  Document document = 2;
+}</p>
+<p>message Document {
+  int32 version = 1;
+  Note note = 2;
+}</p>
+<p>message Note {
+  string note_text = 2;
+  repeated AttributeRun attribute_run = 5;
+}</p>
+<p>message AttributeRun {
+  int32 length = 1;
+  ParagraphStyle paragraph_style = 2;
+  Font font = 3;
+  int32 font_weight = 5;
+  bool underlined = 6;
+  bool strikethrough = 7;
+  int32 superscript = 8;
+  string link = 9;
+  Color color = 10;
+  AttachmentInfo attachment_info = 12;
+}</p>
+<p>message ParagraphStyle {
+  int32 style_type = 1;  // 0=body, 1=title, 2=heading, etc.
+  int32 indent_amount = 2;
+  Checklist checklist = 4;
+}</p>
+<p>message Checklist {
+  bytes uuid = 1;
+  int32 done = 2;  // 0=unchecked, 1=checked
+}</p>
+<p>message AttachmentInfo {
+  string attachment_identifier = 1;
+  string type_uti = 2;
+}
+</code></pre></p>
+<h3>Extracting Attachments</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.AppleNotes.AttachmentExtractor do
+  @moduledoc &quot;&quot;&quot;
+  Extracts attachments from Apple Notes Media folder.
+  &quot;&quot;&quot;
+<p>@media_base &quot;~/Library/Group Containers/group.com.apple.notes/Media&quot;</p>
+<p>def extract_attachments(note_uuid, output_path) do
+    media_path = Path.expand(@media_base)</p>
+<p># Find attachments for this note
+    attachment_folder = Path.join(media_path, note_uuid)</p>
+<p>if File.dir?(attachment_folder) do
+      attachments = Path.wildcard(Path.join(attachment_folder, &quot;</strong>/</em>&quot;))
+                    |&gt; Enum.filter(&amp;File.regular?/1)
+                    |&gt; Enum.map(&amp;copy_attachment(&amp;1, output_path))</p>
+<p>{:ok, attachments}
+    else
+      {:ok, []}
+    end
+  end</p>
+<p>defp copy_attachment(source_path, output_path) do
+    filename = Path.basename(source_path)
+    dest_path = Path.join(output_path, filename)</p>
+<p>File.cp!(source_path, dest_path)</p>
+<p>%{
+      original_path: source_path,
+      exported_path: dest_path,
+      filename: filename,
+      mime_type: MIME.from_path(source_path)
+    }
+  end
+end
+</code></pre></p>
+<hr>
+<h2>iOS Shortcuts Export</h2>
+<h3>Overview</h3>
+<p>iOS Shortcuts can export notes, but with significant limitations.</p>
+<h3>Creating an Export Shortcut</h3>
+<p>1. Open Shortcuts app
+2. Create new Shortcut
+3. Add "Find Notes" action (finds all notes)
+4. Add "Repeat with Each"
+5. Inside repeat: "Get Text from Input"
+6. "Save File" to iCloud Drive</p>
+<h3>Limitations</h3>
+<li><strong>Batch size warning</strong>: May prompt "sharing large amounts of data"</li>
+<li><strong>Settings required</strong>: Settings → Shortcuts → Advanced → "Allow Sharing Large Amounts of Data"</li>
+<li><strong>Attachments</strong>: Limited attachment export</li>
+<li><strong>Format</strong>: Text only, loses rich formatting</li>
+<li><strong>Manual trigger</strong>: Must run manually each time</li>
+<h3>Shortcut Actions</h3>
+<pre><code class="language-">Find Notes
+  └─ Filter: All Notes
+  └─ Sort: Modification Date (Newest First)
+<p>Repeat with Each (Notes)
+  └─ Get Text from Note
+  └─ Set Variable: NoteContent
+  └─ Get Details of Note (Name)
+  └─ Set Variable: NoteName
+  └─ Text: Combine content with metadata
+  └─ Save File
+      └─ Destination: iCloud Drive/Notes Export/
+      └─ Filename: [NoteName].txt</p>
+<p>End Repeat
+</code></pre></p>
+<h3>Integration with Onelist</h3>
+<p>User exports via Shortcut, uploads resulting folder to Onelist:</p>
+<pre><code class="language-elixir">defmodule Onelist.Import.AppleNotes.ShortcutImport do
+  @moduledoc &quot;&quot;&quot;
+  Import notes exported via iOS Shortcuts.
+  Handles plain text files with basic metadata.
+  &quot;&quot;&quot;
+<p>def import_shortcut_export(folder_path, user_id) do
+    Path.wildcard(Path.join(folder_path, &quot;<em>.txt&quot;))
+    |&gt; Enum.map(&amp;parse_shortcut_note/1)
+    |&gt; Enum.map(&amp;create_entry(&amp;1, user_id))
+  end</p>
+<p>defp parse_shortcut_note(file_path) do
+    content = File.read!(file_path)
+    filename = Path.basename(file_path, &quot;.txt&quot;)</p>
+<p>%{
+      title: filename,
+      content: content,
+      # Shortcuts export loses creation date, use file mtime
+      created_at: File.stat!(file_path).mtime |&gt; DateTime.from_unix!(:second)
+    }
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Data Mapping</h2>
+<h3>Entity Mapping</h3>
+<table>
+<tr><th>Apple Notes</th><th>Onelist</th><th>Notes</th></tr>
+<tr><td>Note</td><td>Entry (type: "note")</td><td>Primary content</td></tr>
+<tr><td>Folder</td><td>Tag</td><td><code>apple-notes:folder:Name</code></td></tr>
+<tr><td>Account</td><td>Tag (optional)</td><td><code>apple-notes:account:Name</code></td></tr>
+<tr><td>Tag (#tag)</td><td>Tag</td><td>Direct mapping (iOS 15+)</td></tr>
+<tr><td>Attachment</td><td>Asset</td><td>Images, files, audio</td></tr>
+<tr><td>Drawing</td><td>Asset (PNG/PDF)</td><td>Exported as image</td></tr>
+<tr><td>Scanned Doc</td><td>Asset (PDF)</td><td>Preserved as PDF</td></tr>
+<tr><td>Checklist item</td><td>Markdown checkbox</td><td><code>- [ ]</code> / <code>- [x]</code></td></tr>
+<tr><td>Table</td><td>Markdown table</td><td>Best-effort conversion</td></tr>
+<tr><td>Locked note</td><td>Entry (limited)</td><td>Requires password</td></tr>
+</table>
+<h3>Note → Entry Mapping</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.AppleNotes.Mapper do
+  @moduledoc &quot;&quot;&quot;
+  Maps Apple Notes data to Onelist entries.
+  &quot;&quot;&quot;
+<p>def map_note_to_entry(note, user_id) do
+    %{
+      user_id: user_id,
+      title: note.title || &quot;Untitled&quot;,
+      entry_type: &quot;note&quot;,
+      source_type: &quot;api&quot;,
+      content_created_at: note.created_at,
+      metadata: %{
+        &quot;apple_notes&quot; =&gt; %{
+          &quot;uuid&quot; =&gt; note.uuid,
+          &quot;account&quot; =&gt; note.account,
+          &quot;folder&quot; =&gt; note.folder,
+          &quot;snippet&quot; =&gt; note.snippet,
+          &quot;imported_at&quot; =&gt; DateTime.utc_now(),
+          &quot;source_format&quot; =&gt; note.source_format
+        }
+      }
+    }
+  end</p>
+<p>def map_folder_to_tag(folder_name) do
+    &quot;apple-notes:folder:#{folder_name}&quot;
+  end</p>
+<p>def extract_hashtags(content) do
+    # iOS 15+ supports #tags in notes
+    Regex.scan(~r/#([a-zA-Z0-9_]+)/, content)
+    |&gt; Enum.map(fn [_, tag] -&gt; tag end)
+    |&gt; Enum.uniq()
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Content Conversion</h2>
+<h3>HTML to Markdown</h3>
+<p>Apple Notes exports HTML content that needs conversion:</p>
+<pre><code class="language-elixir">defmodule Onelist.Import.AppleNotes.HtmlConverter do
+  @moduledoc &quot;&quot;&quot;
+  Converts Apple Notes HTML to Markdown.
+  &quot;&quot;&quot;
+<p>def convert(html) do
+    html
+    |&gt; parse_html()
+    |&gt; process_notes_elements()
+    |&gt; to_markdown()
+  end</p>
+<p>defp process_notes_elements(doc) do
+    doc
+    |&gt; convert_checklists()
+    |&gt; convert_headings()
+    |&gt; convert_tables()
+    |&gt; convert_attachments()
+  end</p>
+<p>defp convert_checklists(doc) do
+    # Apple Notes uses &lt;ul&gt; with data-checked attribute
+    # Convert to Markdown checkboxes
+    Floki.find_and_update(doc, &quot;ul.checklist li&quot;, fn li -&gt;
+      checked = Floki.attribute(li, &quot;data-checked&quot;) == [&quot;true&quot;]
+      text = Floki.text(li)
+      checkbox = if checked, do: &quot;- [x] &quot;, else: &quot;- [ ] &quot;
+      {&quot;p&quot;, [], [checkbox &lt;&gt; text]}
+    end)
+  end</p>
+<p>defp convert_headings(doc) do
+    # Map Apple Notes heading styles
+    heading_map = %{
+      &quot;title&quot; =&gt; &quot;#&quot;,
+      &quot;heading&quot; =&gt; &quot;##&quot;,
+      &quot;subheading&quot; =&gt; &quot;###&quot;
+    }</p>
+<p>Enum.reduce(heading_map, doc, fn {class, prefix}, acc -&gt;
+      Floki.find_and_update(acc, &quot;.#{class}&quot;, fn elem -&gt;
+        text = Floki.text(elem)
+        {&quot;p&quot;, [], [&quot;#{prefix} #{text}&quot;]}
+      end)
+    end)
+  end</p>
+<p>defp convert_tables(doc) do
+    Floki.find_and_update(doc, &quot;table&quot;, fn table -&gt;
+      rows = Floki.find(table, &quot;tr&quot;)
+      md_table = rows_to_markdown_table(rows)
+      {&quot;pre&quot;, [], [md_table]}
+    end)
+  end</p>
+<p>defp rows_to_markdown_table(rows) do
+    rows
+    |&gt; Enum.with_index()
+    |&gt; Enum.map(fn {row, idx} -&gt;
+      cells = Floki.find(row, &quot;td, th&quot;)
+              |&gt; Enum.map(&amp;Floki.text/1)
+              |&gt; Enum.join(&quot; | &quot;)</p>
+<p>line = &quot;| #{cells} |&quot;</p>
+<p># Add separator after header row
+      if idx == 0 do
+        separator = cells
+                    |&gt; String.split(&quot; | &quot;)
+                    |&gt; Enum.map(fn _ -&gt; &quot;---&quot; end)
+                    |&gt; Enum.join(&quot; | &quot;)
+        &quot;#{line}\n| #{separator} |&quot;
+      else
+        line
+      end
+    end)
+    |&gt; Enum.join(&quot;\n&quot;)
+  end
+end
+</code></pre></p>
+<h3>Protobuf to Markdown</h3>
+<p>For direct database parsing:</p>
+<pre><code class="language-elixir">defmodule Onelist.Import.AppleNotes.ProtobufConverter do
+  @moduledoc &quot;&quot;&quot;
+  Converts Apple Notes protobuf content to Markdown.
+  &quot;&quot;&quot;
+<p>def convert(proto) do
+    text = proto.document.note.note_text
+    runs = proto.document.note.attribute_run</p>
+<p>apply_formatting(text, runs)
+  end</p>
+<p>defp apply_formatting(text, runs) do
+    # Process each attribute run
+    {formatted, _offset} = Enum.reduce(runs, {&quot;&quot;, 0}, fn run, {acc, offset} -&gt;
+      segment = String.slice(text, offset, run.length)
+      formatted_segment = apply_run_formatting(segment, run)
+      {acc &lt;&gt; formatted_segment, offset + run.length}
+    end)</p>
+<p>formatted
+  end</p>
+<p>defp apply_run_formatting(text, run) do
+    text
+    |&gt; maybe_apply_style(run.paragraph_style)
+    |&gt; maybe_apply_bold(run.font_weight)
+    |&gt; maybe_apply_italic(run.font)
+    |&gt; maybe_apply_underline(run.underlined)
+    |&gt; maybe_apply_strikethrough(run.strikethrough)
+    |&gt; maybe_apply_link(run.link)
+    |&gt; maybe_apply_checklist(run.paragraph_style)
+  end</p>
+<p>defp maybe_apply_style(text, nil), do: text
+  defp maybe_apply_style(text, %{style_type: 1}), do: &quot;# #{text}&quot;      # Title
+  defp maybe_apply_style(text, %{style_type: 2}), do: &quot;## #{text}&quot;     # Heading
+  defp maybe_apply_style(text, %{style_type: 3}), do: &quot;### #{text}&quot;    # Subheading
+  defp maybe_apply_style(text, _), do: text</p>
+<p>defp maybe_apply_checklist(text, %{checklist: %{done: 1}}), do: &quot;- [x] #{text}&quot;
+  defp maybe_apply_checklist(text, %{checklist: %{done: 0}}), do: &quot;- [ ] #{text}&quot;
+  defp maybe_apply_checklist(text, _), do: text</p>
+<p>defp maybe_apply_bold(text, weight) when weight &gt;= 700, do: &quot;<strong>#{text}</strong>&quot;
+  defp maybe_apply_bold(text, _), do: text</p>
+<p>defp maybe_apply_underline(text, true), do: &quot;&lt;u&gt;#{text}&lt;/u&gt;&quot;
+  defp maybe_apply_underline(text, _), do: text</p>
+<p>defp maybe_apply_strikethrough(text, true), do: &quot;~~#{text}~~&quot;
+  defp maybe_apply_strikethrough(text, _), do: text</p>
+<p>defp maybe_apply_link(text, nil), do: text
+  defp maybe_apply_link(text, &quot;&quot;), do: text
+  defp maybe_apply_link(text, url), do: &quot;<a href="#{url}">#{text}</a>&quot;
+end
+</code></pre></p>
+<hr>
+<h2>Implementation Phases</h2>
+<h3>Phase 1: Third-Party Export Import (MVP)</h3>
+<strong>Duration</strong>: 1-2 weeks
+<strong>Scope</strong>:
+<li>Support import from Exporter app (Markdown/HTML)</li>
+<li>Support import from notes-exporter (Markdown)</li>
+<li>Parse folder structure as tags</li>
+<li>Handle embedded images</li>
+<li>Import progress tracking</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Import.AppleNotes.ExporterImport</code></li>
+<li><code>Onelist.Import.AppleNotes.HtmlConverter</code></li>
+<li>Import UI with instructions</li>
+<strong>User Flow</strong>:
+1. User installs Exporter app (or notes-exporter)
+2. User exports all notes to Markdown
+3. User uploads export folder to Onelist
+4. Onelist processes files and creates entries
+<h3>Phase 2: AppleScript Automation (macOS)</h3>
+<strong>Duration</strong>: 1-2 weeks
+<strong>Scope</strong>:
+<li>Provide downloadable AppleScript</li>
+<li>Or: macOS helper app for one-click export</li>
+<li>Handle basic attachments</li>
+<li>Export to Onelist-compatible format</li>
+<strong>Deliverables</strong>:
+<li>Downloadable AppleScript</li>
+<li>Documentation for manual export</li>
+<li>Optional: macOS menu bar app</li>
+<h3>Phase 3: iOS Shortcuts Integration</h3>
+<strong>Duration</strong>: 1 week
+<strong>Scope</strong>:
+<li>Provide installable Shortcut</li>
+<li>Instructions for export</li>
+<li>Import plain text exports</li>
+<li>Handle Shortcuts limitations</li>
+<strong>Deliverables</strong>:
+<li>Downloadable Shortcut file</li>
+<li><code>Onelist.Import.AppleNotes.ShortcutImport</code></li>
+<li>Documentation</li>
+<h3>Phase 4: Direct Database Parsing (Advanced)</h3>
+<strong>Duration</strong>: 3-4 weeks
+<strong>Scope</strong>:
+<li>Parse NoteStore.sqlite directly</li>
+<li>Protobuf decompression and parsing</li>
+<li>Full formatting preservation</li>
+<li>Attachment extraction</li>
+<li>Support for iOS backups</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Import.AppleNotes.DatabaseParser</code></li>
+<li><code>Onelist.Import.AppleNotes.ProtobufConverter</code></li>
+<li><code>Onelist.Import.AppleNotes.AttachmentExtractor</code></li>
+<li>Advanced import option for power users</li>
+<strong>Prerequisites</strong>:
+<li>Protobuf definitions for Apple Notes</li>
+<li>Understanding of Apple's schema (may change with iOS updates)</li>
+<h3>Phase 5: Periodic Export Reminder</h3>
+<strong>Duration</strong>: 1 week
+<strong>Scope</strong>:
+<li>Since ongoing sync isn't possible, remind users to re-export</li>
+<li>Track last import date</li>
+<li>Notify users to update their export</li>
+<li>Detect and import only new/changed notes</li>
+<strong>Deliverables</strong>:
+<li>Import history tracking</li>
+<li>User notifications</li>
+<li>Incremental import detection</li>
+<hr>
+<h2>Technical Considerations</h2>
+<h3>Platform Limitations</h3>
+<table>
+<tr><th>Platform</th><th>Import Method</th><th>Automation</th></tr>
+<tr><td>macOS</td><td>Full access</td><td>AppleScript, database</td></tr>
+<tr><td>iOS/iPadOS</td><td>Limited</td><td>Shortcuts only</td></tr>
+<tr><td>Windows</td><td>iOS backup only</td><td>Parse backup files</td></tr>
+<tr><td>Linux</td><td>iOS backup only</td><td>Parse backup files</td></tr>
+<tr><td>Web</td><td>None</td><td>Requires file upload</td></tr>
+</table>
+<h3>Encrypted Notes</h3>
+<strong>Options</strong>:
+1. <strong>Skip</strong>: Import unencrypted notes only (recommended)
+2. <strong>Prompt</strong>: Ask user for password during import (security risk)
+3. <strong>Placeholder</strong>: Create placeholder entry for locked notes
+<strong>Recommendation</strong>: Skip locked notes with clear notification.
+<h3>iOS Version Compatibility</h3>
+<p>The database schema changes between iOS versions:</p>
+<table>
+<tr><th>iOS Version</th><th>Schema Version</th><th>Notes</th></tr>
+<tr><td>9.x</td><td>Initial</td><td>Basic protobuf</td></tr>
+<tr><td>10.x</td><td>Minor changes</td><td>Added fields</td></tr>
+<tr><td>13.x</td><td>Major update</td><td>New tables</td></tr>
+<tr><td>15.x</td><td>Tags support</td><td>#tags added</td></tr>
+<tr><td>16.x</td><td>Encryption changes</td><td>New key derivation</td></tr>
+<tr><td>17.x+</td><td>Unknown</td><td>May break parsing</td></tr>
+</table>
+<strong>Recommendation</strong>: Support iOS 13+ for database parsing, document limitations.
+<h3>Error Handling</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.AppleNotes.ImportError do
+  defexception [:message, :note_title, :error_type, :recoverable]
+<p>@error_types %{
+    encrypted: &quot;Note is locked and requires password&quot;,
+    parse_failed: &quot;Could not parse note content&quot;,
+    attachment_missing: &quot;Attachment file not found&quot;,
+    unsupported_format: &quot;Note format not supported&quot;
+  }</p>
+<p>def new(type, note_title, opts \\ []) do
+    %__MODULE__{
+      message: @error_types[type] || &quot;Unknown error&quot;,
+      note_title: note_title,
+      error_type: type,
+      recoverable: Keyword.get(opts, :recoverable, true)
+    }
+  end
+end
+</code></pre></p>
+<h3>Performance</h3>
+<li>Stream large exports (don't load all into memory)</li>
+<li>Process notes in batches</li>
+<li>Background job for database parsing</li>
+<li>Progress reporting for large libraries</li>
+<hr>
+<h2>User Experience</h2>
+<h3>Import UI</h3>
+<strong>Method Selection</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Import from Apple Notes                    │
+├─────────────────────────────────────────────┤
+│                                             │
+│  Apple Notes doesn't provide an export      │
+│  feature, so we need to use a workaround.   │
+│                                             │
+│  Choose your device:                        │
+│                                             │
+│  [🍎 Mac]                                   │
+│  Use Exporter app or AppleScript           │
+│                                             │
+│  [📱 iPhone/iPad]                           │
+│  Use iOS Shortcuts                          │
+│                                             │
+│  [📁 I have an export already]              │
+│  Upload Markdown/HTML files                 │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>Mac Instructions</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Import from Mac                            │
+├─────────────────────────────────────────────┤
+│                                             │
+│  Recommended: Use Exporter App              │
+│                                             │
+│  1. Download &quot;Exporter&quot; from Mac App Store │
+│     [Open App Store →]                     │
+│                                             │
+│  2. Open Exporter and click &quot;Export All&quot;   │
+│                                             │
+│  3. Choose &quot;Markdown&quot; format                │
+│                                             │
+│  4. Upload the export folder below:         │
+│                                             │
+│  ┌─────────────────────────────────────┐   │
+│  │  📁 Drop export folder here         │   │
+│  │     or click to browse              │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+│  ─── Alternative: AppleScript ───          │
+│  [Download Export Script]                   │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>iOS Instructions</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Import from iPhone/iPad                    │
+├─────────────────────────────────────────────┤
+│                                             │
+│  Use our iOS Shortcut to export notes:     │
+│                                             │
+│  1. Tap to install the Shortcut:           │
+│     [Install Export Shortcut →]            │
+│                                             │
+│  2. Open Shortcuts app and run             │
+│     &quot;Export Notes to Onelist&quot;              │
+│                                             │
+│  3. Notes will be saved to iCloud Drive    │
+│                                             │
+│  4. Upload the exported files below:        │
+│                                             │
+│  ⚠️ Limitations:                            │
+│  • Rich formatting may be lost              │
+│  • Attachments not included                │
+│  • Large exports may require permission    │
+│                                             │
+│  ┌─────────────────────────────────────┐   │
+│  │  📁 Drop export folder here         │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>Import Progress</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Importing Apple Notes...                   │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ████████████████░░░░░░░░░░  64%           │
+│                                             │
+│  Notes: 156 / 243                          │
+│  Attachments: 89 / 178                     │
+│  Skipped: 3 (locked)                       │
+│                                             │
+│  Currently processing:                      │
+│  &quot;Meeting notes - January 2025&quot;            │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>No Sync Notice</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  ⚠️ Ongoing Sync Not Available              │
+├─────────────────────────────────────────────┤
+│                                             │
+│  Apple doesn't provide an API for Notes,   │
+│  so automatic sync isn't possible.         │
+│                                             │
+│  To keep Onelist updated:                   │
+│  • Re-export from Apple Notes periodically │
+│  • Use &quot;Import New Only&quot; to avoid dupes    │
+│                                             │
+│  ☐ Remind me to re-import monthly          │
+│                                             │
+│  [Got it]                                   │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>Success Metrics</h2>
+<h3>Phase 1 (Third-Party Export)</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Markdown import accuracy</td><td>>99%</td></tr>
+<tr><td>HTML to Markdown conversion</td><td>>95% formatting preserved</td></tr>
+<tr><td>Attachment import</td><td>>99%</td></tr>
+<tr><td>Import speed</td><td>>50 notes/second</td></tr>
+</table>
+<h3>Phase 4 (Database Parsing)</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Protobuf parse success</td><td>>98%</td></tr>
+<tr><td>Full formatting preservation</td><td>>90%</td></tr>
+<tr><td>Attachment extraction</td><td>100%</td></tr>
+<tr><td>iOS version support</td><td>13+</td></tr>
+</table>
+<hr>
+<h2>Dependencies</h2>
+<h3>External Tools</h3>
+<li><strong>Exporter</strong> (Mac App Store) - Recommended for most users</li>
+<li><strong>notes-exporter</strong> (Open source) - Free alternative</li>
+<li><strong>Pandoc</strong> - HTML to Markdown conversion</li>
+<li><strong>SQLite</strong> - Database parsing</li>
+<h3>Internal</h3>
+<li>Storage backend for assets</li>
+<li>Background job processing (Oban)</li>
+<li>HTML parsing (Floki)</li>
+<h3>Libraries</h3>
+<pre><code class="language-elixir"># mix.exs
+defp deps do
+  [
+    # SQLite for database parsing
+    {:exqlite, &quot;~&gt; 0.13&quot;},
+<p># HTML parsing
+    {:floki, &quot;~&gt; 0.34&quot;},</p>
+<p># Protobuf (if implementing direct parsing)
+    {:protobuf, &quot;~&gt; 0.11&quot;},</p>
+<p># Compression
+    # (Erlang :zlib is built-in)
+  ]
+end
+</code></pre></p>
+<hr>
+<h2>References</h2>
+<h3>Apple Documentation</h3>
+<li><a href="https://support.apple.com/guide/iphone/create-and-format-notes-iph1ac0b3a2/ios">Create and format notes</a></li>
+<li><a href="https://support.apple.com/en-us/118442">Use Notes on your devices</a></li>
+<li><a href="https://support.apple.com/guide/security/secure-features-in-the-notes-app-sec1782bcab1/web">Notes security features</a></li>
+<h3>Third-Party Tools</h3>
+<li><a href="https://apps.apple.com/us/app/exporter/id1099120373">Exporter - Mac App Store</a></li>
+<li><a href="https://github.com/storizzi/notes-exporter">notes-exporter - GitHub</a></li>
+<li><a href="https://github.com/threeplanetssoftware/apple_cloud_notes_parser">apple_cloud_notes_parser - GitHub</a></li>
+<h3>Technical Resources</h3>
+<li><a href="https://www.macosxautomation.com/applescript/notes/index.html">Notes AppleScript API</a></li>
+<li><a href="https://ciofecaforensics.com/2020/09/18/apple-notes-revisited-protobuf/">Apple Notes Forensics</a></li>
+<li><a href="https://www.swiftforensics.com/2018/02/reading-notes-database-on-macos.html">NoteStore.sqlite Analysis</a></li>
+<h3>Community Resources</h3>
+<li><a href="https://zapier.com/blog/export-apple-notes/">Export Apple Notes - Zapier</a></li>
+<li><a href="https://macmost.com/export-all-of-the-notes-on-your-mac-using-a-script.html">MacMost Export Tutorial</a></li>
+</ul>
+<hr>
+<h2>Appendix: AppleScript Quick Reference</h2>
+<h3>List All Notes</h3>
+<pre><code class="language-applescript">tell application &quot;Notes&quot;
+    repeat with n in notes
+        log name of n
+    end repeat
+end tell
+</code></pre>
+<h3>Get Note Content</h3>
+<pre><code class="language-applescript">tell application &quot;Notes&quot;
+    set theNote to first note whose name is &quot;Note Title&quot;
+    set noteBody to body of theNote  -- HTML content
+    set notePlain to plaintext of theNote  -- Text only
+end tell
+</code></pre>
+<h3>List Folders</h3>
+<pre><code class="language-applescript">tell application &quot;Notes&quot;
+    repeat with f in folders
+        log name of f
+    end repeat
+end tell
+</code></pre>
+<h3>Create Note</h3>
+<pre><code class="language-applescript">tell application &quot;Notes&quot;
+    tell folder &quot;My Folder&quot;
+        make new note with properties {name:&quot;New Note&quot;, body:&quot;&lt;h1&gt;Title&lt;/h1&gt;&lt;p&gt;Content&lt;/p&gt;&quot;}
+    end tell
+end tell
+</code></pre>
+<hr>
+</em>Document created: 2026-01-28<em>
+</em>Last updated: 2026-01-28*
+  </article>
+</body>
+</html>

@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Cryptocurrency Payments Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Cryptocurrency Payments Plan</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Planning
+<strong>Related:</strong> <code>corporate_services_plan.md</code> (Billing Service section)
+<hr>
+<h2>1. Executive Summary</h2>
+<p>This plan outlines how Onelist will accept cryptocurrency payments for subscription services. The approach prioritizes:</p>
+<p>1. <strong>Self-sovereignty</strong> — Aligned with Onelist's privacy-first ethos
+2. <strong>Stablecoins first</strong> — Predictable revenue, lower volatility risk
+3. <strong>Self-custody</strong> — No third-party holding funds
+4. <strong>Popular chains</strong> — Where users actually are</p>
+<h3>1.1 Recommended Implementation Order</h3>
+<table>
+<tr><th>Phase</th><th>Currencies</th><th>Processor</th><th>Why First</th></tr>
+<tr><td><strong>Phase 1</strong></td><td>USDC, USDT (Ethereum, Base, Polygon)</td><td>BTCPay Server</td><td>Stablecoins = predictable revenue</td></tr>
+<tr><td><strong>Phase 2</strong></td><td>Bitcoin (on-chain + Lightning)</td><td>BTCPay Server</td><td>Most demanded crypto payment</td></tr>
+<tr><td><strong>Phase 3</strong></td><td>ETH, SOL</td><td>BTCPay Server / Custom</td><td>Major L1s where users hold assets</td></tr>
+<tr><td><strong>Phase 4</strong></td><td>Additional stablecoins (DAI, PYUSD)</td><td>BTCPay Server</td><td>Expanded stablecoin options</td></tr>
+</table>
+<hr>
+<h2>2. Currency Analysis</h2>
+<h3>2.1 Tier 1: Stablecoins (Highest Priority)</h3>
+<p>Stablecoins should be the <strong>primary</strong> crypto payment method. They eliminate volatility risk and simplify accounting.</p>
+<table>
+<tr><th>Currency</th><th>Chain(s)</th><th>Market Cap</th><th>Daily Volume</th><th>Recommendation</th></tr>
+<tr><td><strong>USDT</strong></td><td>Ethereum, Tron, Polygon, Base, Arbitrum</td><td>~$140B</td><td>~$50B</td><td>✅ Accept (Ethereum, Polygon, Base)</td></tr>
+<tr><td><strong>USDC</strong></td><td>Ethereum, Polygon, Base, Arbitrum, Solana</td><td>~$45B</td><td>~$8B</td><td>✅ Accept (all major chains)</td></tr>
+<tr><td><strong>DAI</strong></td><td>Ethereum, Polygon, Arbitrum</td><td>~$5B</td><td>~$200M</td><td>✅ Accept (decentralized option)</td></tr>
+<tr><td><strong>PYUSD</strong></td><td>Ethereum, Solana</td><td>~$1B</td><td>~$50M</td><td>⏳ Later (PayPal's stablecoin, growing)</td></tr>
+</table>
+<strong>Why Stablecoins First:</strong>
+<ul>
+<li>No price volatility — $10/month stays $10</li>
+<li>Easier accounting — no capital gains tracking</li>
+<li>Instant settlement value certainty</li>
+<li>Lower barrier for users (no "is now a good time to spend BTC?" hesitation)</li>
+<strong>Chain Priority for Stablecoins:</strong>
+1. <strong>Base</strong> — Low fees (~$0.01), Coinbase ecosystem, growing fast
+2. <strong>Polygon</strong> — Low fees (~$0.01), mature ecosystem
+3. <strong>Arbitrum</strong> — Low fees (~$0.10), strong DeFi presence
+4. <strong>Ethereum L1</strong> — Higher fees (~$1-5), but some users prefer mainnet
+5. <strong>Solana</strong> — Very low fees, different user base
+<h3>2.2 Tier 2: Bitcoin (High Priority)</h3>
+<p>Bitcoin is the most requested crypto payment option, even though volatility makes it less ideal for subscriptions.</p>
+<table>
+<tr><th>Method</th><th>Fees</th><th>Speed</th><th>User Experience</th></tr>
+<tr><td><strong>Lightning Network</strong></td><td>~$0.01</td><td>Instant</td><td>✅ Excellent for subscriptions</td></tr>
+<tr><td><strong>On-chain</strong></td><td>$1-10</td><td>10-60 min</td><td>⚠️ Slower, higher fees</td></tr>
+</table>
+<strong>Recommendation:</strong> Accept both, but <strong>promote Lightning</strong> for subscriptions.
+<strong>Volatility Handling:</strong>
+<li>Option A: Instant conversion to USD/stablecoin (via exchange API)</li>
+<li>Option B: Hold BTC, accept volatility risk</li>
+<li>Option C: Hybrid — convert 80%, hold 20%</li>
+<h3>2.3 Tier 3: Major L1 Tokens</h3>
+<table>
+<tr><th>Currency</th><th>Market Cap</th><th>Daily Volume</th><th>Recommendation</th></tr>
+<tr><td><strong>ETH</strong></td><td>~$400B</td><td>~$15B</td><td>✅ Accept (many users hold ETH)</td></tr>
+<tr><td><strong>SOL</strong></td><td>~$80B</td><td>~$3B</td><td>✅ Accept (growing ecosystem)</td></tr>
+<tr><td><strong>MATIC/POL</strong></td><td>~$5B</td><td>~$300M</td><td>⏳ Lower priority (users can use USDC on Polygon)</td></tr>
+</table>
+<h3>2.4 Tier 4: Other Considerations</h3>
+<table>
+<tr><th>Currency</th><th>Notes</th><th>Recommendation</th></tr>
+<tr><td><strong>XMR (Monero)</strong></td><td>Privacy coin, aligns with ethos, but regulatory risk</td><td>⏳ Evaluate later</td></tr>
+<tr><td><strong>LTC (Litecoin)</strong></td><td>Declining relevance</td><td>❌ Skip</td></tr>
+<tr><td><strong>DOGE</strong></td><td>Meme coin, unpredictable</td><td>❌ Skip</td></tr>
+<tr><td><strong>XRP</strong></td><td>Regulatory uncertainty</td><td>❌ Skip</td></tr>
+</table>
+<hr>
+<h2>3. Payment Processor Options</h2>
+<h3>3.1 Self-Hosted (Recommended)</h3>
+<h4>BTCPay Server ⭐ RECOMMENDED</h4>
+<strong>What:</strong> Open-source, self-hosted payment processor
+<strong>Why:</strong> 
+<li>No third-party custody</li>
+<li>No fees (beyond network fees)</li>
+<li>Full control over funds</li>
+<li>Aligned with Onelist's self-sovereignty ethos</li>
+<li>Supports Bitcoin, Lightning, and many altcoins via plugins</li>
+<strong>Supported Currencies:</strong>
+<li>Bitcoin (on-chain + Lightning) — Native</li>
+<li>Ethereum + ERC-20 tokens — Via plugin</li>
+<li>Monero — Via plugin</li>
+<li>Litecoin — Native</li>
+<li>Many others via community plugins</li>
+<strong>Infrastructure:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────┐
+│  BTCPay Server Instance (Self-Hosted)                           │
+│                                                                  │
+│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐        │
+│  │ Bitcoin Node │   │ Lightning    │   │ NBXplorer    │        │
+│  │ (pruned ok)  │   │ (LND/CLN)    │   │ (indexer)    │        │
+│  └──────────────┘   └──────────────┘   └──────────────┘        │
+│         │                  │                  │                 │
+│         └──────────────────┼──────────────────┘                 │
+│                            ▼                                    │
+│                    ┌──────────────┐                             │
+│                    │ BTCPay Core  │                             │
+│                    │ + Plugins    │                             │
+│                    └──────────────┘                             │
+│                            │                                    │
+│                            ▼                                    │
+│                    ┌──────────────┐                             │
+│                    │ PostgreSQL   │                             │
+│                    └──────────────┘                             │
+└─────────────────────────────────────────────────────────────────┘
+                             │
+                             ▼
+              Webhook to Onelist Billing Service
+</code></pre>
+<strong>Server Requirements:</strong>
+<li>2-4 vCPU, 4-8 GB RAM</li>
+<li>50-100 GB storage (pruned Bitcoin node)</li>
+<li>Estimated cost: $20-40/month</li>
+<strong>Pros:</strong>
+<li>Zero payment processing fees</li>
+<li>Complete self-custody</li>
+<li>Privacy-preserving</li>
+<li>Open source, auditable</li>
+<li>Active development community</li>
+<strong>Cons:</strong>
+<li>Requires running Bitcoin node</li>
+<li>More infrastructure to manage</li>
+<li>ERC-20 support less mature than native BTC</li>
+<h3>3.2 Third-Party Processors (Alternatives)</h3>
+<h4>Coinbase Commerce</h4>
+<strong>What:</strong> Hosted crypto payment gateway by Coinbase
+<strong>Currencies:</strong> BTC, ETH, USDC, DAI, LTC, DOGE, and more
+<strong>Fees:</strong> 1% per transaction
+<strong>Custody:</strong> Coinbase holds funds until withdrawal
+<strong>Pros:</strong>
+<li>Easy setup</li>
+<li>Supports many currencies</li>
+<li>Auto-conversion to USD available</li>
+<strong>Cons:</strong>
+<li>1% fee</li>
+<li>Custodial (not self-sovereign)</li>
+<li>KYC required</li>
+<li>Coinbase can freeze funds</li>
+<h4>BitPay</h4>
+<strong>What:</strong> Established crypto payment processor
+<strong>Currencies:</strong> BTC, ETH, USDC, USDT, and more
+<strong>Fees:</strong> 1% per transaction
+<strong>Settlement:</strong> Daily to bank account or keep crypto
+<strong>Pros:</strong>
+<li>Mature, reliable</li>
+<li>Direct bank settlement</li>
+<li>Invoice system</li>
+<strong>Cons:</strong>
+<li>1% fee</li>
+<li>Requires KYC</li>
+<li>Custodial</li>
+<li>Some privacy concerns</li>
+<h4>NOWPayments</h4>
+<strong>What:</strong> Non-custodial payment gateway
+<strong>Currencies:</strong> 200+ cryptocurrencies
+<strong>Fees:</strong> 0.5% per transaction
+<strong>Custody:</strong> Funds go directly to your wallet
+<strong>Pros:</strong>
+<li>Lower fees</li>
+<li>Non-custodial</li>
+<li>Many currencies</li>
+<li>No KYC for basic use</li>
+<strong>Cons:</strong>
+<li>Less established</li>
+<li>Support quality varies</li>
+<h3>3.3 Comparison Matrix</h3>
+<table>
+<tr><th>Feature</th><th>BTCPay (Self-Hosted)</th><th>Coinbase Commerce</th><th>BitPay</th><th>NOWPayments</th></tr>
+<tr><td><strong>Fees</strong></td><td>0%</td><td>1%</td><td>1%</td><td>0.5%</td></tr>
+<tr><td><strong>Custody</strong></td><td>Self</td><td>Coinbase</td><td>BitPay</td><td>Self</td></tr>
+<tr><td><strong>KYC Required</strong></td><td>No</td><td>Yes</td><td>Yes</td><td>No (basic)</td></tr>
+<tr><td><strong>Setup Complexity</strong></td><td>High</td><td>Low</td><td>Medium</td><td>Low</td></tr>
+<tr><td><strong>Stablecoin Support</strong></td><td>Via plugins</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td><strong>Lightning</strong></td><td>✅ Native</td><td>❌</td><td>✅</td><td>✅</td></tr>
+<tr><td><strong>Privacy</strong></td><td>✅ Best</td><td>❌</td><td>❌</td><td>⚠️ Medium</td></tr>
+<tr><td><strong>Open Source</strong></td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+</table>
+<strong>Recommendation:</strong> BTCPay Server for self-sovereignty, with NOWPayments as fallback for chains BTCPay doesn't support well.
+<hr>
+<h2>4. Technical Integration</h2>
+<h3>4.1 Architecture</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CRYPTO PAYMENT FLOW                                       │
+│                                                                              │
+│  User                    Onelist                     BTCPay Server          │
+│                                                                              │
+│  1. Select plan     ────►                                                   │
+│                           2. Create invoice  ────►                          │
+│                                                      3. Generate addresses   │
+│                           4. Return payment  ◄────                          │
+│                              page URL                                        │
+│  5. Pay invoice     ────────────────────────────►                           │
+│     (wallet tx)                                      6. Detect payment      │
+│                                                      7. Confirm on-chain    │
+│                           8. Webhook:        ◄────                          │
+│                              &quot;invoice paid&quot;                                  │
+│                           9. Activate                                        │
+│  10. Access granted ◄────    subscription                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 BTCPay Server Integration</h3>
+<pre><code class="language-elixir">defmodule Onelist.Billing.Crypto do
+  @moduledoc &quot;&quot;&quot;
+  Cryptocurrency payment integration via BTCPay Server.
+  &quot;&quot;&quot;
+<p>@btcpay_url System.get_env(&quot;BTCPAY_URL&quot;)
+  @btcpay_api_key System.get_env(&quot;BTCPAY_API_KEY&quot;)
+  @store_id System.get_env(&quot;BTCPAY_STORE_ID&quot;)</p>
+<p>@doc &quot;&quot;&quot;
+  Create a BTCPay invoice for a subscription.
+  &quot;&quot;&quot;
+  def create_invoice(user_id, plan, opts \\ []) do
+    amount = plan_price(plan)
+    currency = Keyword.get(opts, :currency, &quot;USD&quot;)  # Price in USD, pay in crypto</p>
+<p>body = %{
+      amount: amount,
+      currency: currency,
+      metadata: %{
+        user_id: user_id,
+        plan: plan,
+        type: &quot;subscription&quot;
+      },
+      checkout: %{
+        redirectURL: &quot;#{web_url()}/billing/success&quot;,
+        redirectAutomatically: true,
+        defaultPaymentMethod: Keyword.get(opts, :payment_method, &quot;BTC-LightningNetwork&quot;)
+      },
+      receipt: %{
+        enabled: true,
+        showPayments: true
+      }
+    }</p>
+<p>case post(&quot;/api/v1/stores/#{@store_id}/invoices&quot;, body) do
+      {:ok, %{&quot;id&quot; =&gt; invoice_id, &quot;checkoutLink&quot; =&gt; checkout_url}} -&gt;
+        # Store invoice reference
+        {:ok, _} = Billing.create_crypto_invoice(%{
+          user_id: user_id,
+          btcpay_invoice_id: invoice_id,
+          plan: plan,
+          amount_usd: amount,
+          status: &quot;pending&quot;
+        })</p>
+<p>{:ok, %{invoice_id: invoice_id, checkout_url: checkout_url}}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Handle BTCPay webhook for payment confirmation.
+  &quot;&quot;&quot;
+  def handle_webhook(%{&quot;type&quot; =&gt; &quot;InvoiceSettled&quot;, &quot;invoiceId&quot; =&gt; invoice_id} = payload) do
+    with {:ok, invoice} &lt;- Billing.get_crypto_invoice_by_btcpay_id(invoice_id),
+         {:ok, btcpay_invoice} &lt;- get_invoice(invoice_id),
+         true &lt;- verify_payment(btcpay_invoice) do</p>
+<p># Activate subscription
+      {:ok, _} = Billing.activate_subscription(invoice.user_id, invoice.plan, %{
+        payment_method: &quot;crypto&quot;,
+        crypto_invoice_id: invoice.id,
+        amount_paid: btcpay_invoice[&quot;amount&quot;],
+        currency_paid: btcpay_invoice[&quot;currency&quot;]
+      })</p>
+<p># Update invoice status
+      Billing.update_crypto_invoice(invoice, %{
+        status: &quot;settled&quot;,
+        settled_at: DateTime.utc_now(),
+        payment_details: extract_payment_details(btcpay_invoice)
+      })</p>
+<p>{:ok, :subscription_activated}
+    end
+  end</p>
+<p>def handle_webhook(%{&quot;type&quot; =&gt; &quot;InvoiceExpired&quot;, &quot;invoiceId&quot; =&gt; invoice_id}) do
+    Billing.update_crypto_invoice_by_btcpay_id(invoice_id, %{status: &quot;expired&quot;})
+    {:ok, :invoice_expired}
+  end</p>
+<p>def handle_webhook(%{&quot;type&quot; =&gt; &quot;InvoicePaymentSettled&quot;} = payload) do
+    # Partial payment settled (for multi-payment invoices)
+    {:ok, :payment_received}
+  end</p>
+<p>def handle_webhook(_), do: {:ok, :ignored}</p>
+<p>@doc &quot;&quot;&quot;
+  Get supported payment methods with current network fees.
+  &quot;&quot;&quot;
+  def get_payment_methods do
+    case get(&quot;/api/v1/stores/#{@store_id}/payment-methods&quot;) do
+      {:ok, methods} -&gt;
+        methods
+        |&gt; Enum.filter(&amp; &amp;1[&quot;enabled&quot;])
+        |&gt; Enum.map(fn method -&gt;
+          %{
+            id: method[&quot;paymentMethodId&quot;],
+            name: format_method_name(method[&quot;paymentMethodId&quot;]),
+            crypto: method[&quot;cryptoCode&quot;],
+            network: extract_network(method[&quot;paymentMethodId&quot;]),
+            estimated_fee: estimate_network_fee(method[&quot;paymentMethodId&quot;])
+          }
+        end)
+        |&gt; prioritize_methods()</p>
+<p>{:error, _} = error -&gt;
+        error
+    end
+  end</p>
+<p>defp prioritize_methods(methods) do
+    priority = [
+      &quot;USDC-Base&quot;,
+      &quot;USDC-Polygon&quot;, 
+      &quot;USDT-Polygon&quot;,
+      &quot;USDC-Ethereum&quot;,
+      &quot;BTC-LightningNetwork&quot;,
+      &quot;BTC-OnChain&quot;,
+      &quot;ETH-Ethereum&quot;
+    ]</p>
+<p>Enum.sort_by(methods, fn m -&gt;
+      Enum.find_index(priority, &amp;(&amp;1 == m.id)) || 999
+    end)
+  end</p>
+<p>defp plan_price(&quot;free&quot;), do: 0
+  defp plan_price(&quot;cloud_sync&quot;), do: 8
+  defp plan_price(&quot;web_access_starter&quot;), do: 10
+  defp plan_price(&quot;web_access_standard&quot;), do: 18
+  defp plan_price(&quot;web_access_pro&quot;), do: 30
+  defp plan_price(&quot;web_access_power&quot;), do: 60</p>
+<p>defp post(path, body) do
+    Req.post(@btcpay_url &lt;&gt; path,
+      json: body,
+      headers: [{&quot;Authorization&quot;, &quot;token #{@btcpay_api_key}&quot;}]
+    )
+    |&gt; handle_response()
+  end</p>
+<p>defp get(path) do
+    Req.get(@btcpay_url &lt;&gt; path,
+      headers: [{&quot;Authorization&quot;, &quot;token #{@btcpay_api_key}&quot;}]
+    )
+    |&gt; handle_response()
+  end</p>
+<p>defp handle_response({:ok, %{status: status, body: body}}) when status in 200..299 do
+    {:ok, body}
+  end</p>
+<p>defp handle_response({:ok, %{status: status, body: body}}) do
+    {:error, %{status: status, body: body}}
+  end</p>
+<p>defp handle_response({:error, _} = error), do: error
+end
+</code></pre></p>
+<h3>4.3 Database Schema</h3>
+<pre><code class="language-sql">-- Crypto payment invoices
+CREATE TABLE crypto_invoices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
+  
+  -- BTCPay reference
+  btcpay_invoice_id VARCHAR(255) NOT NULL UNIQUE,
+  btcpay_store_id VARCHAR(255) NOT NULL,
+  
+  -- What they're paying for
+  plan VARCHAR(50) NOT NULL,
+  amount_usd DECIMAL(10, 2) NOT NULL,
+  
+  -- Payment details (filled when paid)
+  payment_method VARCHAR(100),  -- e.g., &quot;BTC-LightningNetwork&quot;, &quot;USDC-Base&quot;
+  amount_crypto DECIMAL(20, 8),
+  crypto_currency VARCHAR(20),
+  tx_hash VARCHAR(255),
+  
+  -- Status
+  status VARCHAR(50) NOT NULL DEFAULT 'pending',  -- pending, settled, expired, invalid
+  
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMPTZ NOT NULL,
+  settled_at TIMESTAMPTZ
+);
+<p>CREATE INDEX crypto_invoices_user_id_idx ON crypto_invoices(user_id);
+CREATE INDEX crypto_invoices_btcpay_invoice_id_idx ON crypto_invoices(btcpay_invoice_id);
+CREATE INDEX crypto_invoices_status_idx ON crypto_invoices(status);</p>
+<p>-- Crypto payment history (for accounting)
+CREATE TABLE crypto_payments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  crypto_invoice_id UUID REFERENCES crypto_invoices(id),
+  
+  -- Payment details
+  payment_method VARCHAR(100) NOT NULL,
+  amount_crypto DECIMAL(20, 8) NOT NULL,
+  crypto_currency VARCHAR(20) NOT NULL,
+  amount_usd_at_payment DECIMAL(10, 2),  -- USD value at time of payment
+  
+  -- Blockchain details
+  tx_hash VARCHAR(255),
+  block_height BIGINT,
+  confirmations INTEGER,
+  
+  -- For Lightning
+  lightning_invoice VARCHAR(1000),
+  preimage VARCHAR(255),
+  
+  received_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>CREATE INDEX crypto_payments_invoice_id_idx ON crypto_payments(crypto_invoice_id);
+</code></pre></p>
+<h3>4.4 Webhook Security</h3>
+<pre><code class="language-elixir">defmodule OnelistWeb.CryptoWebhookController do
+  use OnelistWeb, :controller
+<p>@btcpay_webhook_secret System.get_env(&quot;BTCPAY_WEBHOOK_SECRET&quot;)</p>
+<p>def btcpay(conn, params) do
+    with :ok &lt;- verify_signature(conn),
+         {:ok, result} &lt;- Onelist.Billing.Crypto.handle_webhook(params) do
+      json(conn, %{status: &quot;ok&quot;, result: result})
+    else
+      {:error, :invalid_signature} -&gt;
+        conn |&gt; put_status(401) |&gt; json(%{error: &quot;invalid signature&quot;})
+      
+      {:error, reason} -&gt;
+        conn |&gt; put_status(400) |&gt; json(%{error: inspect(reason)})
+    end
+  end</p>
+<p>defp verify_signature(conn) do
+    signature = get_req_header(conn, &quot;btcpay-sig&quot;) |&gt; List.first()
+    body = conn.assigns[:raw_body]</p>
+<p>expected = :crypto.mac(:hmac, :sha256, @btcpay_webhook_secret, body)
+               |&gt; Base.encode16(case: :lower)
+               |&gt; then(&amp;&quot;sha256=#{&amp;1}&quot;)</p>
+<p>if Plug.Crypto.secure_compare(signature || &quot;&quot;, expected) do
+      :ok
+    else
+      {:error, :invalid_signature}
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>5. User Experience</h2>
+<h3>5.1 Payment Flow UI</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  UPGRADE TO CLOUD SYNC - $8/month                                           │
+│                                                                              │
+│  Choose payment method:                                                      │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ 💳 Credit Card (Stripe)                                              │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ ₿ Cryptocurrency                                                     │   │
+│  │                                                                      │   │
+│  │   Recommended (low fees):                                           │   │
+│  │   ○ USDC on Base (~$0.01 fee)                                       │   │
+│  │   ○ USDC on Polygon (~$0.01 fee)                                    │   │
+│  │   ○ Bitcoin Lightning (instant, ~$0.01 fee)                         │   │
+│  │                                                                      │   │
+│  │   Other options:                                                     │   │
+│  │   ○ USDT on Polygon                                                 │   │
+│  │   ○ Bitcoin on-chain (~$2-5 fee, 10-60 min)                         │   │
+│  │   ○ ETH on Ethereum (~$1-5 fee)                                     │   │
+│  │   ○ DAI on Ethereum                                                 │   │
+│  │                                                                      │   │
+│  │   [Continue with Crypto →]                                          │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.2 Crypto Checkout Page</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  PAY WITH USDC ON BASE                                                       │
+│                                                                              │
+│  Amount: $8.00 USD = 8.00 USDC                                              │
+│                                                                              │
+│  Send exactly 8.00 USDC to:                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ 0x1234...abcd                                            [Copy] 📋  │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  Network: Base (Chain ID: 8453)                                             │
+│  ⚠️ Make sure you're sending on the BASE network!                           │
+│                                                                              │
+│  ┌───────────────┐                                                          │
+│  │   [QR CODE]   │                                                          │
+│  │               │                                                          │
+│  │               │                                                          │
+│  └───────────────┘                                                          │
+│                                                                              │
+│  Or connect wallet:                                                          │
+│  [🦊 MetaMask] [🌈 Rainbow] [💎 Coinbase Wallet]                            │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  ⏱️ Invoice expires in: 14:32                                               │
+│  Status: Waiting for payment...                                              │
+│                                                                              │
+│  [← Change payment method]                                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.3 Lightning Payment</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  PAY WITH BITCOIN LIGHTNING ⚡                                               │
+│                                                                              │
+│  Amount: $8.00 USD ≈ 12,345 sats                                            │
+│  (Rate: 1 BTC = $64,800 — updates in real-time)                             │
+│                                                                              │
+│  Scan with your Lightning wallet:                                            │
+│  ┌───────────────┐                                                          │
+│  │   [QR CODE]   │                                                          │
+│  │   Lightning   │                                                          │
+│  │   Invoice     │                                                          │
+│  └───────────────┘                                                          │
+│                                                                              │
+│  Or copy invoice:                                                            │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ lnbc123450n1pj...                                        [Copy] 📋  │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  Compatible wallets: Phoenix, Muun, Breez, Strike, Cash App                 │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  ⏱️ Invoice expires in: 9:45                                                │
+│  Status: Waiting for payment...                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>6. Recurring Payments</h2>
+<h3>6.1 The Challenge</h3>
+<p>Crypto doesn't have native recurring payments like credit cards. Options:</p>
+<table>
+<tr><th>Approach</th><th>How It Works</th><th>Pros</th><th>Cons</th></tr>
+<tr><td><strong>Manual renewal</strong></td><td>Invoice sent before expiry, user pays</td><td>Simple, no custody</td><td>User might forget</td></tr>
+<tr><td><strong>Pre-paid credits</strong></td><td>User buys 3/6/12 months upfront</td><td>Predictable, discount incentive</td><td>Large upfront cost</td></tr>
+<tr><td><strong>Token allowance</strong></td><td>User approves spending limit</td><td>Auto-deduct like card</td><td>Complex, gas fees</td></tr>
+<tr><td><strong>Hosted wallet</strong></td><td>Onelist holds user's crypto</td><td>True recurring</td><td>Custody risk, not self-sovereign</td></tr>
+</table>
+<h3>6.2 Recommended Approach: Hybrid</h3>
+<p>1. <strong>Default:</strong> Manual renewal with reminders
+2. <strong>Incentive:</strong> Discounts for prepaid (3mo = 10% off, 12mo = 20% off)
+3. <strong>Future:</strong> Token allowance for stablecoins (EIP-2612 permits)</p>
+<h3>6.3 Renewal Flow</h3>
+<pre><code class="language-">Day -7:  Email: &quot;Your subscription renews in 7 days&quot;
+         Include: One-click payment link, prepaid discount offer
+<p>Day -3:  Email: &quot;3 days left — renew now to avoid interruption&quot;
+         In-app notification</p>
+<p>Day -1:  Email: &quot;Last day! Renew your Onelist subscription&quot;
+         In-app banner</p>
+<p>Day 0:   If not paid: 
+         <li>Service continues for 3-day grace period</li>
+         <li>&quot;Payment overdue&quot; banner in app</li></p>
+<p>Day +3:  If still not paid:
+         <li>Downgrade to free tier</li>
+         <li>Data retained for 30 days (same as Stripe cancellation)</li>
+</code></pre></p>
+<h3>6.4 Prepaid Discounts</h3>
+<table>
+<tr><th>Duration</th><th>Price (Cloud Sync)</th><th>Discount</th></tr>
+<tr><td>1 month</td><td>$8</td><td>—</td></tr>
+<tr><td>3 months</td><td>$21.60</td><td>10% off</td></tr>
+<tr><td>6 months</td><td>$40.80</td><td>15% off</td></tr>
+<tr><td>12 months</td><td>$76.80</td><td>20% off</td></tr>
+</table>
+<pre><code class="language-elixir">defmodule Onelist.Billing.Crypto.Pricing do
+  @base_prices %{
+    &quot;cloud_sync&quot; =&gt; 8,
+    &quot;web_access_starter&quot; =&gt; 10,
+    &quot;web_access_standard&quot; =&gt; 18,
+    &quot;web_access_pro&quot; =&gt; 30,
+    &quot;web_access_power&quot; =&gt; 60
+  }
+<p>@prepaid_discounts %{
+    1 =&gt; 0,
+    3 =&gt; 0.10,
+    6 =&gt; 0.15,
+    12 =&gt; 0.20
+  }</p>
+<p>def calculate_price(plan, months) do
+    base = Map.fetch!(@base_prices, plan)
+    discount = Map.get(@prepaid_discounts, months, 0)
+    
+    total = base <em> months </em> (1 - discount)
+    
+    %{
+      plan: plan,
+      months: months,
+      base_price: base,
+      discount_percent: discount <em> 100,
+      total_price: Float.round(total, 2),
+      savings: Float.round(base </em> months - total, 2)
+    }
+  end
+end
+</code></pre></p>
+<hr>
+<h2>7. Accounting & Compliance</h2>
+<h3>7.1 Revenue Recognition</h3>
+<p>For accounting purposes:
+<li>Record revenue in USD at time of payment</li>
+<li>Use exchange rate at moment of settlement</li>
+<li>Store both crypto amount and USD equivalent</li></p>
+<pre><code class="language-elixir">defmodule Onelist.Billing.Crypto.Accounting do
+  @doc &quot;&quot;&quot;
+  Record crypto payment for accounting.
+  &quot;&quot;&quot;
+  def record_payment(crypto_invoice, btcpay_payment) do
+    usd_amount = case btcpay_payment[&quot;cryptoCode&quot;] do
+      code when code in [&quot;USDC&quot;, &quot;USDT&quot;, &quot;DAI&quot;] -&gt;
+        # Stablecoins: 1:1 with USD
+        btcpay_payment[&quot;amount&quot;]
+        
+      _ -&gt;
+        # Volatile: use rate at payment time
+        btcpay_payment[&quot;amount&quot;] <em> btcpay_payment[&quot;rate&quot;]
+    end
+<p>%{
+      date: DateTime.utc_now(),
+      invoice_id: crypto_invoice.id,
+      user_id: crypto_invoice.user_id,
+      
+      # Crypto details
+      crypto_currency: btcpay_payment[&quot;cryptoCode&quot;],
+      crypto_amount: btcpay_payment[&quot;amount&quot;],
+      network: btcpay_payment[&quot;paymentMethod&quot;],
+      tx_hash: btcpay_payment[&quot;txHash&quot;],
+      
+      # USD equivalent (for accounting)
+      usd_amount: usd_amount,
+      exchange_rate: btcpay_payment[&quot;rate&quot;],
+      
+      # Plan details
+      plan: crypto_invoice.plan,
+      period_months: crypto_invoice.period_months
+    }
+  end
+end
+</code></pre></p>
+<h3>7.2 Tax Considerations</h3>
+<strong>For Onelist (receiving payments):</strong>
+<li>Revenue recognized in USD at time of receipt</li>
+<li>If holding crypto: track cost basis for capital gains</li>
+<li>Consider immediate conversion to USD for simplicity</li>
+<strong>For Users (making payments):</strong>
+<li>Spending crypto may trigger capital gains (user's responsibility)</li>
+<li>Stablecoins minimize this (no/minimal gain)</li>
+<li>Provide receipts with USD amounts</li>
+<h3>7.3 Regulatory Notes</h3>
+<li><strong>No KYC required</strong> for receiving crypto payments</li>
+<li><strong>AML considerations:</strong> Large payments (>$10k) should be reviewed</li>
+<li><strong>Sanctions:</strong> Screen wallet addresses against OFAC list (optional but recommended)</li>
+<li><strong>Privacy coins (Monero):</strong> Higher regulatory scrutiny, consider carefully</li>
+<hr>
+<h2>8. Security Considerations</h2>
+<h3>8.1 Wallet Security</h3>
+<strong>Hot Wallet (for receiving):</strong>
+<li>Used by BTCPay Server for immediate receipt</li>
+<li>Keep minimal balance</li>
+<li>Auto-sweep to cold storage</li>
+<strong>Cold Storage:</strong>
+<li>Hardware wallet or multi-sig</li>
+<li>Majority of funds held here</li>
+<li>Manual withdrawal process</li>
+<h3>8.2 BTCPay Server Security</h3>
+<pre><code class="language-yaml"># Security checklist for BTCPay deployment
+security:
+  # Network
+  <li>Use reverse proxy (nginx/Caddy)</li>
+  <li>TLS 1.3 only</li>
+  <li>Firewall: only 80/443 exposed</li>
+  
+  # Application
+  <li>Strong admin password</li>
+  <li>2FA enabled</li>
+  <li>Webhook secrets rotated quarterly</li>
+  <li>API keys: minimal permissions</li>
+  
+  # Infrastructure
+  <li>Regular OS updates</li>
+  <li>Automated backups (encrypted)</li>
+  <li>Monitoring/alerting</li>
+  
+  # Funds
+  <li>Auto-sweep to cold storage (daily or when &gt; threshold)</li>
+  <li>Multi-sig for cold storage (2-of-3)</li>
+  <li>Regular audits of hot wallet balance</li>
+</code></pre>
+<h3>8.3 Webhook Verification</h3>
+<p>Always verify BTCPay webhook signatures (see code in Section 4.4).</p>
+<hr>
+<h2>9. Implementation Phases</h2>
+<h3>Phase 1: Stablecoins (Week 1-2)</h3>
+<table>
+<tr><th>Task</th><th>Effort</th><th>Notes</th></tr>
+<tr><td>Deploy BTCPay Server</td><td>2 days</td><td>With ERC-20 plugin</td></tr>
+<tr><td>Configure USDC/USDT on Base, Polygon</td><td>1 day</td><td></td></tr>
+<tr><td>Integrate with Billing service</td><td>2 days</td><td>Create invoice, handle webhook</td></tr>
+<tr><td>Build checkout UI</td><td>2 days</td><td>Currency selection, QR codes</td></tr>
+<tr><td>Test end-to-end</td><td>2 days</td><td>Testnet first, then mainnet</td></tr>
+</table>
+<h3>Phase 2: Bitcoin (Week 3-4)</h3>
+<table>
+<tr><th>Task</th><th>Effort</th><th>Notes</th></tr>
+<tr><td>Configure Lightning (LND or CLN)</td><td>2 days</td><td>Channel management</td></tr>
+<tr><td>Configure on-chain BTC</td><td>1 day</td><td>Already in BTCPay</td></tr>
+<tr><td>Add to checkout UI</td><td>1 day</td><td>Lightning QR, on-chain fallback</td></tr>
+<tr><td>Volatility handling</td><td>2 days</td><td>Rate locking, conversion strategy</td></tr>
+<tr><td>Test thoroughly</td><td>2 days</td><td>Lightning can be tricky</td></tr>
+</table>
+<h3>Phase 3: ETH & SOL (Week 5-6)</h3>
+<table>
+<tr><th>Task</th><th>Effort</th><th>Notes</th></tr>
+<tr><td>Configure ETH in BTCPay</td><td>1 day</td><td>Native support</td></tr>
+<tr><td>Evaluate SOL options</td><td>2 days</td><td>BTCPay plugin or NOWPayments</td></tr>
+<tr><td>UI updates</td><td>1 day</td><td></td></tr>
+<tr><td>Testing</td><td>2 days</td><td></td></tr>
+</table>
+<h3>Phase 4: Polish & Optimize (Week 7-8)</h3>
+<table>
+<tr><th>Task</th><th>Effort</th><th>Notes</th></tr>
+<tr><td>Prepaid discounts</td><td>2 days</td><td>3/6/12 month options</td></tr>
+<tr><td>Renewal reminders</td><td>2 days</td><td>Email + in-app</td></tr>
+<tr><td>Analytics dashboard</td><td>2 days</td><td>Crypto vs card breakdown</td></tr>
+<tr><td>Documentation</td><td>2 days</td><td>User guides, FAQ</td></tr>
+</table>
+<hr>
+<h2>10. Success Metrics</h2>
+<table>
+<tr><th>Metric</th><th>Target</th><th>Notes</th></tr>
+<tr><td>Crypto payment adoption</td><td>10-20% of paid users</td><td>Tech-forward audience</td></tr>
+<tr><td>Payment success rate</td><td>>95%</td><td>Failed payments tracked</td></tr>
+<tr><td>Average confirmation time</td><td><5 min (Lightning), <15 min (on-chain)</td><td></td></tr>
+<tr><td>Support tickets (crypto)</td><td><5% of crypto payments</td><td>Clear UX = fewer issues</td></tr>
+<tr><td>Revenue in stablecoins</td><td>>60% of crypto revenue</td><td>Predictable</td></tr>
+</table>
+<hr>
+<h2>11. Open Questions</h2>
+<li>[ ] Should we offer crypto-only pricing (slight discount for no card fees)?</li>
+<li>[ ] Monero support? (Privacy alignment vs regulatory risk)</li>
+<li>[ ] Auto-conversion to USD vs holding crypto treasury?</li>
+<li>[ ] Which cold storage solution? (Hardware wallet, multi-sig, or custody service)</li>
+<li>[ ] Token allowance for true recurring? (Complexity vs UX)</li>
+<hr>
+<h2>12. Resources</h2>
+<strong>BTCPay Server:</strong>
+<li>Docs: https://docs.btcpayserver.org/</li>
+<li>ERC-20 Plugin: https://docs.btcpayserver.org/Altcoins/</li>
+<li>Deployment: https://docs.btcpayserver.org/Deployment/</li>
+<strong>Wallet Integration:</strong>
+<li>WalletConnect: https://walletconnect.com/</li>
+<li>Web3Modal: https://web3modal.com/</li>
+<strong>Compliance:</strong>
+<li>OFAC SDN List: https://sanctionssearch.ofac.treas.gov/</li>
+</ul>
+<hr>
+</em>This document should be reviewed quarterly as the crypto payments landscape evolves rapidly.*
+  </article>
+</body>
+</html>

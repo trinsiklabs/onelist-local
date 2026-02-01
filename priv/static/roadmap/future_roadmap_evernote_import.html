@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evernote Import &amp; Sync Roadmap - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Evernote Import & Sync Roadmap</h1>
+<h2>Executive Summary</h2>
+<p>This roadmap defines the implementation plan for importing Evernote libraries into Onelist, supporting both one-time bulk import via ENEX files and ongoing synchronization via the Evernote Cloud API.</p>
+<h3>Import Methods</h3>
+<table>
+<tr><th>Method</th><th>Use Case</th><th>Real-time</th><th>Complexity</th></tr>
+<tr><td>ENEX File Import</td><td>One-time migration, offline backup</td><td>No</td><td>Low</td></tr>
+<tr><td>API Sync</td><td>Ongoing sync, live updates</td><td>Yes (webhooks)</td><td>High</td></tr>
+</table>
+<h3>Key Outcomes</h3>
+<ul>
+<li><strong>Complete data migration</strong> from Evernote to Onelist</li>
+<li><strong>Preserve relationships</strong> (notebooks → tags, attachments, internal links)</li>
+<li><strong>Convert ENML to Markdown</strong> for native editing</li>
+<li><strong>Optional ongoing sync</strong> for users transitioning gradually</li>
+<hr>
+<h2>Table of Contents</h2>
+<p>1. <a href="#evernote-data-model">Evernote Data Model</a>
+2. <a href="#enex-file-import">ENEX File Import</a>
+3. <a href="#api-based-sync">API-Based Sync</a>
+4. <a href="#data-mapping">Data Mapping</a>
+5. <a href="#content-conversion">Content Conversion</a>
+6. <a href="#implementation-phases">Implementation Phases</a>
+7. <a href="#technical-considerations">Technical Considerations</a>
+8. <a href="#user-experience">User Experience</a></p>
+<hr>
+<h2>Evernote Data Model</h2>
+<p>Understanding Evernote's structure is essential for accurate import.</p>
+<h3>Core Entities</h3>
+<pre><code class="language-">User Account
+├── Notebooks (containers, like folders)
+│   ├── Notes (the primary content unit)
+│   │   ├── Content (ENML format)
+│   │   ├── Resources (attachments)
+│   │   └── Tags (many-to-many)
+│   └── Stacks (notebook groupings)
+├── Tags (global, hierarchical)
+└── Saved Searches
+</code></pre>
+<h3>Note Structure</h3>
+<p>Each Evernote note contains:</p>
+<table>
+<tr><th>Field</th><th>Description</th><th>Onelist Mapping</th></tr>
+<tr><td><code>guid</code></td><td>Unique identifier</td><td><code>metadata.evernote_guid</code></td></tr>
+<tr><td><code>title</code></td><td>Note title</td><td><code>entry.title</code></td></tr>
+<tr><td><code>content</code></td><td>ENML markup</td><td><code>representation.content</code> (converted)</td></tr>
+<tr><td><code>created</code></td><td>Creation timestamp</td><td><code>entry.content_created_at</code></td></tr>
+<tr><td><code>updated</code></td><td>Last modified timestamp</td><td><code>entry.updated_at</code></td></tr>
+<tr><td><code>notebookGuid</code></td><td>Parent notebook</td><td>Tag (notebook name)</td></tr>
+<tr><td><code>tagGuids[]</code></td><td>Applied tags</td><td>Tags (many-to-many)</td></tr>
+<tr><td><code>attributes</code></td><td>Metadata (location, author, source URL)</td><td><code>entry.metadata</code></td></tr>
+<tr><td><code>resources[]</code></td><td>Attachments</td><td>Assets</td></tr>
+</table>
+<h3>Resource (Attachment) Structure</h3>
+<pre><code class="language-">Resource
+├── guid          → Asset ID reference
+├── data          → Binary content (base64 in ENEX)
+├── mime          → MIME type
+├── width/height  → Dimensions (images)
+├── filename      → Original filename
+├── attributes
+│   ├── sourceURL     → Original source
+│   ├── timestamp     → Capture time
+│   ├── latitude      → Geolocation
+│   ├── longitude
+│   ├── cameraMake    → EXIF data
+│   └── cameraModel
+└── recognition   → OCR/recognition data (XML)
+</code></pre>
+<h3>ENML (Evernote Markup Language)</h3>
+<p>ENML is a restricted subset of XHTML with Evernote-specific elements:</p>
+<strong>Allowed Elements</strong>: 80+ standard HTML elements (<code>a</code>, <code>b</code>, <code>p</code>, <code>div</code>, <code>table</code>, <code>ul</code>, <code>ol</code>, <code>img</code>, <code>h1-h6</code>, etc.)
+<strong>Forbidden Elements</strong>: Active/scripting elements (<code>script</code>, <code>form</code>, <code>iframe</code>, <code>embed</code>, <code>input</code>, <code>style</code>, <code>applet</code>)
+<strong>Evernote-Specific Elements</strong>:
+<table>
+<tr><th>Element</th><th>Purpose</th></tr>
+<tr><td><code><en-note></code></td><td>Root element (replaces <code><body></code>)</td></tr>
+<tr><td><code><en-media></code></td><td>Resource placeholder (images, PDFs, audio)</td></tr>
+<tr><td><code><en-todo></code></td><td>Checkbox</td></tr>
+<tr><td><code><en-crypt></code></td><td>Encrypted text block</td></tr>
+</table>
+<strong>Resource Embedding Example</strong>:
+<pre><code class="language-xml">&lt;en-note&gt;
+  &lt;p&gt;Here's an image:&lt;/p&gt;
+  &lt;en-media type=&quot;image/jpeg&quot; hash=&quot;abc123def456...&quot; width=&quot;800&quot; height=&quot;600&quot;/&gt;
+  &lt;p&gt;And a checkbox: &lt;en-todo checked=&quot;false&quot;/&gt;Task item&lt;/p&gt;
+&lt;/en-note&gt;
+</code></pre>
+<hr>
+<h2>ENEX File Import</h2>
+<h3>Overview</h3>
+<p>ENEX (Evernote Export) is an XML-based format for portable note export. This is the primary import method for one-time migrations.</p>
+<h3>ENEX Structure</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE en-export SYSTEM &quot;http://xml.evernote.com/pub/evernote-export4.dtd&quot;&gt;
+&lt;en-export export-date=&quot;20250115T120000Z&quot; application=&quot;Evernote&quot; version=&quot;10.x&quot;&gt;
+  &lt;note&gt;
+    &lt;title&gt;My Note Title&lt;/title&gt;
+    &lt;content&gt;&lt;![CDATA[&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE en-note SYSTEM &quot;http://xml.evernote.com/pub/enml2.dtd&quot;&gt;
+&lt;en-note&gt;
+  &lt;p&gt;Note content here...&lt;/p&gt;
+  &lt;en-media type=&quot;image/png&quot; hash=&quot;abc123...&quot;/&gt;
+&lt;/en-note&gt;]]&gt;&lt;/content&gt;
+    &lt;created&gt;20240101T120000Z&lt;/created&gt;
+    &lt;updated&gt;20240615T153000Z&lt;/updated&gt;
+    &lt;tag&gt;work&lt;/tag&gt;
+    &lt;tag&gt;project-alpha&lt;/tag&gt;
+    &lt;note-attributes&gt;
+      &lt;latitude&gt;37.7749&lt;/latitude&gt;
+      &lt;longitude&gt;-122.4194&lt;/longitude&gt;
+      &lt;author&gt;user@example.com&lt;/author&gt;
+      &lt;source-url&gt;https://example.com/article&lt;/source-url&gt;
+    &lt;/note-attributes&gt;
+    &lt;resource&gt;
+      &lt;data encoding=&quot;base64&quot;&gt;iVBORw0KGgoAAAANSUhEUgAA...&lt;/data&gt;
+      &lt;mime&gt;image/png&lt;/mime&gt;
+      &lt;width&gt;800&lt;/width&gt;
+      &lt;height&gt;600&lt;/height&gt;
+      &lt;resource-attributes&gt;
+        &lt;file-name&gt;screenshot.png&lt;/file-name&gt;
+        &lt;timestamp&gt;20240101T120000Z&lt;/timestamp&gt;
+      &lt;/resource-attributes&gt;
+    &lt;/resource&gt;
+  &lt;/note&gt;
+  &lt;!-- More notes... --&gt;
+&lt;/en-export&gt;
+</code></pre>
+<h3>ENEX Versions</h3>
+<table>
+<tr><th>Version</th><th>Features</th></tr>
+<tr><td>1</td><td>Basic notes, tags, resources</td></tr>
+<tr><td>2</td><td>Task attributes</td></tr>
+<tr><td>3</td><td>Reminder attributes</td></tr>
+<tr><td>4</td><td>Enhanced tasks/reminders (current)</td></tr>
+</table>
+<h3>Limitations</h3>
+<li><strong>No notebook hierarchy</strong>: All notes merged into single file, notebook structure lost</li>
+<li><strong>Flat tag list</strong>: Tag hierarchy not preserved</li>
+<li><strong>No internal links</strong>: Note-to-note links break (use GUID references)</li>
+<li><strong>No version history</strong>: Only current note state exported</li>
+<li><strong>100 note limit per export</strong> (user must export multiple times for large libraries)</li>
+<li><strong>File size limits</strong>: 300MB to 2GB per ENEX file (configurable)</li>
+<h3>Parsing Strategy</h3>
+<p>Use Elixir's XML parsing capabilities:</p>
+<strong>Recommended Libraries</strong>:
+<li><strong>SweetXml</strong> - Wrapper around xmerl with nicer syntax</li>
+<li><strong>Saxy</strong> - Fast SAX parser (good for large files)</li>
+<li><strong>fast_xml</strong> - Expat-based, very fast for streaming</li>
+<strong>Implementation Approach</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Import.Evernote.EnexParser do
+  @moduledoc &quot;&quot;&quot;
+  Parser for Evernote ENEX export files.
+  Uses streaming SAX parsing for large files.
+  &quot;&quot;&quot;
+<p>import SweetXml</p>
+<p>def parse_file(path) do
+    path
+    |&gt; File.stream!()
+    |&gt; SweetXml.stream_tags(:note)
+    |&gt; Stream.map(&amp;parse_note/1)
+  end</p>
+<p>defp parse_note({:note, doc}) do
+    %{
+      title: xpath(doc, ~x&quot;./title/text()&quot;s),
+      content: xpath(doc, ~x&quot;./content/text()&quot;s),
+      created: xpath(doc, ~x&quot;./created/text()&quot;s) |&gt; parse_timestamp(),
+      updated: xpath(doc, ~x&quot;./updated/text()&quot;s) |&gt; parse_timestamp(),
+      tags: xpath(doc, ~x&quot;./tag/text()&quot;sl),
+      attributes: parse_attributes(doc),
+      resources: xpath(doc, ~x&quot;./resource&quot;l) |&gt; Enum.map(&amp;parse_resource/1)
+    }
+  end</p>
+<p>defp parse_resource(resource) do
+    %{
+      data: xpath(resource, ~x&quot;./data/text()&quot;s) |&gt; Base.decode64!(),
+      mime: xpath(resource, ~x&quot;./mime/text()&quot;s),
+      filename: xpath(resource, ~x&quot;./resource-attributes/file-name/text()&quot;s),
+      hash: compute_md5_hash(data),
+      width: xpath(resource, ~x&quot;./width/text()&quot;i),
+      height: xpath(resource, ~x&quot;./height/text()&quot;i)
+    }
+  end
+end
+</code></pre></p>
+<hr>
+<h2>API-Based Sync</h2>
+<h3>Overview</h3>
+<p>The Evernote Cloud API enables ongoing synchronization for users who want to gradually transition or maintain both systems.</p>
+<h3>Authentication</h3>
+<strong>Protocol</strong>: OAuth 1.0a (not OAuth 2.0)
+<strong>Endpoints</strong>:
+<li>Temporary Token: <code>GET https://www.evernote.com/oauth</code></li>
+<li>User Authorization: <code>https://www.evernote.com/OAuth.action</code></li>
+<li>Access Token: <code>GET https://www.evernote.com/oauth</code></li>
+<strong>Token Characteristics</strong>:
+<li>Default validity: 1 year</li>
+<li>User-configurable: 1 day, 1 week, 1 month, 1 year</li>
+<li>No refresh token mechanism (re-auth required on expiry)</li>
+<li>Returned as: <code>S=s432:U=4a535ee:E=15d...</code></li>
+<strong>API Key Requirements</strong>:
+<li>Must request API key via Evernote contact form</li>
+<li>Manual review process (up to 5 business days)</li>
+<li>Two access levels: <strong>Basic</strong> (create notes, list notebooks/tags) and <strong>Full</strong> (read/modify existing notes)</li>
+<li>For sync functionality, <strong>Full</strong> access is required</li>
+<h3>Sync Architecture</h3>
+<strong>Services</strong>:
+<li><strong>UserStore</strong> - User account management (rarely needed)</li>
+<li><strong>NoteStore</strong> - Note content management (primary interface)</li>
+<strong>Sync State Tracking</strong>:
+<p>Each object has:
+<li><code>guid</code> - Globally unique identifier</li>
+<li><code>updateSequenceNum</code> (USN) - Increments on any change</li></p>
+<p>Account-level:
+<li><code>updateCount</code> - Total USN across all objects</li></p>
+<strong>Efficient Sync Algorithm</strong>:
+<pre><code class="language-">1. Store last known updateCount locally
+2. Call NoteStore.getSyncState()
+3. If updateCount unchanged → no changes, skip sync
+4. If updateCount changed → fetch changes since last sync
+5. Call NoteStore.getFilteredSyncChunk(afterUSN, maxEntries, filter)
+6. Process returned notes, notebooks, tags
+7. Update local updateCount
+8. Repeat until caught up
+</code></pre>
+<h3>Webhooks (Real-time Sync)</h3>
+<p>Webhooks provide push notifications for note changes.</p>
+<strong>Registration</strong>:
+<li>Email devsupport@evernote.com with:</li>
+  <li>API consumer key</li>
+  <li>Webhook URL</li>
+  <li>Optional filter (e.g., <code>resource:image/<em></code>)</li>
+<strong>Webhook Payload</strong>:
+<pre><code class="language-json">{
+  &quot;userId&quot;: &quot;12345678&quot;,
+  &quot;guid&quot;: &quot;abc123-note-guid&quot;,
+  &quot;notebookGuid&quot;: &quot;def456-notebook-guid&quot;,
+  &quot;reason&quot;: &quot;update&quot;
+}
+</code></pre>
+<strong>Reason Codes</strong>:
+<li><code>create</code> - New note created</li>
+<li><code>update</code> - Existing note modified</li>
+<li><code>business_create</code> - Business note created</li>
+<li><code>business_update</code> - Business note modified</li>
+<strong>Filter Examples</strong>:
+<li><code>resource:image/</em></code> - Notes with images</li>
+<li><code>notebook:Work</code> - Notes in "Work" notebook</li>
+<li><code>tag:important</code> - Notes tagged "important"</li>
+<h3>Rate Limits</h3>
+<li>Polling: Maximum once per 15 minutes</li>
+<li>API calls: Per-key limit (typically 60/hour, can request increase)</li>
+<li>Initial Sync Boost: 24-hour increased limit for new tokens (must request)</li>
+<h3>Sync Implementation</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Evernote.Sync do
+  @moduledoc &quot;&quot;&quot;
+  Ongoing synchronization with Evernote via Cloud API.
+  &quot;&quot;&quot;
+<p>alias Onelist.Import.Evernote.{Client, Mapper}</p>
+<p>@poll_interval_ms 15 <em> 60 </em> 1000  # 15 minutes minimum</p>
+<p>def sync_account(user_id, oauth_token) do
+    with {:ok, client} &lt;- Client.new(oauth_token),
+         {:ok, sync_state} &lt;- Client.get_sync_state(client),
+         {:ok, local_state} &lt;- get_local_sync_state(user_id) do</p>
+<p>if sync_state.update_count &gt; local_state.update_count do
+        do_incremental_sync(client, user_id, local_state.update_count)
+      else
+        {:ok, :no_changes}
+      end
+    end
+  end</p>
+<p>defp do_incremental_sync(client, user_id, after_usn) do
+    filter = %{
+      include_notes: true,
+      include_notebooks: true,
+      include_tags: true,
+      include_note_resources: true
+    }</p>
+<p>case Client.get_filtered_sync_chunk(client, after_usn, 100, filter) do
+      {:ok, chunk} -&gt;
+        process_sync_chunk(user_id, chunk)</p>
+<p>if chunk.chunkHighUSN &lt; chunk.updateCount do
+          # More changes to fetch
+          do_incremental_sync(client, user_id, chunk.chunkHighUSN)
+        else
+          save_local_sync_state(user_id, chunk.updateCount)
+          {:ok, :synced}
+        end</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end
+end
+</code></pre></p>
+<h3>Webhook Handler</h3>
+<pre><code class="language-elixir">defmodule OnelistWeb.EvernoteWebhookController do
+  use OnelistWeb, :controller
+<p>alias Onelist.Import.Evernote.Sync</p>
+<p>def handle(conn, params) do
+    %{
+      &quot;userId&quot; =&gt; evernote_user_id,
+      &quot;guid&quot; =&gt; note_guid,
+      &quot;notebookGuid&quot; =&gt; notebook_guid,
+      &quot;reason&quot; =&gt; reason
+    } = params</p>
+<p># Find Onelist user by linked Evernote account
+    case find_user_by_evernote_id(evernote_user_id) do
+      {:ok, user} -&gt;
+        # Queue sync job for this specific note
+        Oban.insert(Onelist.Workers.EvernoteSyncWorker.new(%{
+          user_id: user.id,
+          note_guid: note_guid,
+          reason: reason
+        }))</p>
+<p>send_resp(conn, 200, &quot;OK&quot;)</p>
+<p>:not_found -&gt;
+        send_resp(conn, 200, &quot;OK&quot;)  # Acknowledge but ignore
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Data Mapping</h2>
+<h3>Entity Mapping</h3>
+<table>
+<tr><th>Evernote</th><th>Onelist</th><th>Notes</th></tr>
+<tr><td>Note</td><td>Entry (type: "note")</td><td>Primary content unit</td></tr>
+<tr><td>Notebook</td><td>Tag (prefixed)</td><td><code>evernote:notebook:Name</code></td></tr>
+<tr><td>Tag</td><td>Tag</td><td>Direct mapping</td></tr>
+<tr><td>Tag Hierarchy</td><td>Tag (flattened)</td><td>Parent→Child → <code>parent/child</code></td></tr>
+<tr><td>Resource</td><td>Asset</td><td>Binary attachments</td></tr>
+<tr><td>Stack</td><td>Tag (prefixed)</td><td><code>evernote:stack:Name</code></td></tr>
+<tr><td>Saved Search</td><td>—</td><td>Not imported (Onelist has own search)</td></tr>
+</table>
+<h3>Note → Entry Mapping</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Evernote.Mapper do
+  @moduledoc &quot;&quot;&quot;
+  Maps Evernote data structures to Onelist entities.
+  &quot;&quot;&quot;
+<p>def map_note_to_entry(evernote_note, user_id) do
+    %{
+      user_id: user_id,
+      title: evernote_note.title,
+      entry_type: &quot;note&quot;,
+      source_type: &quot;api&quot;,  # or &quot;manual&quot; for ENEX import
+      content_created_at: evernote_note.created,
+      metadata: %{
+        &quot;evernote&quot; =&gt; %{
+          &quot;guid&quot; =&gt; evernote_note.guid,
+          &quot;notebook_guid&quot; =&gt; evernote_note.notebook_guid,
+          &quot;source_url&quot; =&gt; evernote_note.attributes.source_url,
+          &quot;author&quot; =&gt; evernote_note.attributes.author,
+          &quot;location&quot; =&gt; %{
+            &quot;latitude&quot; =&gt; evernote_note.attributes.latitude,
+            &quot;longitude&quot; =&gt; evernote_note.attributes.longitude,
+            &quot;altitude&quot; =&gt; evernote_note.attributes.altitude
+          },
+          &quot;imported_at&quot; =&gt; DateTime.utc_now()
+        }
+      }
+    }
+  end</p>
+<p>def map_resource_to_asset(resource, entry_id) do
+    %{
+      entry_id: entry_id,
+      filename: resource.filename || generate_filename(resource.mime),
+      mime_type: resource.mime,
+      file_size: byte_size(resource.data),
+      metadata: %{
+        &quot;evernote&quot; =&gt; %{
+          &quot;hash&quot; =&gt; resource.hash,
+          &quot;source_url&quot; =&gt; resource.attributes.source_url,
+          &quot;timestamp&quot; =&gt; resource.attributes.timestamp,
+          &quot;camera_make&quot; =&gt; resource.attributes.camera_make,
+          &quot;camera_model&quot; =&gt; resource.attributes.camera_model,
+          &quot;recognition_data&quot; =&gt; resource.recognition
+        },
+        &quot;dimensions&quot; =&gt; %{
+          &quot;width&quot; =&gt; resource.width,
+          &quot;height&quot; =&gt; resource.height
+        }
+      }
+    }
+  end
+end
+</code></pre></p>
+<h3>Tag Mapping Strategy</h3>
+<strong>Notebook Tags</strong>:
+<pre><code class="language-">Evernote Notebook: &quot;Work Projects&quot;
+→ Onelist Tag: &quot;evernote:notebook:Work Projects&quot;
+</code></pre>
+<strong>Stack Tags</strong>:
+<pre><code class="language-">Evernote Stack: &quot;Professional&quot;
+→ Onelist Tag: &quot;evernote:stack:Professional&quot;
+</code></pre>
+<strong>Regular Tags</strong> (direct mapping):
+<pre><code class="language-">Evernote Tag: &quot;important&quot;
+→ Onelist Tag: &quot;important&quot;
+</code></pre>
+<strong>Hierarchical Tags</strong> (flattened):
+<pre><code class="language-">Evernote: Parent Tag → Child Tag
+→ Onelist Tag: &quot;parent-tag/child-tag&quot;
+</code></pre>
+<strong>Conflict Resolution</strong>:
+<li>If tag already exists in Onelist, reuse it</li>
+<li>If notebook name conflicts with existing tag, prefix with <code>evernote:notebook:</code></li>
+<li>User can later merge/rename tags as desired</li>
+<hr>
+<h2>Content Conversion</h2>
+<h3>ENML → Markdown Conversion</h3>
+<p>ENML must be converted to Markdown for native editing in Onelist.</p>
+<strong>Conversion Pipeline</strong>:
+<pre><code class="language-">ENML Document
+    ↓
+Parse XML (extract en-note content)
+    ↓
+Process Evernote elements (en-media, en-todo, en-crypt)
+    ↓
+Convert HTML subset to Markdown
+    ↓
+Store as representation (type: &quot;markdown&quot;)
+</code></pre>
+<h3>Element Conversion Rules</h3>
+<table>
+<tr><th>ENML Element</th><th>Markdown Output</th></tr>
+<tr><td><code><en-note></code></td><td>(root, stripped)</td></tr>
+<tr><td><code><en-media type="image/<em>"></code></td><td><code>!<a href="asset_url">alt</a></code></td></tr>
+<tr><td><code><en-media type="audio/</em>"></code></td><td><code><a href="asset_url">Audio: filename</a></code></td></tr>
+<tr><td><code><en-media type="application/pdf"></code></td><td><code><a href="asset_url">PDF: filename</a></code></td></tr>
+<tr><td><code><en-todo checked="false"/></code></td><td><code>- [ ] </code></td></tr>
+<tr><td><code><en-todo checked="true"/></code></td><td><code>- [x] </code></td></tr>
+<tr><td><code><en-crypt></code></td><td><code>[Encrypted content - password required]</code></td></tr>
+<tr><td><code><p></code></td><td>Paragraph (double newline)</td></tr>
+<tr><td><code><br/></code></td><td>Line break (double space + newline)</td></tr>
+<tr><td><code><b></code>, <code><strong></code></td><td><code><strong>text</strong></code></td></tr>
+<tr><td><code><i></code>, <code><em></code></td><td><code><em>text</em></code></td></tr>
+<tr><td><code><u></code></td><td><code><u>text</u></code> (HTML passthrough)</td></tr>
+<tr><td><code><s></code>, <code><strike></code></td><td><code>~~text~~</code></td></tr>
+<tr><td><code><h1></code> - <code><h6></code></td><td><code>#</code> - <code>######</code></td></tr>
+<tr><td><code><ul></code>, <code><ol></code>, <code><li></code></td><td>Markdown lists</td></tr>
+<tr><td><code><blockquote></code></td><td><code>> quoted text</code></td></tr>
+<tr><td><code><pre></code>, <code><code></code></td><td>``<code> code blocks </code>`<code></td></tr>
+<tr><td></code><a href="..."><code></td><td></code><a href="url">text</a><code></td></tr>
+<tr><td></code><table><code></td><td>Markdown tables or HTML passthrough</td></tr>
+<tr><td></code><hr/><code></td><td></code>---<code></td></tr>
+<tr><td>Inline styles</td><td>Best-effort (often stripped)</td></tr>
+</table>
+<h3>Conversion Implementation</h3>
+<pre><code class="language-elixir">defmodule Onelist.Import.Evernote.EnmlConverter do
+  @moduledoc &quot;&quot;&quot;
+  Converts ENML content to Markdown.
+  &quot;&quot;&quot;
+<p>def convert(enml_content, resources) do
+    enml_content
+    |&gt; parse_enml()
+    |&gt; process_evernote_elements(resources)
+    |&gt; convert_html_to_markdown()
+    |&gt; cleanup_output()
+  end</p>
+<p>defp process_evernote_elements(doc, resources) do
+    doc
+    |&gt; replace_en_media(resources)
+    |&gt; replace_en_todo()
+    |&gt; replace_en_crypt()
+  end</p>
+<p>defp replace_en_media(doc, resources) do
+    # Find each &lt;en-media&gt; element
+    # Look up resource by hash
+    # Replace with appropriate markdown based on MIME type
+    Enum.reduce(find_en_media(doc), doc, fn media, acc -&gt;
+      hash = get_attribute(media, &quot;hash&quot;)
+      resource = Enum.find(resources, &amp;(&amp;1.hash == hash))</p>
+<p>replacement = case resource do
+        %{mime: &quot;image/&quot; &lt;&gt; _} -&gt;
+          &quot;!<a href="#{asset_url(resource">#{resource.filename}</a>})&quot;
+        %{mime: &quot;audio/&quot; &lt;&gt; _} -&gt;
+          &quot;<a href="#{asset_url(resource">Audio: #{resource.filename}</a>})&quot;
+        %{mime: &quot;application/pdf&quot;} -&gt;
+          &quot;<a href="#{asset_url(resource">PDF: #{resource.filename}</a>})&quot;
+        _ -&gt;
+          &quot;<a href="#{asset_url(resource">Attachment: #{resource.filename}</a>})&quot;
+      end</p>
+<p>replace_element(acc, media, replacement)
+    end)
+  end</p>
+<p>defp replace_en_todo(doc) do
+    doc
+    |&gt; String.replace(~r/&lt;en-todo\s+checked=&quot;true&quot;\s<em>\/&gt;/, &quot;- [x] &quot;)
+    |&gt; String.replace(~r/&lt;en-todo\s+checked=&quot;false&quot;\s</em>\/&gt;/, &quot;- [ ] &quot;)
+    |&gt; String.replace(~r/&lt;en-todo\s<em>\/&gt;/, &quot;- [ ] &quot;)
+  end</p>
+<p>defp replace_en_crypt(doc) do
+    Regex.replace(
+      ~r/&lt;en-crypt[^&gt;]</em>&gt;.<em>?&lt;\/en-crypt&gt;/s,
+      doc,
+      &quot;[Encrypted content - password required]&quot;
+    )
+  end
+end
+</code></pre></p>
+<h3>Internal Link Handling</h3>
+<p>Evernote internal links format:
+<pre><code class="language-">evernote:///view/[userId]/[shardId]/[noteGuid]/[noteGuid]/
+</code></pre></p>
+<strong>Strategy</strong>:
+1. Parse internal links during import
+2. Store as placeholder: </code>[[evernote:noteGuid]]<code>
+3. After full import, resolve to Onelist entry IDs
+4. Replace with Onelist internal links: </code>[[entry:publicId]]<code>
+<pre><code class="language-elixir">defp resolve_internal_links(content, guid_to_entry_map) do
+  Regex.replace(
+    ~r/evernote:\/\/\/view\/[^\/]+\/[^\/]+\/([a-f0-9-]+)\/[^\/]+\//,
+    content,
+    fn _, guid -&gt;
+      case Map.get(guid_to_entry_map, guid) do
+        nil -&gt; &quot;[Broken Evernote link]&quot;
+        entry -&gt; &quot;[[entry:#{entry.public_id}]]&quot;
+      end
+    end
+  )
+end
+</code></pre>
+<h3>Preserving Original Content</h3>
+<p>Store multiple representations:</p>
+<pre><code class="language-elixir">def create_representations(entry, enml_content, resources) do
+  markdown = EnmlConverter.convert(enml_content, resources)
+<p>[
+    # Primary editable representation
+    %{
+      entry_id: entry.id,
+      type: &quot;markdown&quot;,
+      content: markdown,
+      metadata: %{&quot;source&quot; =&gt; &quot;evernote_import&quot;}
+    },
+    # Archive original for reference
+    %{
+      entry_id: entry.id,
+      type: &quot;html&quot;,
+      content: enml_content,
+      metadata: %{&quot;source&quot; =&gt; &quot;evernote_original&quot;, &quot;format&quot; =&gt; &quot;enml&quot;}
+    }
+  ]
+end
+</code></pre></p>
+<hr>
+<h2>Implementation Phases</h2>
+<h3>Phase 1: ENEX File Import (MVP)</h3>
+<strong>Duration</strong>: 2-3 weeks
+<strong>Scope</strong>:
+<li>ENEX file upload and parsing</li>
+<li>Note → Entry conversion</li>
+<li>Tag extraction and creation</li>
+<li>Resource → Asset extraction</li>
+<li>Basic ENML → Markdown conversion</li>
+<li>Import progress tracking</li>
+<li>Error handling and reporting</li>
+<strong>Deliverables</strong>:
+<li></code>Onelist.Import.Evernote.EnexParser<code> - XML parsing</li>
+<li></code>Onelist.Import.Evernote.Mapper<code> - Data mapping</li>
+<li></code>Onelist.Import.Evernote.EnmlConverter<code> - Content conversion</li>
+<li></code>Onelist.Import.Evernote.ImportJob<code> - Background processing</li>
+<li>Import UI in settings</li>
+<strong>User Flow</strong>:
+1. User exports ENEX from Evernote
+2. User uploads ENEX to Onelist
+3. Preview import (note count, tags, attachments)
+4. Configure options (notebook→tag mapping, duplicate handling)
+5. Start import
+6. Monitor progress
+7. Review import report
+<h3>Phase 2: Enhanced Conversion</h3>
+<strong>Duration</strong>: 1-2 weeks
+<strong>Scope</strong>:
+<li>Improved ENML → Markdown conversion</li>
+<li>Table conversion</li>
+<li>Code block detection</li>
+<li>Checkbox preservation</li>
+<li>Internal link resolution</li>
+<li>Duplicate detection (by content hash)</li>
+<strong>Deliverables</strong>:
+<li>Enhanced </code>EnmlConverter<code> with better table/code handling</li>
+<li></code>DuplicateDetector<code> module</li>
+<li>Internal link resolution post-processor</li>
+<h3>Phase 3: API Authentication & Setup</h3>
+<strong>Duration</strong>: 1-2 weeks
+<strong>Scope</strong>:
+<li>OAuth 1.0a flow implementation</li>
+<li>Evernote account linking UI</li>
+<li>Token storage and management</li>
+<li>API key application (external process)</li>
+<strong>Deliverables</strong>:
+<li></code>Onelist.Import.Evernote.OAuth<code> - Authentication</li>
+<li></code>Onelist.Import.Evernote.Client<code> - API client</li>
+<li>Account linking UI</li>
+<li>Token refresh handling</li>
+<strong>Prerequisites</strong>:
+<li>Apply for Evernote API key (5 business day review)</li>
+<li>Request Full access level</li>
+<li>Request Initial Sync Boost (optional)</li>
+<h3>Phase 4: Initial Sync</h3>
+<strong>Duration</strong>: 2-3 weeks
+<strong>Scope</strong>:
+<li>Full account sync (first-time)</li>
+<li>Sync state tracking</li>
+<li>Progress reporting for large libraries</li>
+<li>Notebook fetching (vs ENEX limitation)</li>
+<li>Tag hierarchy preservation</li>
+<strong>Deliverables</strong>:
+<li></code>Onelist.Import.Evernote.Sync<code> - Sync logic</li>
+<li></code>Onelist.Import.Evernote.SyncState<code> - State persistence</li>
+<li>Background sync worker</li>
+<h3>Phase 5: Ongoing Sync</h3>
+<strong>Duration</strong>: 2-3 weeks
+<strong>Scope</strong>:
+<li>Webhook integration</li>
+<li>Incremental sync</li>
+<li>Conflict detection</li>
+<li>Bi-directional sync (optional, complex)</li>
+<li>Sync scheduling and management</li>
+<strong>Deliverables</strong>:
+<li>Webhook endpoint and handler</li>
+<li>Incremental sync algorithm</li>
+<li>Conflict resolution UI</li>
+<li>Sync dashboard</li>
+<h3>Phase 6: Polish & Edge Cases</h3>
+<strong>Duration</strong>: 1-2 weeks
+<strong>Scope</strong>:
+<li>Encrypted content handling</li>
+<li>Large file optimization</li>
+<li>Error recovery</li>
+<li>Import/sync history</li>
+<li>Unlink account flow</li>
+<hr>
+<h2>Technical Considerations</h2>
+<h3>Performance</h3>
+<strong>Large Libraries</strong>:
+<li>Stream parse ENEX files (don't load entire file into memory)</li>
+<li>Process notes in batches (50-100 at a time)</li>
+<li>Use background jobs (Oban) for import/sync</li>
+<li>Show progress with estimated completion</li>
+<strong>Asset Storage</strong>:
+<li>Decode base64 resources to temp files first</li>
+<li>Upload to storage backend asynchronously</li>
+<li>Generate thumbnails in background</li>
+<strong>API Efficiency</strong>:
+<li>Cache sync state per user</li>
+<li>Use </code>getSyncState()<code> before polling</li>
+<li>Request Initial Sync Boost for new connections</li>
+<li>Batch operations where possible</li>
+<h3>Error Handling</h3>
+<strong>ENEX Parsing Errors</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Import.Evernote.ImportError do
+  defexception [:message, :note_title, :line_number, :recoverable]
+<p>def recoverable?(%__MODULE__{recoverable: r}), do: r
+end</p>
+<p>def parse_with_recovery(file_path) do
+  file_path
+  |&gt; stream_notes()
+  |&gt; Stream.map(fn note -&gt;
+    case parse_note(note) do
+      {:ok, parsed} -&gt; {:ok, parsed}
+      {:error, reason} -&gt;
+        Logger.warning(&quot;Failed to parse note: #{reason}&quot;)
+        {:error, %ImportError{
+          message: reason,
+          note_title: extract_title(note),
+          recoverable: true
+        }}
+    end
+  end)
+  |&gt; Enum.split_with(&amp;match?({:ok, _}, &amp;1))
+end
+</code></pre></p>
+<strong>API Errors</strong>:
+<li>Rate limit exceeded: Back off, retry with exponential delay</li>
+<li>Token expired: Prompt user to re-authenticate</li>
+<li>Note not found: Mark as deleted in Onelist</li>
+<li>Network errors: Queue for retry</li>
+<h3>Security</h3>
+<strong>Token Storage</strong>:
+<li>Encrypt OAuth tokens at rest</li>
+<li>Store in separate credentials table</li>
+<li>Clear on account unlink</li>
+<strong>Webhook Validation</strong>:
+<li>Verify webhook source (Evernote IPs or signature if available)</li>
+<li>Rate limit webhook endpoint</li>
+<li>Validate payload structure</li>
+<strong>User Data</strong>:
+<li>Process import in user's context only</li>
+<li>No cross-user data access</li>
+<li>Audit log for import/sync operations</li>
+<h3>Encrypted Content</h3>
+<p>Evernote's </code><en-crypt>` contains client-side encrypted text:</p>
+<strong>Options</strong>:
+1. <strong>Skip</strong>: Import as placeholder "[Encrypted - decrypt in Evernote]"
+2. <strong>Prompt</strong>: Ask user for passphrase during import (not recommended - security risk)
+3. <strong>Preserve</strong>: Store encrypted blob, decrypt on demand (requires passphrase)
+<strong>Recommendation</strong>: Option 1 (skip) for MVP, consider Option 3 later.
+<h3>Conflict Resolution (Bi-directional Sync)</h3>
+<p>If enabling bi-directional sync:</p>
+<table>
+<tr><th>Scenario</th><th>Resolution</th></tr>
+<tr><td>Note edited in both</td><td>Show conflict UI, let user choose</td></tr>
+<tr><td>Note deleted in Evernote</td><td>Soft delete in Onelist (recoverable)</td></tr>
+<tr><td>Note deleted in Onelist</td><td>Do not delete in Evernote (safety)</td></tr>
+<tr><td>Tag added in Evernote</td><td>Add to Onelist</td></tr>
+<tr><td>Tag removed in Evernote</td><td>Remove from Onelist (with confirmation)</td></tr>
+</table>
+<strong>Recommendation</strong>: Start with one-way sync (Evernote → Onelist). Bi-directional adds significant complexity.
+<hr>
+<h2>User Experience</h2>
+<h3>Import UI</h3>
+<strong>Upload Page</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Import from Evernote                       │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ┌─────────────────────────────────────┐   │
+│  │  📁 Drop ENEX file here             │   │
+│  │     or click to browse              │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+│  How to export from Evernote:              │
+│  1. Open Evernote desktop app              │
+│  2. Right-click notebook → Export Notes    │
+│  3. Choose &quot;ENEX format&quot;                   │
+│  4. Upload the file here                   │
+│                                             │
+│  ─────── or ───────                        │
+│                                             │
+│  [🔗 Connect Evernote Account]             │
+│  Enable ongoing sync with your account     │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>Import Preview</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Import Preview: work-notes.enex           │
+├─────────────────────────────────────────────┤
+│                                             │
+│  📝 Notes: 247                             │
+│  🏷️  Tags: 34                               │
+│  📎 Attachments: 156 (342 MB)              │
+│                                             │
+│  Options:                                   │
+│  ☑ Create tag for notebook name            │
+│  ☑ Preserve Evernote metadata              │
+│  ☐ Skip duplicates (by content hash)       │
+│                                             │
+│  [Cancel]              [Start Import →]    │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>Import Progress</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Importing from Evernote...                │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ████████████░░░░░░░░░░░░░░  48%           │
+│                                             │
+│  Notes: 119 / 247                          │
+│  Assets: 76 / 156                          │
+│  Errors: 2                                 │
+│                                             │
+│  Currently processing:                      │
+│  &quot;Meeting notes - Q4 planning&quot;             │
+│                                             │
+│  [Cancel Import]                           │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<strong>Import Report</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  ✅ Import Complete                         │
+├─────────────────────────────────────────────┤
+│                                             │
+│  Successfully imported:                     │
+│  • 245 notes                               │
+│  • 34 tags                                 │
+│  • 154 attachments                         │
+│                                             │
+│  Skipped (2):                              │
+│  • &quot;Corrupted note&quot; - Invalid ENML         │
+│  • &quot;Empty note&quot; - No content               │
+│                                             │
+│  [View Imported Notes]  [Import More]      │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<h3>Sync Management</h3>
+<strong>Connected Account</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────┐
+│  Evernote Sync                              │
+├─────────────────────────────────────────────┤
+│                                             │
+│  ✅ Connected: user@example.com            │
+│  Last sync: 5 minutes ago                  │
+│  Notes synced: 1,247                       │
+│                                             │
+│  Sync mode:                                 │
+│  ◉ Automatic (real-time via webhooks)      │
+│  ○ Manual only                             │
+│                                             │
+│  [Sync Now]  [View History]  [Disconnect]  │
+│                                             │
+└─────────────────────────────────────────────┘
+</code></pre>
+<h3>Error States</h3>
+<strong>API Key Pending</strong>:
+<pre><code class="language-">Evernote sync requires API approval.
+Status: Pending review (submitted Jan 15)
+Expected: ~5 business days
+<p>[Use ENEX Import Instead]
+</code></pre></p>
+<strong>Token Expired</strong>:
+<pre><code class="language-">⚠️ Your Evernote connection has expired.
+Please reconnect to resume syncing.
+<p>[Reconnect Evernote]
+</code></pre></p>
+<strong>Sync Conflict</strong>:
+<pre><code class="language-">⚠️ Conflict detected for &quot;Meeting Notes&quot;
+<p>This note was edited in both Evernote and Onelist.</p>
+<p>[Keep Onelist Version]  [Keep Evernote Version]  [View Diff]
+</code></pre></p>
+<hr>
+<h2>Success Metrics</h2>
+<h3>Phase 1 (ENEX Import)</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Parse success rate</td><td>>99% of valid ENEX files</td></tr>
+<tr><td>Content fidelity</td><td>>95% of formatting preserved</td></tr>
+<tr><td>Import speed</td><td>>50 notes/second</td></tr>
+<tr><td>Asset extraction</td><td>100% of resources recovered</td></tr>
+</table>
+<h3>Phase 5 (Ongoing Sync)</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Sync latency (webhook)</td><td><30 seconds</td></tr>
+<tr><td>Sync latency (polling)</td><td><15 minutes</td></tr>
+<tr><td>Conflict rate</td><td><1% of synced notes</td></tr>
+<tr><td>API error rate</td><td><0.1%</td></tr>
+</table>
+<hr>
+<h2>Dependencies</h2>
+<h3>External</h3>
+<li><strong>Evernote API Key</strong>: Must apply and wait for approval (5 business days)</li>
+<li><strong>Webhook registration</strong>: Manual process via email</li>
+<li><strong>OAuth consumer key/secret</strong>: Provided with API key</li>
+<h3>Internal</h3>
+<li>Storage backend for assets (already implemented)</li>
+<li>Background job processing (Oban - already in use)</li>
+<li>User authentication (already implemented)</li>
+<h3>Libraries to Add</h3>
+<pre><code class="language-elixir"># mix.exs
+defp deps do
+  [
+    # XML parsing
+    {:sweet_xml, &quot;~&gt; 0.7&quot;},
+<p># OAuth 1.0a
+    {:oauther, &quot;~&gt; 1.3&quot;},</p>
+<p># HTTP client (if not already present)
+    {:req, &quot;~&gt; 0.4&quot;},</p>
+<p># HTML to Markdown (optional, can implement custom)
+    {:html_to_markdown, &quot;~&gt; 0.1&quot;}  # or implement custom converter
+  ]
+end
+</code></pre></p>
+<hr>
+<h2>References</h2>
+<h3>Official Documentation</h3>
+<li><a href="https://dev.evernote.com/doc/">Evernote Developer Documentation</a></li>
+<li><a href="https://dev.evernote.com/doc/articles/enml.php">ENML Specification</a></li>
+<li><a href="https://dev.evernote.com/doc/articles/synchronization.php">Synchronization Guide</a></li>
+<li><a href="https://dev.evernote.com/doc/articles/authentication.php">OAuth Authentication</a></li>
+<li><a href="https://dev.evernote.com/doc/articles/data_structure.php">Data Structure</a></li>
+<h3>ENEX Format</h3>
+<li><a href="https://evernote.com/blog/how-evernotes-xml-export-format-works">Evernote Export Format Blog</a></li>
+<li><a href="https://www.myinfoapp.com/blog/enex-file-format">ENEX Format Analysis</a></li>
+<li><a href="https://help.evernote.com/hc/en-us/articles/209005557-Export-Notes-and-Notebooks-as-ENEX-or-HTML">Export Help Article</a></li>
+<h3>Open Source References</h3>
+<li><a href="https://github.com/akosbalasko/yarle">Yarle - ENEX to Markdown</a> - Node.js</li>
+<li><a href="https://github.com/CarlLee/ENML_PY">ENML_PY</a> - Python ENML converter</li>
+<li><a href="https://github.com/laurent22/joplin">Joplin Import</a> - Reference implementation</li>
+<h3>Elixir XML Libraries</h3>
+<li><a href="https://hexdocs.pm/sweet_xml/">SweetXml</a></li>
+<li><a href="https://hexdocs.pm/saxy/">Saxy</a></li>
+<li><a href="https://hexdocs.pm/fast_xml/">fast_xml</a></li>
+</ul>
+<hr>
+<h2>Appendix: ENEX DTD (Version 4 Summary)</h2>
+<pre><code class="language-dtd">&lt;!ELEMENT en-export (note</em>)&gt;
+&lt;!ATTLIST en-export export-date CDATA #REQUIRED&gt;
+&lt;!ATTLIST en-export application CDATA #REQUIRED&gt;
+&lt;!ATTLIST en-export version CDATA #REQUIRED&gt;
+<p>&lt;!ELEMENT note (title, content, created?, updated?, tag<em>, note-attributes?, resource</em>)&gt;</p>
+<p>&lt;!ELEMENT title (#PCDATA)&gt;
+&lt;!ELEMENT content (#PCDATA)&gt;
+&lt;!ELEMENT created (#PCDATA)&gt;
+&lt;!ELEMENT updated (#PCDATA)&gt;
+&lt;!ELEMENT tag (#PCDATA)&gt;</p>
+<p>&lt;!ELEMENT note-attributes (
+  subject-date?, latitude?, longitude?, altitude?,
+  author?, source?, source-url?, source-application?,
+  reminder-order?, reminder-time?, reminder-done-time?,
+  place-name?, content-class?
+)&gt;</p>
+<p>&lt;!ELEMENT resource (data, mime, width?, height?,
+  duration?, recognition?, resource-attributes?)&gt;</p>
+<p>&lt;!ELEMENT data (#PCDATA)&gt;
+&lt;!ATTLIST data encoding CDATA #IMPLIED&gt;</p>
+<p>&lt;!ELEMENT resource-attributes (
+  source-url?, timestamp?, latitude?, longitude?, altitude?,
+  camera-make?, camera-model?, reco-type?, file-name?,
+  attachment?, application-data?
+)&gt;
+</code></pre></p>
+<hr>
+<em>Document created: 2026-01-28</em>
+<em>Last updated: 2026-01-28</em>
+  </article>
+</body>
+</html>

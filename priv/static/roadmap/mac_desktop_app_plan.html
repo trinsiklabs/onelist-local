@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Mac Desktop App Development Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Mac Desktop App Development Plan</h1>
+<strong>Document Version:</strong> 2026-01-29
+<strong>Status:</strong> Planning
+<strong>Priority:</strong> Post-MVP (Phase 3 in launch plan)
+<strong>Decisions Finalized:</strong> 2026-01-29
+<hr>
+<h2>1. Executive Summary</h2>
+<h3>1.1 Vision</h3>
+<p>The Onelist Mac app is a <strong>full endpoint</strong> that runs the complete Onelist stack locally, providing:
+<ul>
+<li>Native macOS integration (menu bar, Spotlight, Share Extension, notifications)</li>
+<li>Local-first data storage with P2P sync to other endpoints</li>
+<li>Offline-capable operation with eventual consistency</li>
+<li>Privacy-preserving architecture (data never leaves your devices unless you choose cloud sync)</li></p>
+<h3>1.2 Key Principle</h3>
+<strong>The Mac app is NOT a thin client.</strong> It runs:
+<li>Full Phoenix/Elixir application</li>
+<li>Local PostgreSQL database (embedded or system)</li>
+<li>Local asset storage</li>
+<li>P2P sync engine</li>
+<p>Mobile apps (iOS), by contrast, ARE thin clients that connect to endpoints.</p>
+<h3>1.3 Why This Matters</h3>
+<table>
+<tr><th>Use Case</th><th>Solution</th></tr>
+<tr><td>Privacy-focused users</td><td>All data stays local, no cloud required</td></tr>
+<tr><td>Developers with OpenClaw</td><td>Unified memory across Mac + VPS</td></tr>
+<tr><td>Power users</td><td>Fast local search, offline access</td></tr>
+<tr><td>Free tier users</td><td>Full functionality without subscription</td></tr>
+</table>
+<hr>
+<h2>2. Technology Stack Decision</h2>
+<h3>2.1 Options Considered</h3>
+<table>
+<tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+<tr><td><strong>Tauri + Embedded Phoenix</strong></td><td>Lightweight (~10MB), native WebView, Rust for system integration, cross-platform potential</td><td>Complex packaging, two runtimes (Rust + BEAM)</td></tr>
+<tr><td><strong>Swift Native + Embedded Phoenix</strong></td><td>Best macOS integration, native UI, App Store ready</td><td>macOS only, significant Swift development</td></tr>
+<tr><td><strong>Electron + Embedded Phoenix</strong></td><td>Familiar, cross-platform, large ecosystem</td><td>Heavy (~150MB+), Chromium overhead</td></tr>
+<tr><td><strong>LiveView Desktop (experimental)</strong></td><td>Pure Elixir, no additional runtime</td><td>Not production-ready, limited native integration</td></tr>
+</table>
+<h3>2.2 Recommended Approach: Phased Development</h3>
+<strong>v1 (MVP): Tauri + Embedded Phoenix</strong>
+<strong>v2 (Post-MVP): Swift Shell + Embedded Phoenix</strong>
+<h4>v1: Tauri + Phoenix LiveView</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ONELIST MAC APP ARCHITECTURE                         │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                         TAURI SHELL (Rust)                           │   │
+│  │                                                                      │   │
+│  │  • Native window management                                          │   │
+│  │  • Menu bar integration                                              │   │
+│  │  • System tray                                                       │   │
+│  │  • File system access                                                │   │
+│  │  • Notifications                                                     │   │
+│  │  • Auto-updater                                                      │   │
+│  │  • Spotlight integration                                             │   │
+│  │  • Share Extension bridge                                            │   │
+│  │                                                                      │   │
+│  │  ┌───────────────────────────────────────────────────────────────┐  │   │
+│  │  │                    WKWebView (System)                          │  │   │
+│  │  │                                                                │  │   │
+│  │  │  Renders Onelist LiveView UI                                   │  │   │
+│  │  │  ← Phoenix @ localhost:4000 →                                  │  │   │
+│  │  │                                                                │  │   │
+│  │  └───────────────────────────────────────────────────────────────┘  │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                    │                                        │
+│                                    │ HTTP/WebSocket                         │
+│                                    ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    EMBEDDED PHOENIX SERVER                           │   │
+│  │                                                                      │   │
+│  │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐     │   │
+│  │  │  Onelist Core   │  │  Onelist Web    │  │  P2P Sync       │     │   │
+│  │  │  (Phoenix API)  │  │  (LiveView UI)  │  │  Engine         │     │   │
+│  │  └────────┬────────┘  └─────────────────┘  └────────┬────────┘     │   │
+│  │           │                                          │              │   │
+│  │           ▼                                          ▼              │   │
+│  │  ┌─────────────────────────────────────────────────────────────┐   │   │
+│  │  │                    PostgreSQL (Embedded)                     │   │   │
+│  │  │                    ~/Library/Application Support/Onelist/    │   │   │
+│  │  └─────────────────────────────────────────────────────────────┘   │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  LOCAL STORAGE:                                                             │
+│  ~/Library/Application Support/Onelist/                                     │
+│  ├── data/           PostgreSQL data directory                             │
+│  ├── assets/         Local asset files                                     │
+│  ├── config/         User preferences                                      │
+│  └── logs/           Application logs                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.3 Rationale</h3>
+<table>
+<tr><th>Factor</th><th>Tauri Advantage</th></tr>
+<tr><td>Bundle size</td><td>~10-20MB (vs ~150MB+ Electron)</td></tr>
+<tr><td>Memory usage</td><td>Native WebView, no Chromium</td></tr>
+<tr><td>macOS integration</td><td>Rust can call Objective-C/Swift via FFI</td></tr>
+<tr><td>Security</td><td>Rust's memory safety, no Node.js</td></tr>
+<tr><td>Updates</td><td>Built-in auto-updater</td></tr>
+<tr><td>Cross-platform</td><td>Future Windows/Linux support</td></tr>
+</table>
+<h3>2.4 v2: Swift Shell + Embedded Phoenix (Post-MVP)</h3>
+<p>After v1 proves the embedded Phoenix approach, v2 will replace Tauri with a native Swift shell:</p>
+<li>SwiftUI for app chrome, preferences, onboarding</li>
+<li>WKWebView for main content (still LiveView)</li>
+<li>Native Share Extension</li>
+<li>Better macOS integration via direct Swift APIs</li>
+<li>Improved launch time (~1-2s vs 3-5s)</li>
+<li>Smaller memory footprint (~150MB vs 200-300MB)</li>
+<strong>Prerequisites for v2:</strong>
+<li>v1 stable and validated</li>
+<li>User feedback collected</li>
+<li>Performance benchmarks established</li>
+<hr>
+<h2>3. Core Components</h2>
+<h3>3.1 Embedded Phoenix Server</h3>
+<p>The Mac app bundles a complete Erlang/OTP runtime with the Phoenix application.</p>
+<strong>Packaging approach:</strong>
+<pre><code class="language-">Onelist.app/
+├── Contents/
+│   ├── MacOS/
+│   │   ├── Onelist           # Tauri binary (Rust)
+│   │   ├── onelist_server    # Burrito-packaged Elixir release
+│   │   └── postgres/         # Embedded PostgreSQL binaries
+│   ├── Resources/
+│   │   ├── priv/             # Phoenix static assets
+│   │   └── migrations/       # Ecto migrations
+│   └── Info.plist
+</code></pre>
+<strong>Elixir packaging options:</strong>
+<table>
+<tr><th>Tool</th><th>Description</th><th>Recommendation</th></tr>
+<tr><td><strong>Burrito</strong></td><td>Bundles BEAM + app into single binary</td><td>Recommended</td></tr>
+<tr><td><strong>Bakeware</strong></td><td>Similar to Burrito, Nerves team</td><td>Alternative</td></tr>
+<tr><td><strong>Mix release</strong></td><td>Standard release, requires BEAM installed</td><td>Not suitable</td></tr>
+</table>
+<h3>3.2 Embedded PostgreSQL</h3>
+<strong>Options:</strong>
+<table>
+<tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+<tr><td><strong>Embedded PostgreSQL</strong></td><td>Full compatibility, pgvector support</td><td>Larger bundle (~50MB)</td></tr>
+<tr><td><strong>SQLite + Ecto adapter</strong></td><td>Tiny, no separate process</td><td>Limited features, no pgvector</td></tr>
+<tr><td><strong>System PostgreSQL</strong></td><td>User installs separately</td><td>Poor UX, support burden</td></tr>
+</table>
+<strong>Recommendation: Embedded PostgreSQL</strong>
+<li>Bundle PostgreSQL binaries for macOS (arm64 + x86_64)</li>
+<li>Initialize database in <code>~/Library/Application Support/Onelist/data/</code></li>
+<li>Start PostgreSQL as child process on app launch</li>
+<li>Graceful shutdown on app quit</li>
+<strong>Implementation:</strong>
+<pre><code class="language-elixir">defmodule Onelist.Desktop.PostgresManager do
+  use GenServer
+<p>@pg_dir Application.app_dir(:onelist, &quot;priv/postgres&quot;)
+  @data_dir &quot;~/Library/Application Support/Onelist/data&quot;</p>
+<p>def start_link(_opts) do
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  end</p>
+<p>def init(_) do
+    ensure_data_dir()
+    maybe_init_db()
+    start_postgres()
+    {:ok, %{}}
+  end</p>
+<p>defp start_postgres do
+    port = Port.open({:spawn_executable, pg_ctl_path()}, [
+      :binary,
+      args: [&quot;start&quot;, &quot;-D&quot;, data_dir(), &quot;-l&quot;, log_path()]
+    ])
+    wait_for_ready()
+  end</p>
+<p>def terminate(_reason, _state) do
+    System.cmd(pg_ctl_path(), [&quot;stop&quot;, &quot;-D&quot;, data_dir()])
+  end
+end
+</code></pre></p>
+<h3>3.3 P2P Sync Engine</h3>
+<p>The Mac app participates as a full peer in the Onelist sync network.</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         P2P SYNC ARCHITECTURE                                │
+│                                                                              │
+│   ┌─────────────┐         ┌─────────────┐         ┌─────────────┐          │
+│   │  Mac App    │◄──P2P──►│  VPS w/     │◄──P2P──►│  Another    │          │
+│   │  (Home)     │         │  OpenClaw    │         │  Mac        │          │
+│   └──────┬──────┘         └─────────────┘         └─────────────┘          │
+│          │                                                                   │
+│          │ Remote client (API)                                              │
+│          ▼                                                                   │
+│   ┌─────────────┐                                                           │
+│   │  iOS App    │  (connects to Mac when on same network)                   │
+│   └─────────────┘                                                           │
+│                                                                              │
+│   SYNC CAPABILITIES:                                                        │
+│   ├── LAN Discovery (mDNS/Bonjour) ─────────► Zero-config local sync       │
+│   ├── WAN Discovery (Onelist server) ───────► Cross-network sync           │
+│   └── Cloud Sync (paid tier) ───────────────► E2EE cloud backup            │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Sync features:</strong>
+<table>
+<tr><th>Feature</th><th>MVP</th><th>Post-MVP</th></tr>
+<tr><td>LAN sync (mDNS)</td><td>✅</td><td></td></tr>
+<tr><td>Entry/tag sync</td><td>✅</td><td></td></tr>
+<tr><td>Asset metadata sync</td><td>✅</td><td></td></tr>
+<tr><td>Asset file sync</td><td>✅</td><td></td></tr>
+<tr><td>Conflict resolution (LWW auto)</td><td>✅</td><td></td></tr>
+<tr><td>Vector clocks</td><td>✅</td><td></td></tr>
+<tr><td>WAN discovery</td><td></td><td>✅</td></tr>
+<tr><td>NAT hole punching</td><td></td><td>✅</td></tr>
+<tr><td>Conflict notification UI</td><td></td><td>✅</td></tr>
+</table>
+<h3>3.4 Tauri Shell Features</h3>
+<strong>Menu Bar App:</strong>
+<pre><code class="language-">┌────────────────────────────────────────┐
+│  [Onelist Icon]                        │
+├────────────────────────────────────────┤
+│  ▶ Quick Capture         ⌘⇧N          │
+│  ▶ Search Entries        ⌘⇧O          │
+│  ─────────────────────────────────     │
+│  ▶ Open Onelist          ⌘O           │
+│  ▶ Recent Entries        ▶            │
+│  ─────────────────────────────────     │
+│  ● Syncing (3 peers)                   │
+│  ─────────────────────────────────     │
+│  ▶ Preferences...        ⌘,           │
+│  ▶ Quit Onelist          ⌘Q           │
+└────────────────────────────────────────┘
+</code></pre>
+<strong>Global Shortcuts (MVP):</strong>
+<li><code>⌃⌘N</code> - Quick capture (new note)</li>
+<li><code>⌃⌘O</code> - Quick search overlay</li>
+<li><code>⌃⌘V</code> - Capture clipboard as entry</li>
+<em>Note: Using Control+Command to avoid conflicts with common ⌘⇧ shortcuts in other apps.</em>
+<strong>System Integration:</strong>
+<li>Spotlight indexing via Core Spotlight API</li>
+<li>Share Extension for Safari/apps</li>
+<li>Notification Center integration</li>
+<li>Login item (start on boot)</li>
+<li>Dock icon with badge (unread count)</li>
+<hr>
+<h2>4. Feature Specification</h2>
+<h3>4.1 MVP Features (v1)</h3>
+<table>
+<tr><th>Feature</th><th>Description</th><th>Priority</th></tr>
+<tr><td><strong>Embedded server</strong></td><td>Phoenix + PostgreSQL running locally</td><td>P0</td></tr>
+<tr><td><strong>LiveView UI</strong></td><td>Toast UI Editor in native window</td><td>P0</td></tr>
+<tr><td><strong>Menu bar</strong></td><td>Status icon, quick actions (optional via preference)</td><td>P0</td></tr>
+<tr><td><strong>Quick Capture</strong></td><td><code>⌃⌘N</code> global shortcut</td><td>P0</td></tr>
+<tr><td><strong>Quick Search</strong></td><td><code>⌃⌘O</code> global shortcut</td><td>P0</td></tr>
+<tr><td><strong>Clipboard Capture</strong></td><td><code>⌃⌘V</code> global shortcut</td><td>P0</td></tr>
+<tr><td><strong>Spotlight integration</strong></td><td>Core Spotlight API indexing</td><td>P0</td></tr>
+<tr><td><strong>LAN sync</strong></td><td>mDNS discovery, peer sync</td><td>P0</td></tr>
+<tr><td><strong>Local assets</strong></td><td>File storage in app support dir</td><td>P0</td></tr>
+<tr><td><strong>Conflict resolution</strong></td><td>Auto-resolve with LWW</td><td>P0</td></tr>
+<tr><td><strong>Auto-start</strong></td><td>Launch on login option</td><td>P1</td></tr>
+<tr><td><strong>Preferences</strong></td><td>Native settings window</td><td>P1</td></tr>
+<tr><td><strong>Auto-update</strong></td><td>Tauri updater integration</td><td>P1</td></tr>
+</table>
+<strong>Minimum macOS Version:</strong> macOS 13 (Ventura)
+<strong>Distribution:</strong> Direct download only (onelist.my/download)
+<strong>Pricing:</strong> Included with all tiers (Free, Cloud Sync, Web Access)
+<h3>4.2 Post-MVP Features (v1.x)</h3>
+<table>
+<tr><th>Feature</th><th>Description</th><th>Priority</th></tr>
+<tr><td><strong>Share Extension</strong></td><td>Share from any app to Onelist</td><td>P1</td></tr>
+<tr><td><strong>Homebrew Cask</strong></td><td><code>brew install --cask onelist</code></td><td>P1</td></tr>
+<tr><td><strong>Conflict notification UI</strong></td><td>Show both versions, pick one</td><td>P1</td></tr>
+<tr><td><strong>Audio notes</strong></td><td>Record audio in Quick Capture</td><td>P2</td></tr>
+<tr><td><strong>Auto-tag by context</strong></td><td>Suggest tags based on source app</td><td>P2</td></tr>
+<tr><td><strong>WAN sync</strong></td><td>Cross-network sync via discovery</td><td>P2</td></tr>
+<tr><td><strong>Multiple windows</strong></td><td>Open entries in separate windows</td><td>P2</td></tr>
+<tr><td><strong>Windows/Linux</strong></td><td>Cross-platform via Tauri</td><td>P2</td></tr>
+</table>
+<h3>4.3 v2 Features (Swift Shell)</h3>
+<table>
+<tr><th>Feature</th><th>Description</th><th>Priority</th></tr>
+<tr><td><strong>Swift Shell</strong></td><td>Replace Tauri with native Swift app chrome</td><td>P1</td></tr>
+<tr><td><strong>SwiftUI preferences</strong></td><td>Native settings UI</td><td>P1</td></tr>
+<tr><td><strong>SwiftUI onboarding</strong></td><td>Native first-launch experience</td><td>P1</td></tr>
+<tr><td><strong>Improved performance</strong></td><td>Faster launch, lower memory</td><td>P1</td></tr>
+<tr><td><strong>Touch Bar</strong></td><td>Quick actions on MacBook Pro</td><td>P3</td></tr>
+<tr><td><strong>Widgets</strong></td><td>macOS widgets for recent entries</td><td>P3</td></tr>
+<tr><td><strong>Shortcuts app</strong></td><td>Siri Shortcuts integration</td><td>P3</td></tr>
+</table>
+<h3>4.4 Not Planned</h3>
+<table>
+<tr><th>Feature</th><th>Reason</th></tr>
+<tr><td>Selective sync</td><td>Adds complexity, not needed</td></tr>
+<tr><td>Force sync command</td><td>Auto-sync is sufficient</td></tr>
+<tr><td>Full merge conflict UI</td><td>Too complex for users</td></tr>
+<tr><td>Mac App Store</td><td>Sandboxing conflicts with embedded PostgreSQL</td></tr>
+<tr><td>Native SwiftUI editor</td><td>Toast UI provides feature parity</td></tr>
+</table>
+<hr>
+<h2>5. User Experience</h2>
+<h3>5.1 First Launch Flow</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         FIRST LAUNCH EXPERIENCE                              │
+│                                                                              │
+│  1. WELCOME                                                                 │
+│     ┌─────────────────────────────────────────────────────────┐            │
+│     │                                                         │            │
+│     │     [Onelist Logo]                                      │            │
+│     │                                                         │            │
+│     │     Welcome to Onelist                                  │            │
+│     │     Your augmented memory, on your Mac.                 │            │
+│     │                                                         │            │
+│     │     [Get Started]                                       │            │
+│     │                                                         │            │
+│     └─────────────────────────────────────────────────────────┘            │
+│                                                                              │
+│  2. ACCOUNT SETUP                                                           │
+│     ┌─────────────────────────────────────────────────────────┐            │
+│     │                                                         │            │
+│     │     ( ) Create new account                              │            │
+│     │     ( ) Sign in to existing account                     │            │
+│     │     ( ) Use without account (local only)                │            │
+│     │                                                         │            │
+│     │     [Continue]                                          │            │
+│     │                                                         │            │
+│     └─────────────────────────────────────────────────────────┘            │
+│                                                                              │
+│  3. SYNC SETUP (if account)                                                 │
+│     ┌─────────────────────────────────────────────────────────┐            │
+│     │                                                         │            │
+│     │     Found 2 other devices on your account:              │            │
+│     │                                                         │            │
+│     │     ☑ MacBook Pro (this device)                         │            │
+│     │     ☑ openclaw-vps (VPS)                                 │            │
+│     │     ☐ iPhone 15 Pro                                     │            │
+│     │                                                         │            │
+│     │     [Start Syncing]                                     │            │
+│     │                                                         │            │
+│     └─────────────────────────────────────────────────────────┘            │
+│                                                                              │
+│  4. PERMISSIONS                                                             │
+│     ┌─────────────────────────────────────────────────────────┐            │
+│     │                                                         │            │
+│     │     Onelist works best with these permissions:          │            │
+│     │                                                         │            │
+│     │     ☐ Accessibility (global shortcuts)                  │            │
+│     │     ☐ Notifications                                     │            │
+│     │     ☐ Start at login                                    │            │
+│     │                                                         │            │
+│     │     [Grant Permissions]   [Skip for Now]                │            │
+│     │                                                         │            │
+│     └─────────────────────────────────────────────────────────┘            │
+│                                                                              │
+│  5. READY                                                                   │
+│     ┌─────────────────────────────────────────────────────────┐            │
+│     │                                                         │            │
+│     │     ✓ You're all set!                                   │            │
+│     │                                                         │            │
+│     │     Quick tips:                                         │            │
+│     │     • ⌘⇧N to capture a new note                         │            │
+│     │     • ⌘⇧O to search your entries                        │            │
+│     │     • Look for [icon] in your menu bar                  │            │
+│     │                                                         │            │
+│     │     [Open Onelist]                                      │            │
+│     │                                                         │            │
+│     └─────────────────────────────────────────────────────────┘            │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.2 Quick Capture</h3>
+<p>Global shortcut (<code>⌘⇧N</code>) opens a floating capture window:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Quick Capture                                                        ✕    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Title: _______________________________________________                     │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                     │   │
+│  │  Start typing your note...                                          │   │
+│  │                                                                     │   │
+│  │                                                                     │   │
+│  │                                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  Tags: [ add tags... ]                                                      │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                            [Cancel]  [Save ⌘↵]             │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Clipboard detection (MVP):</strong>
+<li>URL detected → Offer to create web clip entry</li>
+<li>Image detected → Offer to attach as asset</li>
+<li>Code detected → Auto-apply code formatting</li>
+<strong>Post-MVP enhancements:</strong>
+<li>Audio recording button</li>
+<li>Auto-tag based on source app</li>
+<h3>5.3 Quick Search Overlay</h3>
+<p>Global shortcut (<code>⌘⇧O</code>) opens Spotlight-like search:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│  🔍  Search Onelist...                                           ⌘⇧O       │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  RECENT                                                                     │
+│  ├── Meeting notes - Project Alpha           📝  2 hours ago               │
+│  ├── API design thoughts                     📝  Yesterday                 │
+│  └── Recipe: Sourdough bread                 📝  3 days ago                │
+│                                                                              │
+│  TAGS                                                                       │
+│  ├── #work (42)                                                            │
+│  ├── #ideas (28)                                                           │
+│  └── #recipes (15)                                                         │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│  ↑↓ Navigate   ↵ Open   ⌘↵ Open in new window   ⎋ Close                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>6. Data & Storage</h2>
+<h3>6.1 Directory Structure</h3>
+<pre><code class="language-">~/Library/Application Support/Onelist/
+├── data/                    # PostgreSQL data directory
+│   ├── base/
+│   ├── pg_wal/
+│   └── ...
+├── assets/                  # Local asset files
+│   ├── originals/           # Full-size files
+│   └── thumbnails/          # Generated thumbnails
+├── config/
+│   ├── config.json          # User preferences
+│   └── device.json          # Device identity (keypair)
+├── logs/
+│   ├── phoenix.log
+│   ├── postgres.log
+│   └── sync.log
+└── cache/
+    └── spotlight/           # Spotlight index cache
+</code></pre>
+<h3>6.2 Data Ownership</h3>
+<table>
+<tr><th>Scenario</th><th>Data Location</th></tr>
+<tr><td>App uninstalled</td><td>Data remains in Application Support</td></tr>
+<tr><td>App reinstalled</td><td>Picks up existing data automatically</td></tr>
+<tr><td>"Remove all data"</td><td>Explicit user action clears everything</td></tr>
+<tr><td>Export</td><td>Standard JSON/Markdown export to chosen folder</td></tr>
+</table>
+<h3>6.3 Backup Considerations</h3>
+<li>Time Machine includes <code>~/Library/Application Support/</code> by default</li>
+<li>Users with cloud sync have E2EE backup</li>
+<li>Manual export always available</li>
+<hr>
+<h2>7. Sync Architecture</h2>
+<h3>7.1 Device Identity</h3>
+<p>Each Mac app instance has a unique device identity:</p>
+<pre><code class="language-json">{
+  &quot;device_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;device_name&quot;: &quot;Bryan's MacBook Pro&quot;,
+  &quot;public_key&quot;: &quot;ed25519:...&quot;,
+  &quot;private_key&quot;: &quot;encrypted:...&quot;,
+  &quot;created_at&quot;: &quot;2026-01-29T12:00:00Z&quot;
+}
+</code></pre>
+<li>Ed25519 keypair generated on first launch</li>
+<li>Private key encrypted with user's master password (if set) or system keychain</li>
+<li>Public key registered with Onelist account (if signed in)</li>
+<h3>7.2 LAN Discovery (mDNS/Bonjour)</h3>
+<pre><code class="language-elixir"># Service advertisement
+defmodule Onelist.Sync.Discovery do
+  @service_type &quot;_onelist._tcp&quot;
+<p>def advertise do
+    :dnssd.register(@service_type, port(), [
+      {&quot;device_id&quot;, device_id()},
+      {&quot;account_hash&quot;, account_hash()}  # For filtering to same account
+    ])
+  end</p>
+<p>def browse do
+    :dnssd.browse(@service_type, fn service -&gt;
+      if same_account?(service) do
+        connect_to_peer(service)
+      end
+    end)
+  end
+end
+</code></pre></p>
+<h3>7.3 Sync Protocol</h3>
+<p>See <code>future_roadmap_free_tier.md</code> Section 9 for full protocol specification.</p>
+<strong>Summary:</strong>
+1. Device discovery (mDNS or Onelist discovery server)
+2. Mutual authentication (challenge-response with device keys)
+3. Session key exchange (X25519 ECDH)
+4. Encrypted sync channel (ChaCha20-Poly1305)
+5. Bidirectional change sync with vector clocks
+6. Conflict resolution (LWW with user override option)
+<hr>
+<h2>8. Security</h2>
+<h3>8.1 Local Data Protection</h3>
+<table>
+<tr><th>Layer</th><th>Protection</th></tr>
+<tr><td>PostgreSQL</td><td>Password-protected, local socket only</td></tr>
+<tr><td>Asset files</td><td>Filesystem permissions (user-only)</td></tr>
+<tr><td>Device keys</td><td>macOS Keychain</td></tr>
+<tr><td>Master password</td><td>Argon2id hash, never stored plaintext</td></tr>
+</table>
+<h3>8.2 Network Security</h3>
+<table>
+<tr><th>Channel</th><th>Protection</th></tr>
+<tr><td>P2P sync</td><td>ChaCha20-Poly1305 authenticated encryption</td></tr>
+<tr><td>Cloud sync</td><td>TLS 1.3 + E2EE (content encrypted before upload)</td></tr>
+<tr><td>Phoenix UI</td><td>localhost only, no external binding</td></tr>
+</table>
+<h3>8.3 Code Signing</h3>
+<li>Signed with Apple Developer ID</li>
+<li>Notarized for Gatekeeper</li>
+<li>Hardened runtime enabled</li>
+<li>No entitlements beyond required</li>
+<hr>
+<h2>9. Implementation Phases</h2>
+<h3>Phase 1: Core Foundation (4-6 weeks)</h3>
+<table>
+<tr><th>Week</th><th>Tasks</th></tr>
+<tr><td>1</td><td>Set up Tauri project, basic window</td></tr>
+<tr><td>1</td><td>Burrito packaging for Phoenix release</td></tr>
+<tr><td>2</td><td>Embedded PostgreSQL management</td></tr>
+<tr><td>2</td><td>LiveView rendering in WebView</td></tr>
+<tr><td>3</td><td>Menu bar implementation</td></tr>
+<tr><td>3</td><td>Quick capture window</td></tr>
+<tr><td>4</td><td>LAN sync (mDNS discovery)</td></tr>
+<tr><td>4</td><td>Basic sync protocol</td></tr>
+<tr><td>5</td><td>Preferences window</td></tr>
+<tr><td>5</td><td>Auto-update mechanism</td></tr>
+<tr><td>6</td><td>Testing, bug fixes</td></tr>
+<tr><td>6</td><td>DMG packaging, notarization</td></tr>
+</table>
+<strong>Deliverables:</strong>
+<li>[ ] Tauri app shell with window management</li>
+<li>[ ] Embedded Phoenix server (Burrito)</li>
+<li>[ ] Embedded PostgreSQL with auto-init</li>
+<li>[ ] Menu bar with status and quick actions</li>
+<li>[ ] Quick capture via global shortcut</li>
+<li>[ ] LAN peer discovery and sync</li>
+<li>[ ] Native preferences window</li>
+<li>[ ] Signed, notarized DMG installer</li>
+<h3>Phase 2: Enhanced Integration (3-4 weeks)</h3>
+<table>
+<tr><th>Week</th><th>Tasks</th></tr>
+<tr><td>1</td><td>Spotlight integration (Core Spotlight API)</td></tr>
+<tr><td>1</td><td>Share Extension</td></tr>
+<tr><td>2</td><td>Quick search overlay</td></tr>
+<tr><td>2</td><td>Clipboard detection</td></tr>
+<tr><td>3</td><td>WAN sync (discovery server integration)</td></tr>
+<tr><td>3</td><td>Selective sync</td></tr>
+<tr><td>4</td><td>Multiple window support</td></tr>
+<tr><td>4</td><td>Polish and testing</td></tr>
+</table>
+<strong>Deliverables:</strong>
+<li>[ ] Spotlight indexing of entries</li>
+<li>[ ] Share Extension for Safari/apps</li>
+<li>[ ] Quick search overlay (⌘⇧O)</li>
+<li>[ ] Smart clipboard capture</li>
+<li>[ ] WAN sync capability</li>
+<li>[ ] Selective sync preferences</li>
+<h3>Phase 3: Native Enhancements (2-3 weeks)</h3>
+<table>
+<tr><th>Week</th><th>Tasks</th></tr>
+<tr><td>1</td><td>SwiftUI preferences (replace web-based)</td></tr>
+<tr><td>1</td><td>Native onboarding flow</td></tr>
+<tr><td>2</td><td>Widgets</td></tr>
+<tr><td>2</td><td>Shortcuts app integration</td></tr>
+<tr><td>3</td><td>Touch Bar support</td></tr>
+<tr><td>3</td><td>Focus mode integration</td></tr>
+</table>
+<strong>Deliverables:</strong>
+<li>[ ] Native SwiftUI preferences</li>
+<li>[ ] macOS Widgets</li>
+<li>[ ] Siri Shortcuts actions</li>
+<li>[ ] Touch Bar quick actions</li>
+<li>[ ] Focus mode filters</li>
+<hr>
+<h2>10. Technical Challenges</h2>
+<h3>10.1 Packaging Complexity</h3>
+<strong>Challenge:</strong> Bundling Erlang/OTP + Phoenix + PostgreSQL into a macOS app bundle.
+<strong>Solution:</strong>
+1. Use Burrito to create self-contained Elixir binary
+2. Bundle PostgreSQL binaries (universal for arm64 + x86_64)
+3. Use Tauri's resource embedding for assets
+4. Test on clean macOS install (no dev tools)
+<h3>10.2 PostgreSQL Lifecycle</h3>
+<strong>Challenge:</strong> Managing PostgreSQL as a child process of a GUI app.
+<strong>Solution:</strong>
+<pre><code class="language-elixir"># Graceful startup
+1. Check if data directory exists
+2. If not, run initdb
+3. Start postgres with controlled port
+4. Wait for ready signal
+5. Run migrations
+6. Start Phoenix
+<h1>Graceful shutdown</h1>
+1. Phoenix receives quit signal
+2. Close all connections
+3. Stop PostgreSQL gracefully
+4. Terminate Tauri process
+<h1>Crash recovery</h1>
+1. On startup, check for stale PID file
+2. If found, attempt recovery
+3. Run pg_resetwal if necessary
+4. Log recovery actions
+</code></pre>
+<h3>10.3 Binary Size</h3>
+<strong>Challenge:</strong> Keeping app size reasonable.
+<strong>Estimates:</strong>
+<li>Tauri shell: ~5MB</li>
+<li>Erlang/OTP runtime: ~20MB</li>
+<li>Phoenix app (compressed): ~10MB</li>
+<li>PostgreSQL binaries: ~50MB</li>
+<li><strong>Total: ~85MB</strong> (acceptable, cf. Electron at 150MB+)</li>
+<strong>Optimizations:</strong>
+<li>Strip debug symbols from BEAM binaries</li>
+<li>Compress assets</li>
+<li>Use universal binaries only for PostgreSQL</li>
+<h3>10.4 First-Launch Performance</h3>
+<strong>Challenge:</strong> Initial database setup takes time.
+<strong>Solution:</strong>
+1. Show progress UI during first launch
+2. Pre-initialize database in background
+3. Cache migrations for fast startup after first run
+4. Target: <10 seconds for first launch, <3 seconds subsequent
+<hr>
+<h2>11. Distribution</h2>
+<h3>11.1 Channels</h3>
+<table>
+<tr><th>Channel</th><th>Purpose</th><th>Status</th></tr>
+<tr><td><strong>Direct download</strong></td><td>onelist.my/download/mac</td><td>MVP</td></tr>
+<tr><td><strong>Homebrew Cask</strong></td><td><code>brew install --cask onelist</code></td><td>Post-MVP</td></tr>
+<tr><td><strong>Beta channel</strong></td><td>Early adopters</td><td>Post-MVP</td></tr>
+<tr><td><strong>Mac App Store</strong></td><td>Not planned (sandboxing constraints)</td><td>-</td></tr>
+</table>
+<h3>11.2 Auto-Update</h3>
+<p>Tauri's built-in updater with custom update server:</p>
+<pre><code class="language-json">{
+  &quot;updater&quot;: {
+    &quot;active&quot;: true,
+    &quot;endpoints&quot;: [&quot;https://releases.onelist.my/mac/latest.json&quot;],
+    &quot;pubkey&quot;: &quot;...&quot;
+  }
+}
+</code></pre>
+<p>Update flow:
+1. Check for updates on launch (configurable)
+2. Download in background
+3. Notify user when ready
+4. Apply on next restart (or user-triggered)</p>
+<h3>11.3 Mac App Store</h3>
+<strong>Decision:</strong> Not planned due to sandboxing constraints with embedded PostgreSQL.
+<p>The Mac App Store requires app sandboxing which conflicts with:
+<li>Embedded PostgreSQL process management</li>
+<li>Local database file access</li>
+<li>Background sync processes</li></p>
+<p>Users can download directly from onelist.my/download or via Homebrew (post-MVP).</p>
+<hr>
+<h2>12. Testing Strategy</h2>
+<h3>12.1 Automated Testing</h3>
+<table>
+<tr><th>Type</th><th>Tools</th><th>Coverage</th></tr>
+<tr><td>Unit tests</td><td>ExUnit (Elixir), Rust tests</td><td>Core logic</td></tr>
+<tr><td>Integration tests</td><td>Wallaby, Tauri test utils</td><td>UI flows</td></tr>
+<tr><td>E2E tests</td><td>Playwright + Tauri driver</td><td>Full app</td></tr>
+<tr><td>Sync tests</td><td>Multi-process test harness</td><td>P2P sync</td></tr>
+</table>
+<h3>12.2 Manual Testing Matrix</h3>
+<table>
+<tr><th>macOS Version</th><th>Chip</th><th>Priority</th></tr>
+<tr><td>macOS 14 Sonoma</td><td>Apple Silicon</td><td>P0</td></tr>
+<tr><td>macOS 14 Sonoma</td><td>Intel</td><td>P0</td></tr>
+<tr><td>macOS 13 Ventura</td><td>Apple Silicon</td><td>P1</td></tr>
+<tr><td>macOS 13 Ventura</td><td>Intel</td><td>P1</td></tr>
+<tr><td>macOS 12 Monterey</td><td>Apple Silicon</td><td>P2</td></tr>
+<tr><td>macOS 12 Monterey</td><td>Intel</td><td>P2</td></tr>
+</table>
+<h3>12.3 Performance Targets</h3>
+<strong>v1 (Tauri + Phoenix):</strong>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>App launch (cold)</td><td><5 seconds</td></tr>
+<tr><td>App launch (warm)</td><td><2 seconds</td></tr>
+<tr><td>Quick capture appear</td><td><300ms</td></tr>
+<tr><td>Search results</td><td><100ms</td></tr>
+<tr><td>Memory usage (idle)</td><td><300MB</td></tr>
+<tr><td>Memory usage (active)</td><td><500MB</td></tr>
+<tr><td>App bundle size</td><td><100MB</td></tr>
+</table>
+<strong>v2 (Swift Shell) Targets:</strong>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>App launch (cold)</td><td><2 seconds</td></tr>
+<tr><td>App launch (warm)</td><td><1 second</td></tr>
+<tr><td>Memory usage (idle)</td><td><150MB</td></tr>
+<tr><td>App bundle size</td><td><60MB</td></tr>
+</table>
+<hr>
+<h2>13. Success Metrics</h2>
+<h3>13.1 Adoption</h3>
+<table>
+<tr><th>Metric</th><th>Target (Month 1)</th><th>Target (Month 6)</th></tr>
+<tr><td>Downloads</td><td>500</td><td>5,000</td></tr>
+<tr><td>Daily active users</td><td>100</td><td>1,000</td></tr>
+<tr><td>Retention (D7)</td><td>40%</td><td>50%</td></tr>
+<tr><td>Retention (D30)</td><td>20%</td><td>30%</td></tr>
+</table>
+<h3>13.2 Quality</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Crash-free rate</td><td>>99%</td></tr>
+<tr><td>Sync success rate</td><td>>99.9%</td></tr>
+<tr><td>User-reported bugs/week</td><td><10</td></tr>
+<tr><td>App Store rating</td><td>4.5+</td></tr>
+</table>
+<h3>13.3 Engagement</h3>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Entries created/user/week</td><td>10+</td></tr>
+<tr><td>Quick capture usage</td><td>30% of entries</td></tr>
+<tr><td>Active sync peers/user</td><td>1.5+</td></tr>
+</table>
+<hr>
+<h2>14. Dependencies on Other Work</h2>
+<table>
+<tr><th>Dependency</th><th>Status</th><th>Blocker For</th></tr>
+<tr><td>P2P sync protocol</td><td>Planned (free tier)</td><td>LAN/WAN sync</td></tr>
+<tr><td>entry_links migration</td><td>Not started</td><td>Full sync</td></tr>
+<tr><td>Cloud sync (paid tier)</td><td>Planned</td><td>E2EE backup</td></tr>
+<tr><td>Onelist account system</td><td>Done</td><td>Device registration</td></tr>
+<tr><td>Discovery server</td><td>Post-MVP</td><td>WAN sync</td></tr>
+</table>
+<hr>
+<h2>15. Open Questions</h2>
+<p>All major questions resolved. See Decisions Log below.</p>
+<strong>Remaining minor questions:</strong>
+<li>[ ] <strong>Q1</strong>: Exact PostgreSQL version to bundle (16.x recommended)</li>
+<li>[ ] <strong>Q2</strong>: Burrito vs Bakeware for Elixir packaging (test both)</li>
+<li>[ ] <strong>Q3</strong>: Quick Capture window design details</li>
+<hr>
+<h2>16. Related Documents</h2>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a> - Overall launch strategy</li>
+<li><a href="./future_roadmap_free_tier.md">Free Tier</a> - P2P sync architecture</li>
+<li><a href="./asset_storage_plan.md">Asset Storage Plan</a> - Storage system</li>
+<li><a href="./future_roadmap_openclaw_install.md">OpenClaw Integration</a> - Desktop-OpenClaw sync</li>
+</ul>
+<hr>
+<h2>17. Decisions Log</h2>
+<p>Decisions finalized 2026-01-29:</p>
+<table>
+<tr><th>#</th><th>Topic</th><th>Decision</th><th>Rationale</th></tr>
+<tr><td>1</td><td>Technology Stack</td><td>Tauri+Phoenix (v1), Swift Shell+Phoenix (v2)</td><td>Ship fast, improve later</td></tr>
+<tr><td>2</td><td>Performance Claims</td><td>Comparative + contextual framing</td><td>Honest but competitive positioning</td></tr>
+<tr><td>3</td><td>Editor</td><td>Toast UI in WebView</td><td>Feature parity with web</td></tr>
+<tr><td>4</td><td>Audio Notes</td><td>Post-MVP roadmap</td><td>Reduce MVP scope</td></tr>
+<tr><td>5</td><td>Auto-Tag by Context</td><td>Post-MVP roadmap</td><td>Reduce MVP scope</td></tr>
+<tr><td>6</td><td>macOS Version</td><td>macOS 13+ (Ventura)</td><td>Better APIs, 85% user coverage</td></tr>
+<tr><td>7</td><td>Selective Sync</td><td>Not planned</td><td>Never intended, adds complexity</td></tr>
+<tr><td>8</td><td>Conflict Resolution</td><td>LWW auto (MVP), simple UI (post-MVP)</td><td>Keep simple for users</td></tr>
+<tr><td>9</td><td>Menu Bar</td><td>Optional via preference</td><td>User choice</td></tr>
+<tr><td>10</td><td>Pricing</td><td>All tiers</td><td>Mac app is a free download</td></tr>
+<tr><td>11</td><td>Distribution</td><td>Direct (MVP), Homebrew (post-MVP)</td><td>Start simple</td></tr>
+<tr><td>12</td><td>Shortcuts</td><td><code>⌃⌘N/O/V</code>, no force sync</td><td>Avoid conflicts</td></tr>
+<tr><td>13</td><td>Spotlight</td><td>MVP</td><td>Key macOS differentiator</td></tr>
+<tr><td>14</td><td>Share Extension</td><td>Post-MVP roadmap</td><td>Reduce MVP scope</td></tr>
+<tr><td>15</td><td>iOS Approach</td><td>Defer decision</td><td>Focus on Mac first</td></tr>
+<tr><td>16</td><td>Windows/Linux</td><td>Planned post-MVP</td><td>Tauri enables this</td></tr>
+</table>
+<hr>
+<em>Last updated: 2026-01-29</em>
+<em>Status: Planning - Decisions Finalized</em>
+  </article>
+</body>
+</html>

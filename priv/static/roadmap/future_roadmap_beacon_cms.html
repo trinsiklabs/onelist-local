@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beacon CMS Integration Roadmap - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Beacon CMS Integration Roadmap</h1>
+<strong>Document Version:</strong> 2026-01-29
+<strong>Status:</strong> Active - MVP Component
+<strong>Priority:</strong> HIGH - Required for MVP (corporate site)
+<h2>Overview</h2>
+<a href="https://beaconcms.org/">Beacon</a> is a content management system built on Phoenix LiveView. It enables building and serving websites directly from Elixir/Phoenix applications.
+<strong>Important Distinction:</strong>
+<p>1. <strong>Core Entry Sharing (Already Built)</strong> - Users can toggle any entry public and share it at its canonical URL. This uses the existing <code>public_id</code> field and <code>public</code> boolean - no Beacon required.</p>
+<p>2. <strong>Beacon CMS Sites (This Document)</strong> - An <em>additional</em> option for users who want full managed websites (corporate site, user blogs with navigation, themes, multiple pages).</p>
+<h2>What Already Exists: Core Entry Sharing</h2>
+<p>The Onelist Core schema already supports public entry sharing:</p>
+<pre><code class="language-elixir"># From lib/onelist/entries/entry.ex
+schema &quot;entries&quot; do
+  field :public_id, :string      # 21-char URL-safe random ID
+  field :public, :boolean, default: false
+  # ...
+end
+</code></pre>
+<p>When a user toggles <code>public: true</code> on an entry:
+<ul>
+<li>Entry becomes accessible at <code>onelist.my/[username]/[public_id]</code></li>
+<li>Uses the pre-generated HTML representation (maintained for all entries)</li>
+<li>No slug customization - the <code>public_id</code> is the permanent identifier</li>
+<li>Simple, predictable, collision-free URLs</li></p>
+<strong>This core sharing functionality does NOT require Beacon CMS.</strong>
+<h2>Beacon CMS Use Cases</h2>
+<p>Beacon CMS is for scenarios requiring full website management:</p>
+<h3>1. Onelist Corporate Site (<code>onelist.my</code>)</h3>
+<p>Serve marketing, documentation, and community pages:
+<li><code>onelist.my/</code> - Homepage</li>
+<li><code>onelist.my/features</code> - Feature pages</li>
+<li><code>onelist.my/docs/<em></code> - Documentation</li>
+<li><code>onelist.my/pricing</code> - Pricing</li>
+<li><code>onelist.my/about</code>, <code>/contact</code>, etc.</li></p>
+<p>Benefits:
+<li>Content as Onelist entries (dogfooding)</li>
+<li>No separate CMS to maintain</li>
+<li>LiveView components shared with app</li></p>
+<h3>2. User Beacon Sites (Post-MVP)</h3>
+<p>For users who want more than single entry sharing - full websites with:
+<li>Multiple linked pages</li>
+<li>Site navigation / menus</li>
+<li>Custom themes</li>
+<li>RSS feeds</li>
+<li>Homepage with entry listings</li></p>
+<strong>Availability by Tier:</strong>
+<table>
+<tr><th>Tier</th><th>Beacon Sites</th><th>URL Options</th></tr>
+<tr><td>Free</td><td>No</td><td>N/A</td></tr>
+<tr><td>Cloud Sync ($3+usage)</td><td>Yes</td><td>Subpath only: <code>onelist.my/[username]/site/</em></code></td></tr>
+<tr><td>Web Access ($20)</td><td>Yes</td><td>Subpath AND subdomain: <code>[username].onelist.my/<em></code></td></tr>
+</table>
+<strong>Note:</strong> Web Access runs on a dedicated VPS provisioned by Onelist.
+<p>User can place their Beacon site at:
+<li>Root of their namespace: <code>onelist.my/[username]/</code></li>
+<li>Subpath: <code>onelist.my/[username]/site/</em></code> or any path they choose</li>
+<li>Subdomain (Web Access only): <code>[username].onelist.my/<em></code></li></p>
+<h2>Architecture</h2>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ONELIST ARCHITECTURE                                 │
+│                                                                              │
+│  Requests                                                                   │
+│     │                                                                       │
+│     ▼                                                                       │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                         PHOENIX ROUTER                               │   │
+│  │                                                                      │   │
+│  │  /app/</em>           → Onelist Web (LiveView app)                      │   │
+│  │  /api/<em>           → Onelist API (REST endpoints)                    │   │
+│  │                                                                      │   │
+│  │  CORPORATE SITE (Beacon):                                           │   │
+│  │  /                → Homepage                                        │   │
+│  │  /features        → Feature pages                                   │   │
+│  │  /docs/</em>          → Documentation                                   │   │
+│  │  /pricing         → Pricing                                         │   │
+│  │                                                                      │   │
+│  │  PUBLIC ENTRIES (Core - no Beacon):                                 │   │
+│  │  /:username/:public_id → Render entry HTML representation           │   │
+│  │                                                                      │   │
+│  │  USER BEACON SITES (Post-MVP):                                      │   │
+│  │  /:username/site/<em> → User's Beacon-managed site                     │   │
+│  │                                                                      │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Note: Community Forum is NOT Beacon-Rendered</h3>
+<p>The community forum at <code>onelist.my/community/</em></code> is built with <strong>regular LiveView pages</strong>, not Beacon CMS. This is because:
+<li>Forum is highly dynamic (new posts, replies, sorting)</li>
+<li>Requires complex queries (join entry_links, count replies)</li>
+<li>LiveView is better suited for interactive features</li>
+<li>Individual topic/reply content uses <code>html_public</code> representations</li></p>
+<p>See <a href="./future_roadmap_forum.md">Forum Roadmap</a> for full specification.</p>
+<h2>Phase 1: Corporate Site on Beacon (MVP - Week 2)</h2>
+<strong>Goal:</strong> Serve the onelist.my marketing site via Beacon, with content stored as Onelist entries.
+<h3>URL Structure</h3>
+<table>
+<tr><th>URL</th><th>Content Source</th></tr>
+<tr><td><code>onelist.my/</code></td><td>Homepage entry</td></tr>
+<tr><td><code>onelist.my/features</code></td><td>Features entry</td></tr>
+<tr><td><code>onelist.my/features/core</code></td><td>Core features entry</td></tr>
+<tr><td><code>onelist.my/pricing</code></td><td>Pricing entry</td></tr>
+<tr><td><code>onelist.my/docs</code></td><td>Docs index entry</td></tr>
+<tr><td><code>onelist.my/docs/getting-started</code></td><td>Getting started entry</td></tr>
+<tr><td><code>onelist.my/about</code></td><td>About entry</td></tr>
+<tr><td><code>onelist.my/contact</code></td><td>Contact entry</td></tr>
+</table>
+<h3>Corporate Site as Entries</h3>
+<p>Corporate pages are entries in a system account with special <code>entry_type</code>:</p>
+<pre><code class="language-elixir"># Entry types for corporate site
+entry_type: &quot;page&quot;      # Standard page
+entry_type: &quot;doc&quot;       # Documentation page
+entry_type: &quot;component&quot; # Reusable component (header, footer, etc.)
+</code></pre>
+<p>Tags organize the structure:
+<pre><code class="language-">site:corporate
+page:homepage
+page:features
+docs:getting-started
+component:header
+</code></pre></p>
+<h3>Beacon Layouts</h3>
+<pre><code class="language-elixir"># Marketing layout
+defmodule OnelistWeb.Beacon.Layouts.Marketing do
+  use Beacon.Layout
+<p>@impl true
+  def render(assigns) do
+    ~H&quot;&quot;&quot;
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+      &lt;head&gt;
+        &lt;.meta_tags entry={@entry} /&gt;
+        &lt;.tailwind_cdn /&gt;
+      &lt;/head&gt;
+      &lt;body&gt;
+        &lt;.header /&gt;
+        &lt;main&gt;&lt;%= @inner_content %&gt;&lt;/main&gt;
+        &lt;.footer /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+    &quot;&quot;&quot;
+  end
+end</p>
+<h1>Documentation layout</h1>
+defmodule OnelistWeb.Beacon.Layouts.Docs do
+  use Beacon.Layout
+<p>@impl true
+  def render(assigns) do
+    ~H&quot;&quot;&quot;
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+      &lt;head&gt;...&lt;/head&gt;
+      &lt;body&gt;
+        &lt;.header /&gt;
+        &lt;div class=&quot;flex&quot;&gt;
+          &lt;.docs_sidebar current={@entry.slug} /&gt;
+          &lt;main class=&quot;flex-1&quot;&gt;&lt;%= @inner_content %&gt;&lt;/main&gt;
+        &lt;/div&gt;
+        &lt;.footer /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+    &quot;&quot;&quot;
+  end
+end
+</code></pre></p>
+<h3>Migration Path</h3>
+<p>1. Build Beacon layouts and components
+2. Create system account for corporate content
+3. Import existing static site HTML as entries
+4. Configure Beacon routes
+5. Test and switch over
+6. Remove static files</p>
+<h3>Phase 1 Deliverables</h3>
+<li>[ ] Marketing layout with header/footer components</li>
+<li>[ ] Documentation layout with sidebar navigation</li>
+<li>[ ] System account for corporate entries</li>
+<li>[ ] Migration script: static HTML → entries</li>
+<li>[ ] Beacon route configuration</li>
+<li>[ ] Asset handling (images, CSS, JS)</li>
+<h2>Phase 2: User Beacon Sites (Post-MVP)</h2>
+<strong>Goal:</strong> Optional feature for users who want full Beacon-managed websites.
+<blockquote><strong>Note:</strong> This is separate from basic entry sharing which uses core functionality.</blockquote>
+<blockquote>> <strong>Availability:</strong> Cloud Sync tier (subpath only) and Web Access tier (subpath + subdomain).</blockquote>
+<h3>Who Needs This</h3>
+<p>Users who want:
+<li>A blog with homepage, archives, categories</li>
+<li>Navigation between multiple pages</li>
+<li>Custom themes/styling</li>
+<li>RSS feed</li>
+<li>More than just sharing individual entries</li></p>
+<h3>Site Configuration</h3>
+<pre><code class="language-elixir"># New schema: user_sites (NOT in entries table)
+schema &quot;user_sites&quot; do
+  belongs_to :user, User
+  field :slug, :string           # e.g., &quot;blog&quot; → onelist.my/username/blog/
+  field :theme, :string          # Theme identifier
+  field :title, :string          # Site title
+  field :description, :string
+  field :navigation, :map        # Menu structure as JSON
+  field :settings, :map          # RSS enabled, etc.
+<p>timestamps()
+end
+</code></pre></p>
+<h3>Routing</h3>
+<pre><code class="language-elixir"># User Beacon sites are explicitly namespaced
+scope &quot;/:username/site&quot;, OnelistWeb.Beacon do
+  pipe_through [:browser, :beacon_user_site]
+<p>get &quot;/&quot;, SiteController, :index
+  get &quot;/<em>path&quot;, SiteController, :page
+end
+</code></pre></p>
+<h3>Theme System</h3>
+<li>Default themes provided</li>
+<li>User can select theme for their site</li>
+<li>Themes define layout, colors, typography</li>
+<li>Content pulled from user's Onelist entries via tags</li>
+<h3>Phase 2 Deliverables</h3>
+<li>[ ] <code>user_sites</code> schema and migrations</li>
+<li>[ ] Site creation/configuration UI</li>
+<li>[ ] Default theme set</li>
+<li>[ ] Site routing and rendering</li>
+<li>[ ] RSS feed generation</li>
+<li>[ ] Navigation builder</li>
+<h2>Comparison: Core Sharing vs. Beacon Sites</h2>
+<table>
+<tr><th>Feature</th><th>Core Entry Sharing</th><th>User Beacon Sites</th></tr>
+<tr><td>Availability</td><td>MVP</td><td>Post-MVP</td></tr>
+<tr><td>Toggle to publish</td><td>✅</td><td>-</td></tr>
+<tr><td>URL</td><td><code>/:username/:public_id</code></td><td>User's choice in their namespace</td></tr>
+<tr><td>Multiple pages</td><td>Single entry</td><td>✅ Multiple</td></tr>
+<tr><td>Navigation</td><td>None</td><td>Basic menus</td></tr>
+<tr><td>Themes</td><td>Default template (MVP)</td><td>Select from themes</td></tr>
+<tr><td>Custom CSS</td><td>Post-MVP consideration</td><td>Yes</td></tr>
+<tr><td>RSS</td><td>No</td><td>Yes</td></tr>
+<tr><td>Tiers</td><td>All tiers</td><td>Cloud Sync (subpath), Web Access (subpath + subdomain)</td></tr>
+</table>
+<h2>Technical Considerations</h2>
+<h3>E2EE and Public Content</h3>
+<strong>Critical Architecture Constraint:</strong> Onelist uses end-to-end encryption (E2EE) for private content. This has significant implications for any public content:
+<strong>The Problem:</strong>
+<li>Private entries are encrypted with the user's key - server cannot read them</li>
+<li>Public pages must be readable by anyone without decryption keys</li>
+<li>Therefore, public content requires an <strong>unencrypted</strong> representation</li>
+<strong>Solution: <code>html_public</code> Representation Type</strong>
+<p>The <code>html_public</code> representation is generated on every content change (not just when toggling to public):</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  CONTENT CHANGE (create/update)                                              │
+│       │                                                                      │
+│       ▼                                                                      │
+│  Generate/update ALL representations in PostgreSQL:                          │
+│  ├── markdown (encrypted) ──────► Private, for user's local search          │
+│  ├── summary (encrypted) ───────► Private, AI-generated                     │
+│  └── html_public (plaintext) ───► Always generated, always ready            │
+│                                                                              │
+│  TOGGLE TO PUBLIC                                                            │
+│       │                                                                      │
+│       ▼                                                                      │
+│  Just flip entry.public = true (instant, no content generation)             │
+│  html_public already exists ──► Now accessible at public URL                │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Storage:</strong> All representations (encrypted and plaintext) are stored in PostgreSQL. No separate buckets needed. Access control is enforced at the query level.
+<strong>Representation Types:</strong>
+<table>
+<tr><th>Type</th><th>Encrypted?</th><th>Purpose</th></tr>
+<tr><td><code>markdown</code></td><td>Yes (E2EE)</td><td>Full content, private</td></tr>
+<tr><td><code>summary</code></td><td>Yes (E2EE)</td><td>AI-generated summary, private</td></tr>
+<tr><td><code>json</code></td><td>Yes (E2EE)</td><td>Structured data, private</td></tr>
+<tr><td><code>html_public</code></td><td><strong>No</strong></td><td>Rendered HTML for public viewing (always generated)</td></tr>
+</table>
+<strong>User Consent Required:</strong>
+<p>When toggling an entry to public, the UI must clearly inform the user:</p>
+<blockquote>"Public entries are stored unencrypted so anyone with the link can view them. Your other entries remain end-to-end encrypted."</blockquote>
+<strong>Traffic Scaling:</strong> Cloudflare CDN in front of the app caches public pages at the edge. Cache is purged via Cloudflare API when content changes.
+<h3>Public Entry Rendering (Core)</h3>
+<p>For the existing core entry sharing:
+<li>Entries have <code>html_public</code> representation maintained by Oban job</li>
+<li>Simple controller fetches entry by username + public_id</li>
+<li>Returns pre-rendered HTML with basic wrapper template</li>
+<li>No Beacon involved</li>
+<li><strong>Note:</strong> Only <code>html_public</code> representation is used - other representations remain E2EE</li></p>
+<h3>Beacon Site Rendering</h3>
+<p>For Beacon-managed sites:
+<li>Beacon handles routing, layouts, components</li>
+<li>Pulls <code>html_public</code> representation content (already decrypted/public)</li>
+<li>Applies themes and navigation</li>
+<li>More overhead but more features</li>
+<li><strong>Note:</strong> All Beacon-rendered content is public and unencrypted by definition</li></p>
+<h3>Performance</h3>
+<li><strong>Core sharing:</strong> Direct DB lookup, cached <code>html_public</code> representation</li>
+<li><strong>Beacon sites:</strong> Additional Beacon routing layer, template compilation</li>
+<h3>Security</h3>
+<li><strong>Sanitization:</strong> All user HTML must be sanitized before storing <code>html_public</code></li>
+<li><strong>CSP:</strong> Content Security Policy for public pages</li>
+<li><strong>Rate Limiting:</strong> Protect against scraping</li>
+<h3>Asset Handling for Public Pages</h3>
+<p>When a public entry or Beacon page contains images/files, those assets must be publicly accessible.</p>
+<strong>For User Public Entries:</strong>
+<p>Assets follow the standard public asset flow (see <a href="./mvp_public_content_plan.md">MVP Public Content Plan</a>):</p>
+<p>1. Assets are E2EE encrypted by default
+2. When entry goes public, linked assets are decrypted and uploaded to R2 public bucket
+3. <code>html_public</code> references the <code>asset.public_url</code>
+4. Reference counting ensures cleanup when entry goes private</p>
+<strong>For Corporate Site (onelist.my):</strong>
+<p>Corporate site assets are a special case - they are <strong>always public</strong> since the corporate site itself is public:</p>
+<pre><code class="language-">Corporate site assets:
+├── Stored directly in R2 public bucket (no E2EE)
+├── No reference counting needed (always public)
+├── Managed via system account
+└── URL: https://assets.onelist.my/corporate/...
+</code></pre>
+<strong>For User Beacon Sites:</strong>
+<p>User Beacon sites follow the same rules as public entries:
+<li>Site pages are entries with <code>public = true</code></li>
+<li>Assets in those pages go through the public asset flow</li>
+<li>If user makes a page private, assets are cleaned up per reference counting</li></p>
+<h2>Resolved Questions</h2>
+<li>[x] <strong>Q80:</strong> What's the migration path if a user wants to upgrade from core sharing to a Beacon site?</li>
+  <li><strong>Resolved:</strong> No migration path. User can place Beacon site at any path in their namespace (root, <code>/site/</code>, etc.). User manages their own content organization.</li>
+<li>[x] <strong>Q81:</strong> Should Beacon sites be a separate tier/pricing?</li>
+  <li><strong>Resolved:</strong> Cloud Sync tier = subpath only (<code>onelist.my/[username]/site/</em></code>). Web Access tier = subpath + subdomain (<code>[username].onelist.my/<em></code>).</li>
+<li>[x] <strong>Q82:</strong> How to handle conflicts between /:username/:public_id and /:username/site/</em> routing?</li>
+  <li><strong>Resolved:</strong> User manages their own namespace. System warns if publishing to a URL that already has a public entry. Conflicts unlikely due to randomly generated <code>public_id</code> (21-char).</li>
+<li>[x] <strong>Q83:</strong> Should we support custom CSS on basic public entries?</li>
+  <li><strong>Resolved:</strong> MVP = default template only. Post-MVP = consider theme selection and/or custom CSS.</li>
+<h2>Related Documents</h2>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a> - Overall launch strategy</li>
+<li><a href="./future_roadmap.md">Main Roadmap</a> - Public entries overview</li>
+<li><a href="./future_roadmap_forum.md">Forum Roadmap</a> - Community forum specification</li>
+<li><a href="./mvp_public_content_plan.md">MVP Public Content Plan</a> - Public entry sharing details</li>
+</ul>
+  </article>
+</body>
+</html>

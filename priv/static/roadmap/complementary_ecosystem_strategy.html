@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complementary Ecosystem Strategy: Onelist Integration Opportunities - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Complementary Ecosystem Strategy: Onelist Integration Opportunities</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Strategic Analysis
+<hr>
+<h2>Executive Summary</h2>
+<p>Rather than viewing Twin, Supermemory, and OpenClaw purely as competitors, this analysis identifies how Onelist can be <strong>complementary</strong> to each platform and the specific <strong>integration opportunities</strong> that would benefit all parties. Onelist occupies a unique position in the AI ecosystem: a <strong>privacy-first, self-hostable, complete knowledge platform</strong> that can serve as the memory backbone for action-oriented tools.</p>
+<strong>Key Insight:</strong> Each platform excels in a different dimension. By positioning Onelist as a complementary layer rather than a replacement, we can expand our total addressable market and create network effects.
+<table>
+<tr><th>Platform</th><th>Excels At</th><th>Onelist Complements By</th></tr>
+<tr><td><strong>Twin</strong></td><td>Business automation, browser control</td><td>Knowledge persistence, privacy layer</td></tr>
+<tr><td><strong>Supermemory</strong></td><td>Memory infrastructure, benchmarks</td><td>Complete UI, self-hosting, GTD</td></tr>
+<tr><td><strong>OpenClaw</strong></td><td>Task execution, messaging</td><td>Memory organization, security</td></tr>
+</table>
+<hr>
+<h2>1. The AI Tool Landscape</h2>
+<h3>1.1 Platform Positioning Map</h3>
+<pre><code class="language-">                    ┌─────────────────────────────────────────────────────┐
+                    │                 EXECUTION FOCUS                      │
+                    │                        ▲                             │
+                    │                        │                             │
+                    │         OpenClaw       │      Twin                   │
+                    │         (Messaging,    │      (Browser,              │
+                    │          Shell, CDP)   │       2700+ apps)           │
+                    │                        │                             │
+  SELF-HOSTED ◄─────┼────────────────────────┼────────────────────────► CLOUD-ONLY
+                    │                        │                             │
+                    │        ╔═══════════╗   │                             │
+                    │        ║  ONELIST  ║   │      Supermemory            │
+                    │        ║ (Memory,  ║   │      (Memory API,           │
+                    │        ║  GTD, UI) ║   │       Benchmarks)           │
+                    │        ╚═══════════╝   │                             │
+                    │                        │                             │
+                    │                        ▼                             │
+                    │                 MEMORY FOCUS                         │
+                    └─────────────────────────────────────────────────────┘
+</code></pre>
+<h3>1.2 Capability Matrix</h3>
+<table>
+<tr><th>Capability</th><th>Onelist</th><th>Twin</th><th>Supermemory</th><th>OpenClaw</th></tr>
+<tr><td><strong>Memory Storage</strong></td><td>✓ Full</td><td>◐ Basic</td><td>✓ Full</td><td>◐ Basic</td></tr>
+<tr><td><strong>Atomic Extraction</strong></td><td>✓ Planned</td><td>✗</td><td>✓ Core</td><td>✗</td></tr>
+<tr><td><strong>Semantic Search</strong></td><td>✓ Two-layer</td><td>◐</td><td>✓ SOTA</td><td>◐</td></tr>
+<tr><td><strong>Knowledge Organization</strong></td><td>✓ GTD</td><td>✗</td><td>✗</td><td>✗</td></tr>
+<tr><td><strong>User Interface</strong></td><td>✓ Web/Desktop</td><td>✓ Dashboard</td><td>✗ API only</td><td>✗ Chat only</td></tr>
+<tr><td><strong>Browser Automation</strong></td><td>◐ Planned</td><td>✓ Core</td><td>✗</td><td>✓ CDP</td></tr>
+<tr><td><strong>Messaging Integration</strong></td><td>✗</td><td>✗</td><td>✗</td><td>✓ 12+</td></tr>
+<tr><td><strong>Self-Hosted</strong></td><td>✓ Free</td><td>✗</td><td>✗</td><td>✓ Core</td></tr>
+<tr><td><strong>E2E Encryption</strong></td><td>✓</td><td>✗</td><td>✗</td><td>✗</td></tr>
+<tr><td><strong>MCP Server</strong></td><td>◐ Planned</td><td>✗</td><td>✓</td><td>✗</td></tr>
+<tr><td><strong>Open Source</strong></td><td>✓</td><td>✗</td><td>◐ Partial</td><td>✓ MIT</td></tr>
+</table>
+<strong>Legend:</strong> ✓ = Full support | ◐ = Partial/Planned | ✗ = Not available
+<hr>
+<h2>2. Complementary Analysis: Twin</h2>
+<h3>2.1 How Onelist Complements Twin</h3>
+<strong>Twin's Strength:</strong> Business automation with 2,700+ integrations, browser-based control, zero-setup agent creation.
+<strong>Twin's Gap:</strong> Basic memory system, cloud-only (privacy concerns), no knowledge organization, no self-hosted option.
+<strong>Onelist Value Add:</strong>
+<table>
+<tr><th>Twin User Need</th><th>Onelist Solution</th></tr>
+<tr><td>"My Twin agents forget previous context"</td><td>Persistent atomic memories across sessions</td></tr>
+<tr><td>"I need to self-host for compliance"</td><td>Onelist + Twin API = privacy-compliant automation</td></tr>
+<tr><td>"Where's the knowledge Twin extracted?"</td><td>GTD-organized entry storage with relationships</td></tr>
+<tr><td>"Twin knows tasks, not knowledge"</td><td>Onelist stores learnings, Twin executes actions</td></tr>
+</table>
+<h3>2.2 Integration Architecture: Twin + Onelist</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         Twin + Onelist Integration                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────────────┐         ┌─────────────────────────────────┐    │
+│  │         TWIN            │         │           ONELIST               │    │
+│  │                         │  REST   │                                 │    │
+│  │  ┌─────────────────┐    │   API   │  ┌─────────────────────────┐   │    │
+│  │  │  Browser Agent  │────┼────────►│  │     Reader Agent        │   │    │
+│  │  │  (scrape data)  │    │         │  │  (extract memories)     │   │    │
+│  │  └─────────────────┘    │         │  └─────────────────────────┘   │    │
+│  │                         │         │              │                  │    │
+│  │  ┌─────────────────┐    │         │              ▼                  │    │
+│  │  │  Workflow Agent │────┼────────►│  ┌─────────────────────────┐   │    │
+│  │  │  (needs context)│◄───┼─────────┤  │    Searcher Agent       │   │    │
+│  │  └─────────────────┘    │         │  │  (provide context)      │   │    │
+│  │                         │         │  └─────────────────────────┘   │    │
+│  │  ┌─────────────────┐    │         │              │                  │    │
+│  │  │  2,700+ Apps    │    │         │              ▼                  │    │
+│  │  │  (integrations) │    │         │  ┌─────────────────────────┐   │    │
+│  │  └─────────────────┘    │         │  │    Entry Storage        │   │    │
+│  │                         │         │  │  (E2E encrypted)        │   │    │
+│  └─────────────────────────┘         │  └─────────────────────────┘   │    │
+│                                      │                                 │    │
+│                                      └─────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.3 Integration Implementation</h3>
+<strong>Option A: Onelist as Twin's Memory Backend</strong>
+<pre><code class="language-yaml"># Twin workflow using Onelist for memory
+name: Research with Memory
+trigger: manual
+<p>steps:
+  # Step 1: Get context from Onelist
+  <ul>
+<li>action: http_request</li>
+    config:
+      url: &quot;https://your-onelist.com/api/v1/search&quot;
+      method: POST
+      headers:
+        Authorization: &quot;Bearer ${ONELIST_API_KEY}&quot;
+      body:
+        query: &quot;{{topic}}&quot;
+        limit: 10
+    output: existing_knowledge</p>
+<p># Step 2: Twin does browser research
+  <li>action: browser_scrape</li>
+    config:
+      urls: [&quot;{{search_urls}}&quot;]
+      extract: [&quot;title&quot;, &quot;content&quot;, &quot;date&quot;]
+    output: new_research</p>
+<p># Step 3: Store findings in Onelist
+  <li>action: http_request</li>
+    config:
+      url: &quot;https://your-onelist.com/api/v1/entries&quot;
+      method: POST
+      body:
+        title: &quot;Research: {{topic}}&quot;
+        content: &quot;{{new_research}}&quot;
+        tags: [&quot;research&quot;, &quot;twin-automated&quot;]
+</code></pre></p>
+<strong>Option B: Onelist Integration Plugin for Twin</strong>
+<pre><code class="language-typescript">// Twin plugin: @onelist/twin-integration
+export const onelistPlugin = {
+  name: &quot;onelist&quot;,
+  version: &quot;1.0.0&quot;,
+<p>actions: {
+    // Store content in Onelist
+    &quot;onelist.store&quot;: async (params, context) =&gt; {
+      const response = await fetch(<code>${params.onelist_url}/api/v1/entries</code>, {
+        method: &quot;POST&quot;,
+        headers: { Authorization: <code>Bearer ${params.api_key}</code> },
+        body: JSON.stringify({
+          title: params.title,
+          content: params.content,
+          tags: params.tags || []
+        })
+      });
+      return response.json();
+    },</p>
+<p>// Search Onelist for context
+    &quot;onelist.search&quot;: async (params, context) =&gt; {
+      const response = await fetch(<code>${params.onelist_url}/api/v1/search</code>, {
+        method: &quot;POST&quot;,
+        headers: { Authorization: <code>Bearer ${params.api_key}</code> },
+        body: JSON.stringify({
+          query: params.query,
+          limit: params.limit || 5
+        })
+      });
+      return response.json();
+    },</p>
+<p>// Add to GTD inbox
+    &quot;onelist.inbox&quot;: async (params, context) =&gt; {
+      return onelistPlugin.actions<a href="{
+        ...params,
+        tags: [&quot;inbox&quot;, &quot;gtd&quot;, ...(params.tags || []">&quot;onelist.store&quot;</a>]
+      }, context);
+    }
+  }
+};
+</code></pre></p>
+<h3>2.4 Business Model Opportunity</h3>
+<table>
+<tr><th>Scenario</th><th>Value for Twin Users</th><th>Value for Onelist</th></tr>
+<tr><td>Twin user wants privacy</td><td>Use Onelist self-hosted as storage</td><td>New user acquisition</td></tr>
+<tr><td>Twin user needs organization</td><td>Onelist GTD for workflow outputs</td><td>Premium feature upsell</td></tr>
+<tr><td>Enterprise Twin deployment</td><td>Onelist provides compliance layer</td><td>Enterprise contracts</td></tr>
+<tr><td>Twin free tier limit</td><td>Onelist unlimited self-hosted</td><td>Conversion opportunity</td></tr>
+</table>
+<hr>
+<h2>3. Complementary Analysis: Supermemory</h2>
+<h3>3.1 How Onelist Complements Supermemory</h3>
+<strong>Supermemory's Strength:</strong> State-of-the-art memory API (81.6% LongMemEval), sub-300ms latency, MCP support, enterprise scale.
+<strong>Supermemory's Gap:</strong> API-only (no UI), cloud-only, no user-facing application, no productivity methodology.
+<strong>Onelist Value Add:</strong>
+<table>
+<tr><th>Supermemory Developer Need</th><th>Onelist Solution</th></tr>
+<tr><td>"I need a UI for my memory app"</td><td>Onelist provides complete web/desktop UI</td></tr>
+<tr><td>"Users want to self-host"</td><td>Onelist self-hosted with Supermemory-class memory</td></tr>
+<tr><td>"Need GTD/productivity features"</td><td>River Agent, Weekly Review, Six Horizons</td></tr>
+<tr><td>"Want to see the memories"</td><td>Entry browser, relationship visualization</td></tr>
+</table>
+<h3>3.2 Integration Options</h3>
+<strong>Option A: Onelist Uses Supermemory as Backend (Hybrid)</strong>
+<pre><code class="language-elixir"># Onelist using Supermemory for memory operations
+defmodule Onelist.Memory.SupermemoryAdapter do
+  @moduledoc &quot;&quot;&quot;
+  Use Supermemory API for memory storage while Onelist handles
+  UI, organization, and user-facing features.
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Memory.Adapter</p>
+<p>def store_memory(content, metadata) do
+    # Use Supermemory's superior extraction
+    response = Supermemory.API.add_memory(%{
+      content: content,
+      metadata: metadata,
+      user_id: metadata.user_id
+    })</p>
+<p># Also store locally for offline access
+    Onelist.Memory.LocalCache.store(response.memory_id, content)</p>
+<p>{:ok, response}
+  end</p>
+<p>def search(query, opts) do
+    # Use Supermemory's SOTA retrieval
+    Supermemory.API.search(%{
+      query: query,
+      limit: opts[:limit] || 10,
+      user_id: opts[:user_id]
+    })
+  end
+end
+</code></pre></p>
+<strong>Pros:</strong> Leverage Supermemory's benchmarks, reduce development time
+<strong>Cons:</strong> Cloud dependency, cost at scale, privacy concerns
+<strong>Option B: Onelist Competes on Memory, Differentiates on Platform</strong>
+<pre><code class="language-elixir"># Onelist native memory (Supermemory-inspired architecture)
+defmodule Onelist.Memory.NativeAdapter do
+  @moduledoc &quot;&quot;&quot;
+  Native memory implementation with Supermemory-inspired architecture.
+  Differentiates on self-hosting, E2E encryption, and complete platform.
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Memory.Adapter</p>
+<p># Implement atomic extraction (match Supermemory quality)
+  def store_memory(content, metadata) do
+    # Extract atomic facts
+    atoms = Onelist.Reader.extract_atoms(content)</p>
+<p># Build knowledge graph relationships
+    relationships = Onelist.Memory.Graph.find_relationships(atoms)</p>
+<p># Store with bi-temporal metadata
+    Enum.each(atoms, fn atom -&gt;
+      Onelist.Memory.Repo.insert(%Memory{
+        content: atom.content,
+        event_timestamp: atom.event_time,
+        ingestion_timestamp: DateTime.utc_now(),
+        embedding: Onelist.Embeddings.generate(atom.content),
+        relationships: relationships[atom.id]
+      })
+    end)
+  end
+end
+</code></pre></p>
+<strong>Pros:</strong> Full control, privacy maintained, no external dependency
+<strong>Cons:</strong> More development effort, need to match benchmarks
+<strong>Recommendation:</strong> Option B (native implementation) with Option A available as premium cloud integration for users who want Supermemory's performance.
+<h3>3.3 MCP Interoperability</h3>
+<p>Both Supermemory and Onelist can expose MCP servers, allowing AI assistants to choose their memory backend:</p>
+<pre><code class="language-typescript">// Universal MCP memory interface
+// Works with both Supermemory and Onelist
+<p>interface MemoryMCPServer {
+  tools: {
+    &quot;memory/add&quot;: {
+      content: string;
+      metadata?: Record&lt;string, any&gt;;
+    };
+    &quot;memory/search&quot;: {
+      query: string;
+      limit?: number;
+      filters?: Record&lt;string, any&gt;;
+    };
+    &quot;memory/recall&quot;: {
+      topic: string;
+      temporal_range?: { start: string; end: string };
+    };
+  };
+}</p>
+<p>// User chooses which backend
+const memoryBackend = process.env.MEMORY_BACKEND; // &quot;onelist&quot; or &quot;supermemory&quot;</p>
+<p>const mcpConfig = {
+  servers: {
+    memory: memoryBackend === &quot;onelist&quot;
+      ? &quot;http://localhost:4000/mcp&quot;  // Self-hosted Onelist
+      : &quot;https://api.supermemory.ai/mcp&quot;  // Cloud Supermemory
+  }
+};
+</code></pre></p>
+<h3>3.4 Market Positioning</h3>
+<table>
+<tr><th>User Segment</th><th>Supermemory Wins</th><th>Onelist Wins</th></tr>
+<tr><td><strong>AI developers building apps</strong></td><td>✓ API-first, proven scale</td><td></td></tr>
+<tr><td><strong>Privacy-conscious users</strong></td><td></td><td>✓ Self-hosted, E2E</td></tr>
+<tr><td><strong>Enterprise with compliance</strong></td><td></td><td>✓ On-prem deployment</td></tr>
+<tr><td><strong>End users wanting UI</strong></td><td></td><td>✓ Complete application</td></tr>
+<tr><td><strong>GTD/productivity focus</strong></td><td></td><td>✓ River Agent, methodology</td></tr>
+<tr><td><strong>Maximum retrieval accuracy</strong></td><td>✓ 81.6% benchmark</td><td></td></tr>
+</table>
+<hr>
+<h2>4. Complementary Analysis: OpenClaw</h2>
+<h3>4.1 How Onelist Complements OpenClaw</h3>
+<strong>OpenClaw's Strength:</strong> 100K+ stars, 12+ messaging platforms, task execution, browser control, proactive behavior.
+<strong>OpenClaw's Gap:</strong> Basic memory (notes only), no knowledge organization, security concerns, no semantic search.
+<strong>Onelist Value Add:</strong>
+<table>
+<tr><th>OpenClaw User Need</th><th>Onelist Solution</th></tr>
+<tr><td>"My AI forgets conversations"</td><td>Atomic memories, never forget</td></tr>
+<tr><td>"Can't find past information"</td><td>Two-layer retrieval, GTD organization</td></tr>
+<tr><td>"Want organized knowledge"</td><td>Tag taxonomy, relationship tracking</td></tr>
+<tr><td>"Security concerns"</td><td>E2E encryption, read-mostly architecture</td></tr>
+<tr><td>"Need life management"</td><td>River Agent, Weekly Review</td></tr>
+</table>
+<h3>4.2 Integration Architecture: OpenClaw + Onelist</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                       OpenClaw + Onelist Integration                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                              USER                                            │
+│                                │                                             │
+│                    WhatsApp / Telegram / Discord                             │
+│                                │                                             │
+│                                ▼                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                         OPENCLAW                                     │    │
+│  │                                                                      │    │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │    │
+│  │  │   Gateway    │  │   Browser    │  │   Shell      │               │    │
+│  │  │  (messages)  │  │   (CDP)      │  │  (commands)  │               │    │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │    │
+│  │          │                                                           │    │
+│  │          │  &quot;What do I know about Project X?&quot;                       │    │
+│  │          │                                                           │    │
+│  │          ▼                                                           │    │
+│  │  ┌──────────────────────────────────────────────────────────────┐   │    │
+│  │  │              ONELIST SKILL (ClawdHub)                         │   │    │
+│  │  │                                                               │   │    │
+│  │  │  Commands:                                                    │   │    │
+│  │  │  • remember &lt;content&gt;  → POST /api/v1/entries                │   │    │
+│  │  │  • recall &lt;query&gt;      → POST /api/v1/search                 │   │    │
+│  │  │  • inbox &lt;item&gt;        → POST /api/v1/entries (tagged)       │   │    │
+│  │  │  • review              → GET /api/v1/review/daily            │   │    │
+│  │  └──────────────────────────────────────────────────────────────┘   │    │
+│  │                              │                                       │    │
+│  └──────────────────────────────┼───────────────────────────────────────┘    │
+│                                 │ MCP / REST API                             │
+│                                 ▼                                            │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                          ONELIST                                     │    │
+│  │                                                                      │    │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │    │
+│  │  │   Reader     │  │   Searcher   │  │   River      │               │    │
+│  │  │   (extract)  │  │   (find)     │  │   (GTD)      │               │    │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘               │    │
+│  │          │                │                │                         │    │
+│  │          └────────────────┴────────────────┘                         │    │
+│  │                           │                                          │    │
+│  │                           ▼                                          │    │
+│  │  ┌──────────────────────────────────────────────────────────────┐   │    │
+│  │  │                   Entry Storage                               │   │    │
+│  │  │           (PostgreSQL + pgvector, E2E encrypted)              │   │    │
+│  │  └──────────────────────────────────────────────────────────────┘   │    │
+│  │                                                                      │    │
+│  └──────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.3 ClawdHub Skill Implementation</h3>
+<pre><code class="language-markdown">---
+name: onelist
+version: 1.0.0
+author: onelist
+description: Give OpenClaw perfect memory with Onelist - the augmented memory platform
+repository: https://github.com/onelist/openclaw-skill
+homepage: https://onelist.my
+tags: [memory, knowledge, gtd, productivity, pkm]
+requires:
+  <li>ONELIST_API_URL</li>
+  <li>ONELIST_API_KEY</li>
+<hr>
+<h1>Onelist Memory Integration</h1>
+<p>Connect OpenClaw to your Onelist instance for persistent, organized memory.</p>
+<h2>Quick Start</h2>
+</code></pre>bash
+openclaw skill install onelist
+openclaw config set ONELIST_API_URL https://your-onelist.com/api/v1
+openclaw config set ONELIST_API_KEY your-api-key
+<pre><code class="language-">
+<h2>Commands</h2>
+<h3>Remember</h3>
+Store something in your Onelist knowledge base.
+</code></pre>
+remember that John's birthday is March 15th
+remember: meeting with Sarah - discussed Q3 budget, agreed on $2.4M allocation
+remember [project:acme] the deadline is February 28th
+<pre><code class="language-">
+<h3>Recall</h3>
+Search your memories for relevant information.
+</code></pre>
+recall John's birthday
+what do I know about the Q3 budget?
+recall [project:acme] deadlines
+<pre><code class="language-">
+<h3>Inbox</h3>
+Add items to your GTD inbox for later processing.
+</code></pre>
+inbox call mom about weekend plans
+inbox review the quarterly report
+inbox [priority:high] respond to client proposal
+<pre><code class="language-">
+<h3>Review</h3>
+Get your daily or weekly review from Onelist.
+</code></pre>
+review              # daily review
+review weekly       # weekly review
+review focus        # current focus areas
+<pre><code class="language-">
+<h2>Automatic Memory</h2>
+<p>When enabled, the skill automatically stores:
+<li>Important facts mentioned in conversations</li>
+<li>Decisions made</li>
+<li>Action items discussed</li>
+<li>People and relationships</li></p>
+<p>Configure with:
+</code></pre>
+onelist auto on     # enable automatic memory
+onelist auto off    # disable
+onelist auto status # check current setting
+<pre><code class="language-">
+<h2>Privacy</h2></p>
+<p>All data is stored in YOUR Onelist instance (self-hosted or cloud).
+OpenClaw only sends data to your configured ONELIST_API_URL.
+Enable E2E encryption in Onelist for maximum security.
+</code></pre></p>
+<h3>4.4 User Experience Flow</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  WhatsApp Conversation                                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  [You] 9:00 AM                                                               │
+│  Hey, what did we decide about the marketing budget last month?              │
+│                                                                              │
+│  [OpenClaw] 9:00 AM                                                          │
+│  🔍 Searching your Onelist memories...                                       │
+│                                                                              │
+│  Based on your notes from December 15th:                                     │
+│                                                                              │
+│  📋 Marketing Budget Q1 2026:                                                │
+│  • Total allocation: $450K (up 15% from Q4)                                  │
+│  • Digital spend: 60% ($270K)                                                │
+│  • Events budget: $80K for 3 conferences                                     │
+│  • Contingency: $50K held for opportunities                                  │
+│                                                                              │
+│  Source: &quot;Q1 Planning Meeting Notes&quot; (December 15, 2025)                     │
+│                                                                              │
+│  Want me to pull up the full document or schedule a budget review?           │
+│                                                                              │
+│  [You] 9:01 AM                                                               │
+│  Perfect, thanks! Remember that we're moving $20K from contingency           │
+│  to digital for the new campaign.                                            │
+│                                                                              │
+│  [OpenClaw] 9:01 AM                                                          │
+│  ✅ Noted! I've updated your Onelist:                                        │
+│                                                                              │
+│  &quot;Marketing budget update: $20K moved from contingency to digital            │
+│   for new campaign. New totals: Digital $290K, Contingency $30K&quot;             │
+│                                                                              │
+│  Tagged: #marketing #budget #q1-2026                                         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>5. Unified Ecosystem Strategy</h2>
+<h3>5.1 Onelist as the Memory Layer</h3>
+<p>The strategic opportunity is to position Onelist as the <strong>universal memory layer</strong> that any AI tool can integrate with:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                       AI TOOL ECOSYSTEM                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐      │
+│  │   Twin   │  │ OpenClaw │  │  Claude  │  │ ChatGPT  │  │  Custom  │      │
+│  │          │  │          │  │   Code   │  │          │  │   Apps   │      │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘      │
+│       │             │             │             │             │             │
+│       │             │             │             │             │             │
+│       └─────────────┴─────────────┴─────────────┴─────────────┘             │
+│                                   │                                          │
+│                         MCP / REST API / SDK                                 │
+│                                   │                                          │
+│                                   ▼                                          │
+│  ╔═══════════════════════════════════════════════════════════════════════╗  │
+│  ║                           ONELIST                                      ║  │
+│  ║                                                                        ║  │
+│  ║   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ║  │
+│  ║   │   Atomic    │  │   Two-Layer │  │     GTD     │  │     E2E     │  ║  │
+│  ║   │   Memories  │  │   Retrieval │  │Organization │  │  Encryption │  ║  │
+│  ║   └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  ║  │
+│  ║                                                                        ║  │
+│  ║   Deployment Options:                                                  ║  │
+│  ║   • Self-Hosted (free)    • Cloud Sync ($3/mo)    • Web Access ($20)  ║  │
+│  ║                                                                        ║  │
+│  ╚═══════════════════════════════════════════════════════════════════════╝  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.2 Integration Priority Matrix</h3>
+<table>
+<tr><th>Integration</th><th>Effort</th><th>Impact</th><th>Priority</th><th>Notes</th></tr>
+<tr><td><strong>OpenClaw ClawdHub Skill</strong></td><td>Low</td><td>High</td><td><strong>P0</strong></td><td>Natural fit, 100K+ users</td></tr>
+<tr><td><strong>MCP Server</strong></td><td>Medium</td><td>High</td><td><strong>P0</strong></td><td>Universal AI tool support</td></tr>
+<tr><td><strong>Twin Plugin</strong></td><td>Medium</td><td>Medium</td><td><strong>P1</strong></td><td>Business automation users</td></tr>
+<tr><td><strong>Supermemory Fallback</strong></td><td>Medium</td><td>Low</td><td><strong>P3</strong></td><td>Optional premium feature</td></tr>
+<tr><td><strong>Claude Code Extension</strong></td><td>Low</td><td>Medium</td><td><strong>P1</strong></td><td>Developer audience</td></tr>
+<tr><td><strong>ChatGPT Plugin</strong></td><td>Medium</td><td>Medium</td><td><strong>P2</strong></td><td>Broad reach, complex approval</td></tr>
+</table>
+<h3>5.3 Technical Requirements</h3>
+<strong>Must Have (P0):</strong>
+<pre><code class="language-elixir"># 1. MCP Server (universal AI integration)
+defmodule OnelistWeb.McpServer do
+  # Standard MCP tools
+  def tools do
+    [
+      %{name: &quot;memory_add&quot;, description: &quot;Store a memory&quot;},
+      %{name: &quot;memory_search&quot;, description: &quot;Search memories&quot;},
+      %{name: &quot;memory_recall&quot;, description: &quot;Recall context for topic&quot;},
+      %{name: &quot;inbox_add&quot;, description: &quot;Add to GTD inbox&quot;},
+      %{name: &quot;review_daily&quot;, description: &quot;Get daily review&quot;}
+    ]
+  end
+end
+<h1>2. REST API v1 (already planned)</h1>
+<h1>Endpoints needed:</h1>
+<h1>POST   /api/v1/entries      - Create entry</h1>
+<h1>GET    /api/v1/entries/:id  - Get entry</h1>
+<h1>POST   /api/v1/search       - Semantic search</h1>
+<h1>POST   /api/v1/memories     - Store atomic memories</h1>
+<h1>GET    /api/v1/review/:type - Get review (daily/weekly)</h1>
+<h1>3. Webhook support (for proactive notifications)</h1>
+defmodule Onelist.Webhooks do
+  def notify(user, event, payload) do
+    user.webhook_urls
+    |&gt; Enum.each(&amp;send_webhook(&amp;1, event, payload))
+  end
+end
+</code></pre>
+<strong>Should Have (P1):</strong>
+<pre><code class="language-elixir"># 4. SDK packages
+<h1>- npm: @onelist/sdk</h1>
+<h1>- pip: onelist-sdk</h1>
+<h1>- cargo: onelist-sdk (for Rust tools)</h1>
+<h1>5. Integration templates</h1>
+<h1>- OpenClaw SKILL.md</h1>
+<h1>- Twin workflow templates</h1>
+<h1>- n8n/Zapier webhooks</h1>
+</code></pre>
+<h3>5.4 Go-To-Market Strategy</h3>
+<strong>Phase 1: OpenClaw Integration (Weeks 1-4)</strong>
+1. Develop ClawdHub skill
+2. Publish to ClawdHub marketplace
+3. Write "Giving OpenClaw Perfect Memory" blog post
+4. Engage in OpenClaw Discord community
+5. Target: 1,000 installs in first month
+<strong>Phase 2: MCP Ecosystem (Weeks 5-8)</strong>
+1. Launch MCP server
+2. Test with Claude Code, ChatGPT
+3. Document MCP integration guide
+4. Announce on Hacker News, Reddit
+5. Target: 500 MCP connections
+<strong>Phase 3: Twin Integration (Weeks 9-12)</strong>
+1. Develop Twin plugin
+2. Create workflow templates
+3. Partner outreach to Twin team
+4. Case studies with early adopters
+5. Target: 200 Twin users
+<hr>
+<h2>6. Revenue Model Implications</h2>
+<h3>6.1 Free Tier Value</h3>
+<table>
+<tr><th>Integration</th><th>Free Tier Includes</th><th>Upgrade Trigger</th></tr>
+<tr><td>OpenClaw Skill</td><td>Unlimited local memories</td><td>Cloud sync, web access</td></tr>
+<tr><td>MCP Server</td><td>Self-hosted endpoint</td><td>Managed cloud endpoint</td></tr>
+<tr><td>Twin Plugin</td><td>Basic storage</td><td>Advanced search, agents</td></tr>
+<tr><td>REST API</td><td>1,000 calls/month</td><td>Higher limits, SLA</td></tr>
+</table>
+<h3>6.2 Monetization Opportunities</h3>
+<table>
+<tr><th>Opportunity</th><th>Description</th><th>Revenue Potential</th></tr>
+<tr><td><strong>Cloud Sync upsell</strong></td><td>Integration users want sync</td><td>$3/mo per user</td></tr>
+<tr><td><strong>Web Access upsell</strong></td><td>Power users want full UI</td><td>$20/mo per user</td></tr>
+<tr><td><strong>Enterprise API</strong></td><td>High-volume integrations</td><td>Custom pricing</td></tr>
+<tr><td><strong>White-label</strong></td><td>Twin/OpenClaw branded Onelist</td><td>Partnership deals</td></tr>
+<tr><td><strong>Premium connectors</strong></td><td>Managed OAuth for services</td><td>Add-on pricing</td></tr>
+</table>
+<h3>6.3 Success Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Target (6 months)</th><th>Target (12 months)</th></tr>
+<tr><td><strong>ClawdHub installs</strong></td><td>5,000</td><td>25,000</td></tr>
+<tr><td><strong>MCP connections</strong></td><td>2,000</td><td>15,000</td></tr>
+<tr><td><strong>API calls/month</strong></td><td>100K</td><td>1M</td></tr>
+<tr><td><strong>Conversion to paid</strong></td><td>5%</td><td>8%</td></tr>
+<tr><td><strong>Partner integrations</strong></td><td>3</td><td>10</td></tr>
+</table>
+<hr>
+<h2>7. Implementation Roadmap</h2>
+<h3>7.1 Immediate (Weeks 1-4)</h3>
+<table>
+<tr><th>Task</th><th>Owner</th><th>Deliverable</th></tr>
+<tr><td>MCP Server MVP</td><td>Backend</td><td><code>/mcp</code> endpoint with core tools</td></tr>
+<tr><td>OpenClaw Skill</td><td>Integrations</td><td>ClawdHub published skill</td></tr>
+<tr><td>REST API v1 complete</td><td>Backend</td><td>Full CRUD + search</td></tr>
+<tr><td>Documentation</td><td>Docs</td><td>Integration guides</td></tr>
+</table>
+<h3>7.2 Near-term (Weeks 5-12)</h3>
+<table>
+<tr><th>Task</th><th>Owner</th><th>Deliverable</th></tr>
+<tr><td>Twin plugin</td><td>Integrations</td><td>Published plugin</td></tr>
+<tr><td>SDK packages</td><td>Backend</td><td>npm, pip packages</td></tr>
+<tr><td>Webhook system</td><td>Backend</td><td>Event notifications</td></tr>
+<tr><td>Integration dashboard</td><td>Frontend</td><td>Usage metrics UI</td></tr>
+</table>
+<h3>7.3 Medium-term (Months 3-6)</h3>
+<table>
+<tr><th>Task</th><th>Owner</th><th>Deliverable</th></tr>
+<tr><td>Partner program</td><td>Business</td><td>Formal partnership structure</td></tr>
+<tr><td>White-label option</td><td>Backend</td><td>Customizable branding</td></tr>
+<tr><td>Enterprise API tier</td><td>Backend</td><td>SLA, dedicated support</td></tr>
+<tr><td>Advanced connectors</td><td>Integrations</td><td>OAuth flows for services</td></tr>
+</table>
+<hr>
+<h2>8. Conclusion</h2>
+<p>The AI tool landscape presents a significant opportunity for Onelist to become the <strong>universal memory layer</strong> that powers multiple platforms. Rather than competing directly with Twin, Supermemory, or OpenClaw, Onelist can:</p>
+<p>1. <strong>Complement Twin</strong> by providing organized, persistent memory for business automation
+2. <strong>Complement Supermemory</strong> by offering a complete UI and self-hosted deployment
+3. <strong>Complement OpenClaw</strong> by being the memory backend for task execution</p>
+<p>The unified strategy is:</p>
+<blockquote><strong>"Onelist: The memory layer for AI tools"</strong></blockquote>
+<p>Key investments:
+<li><strong>MCP Server</strong> (P0): Universal AI tool integration</li>
+<li><strong>OpenClaw Skill</strong> (P0): Immediate 100K+ user reach</li>
+<li><strong>REST API</strong> (P0): Foundation for all integrations</li>
+<li><strong>Twin Plugin</strong> (P1): Business automation market</li></p>
+<p>This positions Onelist not as a competitor to be replaced, but as an essential infrastructure component that makes every AI tool more capable. The privacy-first, self-hosted architecture becomes a unique selling point that cloud-only alternatives cannot match.</p>
+<hr>
+<h2>References</h2>
+<li><a href="./competitive_analysis_twin.md">Competitive Analysis: Twin</a></li>
+<li><a href="./competitive_analysis_supermemory.md">Competitive Analysis: Supermemory</a></li>
+<li><a href="./competitive_analysis_openclaw.md">Competitive Analysis: OpenClaw</a></li>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a></li>
+<li><a href="./ai_memory_evolution.md">AI Memory Evolution</a></li>
+</ul>
+<hr>
+<em>Document created: 2026-01-30</em>
+<em>Status: Strategic Analysis</em>
+  </article>
+</body>
+</html>

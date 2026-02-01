@@ -1,0 +1,40 @@
+<.flash_group flash={@flash} />
+
+<main class="min-h-screen bg-white">
+  <article class="max-w-3xl mx-auto px-4 py-8">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @entry.title || "Untitled" %></h1>
+      <div class="text-sm text-gray-500">
+        <span>By <%= @user.username %></span>
+        <span class="mx-2">&middot;</span>
+        <time datetime={@entry.inserted_at}><%= format_date(@entry.inserted_at) %></time>
+      </div>
+    </header>
+
+    <div class="prose prose-lg max-w-none">
+      <%= raw(@html_content) %>
+    </div>
+
+    <%= if Enum.any?(assigns[:assets] || []) do %>
+      <div class="mt-8">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Attachments</h2>
+        <ul class="space-y-2">
+          <%= for asset <- @assets do %>
+            <li class="flex items-center text-sm text-gray-600">
+              <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+              <span><%= asset.filename %></span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <footer class="mt-12 pt-6 border-t border-gray-200">
+      <p class="text-sm text-gray-500">
+        Published on <a href="https://onelist.my" class="text-indigo-600 hover:text-indigo-800">Onelist</a>
+      </p>
+    </footer>
+  </article>
+</main>

@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Searcher Agent Development Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Searcher Agent Development Plan</h1>
+<strong>Document Version:</strong> 2026-01-29
+<strong>Status:</strong> Active - MVP Component
+<strong>Priority:</strong> HIGH - Required for OpenClaw Integration
+<hr>
+<h2>1. Executive Summary</h2>
+<p>The Searcher Agent is Onelist's <strong>embedding generation and semantic search service</strong>. It transforms text content into vector embeddings, maintains the vector index, and provides hybrid search (combining full-text and semantic) capabilities.</p>
+<h3>1.1 Core Responsibilities</h3>
+<table>
+<tr><th>Responsibility</th><th>Description</th></tr>
+<tr><td><strong>Embedding Generation</strong></td><td>Convert text content to vector embeddings</td></tr>
+<tr><td><strong>Vector Storage</strong></td><td>Store embeddings in pgvector for similarity search</td></tr>
+<tr><td><strong>Hybrid Search</strong></td><td>Combine FTS + semantic search with configurable weighting</td></tr>
+<tr><td><strong>Similarity Check</strong></td><td>Pre-storage duplicate detection to prevent redundant content</td></tr>
+<tr><td><strong>Index Maintenance</strong></td><td>Keep embeddings in sync with content changes</td></tr>
+<tr><td><strong>Model Management</strong></td><td>Support multiple embedding models, handle upgrades</td></tr>
+</table>
+<h3>1.2 Why It's Critical for OpenClaw</h3>
+<p>Without Searcher:
+<ul>
+<li>OpenClaw must generate its own embeddings (extra complexity)</li>
+<li>No semantic search - only keyword matching</li>
+<li>Users must manage embedding model configuration</li></p>
+<p>With Searcher:
+<li>Embedding generation is offloaded to Onelist</li>
+<li>"Enhanced search" value proposition is realized</li>
+<li>Consistent embedding model across all entries</li></p>
+<hr>
+<h2>2. Architecture</h2>
+<h3>2.1 System Context</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ONELIST STACK                                        │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    CLIENTS (OpenClaw, Web UI, API)                     │   │
+│  └───────────────────────────────┬──────────────────────────────────────┘   │
+│                                  │                                           │
+│                                  ▼                                           │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    ONELIST CORE (Phoenix API)                         │   │
+│  │                                                                       │   │
+│  │  /api/v1/search          → Hybrid search endpoint                    │   │
+│  │  /api/v1/entries         → CRUD (triggers embedding generation)      │   │
+│  │  /api/v1/embeddings      → Direct embedding operations               │   │
+│  └───────────────────────────────┬──────────────────────────────────────┘   │
+│                                  │                                           │
+│                    ┌─────────────┴─────────────┐                            │
+│                    │                           │                            │
+│                    ▼                           ▼                            │
+│  ┌─────────────────────────────┐  ┌─────────────────────────────┐          │
+│  │     SEARCHER AGENT          │  │     PostgreSQL + pgvector    │          │
+│  │     (Oban Worker)           │  │                              │          │
+│  │                             │  │  entries table               │          │
+│  │  • Embedding generation     │  │  representations table       │          │
+│  │  • Model management         │  │  embeddings table            │          │
+│  │  • Batch processing         │  │  (FTS tsvector columns)      │          │
+│  │  • Re-embedding jobs        │  │                              │          │
+│  └──────────────┬──────────────┘  └─────────────────────────────┘          │
+│                 │                                                            │
+│                 ▼                                                            │
+│  ┌─────────────────────────────┐                                            │
+│  │    EMBEDDING PROVIDER       │                                            │
+│  │                             │                                            │
+│  │  • OpenAI (default)         │                                            │
+│  │  • Anthropic (future)       │                                            │
+│  │  • Local (Ollama, future)   │                                            │
+│  └─────────────────────────────┘                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.2 Data Flow</h3>
+<pre><code class="language-">ENTRY CREATED/UPDATED
+        │
+        ▼
+Onelist Core receives entry
+        │
+        ├── Saves to entries table
+        ├── Generates representations (markdown, html_public, etc.)
+        │
+        ▼
+Enqueues Searcher job (Oban)
+        │
+        ▼
+SEARCHER AGENT PROCESSES
+        │
+        ├── 1. Extract text from representations
+        ├── 2. Chunk if necessary (for long content)
+        ├── 3. Call embedding provider
+        ├── 4. Store vectors in embeddings table
+        └── 5. Update search_vector (FTS) if needed
+</code></pre>
+<hr>
+<h2>3. Database Schema</h2>
+<h3>3.1 Embeddings Table</h3>
+<pre><code class="language-sql">CREATE TABLE embeddings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  entry_id UUID NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+  representation_id UUID REFERENCES representations(id) ON DELETE CASCADE,
+<p>-- Embedding data
+  model_name VARCHAR(255) NOT NULL,      -- e.g., 'text-embedding-3-small'
+  model_version VARCHAR(50),              -- e.g., '2024-01'
+  dimensions INTEGER NOT NULL,            -- e.g., 1536
+  vector vector(1536),                    -- pgvector column</p>
+<p>-- Chunking support
+  chunk_index INTEGER DEFAULT 0,          -- 0 for single-chunk, 1+ for multi-chunk
+  chunk_text TEXT,                        -- Original text that was embedded
+  chunk_start_offset INTEGER,             -- Character offset in source
+  chunk_end_offset INTEGER,</p>
+<p>-- Metadata
+  token_count INTEGER,                    -- Tokens in source text
+  processing_time_ms INTEGER,             -- How long embedding took
+  error_message TEXT,                     -- If embedding failed</p>
+<p>-- Timestamps
+  inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),</p>
+<p>-- Constraints
+  UNIQUE(entry_id, model_name, chunk_index)
+);</p>
+<p>-- Indexes
+CREATE INDEX embeddings_entry_id_idx ON embeddings(entry_id);
+CREATE INDEX embeddings_model_name_idx ON embeddings(model_name);
+CREATE INDEX embeddings_vector_idx ON embeddings
+  USING ivfflat (vector vector_cosine_ops) WITH (lists = 100);</p>
+<p>-- For HNSW (better quality, more memory) - consider for production
+-- CREATE INDEX embeddings_vector_hnsw_idx ON embeddings
+--   USING hnsw (vector vector_cosine_ops) WITH (m = 16, ef_construction = 64);
+</code></pre></p>
+<h3>3.2 Search Configuration Table</h3>
+<pre><code class="language-sql">CREATE TABLE search_configs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
+<p>-- Model settings
+  embedding_model VARCHAR(255) NOT NULL DEFAULT 'text-embedding-3-small',
+  embedding_dimensions INTEGER NOT NULL DEFAULT 1536,</p>
+<p>-- Search defaults
+  default_search_type VARCHAR(50) DEFAULT 'hybrid',  -- 'semantic', 'keyword', 'hybrid'
+  semantic_weight DECIMAL(3,2) DEFAULT 0.7,
+  keyword_weight DECIMAL(3,2) DEFAULT 0.3,</p>
+<p>-- Processing settings
+  auto_embed_on_create BOOLEAN DEFAULT true,
+  auto_embed_on_update BOOLEAN DEFAULT true,
+  max_chunk_tokens INTEGER DEFAULT 500,
+  chunk_overlap_tokens INTEGER DEFAULT 50,</p>
+<p>-- Rate limiting
+  daily_embedding_limit INTEGER,           -- NULL = unlimited
+  embeddings_today INTEGER DEFAULT 0,
+  limit_reset_at TIMESTAMPTZ,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),</p>
+<p>UNIQUE(user_id)
+);
+</code></pre></p>
+<h3>3.3 Embedding Queue Table (Oban Jobs)</h3>
+<pre><code class="language-sql">-- Using Oban's built-in job queue, but tracking status separately for visibility
+CREATE TABLE embedding_jobs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  entry_id UUID NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+  oban_job_id BIGINT,
+<p>status VARCHAR(50) NOT NULL DEFAULT 'pending',  -- pending, processing, completed, failed
+  priority INTEGER DEFAULT 0,                      -- Higher = processed first</p>
+<p>attempts INTEGER DEFAULT 0,
+  max_attempts INTEGER DEFAULT 3,
+  last_error TEXT,</p>
+<p>scheduled_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,</p>
+<p>inserted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</p>
+<p>CREATE INDEX embedding_jobs_entry_id_idx ON embedding_jobs(entry_id);
+CREATE INDEX embedding_jobs_status_idx ON embedding_jobs(status);
+</code></pre></p>
+<hr>
+<h2>4. Elixir Implementation</h2>
+<h3>4.1 Module Structure</h3>
+<pre><code class="language-">lib/onelist/
+├── searcher/
+│   ├── searcher.ex                 # Main context module
+│   ├── embedding.ex                # Embedding schema
+│   ├── search_config.ex            # SearchConfig schema
+│   ├── embedding_job.ex            # EmbeddingJob schema
+│   │
+│   ├── workers/
+│   │   ├── embed_entry_worker.ex   # Oban worker for single entry
+│   │   ├── batch_embed_worker.ex   # Oban worker for batch embedding
+│   │   └── reembed_worker.ex       # Oban worker for model upgrades
+│   │
+│   ├── providers/
+│   │   ├── provider.ex             # Behaviour for embedding providers
+│   │   ├── openai.ex               # OpenAI implementation
+│   │   ├── anthropic.ex            # Anthropic implementation (future)
+│   │   └── ollama.ex               # Local Ollama implementation (future)
+│   │
+│   ├── chunker.ex                  # Text chunking logic
+│   ├── search.ex                   # Search query execution
+│   └── hybrid_search.ex            # Hybrid search orchestration
+</code></pre>
+<h3>4.2 Core Context Module</h3>
+<pre><code class="language-elixir">defmodule Onelist.Searcher do
+  @moduledoc &quot;&quot;&quot;
+  The Searcher context for embedding generation and semantic search.
+  &quot;&quot;&quot;
+<p>alias Onelist.Repo
+  alias Onelist.Searcher.{Embedding, SearchConfig, Search, HybridSearch}
+  alias Onelist.Searcher.Workers.{EmbedEntryWorker, BatchEmbedWorker}</p>
+<p># ============================================
+  # EMBEDDING OPERATIONS
+  # ============================================</p>
+<p>@doc &quot;&quot;&quot;
+  Enqueue an entry for embedding generation.
+  Called automatically when entries are created/updated.
+  &quot;&quot;&quot;
+  def enqueue_embedding(entry_id, opts \\ []) do
+    priority = Keyword.get(opts, :priority, 0)</p>
+<p>%{entry_id: entry_id, priority: priority}
+    |&gt; EmbedEntryWorker.new(priority: priority)
+    |&gt; Oban.insert()
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Enqueue multiple entries for batch embedding.
+  &quot;&quot;&quot;
+  def enqueue_batch_embedding(entry_ids, opts \\ []) do
+    %{entry_ids: entry_ids}
+    |&gt; BatchEmbedWorker.new(Keyword.merge([queue: :embeddings], opts))
+    |&gt; Oban.insert()
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get embedding for an entry. Returns nil if not yet embedded.
+  &quot;&quot;&quot;
+  def get_embedding(entry_id, model_name \\ nil) do
+    model = model_name || default_model()</p>
+<p>Embedding
+    |&gt; where([e], e.entry_id == ^entry_id and e.model_name == ^model)
+    |&gt; order_by([e], e.chunk_index)
+    |&gt; Repo.all()
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Check if entry has been embedded with current model.
+  &quot;&quot;&quot;
+  def embedded?(entry_id) do
+    Embedding
+    |&gt; where([e], e.entry_id == ^entry_id and e.model_name == ^default_model())
+    |&gt; Repo.exists?()
+  end</p>
+<p># ============================================
+  # SEARCH OPERATIONS
+  # ============================================</p>
+<p>@doc &quot;&quot;&quot;
+  Perform hybrid search combining semantic and keyword matching.</p>
+<p>## Options
+    <em> <code>:search_type</code> - &quot;hybrid&quot;, &quot;semantic&quot;, or &quot;keyword&quot; (default: &quot;hybrid&quot;)
+    </em> <code>:semantic_weight</code> - Weight for semantic results (default: 0.7)
+    <em> <code>:keyword_weight</code> - Weight for keyword results (default: 0.3)
+    </em> <code>:limit</code> - Max results (default: 20)
+    <em> <code>:offset</code> - Pagination offset (default: 0)
+    </em> <code>:filters</code> - Map of filters (entry_types, tags, date_range, etc.)
+  &quot;&quot;&quot;
+  def search(user_id, query, opts \\ []) do
+    search_type = Keyword.get(opts, :search_type, &quot;hybrid&quot;)</p>
+<p>case search_type do
+      &quot;semantic&quot; -&gt; Search.semantic_search(user_id, query, opts)
+      &quot;keyword&quot; -&gt; Search.keyword_search(user_id, query, opts)
+      &quot;hybrid&quot; -&gt; HybridSearch.search(user_id, query, opts)
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Quick semantic similarity search. Returns entry IDs with scores.
+  &quot;&quot;&quot;
+  def similar_entries(entry_id, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 10)</p>
+<p>with {:ok, embedding} &lt;- get_entry_embedding(entry_id) do
+      Search.find_similar(embedding.vector, limit, exclude: [entry_id])
+    end
+  end</p>
+<p># ============================================
+  # CONFIGURATION
+  # ============================================</p>
+<p>@doc &quot;&quot;&quot;
+  Get or create search config for user.
+  &quot;&quot;&quot;
+  def get_search_config(user_id) do
+    case Repo.get_by(SearchConfig, user_id: user_id) do
+      nil -&gt; create_default_config(user_id)
+      config -&gt; {:ok, config}
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Update search configuration.
+  &quot;&quot;&quot;
+  def update_search_config(user_id, attrs) do
+    {:ok, config} = get_search_config(user_id)</p>
+<p>config
+    |&gt; SearchConfig.changeset(attrs)
+    |&gt; Repo.update()
+  end</p>
+<p># ============================================
+  # PRIVATE
+  # ============================================</p>
+<p>defp default_model do
+    Application.get_env(:onelist, :embedding_model, &quot;text-embedding-3-small&quot;)
+  end</p>
+<p>defp create_default_config(user_id) do
+    %SearchConfig{}
+    |&gt; SearchConfig.changeset(%{user_id: user_id})
+    |&gt; Repo.insert()
+  end
+end
+</code></pre></p>
+<h3>4.3 Embedding Worker</h3>
+<pre><code class="language-elixir">defmodule Onelist.Searcher.Workers.EmbedEntryWorker do
+  @moduledoc &quot;&quot;&quot;
+  Oban worker for generating embeddings for a single entry.
+  &quot;&quot;&quot;
+<p>use Oban.Worker,
+    queue: :embeddings,
+    max_attempts: 3,
+    priority: 1</p>
+<p>alias Onelist.{Repo, Entries}
+  alias Onelist.Searcher
+  alias Onelist.Searcher.{Embedding, Chunker}
+  alias Onelist.Searcher.Providers.OpenAI</p>
+<p>require Logger</p>
+<p>@impl Oban.Worker
+  def perform(%Oban.Job{args: %{&quot;entry_id&quot; =&gt; entry_id} = args}) do
+    priority = Map.get(args, &quot;priority&quot;, 0)</p>
+<p>with {:ok, entry} &lt;- get_entry(entry_id),
+         {:ok, text} &lt;- extract_embeddable_text(entry),
+         {:ok, chunks} &lt;- chunk_text(text, entry),
+         {:ok, embeddings} &lt;- generate_embeddings(chunks),
+         {:ok, _} &lt;- store_embeddings(entry, chunks, embeddings) do
+      Logger.info(&quot;Successfully embedded entry #{entry_id}&quot;)
+      :ok
+    else
+      {:error, :entry_not_found} -&gt;
+        Logger.warn(&quot;Entry #{entry_id} not found, skipping embedding&quot;)
+        :ok  # Don't retry if entry doesn't exist</p>
+<p>{:error, :no_content} -&gt;
+        Logger.debug(&quot;Entry #{entry_id} has no embeddable content&quot;)
+        :ok</p>
+<p>{:error, reason} -&gt;
+        Logger.error(&quot;Failed to embed entry #{entry_id}: #{inspect(reason)}&quot;)
+        {:error, reason}
+    end
+  end</p>
+<p>defp get_entry(entry_id) do
+    case Entries.get_entry(entry_id) do
+      nil -&gt; {:error, :entry_not_found}
+      entry -&gt; {:ok, entry}
+    end
+  end</p>
+<p>defp extract_embeddable_text(entry) do
+    # Priority: markdown representation &gt; title + content
+    text = case Entries.get_representation(entry.id, &quot;markdown&quot;) do
+      nil -&gt;
+        [entry.title, entry.content]
+        |&gt; Enum.filter(&amp; &amp;1)
+        |&gt; Enum.join(&quot;\n\n&quot;)
+      rep -&gt;
+        rep.content
+    end</p>
+<p>if String.trim(text) == &quot;&quot; do
+      {:error, :no_content}
+    else
+      {:ok, text}
+    end
+  end</p>
+<p>defp chunk_text(text, entry) do
+    config = Searcher.get_search_config!(entry.user_id)</p>
+<p>chunks = Chunker.chunk(text,
+      max_tokens: config.max_chunk_tokens,
+      overlap_tokens: config.chunk_overlap_tokens
+    )</p>
+<p>{:ok, chunks}
+  end</p>
+<p>defp generate_embeddings(chunks) do
+    texts = Enum.map(chunks, &amp; &amp;1.text)</p>
+<p>case OpenAI.embed_batch(texts) do
+      {:ok, vectors} -&gt; {:ok, vectors}
+      {:error, reason} -&gt; {:error, {:embedding_failed, reason}}
+    end
+  end</p>
+<p>defp store_embeddings(entry, chunks, vectors) do
+    now = DateTime.utc_now()</p>
+<p># Delete existing embeddings for this entry/model
+    Embedding
+    |&gt; where([e], e.entry_id == ^entry.id and e.model_name == ^OpenAI.model_name())
+    |&gt; Repo.delete_all()</p>
+<p># Insert new embeddings
+    embeddings =
+      chunks
+      |&gt; Enum.zip(vectors)
+      |&gt; Enum.with_index()
+      |&gt; Enum.map(fn {{chunk, vector}, index} -&gt;
+        %{
+          id: Ecto.UUID.generate(),
+          entry_id: entry.id,
+          model_name: OpenAI.model_name(),
+          model_version: OpenAI.model_version(),
+          dimensions: length(vector),
+          vector: Pgvector.new(vector),
+          chunk_index: index,
+          chunk_text: chunk.text,
+          chunk_start_offset: chunk.start_offset,
+          chunk_end_offset: chunk.end_offset,
+          token_count: chunk.token_count,
+          inserted_at: now,
+          updated_at: now
+        }
+      end)</p>
+<p>{count, _} = Repo.insert_all(Embedding, embeddings)
+    {:ok, count}
+  end
+end
+</code></pre></p>
+<h3>4.4 OpenAI Provider</h3>
+<pre><code class="language-elixir">defmodule Onelist.Searcher.Providers.OpenAI do
+  @moduledoc &quot;&quot;&quot;
+  OpenAI embedding provider implementation.
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Searcher.Providers.Provider</p>
+<p>require Logger</p>
+<p>@default_model &quot;text-embedding-3-small&quot;
+  @default_dimensions 1536
+  @batch_size 100  # OpenAI allows up to 2048 inputs per request</p>
+<p>def model_name, do: @default_model
+  def model_version, do: &quot;2024-01&quot;
+  def dimensions, do: @default_dimensions</p>
+<p>@doc &quot;&quot;&quot;
+  Generate embedding for a single text.
+  &quot;&quot;&quot;
+  @impl true
+  def embed(text) do
+    case embed_batch([text]) do
+      {:ok, [vector]} -&gt; {:ok, vector}
+      {:error, reason} -&gt; {:error, reason}
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Generate embeddings for multiple texts in batch.
+  &quot;&quot;&quot;
+  @impl true
+  def embed_batch(texts) when is_list(texts) do
+    api_key = get_api_key()</p>
+<p>texts
+    |&gt; Enum.chunk_every(@batch_size)
+    |&gt; Enum.reduce_while({:ok, []}, fn batch, {:ok, acc} -&gt;
+      case do_embed_request(batch, api_key) do
+        {:ok, vectors} -&gt; {:cont, {:ok, acc ++ vectors}}
+        {:error, reason} -&gt; {:halt, {:error, reason}}
+      end
+    end)
+  end</p>
+<p>defp do_embed_request(texts, api_key) do
+    url = &quot;https://api.openai.com/v1/embeddings&quot;</p>
+<p>body = Jason.encode!(%{
+      model: @default_model,
+      input: texts,
+      dimensions: @default_dimensions
+    })</p>
+<p>headers = [
+      {&quot;Authorization&quot;, &quot;Bearer #{api_key}&quot;},
+      {&quot;Content-Type&quot;, &quot;application/json&quot;}
+    ]</p>
+<p>case Req.post(url, body: body, headers: headers) do
+      {:ok, %{status: 200, body: response}} -&gt;
+        vectors =
+          response[&quot;data&quot;]
+          |&gt; Enum.sort_by(&amp; &amp;1[&quot;index&quot;])
+          |&gt; Enum.map(&amp; &amp;1[&quot;embedding&quot;])
+        {:ok, vectors}</p>
+<p>{:ok, %{status: status, body: body}} -&gt;
+        Logger.error(&quot;OpenAI API error: #{status} - #{inspect(body)}&quot;)
+        {:error, {:api_error, status, body}}</p>
+<p>{:error, reason} -&gt;
+        Logger.error(&quot;OpenAI request failed: #{inspect(reason)}&quot;)
+        {:error, {:request_failed, reason}}
+    end
+  end</p>
+<p>defp get_api_key do
+    Application.get_env(:onelist, :openai_api_key) ||
+      System.get_env(&quot;OPENAI_API_KEY&quot;) ||
+      raise &quot;OpenAI API key not configured&quot;
+  end
+end
+</code></pre></p>
+<h3>4.5 Two-Layer Retrieval (Supermemory-Inspired)</h3>
+<p>Based on <a href="https://supermemory.ai/research">Supermemory.ai research</a>, we implement two-layer retrieval:
+1. <strong>Search</strong> on atomic memories (high precision)
+2. <strong>Return</strong> original source chunks (preserves context)</p>
+<pre><code class="language-elixir">defmodule Onelist.Searcher.TwoLayerSearch do
+  @moduledoc &quot;&quot;&quot;
+  Two-layer retrieval: search atomic memories, inject source chunks.
+  This approach achieves higher precision than standard RAG.
+  &quot;&quot;&quot;
+<p>alias Onelist.Repo
+  alias Onelist.Reader.Memory
+  alias Onelist.Entries.{Entry, Representation}
+  alias Onelist.Searcher.Providers.OpenAI</p>
+<p>import Ecto.Query</p>
+<p>@doc &quot;&quot;&quot;
+  Search with two-layer retrieval.</p>
+<p>## Options
+    <em> <code>:search_mode</code> - &quot;atomic&quot; (memories), &quot;chunk&quot; (legacy), &quot;hybrid&quot;
+    </em> <code>:include_source_chunks</code> - Inject original context (default: true)
+    <em> <code>:current_only</code> - Only non-superseded memories (default: true)
+    </em> <code>:limit</code> - Max results
+  &quot;&quot;&quot;
+  def search(user_id, query, opts \\ []) do
+    search_mode = Keyword.get(opts, :search_mode, &quot;atomic&quot;)
+    include_source = Keyword.get(opts, :include_source_chunks, true)
+    current_only = Keyword.get(opts, :current_only, true)
+    limit = Keyword.get(opts, :limit, 20)</p>
+<p>with {:ok, query_embedding} &lt;- OpenAI.embed(query) do
+      results = case search_mode do
+        &quot;atomic&quot; -&gt; search_memories(user_id, query_embedding, current_only, limit <em> 3)
+        &quot;chunk&quot; -&gt; search_chunks(user_id, query_embedding, limit)
+        &quot;hybrid&quot; -&gt; hybrid_memory_chunk_search(user_id, query, query_embedding, limit)
+      end</p>
+<p># Layer 2: Inject source chunks if requested
+      enriched = if include_source &amp;&amp; search_mode == &quot;atomic&quot; do
+        Enum.map(results, &amp;inject_source_context/1)
+      else
+        results
+      end</p>
+<p># Deduplicate by entry
+      final = enriched
+        |&gt; deduplicate_by_entry()
+        |&gt; Enum.take(limit)</p>
+<p>{:ok, %{results: final, search_mode: search_mode, total: length(final)}}
+    end
+  end</p>
+<p>defp search_memories(user_id, query_vector, current_only, limit) do
+    base_query = from m in Memory,
+      where: m.user_id == ^user_id,
+      where: not is_nil(m.embedding),
+      select: %{
+        memory_id: m.id, content: m.content, memory_type: m.memory_type,
+        entry_id: m.entry_id, representation_id: m.representation_id,
+        source_start_offset: m.source_start_offset,
+        source_end_offset: m.source_end_offset,
+        score: fragment(&quot;1 - (embedding &lt;=&gt; ?)&quot;, ^Pgvector.new(query_vector))
+      },
+      order_by: [desc: fragment(&quot;1 - (embedding &lt;=&gt; ?)&quot;, ^Pgvector.new(query_vector))],
+      limit: ^limit</p>
+<p>query = if current_only, do: where(base_query, [m], is_nil(m.valid_until)), else: base_query
+    Repo.all(query)
+  end</p>
+<p>defp inject_source_context(hit) do
+    rep = hit.representation_id &amp;&amp; Repo.get(Representation, hit.representation_id)
+    source_chunk = if rep &amp;&amp; hit.source_start_offset &amp;&amp; hit.source_end_offset do
+      String.slice(rep.content, hit.source_start_offset, hit.source_end_offset - hit.source_start_offset)
+    else
+      rep &amp;&amp; rep.content
+    end</p>
+<p>entry = Repo.get(Entry, hit.entry_id)
+    Map.merge(hit, %{
+      source_chunk: source_chunk,
+      source_entry: entry &amp;&amp; %{id: entry.id, title: entry.title, entry_type: entry.entry_type}
+    })
+  end</p>
+<p>defp deduplicate_by_entry(results) do
+    results
+    |&gt; Enum.group_by(&amp; &amp;1.entry_id)
+    |&gt; Enum.map(fn {_, group} -&gt; Enum.max_by(group, &amp; &amp;1.score) end)
+    |&gt; Enum.sort_by(&amp; &amp;1.score, :desc)
+  end
+end
+</code></pre></p>
+<h3>4.6 Memory Embedding</h3>
+<pre><code class="language-elixir">defmodule Onelist.Searcher.MemoryEmbedder do
+  @moduledoc &quot;&quot;&quot;
+  Generates embeddings for atomic memories (from Reader Agent).
+  &quot;&quot;&quot;
+<p>alias Onelist.Repo
+  alias Onelist.Reader.Memory
+  alias Onelist.Searcher.Providers.OpenAI
+  import Ecto.Query</p>
+<p>def embed_memories(entry_id, memory_ids \\ nil) do
+    query = from m in Memory, where: m.entry_id == ^entry_id, where: is_nil(m.embedding)
+    query = if memory_ids, do: where(query, [m], m.id in ^memory_ids), else: query
+    memories = Repo.all(query)</p>
+<p>if length(memories) &gt; 0 do
+      texts = Enum.map(memories, &amp; &amp;1.content)
+      case OpenAI.embed_batch(texts) do
+        {:ok, vectors} -&gt;
+          Enum.zip(memories, vectors)
+          |&gt; Enum.each(fn {m, v} -&gt;
+            from(mem in Memory, where: mem.id == ^m.id)
+            |&gt; Repo.update_all(set: [embedding: Pgvector.new(v)])
+          end)
+          {:ok, length(memories)}
+        {:error, reason} -&gt; {:error, reason}
+      end
+    else
+      {:ok, 0}
+    end
+  end
+end
+</code></pre></p>
+<h3>4.7 Hybrid Search Implementation</h3>
+<pre><code class="language-elixir">defmodule Onelist.Searcher.HybridSearch do
+  @moduledoc &quot;&quot;&quot;
+  Hybrid search combining semantic vector similarity with full-text search.
+  &quot;&quot;&quot;
+<p>alias Onelist.Repo
+  alias Onelist.Entries.Entry
+  alias Onelist.Searcher.{Embedding, Search}
+  alias Onelist.Searcher.Providers.OpenAI</p>
+<p>import Ecto.Query</p>
+<p>@doc &quot;&quot;&quot;
+  Perform hybrid search with configurable weights.
+  &quot;&quot;&quot;
+  def search(user_id, query, opts \\ []) do
+    semantic_weight = Keyword.get(opts, :semantic_weight, 0.7)
+    keyword_weight = Keyword.get(opts, :keyword_weight, 0.3)
+    limit = Keyword.get(opts, :limit, 20)
+    offset = Keyword.get(opts, :offset, 0)
+    filters = Keyword.get(opts, :filters, %{})</p>
+<p># Get results from both search methods
+    with {:ok, query_embedding} &lt;- embed_query(query),
+         {:ok, semantic_results} &lt;- semantic_search(user_id, query_embedding, filters, limit </em> 2),
+         {:ok, keyword_results} &lt;- keyword_search(user_id, query, filters, limit <em> 2) do</p>
+<p># Combine and re-rank
+      combined = combine_results(
+        semantic_results,
+        keyword_results,
+        semantic_weight,
+        keyword_weight
+      )</p>
+<p># Apply pagination
+      results =
+        combined
+        |&gt; Enum.drop(offset)
+        |&gt; Enum.take(limit)</p>
+<p>{:ok, %{
+        results: results,
+        total: length(combined),
+        query: query,
+        search_type: &quot;hybrid&quot;,
+        weights: %{semantic: semantic_weight, keyword: keyword_weight}
+      }}
+    end
+  end</p>
+<p>defp embed_query(query) do
+    OpenAI.embed(query)
+  end</p>
+<p>defp semantic_search(user_id, query_vector, filters, limit) do
+    base_query =
+      from e in Entry,
+        join: emb in Embedding, on: emb.entry_id == e.id,
+        where: e.user_id == ^user_id,
+        where: emb.model_name == ^OpenAI.model_name(),
+        select: %{
+          entry_id: e.id,
+          title: e.title,
+          entry_type: e.entry_type,
+          score: fragment(
+            &quot;1 - (? &lt;=&gt; ?)&quot;,
+            emb.vector,
+            ^Pgvector.new(query_vector)
+          )
+        },
+        order_by: [desc: fragment(&quot;1 - (? &lt;=&gt; ?)&quot;, emb.vector, ^Pgvector.new(query_vector))],
+        limit: ^limit</p>
+<p>query = apply_filters(base_query, filters)</p>
+<p>{:ok, Repo.all(query)}
+  end</p>
+<p>defp keyword_search(user_id, query, filters, limit) do
+    tsquery = to_tsquery(query)</p>
+<p>base_query =
+      from e in Entry,
+        where: e.user_id == ^user_id,
+        where: fragment(
+          &quot;to_tsvector('english', coalesce(?, '') || ' ' || coalesce(?, '')) @@ to_tsquery('english', ?)&quot;,
+          e.title,
+          e.content,
+          ^tsquery
+        ),
+        select: %{
+          entry_id: e.id,
+          title: e.title,
+          entry_type: e.entry_type,
+          score: fragment(
+            &quot;ts_rank(to_tsvector('english', coalesce(?, '') || ' ' || coalesce(?, '')), to_tsquery('english', ?))&quot;,
+            e.title,
+            e.content,
+            ^tsquery
+          )
+        },
+        order_by: [desc: fragment(
+          &quot;ts_rank(to_tsvector('english', coalesce(?, '') || ' ' || coalesce(?, '')), to_tsquery('english', ?))&quot;,
+          e.title,
+          e.content,
+          ^tsquery
+        )],
+        limit: ^limit</p>
+<p>query = apply_filters(base_query, filters)</p>
+<p>{:ok, Repo.all(query)}
+  end</p>
+<p>defp combine_results(semantic_results, keyword_results, semantic_weight, keyword_weight) do
+    # Normalize scores to 0-1 range
+    semantic_normalized = normalize_scores(semantic_results)
+    keyword_normalized = normalize_scores(keyword_results)</p>
+<p># Build combined score map
+    all_ids =
+      (Enum.map(semantic_normalized, &amp; &amp;1.entry_id) ++
+       Enum.map(keyword_normalized, &amp; &amp;1.entry_id))
+      |&gt; Enum.uniq()</p>
+<p>semantic_map = Map.new(semantic_normalized, &amp;{&amp;1.entry_id, &amp;1})
+    keyword_map = Map.new(keyword_normalized, &amp;{&amp;1.entry_id, &amp;1})</p>
+<p>all_ids
+    |&gt; Enum.map(fn id -&gt;
+      semantic_score = get_in(semantic_map, [id, :score]) || 0
+      keyword_score = get_in(keyword_map, [id, :score]) || 0</p>
+<p>combined_score = (semantic_score </em> semantic_weight) + (keyword_score <em> keyword_weight)</p>
+<p>base = semantic_map[id] || keyword_map[id]</p>
+<p>%{
+        entry_id: id,
+        title: base.title,
+        entry_type: base.entry_type,
+        combined_score: combined_score,
+        semantic_score: semantic_score,
+        keyword_score: keyword_score
+      }
+    end)
+    |&gt; Enum.sort_by(&amp; &amp;1.combined_score, :desc)
+  end</p>
+<p>defp normalize_scores(results) when results == [], do: []
+  defp normalize_scores(results) do
+    max_score = results |&gt; Enum.map(&amp; &amp;1.score) |&gt; Enum.max()
+    min_score = results |&gt; Enum.map(&amp; &amp;1.score) |&gt; Enum.min()
+    range = max_score - min_score</p>
+<p>if range == 0 do
+      Enum.map(results, &amp;Map.put(&amp;1, :score, 1.0))
+    else
+      Enum.map(results, fn r -&gt;
+        Map.put(r, :score, (r.score - min_score) / range)
+      end)
+    end
+  end</p>
+<p>defp apply_filters(query, filters) do
+    query
+    |&gt; maybe_filter_entry_types(filters[&quot;entry_types&quot;])
+    |&gt; maybe_filter_tags(filters[&quot;tags&quot;])
+    |&gt; maybe_filter_date_range(filters[&quot;date_range&quot;])
+  end</p>
+<p>defp maybe_filter_entry_types(query, nil), do: query
+  defp maybe_filter_entry_types(query, types) when is_list(types) do
+    where(query, [e], e.entry_type in ^types)
+  end</p>
+<p>defp maybe_filter_tags(query, nil), do: query
+  defp maybe_filter_tags(query, tags) when is_list(tags) do
+    from e in query,
+      join: et in &quot;entry_tags&quot;, on: et.entry_id == e.id,
+      join: t in &quot;tags&quot;, on: t.id == et.tag_id,
+      where: t.name in ^tags,
+      distinct: true
+  end</p>
+<p>defp maybe_filter_date_range(query, nil), do: query
+  defp maybe_filter_date_range(query, %{&quot;from&quot; =&gt; from, &quot;to&quot; =&gt; to}) do
+    where(query, [e], e.inserted_at &gt;= ^from and e.inserted_at &lt;= ^to)
+  end</p>
+<p>defp to_tsquery(query) do
+    query
+    |&gt; String.split(~r/\s+/)
+    |&gt; Enum.filter(&amp;(String.length(&amp;1) &gt; 2))
+    |&gt; Enum.join(&quot; &amp; &quot;)
+  end
+end
+</code></pre></p>
+<h3>4.6 Pre-Storage Similarity Check</h3>
+<p>The similarity check feature allows clients to check if content is similar to existing entries <strong>before</strong> creating a new entry. This prevents duplicate content and helps users discover existing knowledge.</p>
+<pre><code class="language-elixir">defmodule Onelist.Searcher.SimilarityCheck do
+  @moduledoc &quot;&quot;&quot;
+  Pre-storage similarity detection to prevent duplicate content.
+<p>Use Cases:
+  <li>Web clipper: Check if article already saved</li>
+  <li>OpenClaw: Detect if incoming content duplicates existing entry</li>
+  <li>River Agent: Suggest linking instead of duplicating</li>
+  &quot;&quot;&quot;</p>
+<p>alias Onelist.Repo
+  alias Onelist.Entries.Entry
+  alias Onelist.Searcher.{Embedding, HybridSearch}
+  alias Onelist.Searcher.Providers.OpenAI</p>
+<p>import Ecto.Query</p>
+<p>@default_threshold 0.70  # 70% similarity = potential duplicate
+  @high_threshold 0.85     # 85% similarity = very likely duplicate</p>
+<p>@doc &quot;&quot;&quot;
+  Check if text is similar to existing entries before saving.</p>
+<p>Returns matches above the similarity threshold with actionable recommendations.</p>
+<p>## Options
+    </em> <code>:threshold</code> - Minimum similarity score (0.0-1.0, default: 0.70)
+    <em> <code>:limit</code> - Maximum similar entries to return (default: 5)
+    </em> <code>:entry_types</code> - Filter to specific entry types (default: all)
+    <em> <code>:include_content_preview</code> - Include snippet of matching content (default: true)</p>
+<p>## Returns
+    </em> <code>{:ok, %{similar: [], recommendation: :create}}</code> - No similar content, safe to create
+    <em> <code>{:ok, %{similar: [...], recommendation: :review}}</code> - Similar content found, user should review
+    </em> <code>{:ok, %{similar: [...], recommendation: :duplicate}}</code> - High similarity, likely duplicate
+  &quot;&quot;&quot;
+  def check(user_id, text, opts \\ []) do
+    threshold = Keyword.get(opts, :threshold, @default_threshold)
+    limit = Keyword.get(opts, :limit, 5)
+    entry_types = Keyword.get(opts, :entry_types, nil)
+    include_preview = Keyword.get(opts, :include_content_preview, true)</p>
+<p>with {:ok, query_vector} &lt;- OpenAI.embed(text) do
+      similar_entries = find_similar(user_id, query_vector, threshold, limit, entry_types)</p>
+<p>similar_with_details =
+        if include_preview do
+          enrich_with_previews(similar_entries, text)
+        else
+          similar_entries
+        end</p>
+<p>recommendation = determine_recommendation(similar_entries)</p>
+<p>{:ok, %{
+        similar: similar_with_details,
+        recommendation: recommendation,
+        highest_score: get_highest_score(similar_entries),
+        threshold_used: threshold,
+        query_preview: String.slice(text, 0, 200)
+      }}
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Check similarity for a URL (fetches and extracts content first).
+  Used by Web Clipper before saving.
+  &quot;&quot;&quot;
+  def check_url(user_id, url, opts \\ []) do
+    with {:ok, content} &lt;- fetch_and_extract(url) do
+      check(user_id, content.text, Keyword.put(opts, :url, url))
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Quick boolean check - is this content likely a duplicate?
+  &quot;&quot;&quot;
+  def is_duplicate?(user_id, text, threshold \\ @high_threshold) do
+    case check(user_id, text, threshold: threshold, limit: 1) do
+      {:ok, %{similar: [_ | _]}} -&gt; true
+      _ -&gt; false
+    end
+  end</p>
+<p># ============================================
+  # PRIVATE
+  # ============================================</p>
+<p>defp find_similar(user_id, query_vector, threshold, limit, entry_types) do
+    base_query =
+      from e in Entry,
+        join: emb in Embedding, on: emb.entry_id == e.id,
+        where: e.user_id == ^user_id,
+        where: emb.model_name == ^OpenAI.model_name(),
+        where: emb.chunk_index == 0,  # Compare against first chunk only for speed
+        select: %{
+          entry_id: e.id,
+          title: e.title,
+          entry_type: e.entry_type,
+          created_at: e.inserted_at,
+          similarity: fragment(
+            &quot;1 - (? &lt;=&gt; ?)&quot;,
+            emb.vector,
+            ^Pgvector.new(query_vector)
+          )
+        },
+        having: fragment(
+          &quot;1 - (? &lt;=&gt; ?) &gt;= ?&quot;,
+          emb.vector,
+          ^Pgvector.new(query_vector),
+          ^threshold
+        ),
+        order_by: [desc: fragment(&quot;1 - (? &lt;=&gt; ?)&quot;, emb.vector, ^Pgvector.new(query_vector))],
+        limit: ^limit</p>
+<p>query = if entry_types, do: where(base_query, [e], e.entry_type in ^entry_types), else: base_query</p>
+<p>Repo.all(query)
+  end</p>
+<p>defp enrich_with_previews(similar_entries, query_text) do
+    entry_ids = Enum.map(similar_entries, &amp; &amp;1.entry_id)</p>
+<p># Fetch entry content for previews
+    entries_map =
+      from(e in Entry, where: e.id in ^entry_ids, select: {e.id, e})
+      |&gt; Repo.all()
+      |&gt; Map.new()</p>
+<p>Enum.map(similar_entries, fn match -&gt;
+      entry = entries_map[match.entry_id]</p>
+<p>Map.merge(match, %{
+        content_preview: String.slice(entry.content || &quot;&quot;, 0, 300),
+        similarity_percent: round(match.similarity <em> 100),
+        overlap_explanation: explain_overlap(entry, query_text)
+      })
+    end)
+  end</p>
+<p>defp explain_overlap(entry, query_text) do
+    # Simple keyword overlap explanation
+    entry_words = extract_keywords(entry.title &lt;&gt; &quot; &quot; &lt;&gt; (entry.content || &quot;&quot;))
+    query_words = extract_keywords(query_text)</p>
+<p>common = MapSet.intersection(entry_words, query_words) |&gt; MapSet.to_list()</p>
+<p>if length(common) &gt; 0 do
+      &quot;Shared topics: #{Enum.take(common, 5) |&gt; Enum.join(&quot;, &quot;)}&quot;
+    else
+      &quot;Semantic similarity detected&quot;
+    end
+  end</p>
+<p>defp extract_keywords(text) do
+    text
+    |&gt; String.downcase()
+    |&gt; String.split(~r/[^\w]+/)
+    |&gt; Enum.filter(&amp;(String.length(&amp;1) &gt; 4))
+    |&gt; Enum.frequencies()
+    |&gt; Enum.filter(fn {_, count} -&gt; count &gt;= 1 end)
+    |&gt; Enum.map(fn {word, _} -&gt; word end)
+    |&gt; MapSet.new()
+  end</p>
+<p>defp determine_recommendation(similar_entries) do
+    case similar_entries do
+      [] -&gt;
+        :create  # No similar content, safe to create</p>
+<p>[%{similarity: score} | _] when score &gt;= @high_threshold -&gt;
+        :duplicate  # Very high similarity, likely duplicate</p>
+<p>_ -&gt;
+        :review  # Moderate similarity, user should review
+    end
+  end</p>
+<p>defp get_highest_score([]), do: 0.0
+  defp get_highest_score([%{similarity: score} | _]), do: score</p>
+<p>defp fetch_and_extract(url) do
+    # Delegate to Web Clipper's extraction logic
+    # This is a placeholder - actual implementation in Feeder Agent
+    Onelist.Feeder.Adapters.WebClipper.extract_content(url)
+  end
+end
+</code></pre></p>
+<strong>Similarity Check Flow:</strong>
+<pre><code class="language-">USER SUBMITS CONTENT (via Web Clipper, OpenClaw, etc.)
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         SIMILARITY CHECK                                     │
+│                                                                              │
+│  1. Generate embedding for incoming content                                  │
+│  2. Query existing embeddings for cosine similarity                          │
+│  3. Filter by threshold (default: 70%)                                       │
+│  4. Return matches with recommendations                                       │
+│                                                                              │
+│  RECOMMENDATIONS:                                                            │
+│  ├── :create    - No similar content found, safe to proceed                 │
+│  ├── :review    - Similar content exists (70-85%), user should review       │
+│  └── :duplicate - Very similar (&gt;85%), likely a duplicate                   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         USER DECISION                                        │
+│                                                                              │
+│  If :review or :duplicate:                                                   │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  &quot;This content is 87% similar to an existing entry:                 │    │
+│  │                                                                      │    │
+│  │  📄 'AI Memory Systems Overview'                                    │    │
+│  │     Created: 2026-01-15                                             │    │
+│  │     Preview: 'This article discusses approaches to...'              │    │
+│  │     Shared topics: memory, AI, embeddings, retrieval                │    │
+│  │                                                                      │    │
+│  │  [ View Existing ] [ Save Anyway ] [ Link to Existing ] [ Cancel ]  │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.7 Text Chunker</h3>
+<pre><code class="language-elixir">defmodule Onelist.Searcher.Chunker do
+  @moduledoc &quot;&quot;&quot;
+  Split long text into overlapping chunks for embedding.
+  &quot;&quot;&quot;
+<p>@default_max_tokens 500
+  @default_overlap_tokens 50
+  @approx_chars_per_token 4  # Rough estimate</p>
+<p>defstruct [:text, :start_offset, :end_offset, :token_count]</p>
+<p>@doc &quot;&quot;&quot;
+  Chunk text into pieces suitable for embedding.</p>
+<p>## Options
+    </em> <code>:max_tokens</code> - Maximum tokens per chunk (default: 500)
+    <em> <code>:overlap_tokens</code> - Token overlap between chunks (default: 50)
+  &quot;&quot;&quot;
+  def chunk(text, opts \\ []) do
+    max_tokens = Keyword.get(opts, :max_tokens, @default_max_tokens)
+    overlap_tokens = Keyword.get(opts, :overlap_tokens, @default_overlap_tokens)</p>
+<p>max_chars = max_tokens </em> @approx_chars_per_token
+    overlap_chars = overlap_tokens <em> @approx_chars_per_token</p>
+<p>if String.length(text) &lt;= max_chars do
+      # Single chunk
+      [%__MODULE__{
+        text: text,
+        start_offset: 0,
+        end_offset: String.length(text),
+        token_count: estimate_tokens(text)
+      }]
+    else
+      # Multiple chunks with overlap
+      chunk_with_overlap(text, max_chars, overlap_chars, 0, [])
+    end
+  end</p>
+<p>defp chunk_with_overlap(text, max_chars, overlap_chars, offset, acc) do
+    if String.length(text) &lt;= max_chars do
+      # Final chunk
+      chunk = %__MODULE__{
+        text: text,
+        start_offset: offset,
+        end_offset: offset + String.length(text),
+        token_count: estimate_tokens(text)
+      }
+      Enum.reverse([chunk | acc])
+    else
+      # Find good break point (end of sentence or word)
+      chunk_text = String.slice(text, 0, max_chars)
+      break_point = find_break_point(chunk_text)</p>
+<p>actual_chunk = String.slice(text, 0, break_point)</p>
+<p>chunk = %__MODULE__{
+        text: actual_chunk,
+        start_offset: offset,
+        end_offset: offset + break_point,
+        token_count: estimate_tokens(actual_chunk)
+      }</p>
+<p># Calculate next chunk start with overlap
+      next_start = max(0, break_point - overlap_chars)
+      remaining = String.slice(text, next_start, String.length(text))</p>
+<p>chunk_with_overlap(remaining, max_chars, overlap_chars, offset + next_start, [chunk | acc])
+    end
+  end</p>
+<p>defp find_break_point(text) do
+    len = String.length(text)</p>
+<p># Try to break at sentence end
+    case Regex.run(~r/[.!?]\s+[A-Z]/, text, return: :index) |&gt; List.last() do
+      {pos, _} when pos &gt; len </em> 0.5 -&gt; pos + 1
+      _ -&gt;
+        # Try to break at paragraph
+        case Regex.run(~r/\n\n/, text, return: :index) |&gt; List.last() do
+          {pos, _} when pos &gt; len <em> 0.5 -&gt; pos
+          _ -&gt;
+            # Break at word boundary
+            case Regex.run(~r/\s+\S</em>$/, text, return: :index) do
+              [{pos, _}] -&gt; pos
+              _ -&gt; len
+            end
+        end
+    end
+  end</p>
+<p>defp estimate_tokens(text) do
+    # Rough estimate: ~4 chars per token for English
+    div(String.length(text), @approx_chars_per_token)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>5. API Endpoints</h2>
+<h3>5.1 Search Endpoint</h3>
+<pre><code class="language-elixir"># POST /api/v1/search
+defmodule OnelistWeb.API.V1.SearchController do
+  use OnelistWeb, :controller
+<p>alias Onelist.Searcher</p>
+<p>def search(conn, params) do
+    user_id = conn.assigns.current_user.id
+    query = params[&quot;query&quot;]</p>
+<p>opts = [
+      search_type: params[&quot;search_type&quot;] || &quot;hybrid&quot;,
+      semantic_weight: parse_float(params[&quot;semantic_weight&quot;], 0.7),
+      keyword_weight: parse_float(params[&quot;keyword_weight&quot;], 0.3),
+      limit: parse_int(params[&quot;limit&quot;], 20),
+      offset: parse_int(params[&quot;offset&quot;], 0),
+      filters: params[&quot;filters&quot;] || %{}
+    ]</p>
+<p>case Searcher.search(user_id, query, opts) do
+      {:ok, results} -&gt;
+        json(conn, %{
+          success: true,
+          data: results
+        })</p>
+<p>{:error, reason} -&gt;
+        conn
+        |&gt; put_status(:unprocessable_entity)
+        |&gt; json(%{success: false, error: inspect(reason)})
+    end
+  end</p>
+<p>def similar(conn, %{&quot;entry_id&quot; =&gt; entry_id} = params) do
+    limit = parse_int(params[&quot;limit&quot;], 10)</p>
+<p>case Searcher.similar_entries(entry_id, limit: limit) do
+      {:ok, results} -&gt;
+        json(conn, %{success: true, data: results})</p>
+<p>{:error, reason} -&gt;
+        conn
+        |&gt; put_status(:unprocessable_entity)
+        |&gt; json(%{success: false, error: inspect(reason)})
+    end
+  end</p>
+<p>defp parse_float(nil, default), do: default
+  defp parse_float(val, _) when is_float(val), do: val
+  defp parse_float(val, default) when is_binary(val) do
+    case Float.parse(val) do
+      {f, _} -&gt; f
+      :error -&gt; default
+    end
+  end</p>
+<p>defp parse_int(nil, default), do: default
+  defp parse_int(val, _) when is_integer(val), do: val
+  defp parse_int(val, default) when is_binary(val) do
+    case Integer.parse(val) do
+      {i, _} -&gt; i
+      :error -&gt; default
+    end
+  end
+end
+</code></pre></p>
+<h3>5.2 Similarity Check Endpoint</h3>
+<pre><code class="language-elixir"># POST /api/v1/search/similarity_check
+defmodule OnelistWeb.API.V1.SimilarityCheckController do
+  use OnelistWeb, :controller
+<p>alias Onelist.Searcher.SimilarityCheck</p>
+<p>@doc &quot;&quot;&quot;
+  POST /api/v1/search/similarity_check</p>
+<p>Check if content is similar to existing entries before saving.</p>
+<p>## Request Body
+    <em> <code>text</code> - Text content to check (required, unless <code>url</code> provided)
+    </em> <code>url</code> - URL to fetch and check (optional, alternative to <code>text</code>)
+    <em> <code>threshold</code> - Minimum similarity score 0.0-1.0 (optional, default: 0.70)
+    </em> <code>limit</code> - Maximum similar entries to return (optional, default: 5)
+    <em> <code>entry_types</code> - Filter to specific entry types (optional)</p>
+<p>## Response
+    </em> <code>similar</code> - Array of similar entries with scores and previews
+    <em> <code>recommendation</code> - &quot;create&quot;, &quot;review&quot;, or &quot;duplicate&quot;
+    </em> <code>highest_score</code> - Highest similarity score found
+  &quot;&quot;&quot;
+  def check(conn, %{&quot;text&quot; =&gt; text} = params) when is_binary(text) and text != &quot;&quot; do
+    user_id = conn.assigns.current_user.id</p>
+<p>opts = [
+      threshold: parse_float(params[&quot;threshold&quot;], 0.70),
+      limit: parse_int(params[&quot;limit&quot;], 5),
+      entry_types: params[&quot;entry_types&quot;],
+      include_content_preview: params[&quot;include_preview&quot;] != &quot;false&quot;
+    ]</p>
+<p>case SimilarityCheck.check(user_id, text, opts) do
+      {:ok, result} -&gt;
+        json(conn, %{
+          success: true,
+          data: %{
+            similar: format_similar_entries(result.similar),
+            recommendation: result.recommendation,
+            highest_score: result.highest_score,
+            threshold_used: result.threshold_used,
+            message: recommendation_message(result.recommendation, result.highest_score)
+          }
+        })</p>
+<p>{:error, reason} -&gt;
+        conn
+        |&gt; put_status(:unprocessable_entity)
+        |&gt; json(%{success: false, error: inspect(reason)})
+    end
+  end</p>
+<p>def check(conn, %{&quot;url&quot; =&gt; url} = params) when is_binary(url) do
+    user_id = conn.assigns.current_user.id</p>
+<p>opts = [
+      threshold: parse_float(params[&quot;threshold&quot;], 0.70),
+      limit: parse_int(params[&quot;limit&quot;], 5),
+      entry_types: params[&quot;entry_types&quot;]
+    ]</p>
+<p>case SimilarityCheck.check_url(user_id, url, opts) do
+      {:ok, result} -&gt;
+        json(conn, %{
+          success: true,
+          data: %{
+            similar: format_similar_entries(result.similar),
+            recommendation: result.recommendation,
+            highest_score: result.highest_score,
+            url_checked: url,
+            message: recommendation_message(result.recommendation, result.highest_score)
+          }
+        })</p>
+<p>{:error, :fetch_failed} -&gt;
+        conn
+        |&gt; put_status(:unprocessable_entity)
+        |&gt; json(%{success: false, error: &quot;Failed to fetch URL content&quot;})</p>
+<p>{:error, reason} -&gt;
+        conn
+        |&gt; put_status(:unprocessable_entity)
+        |&gt; json(%{success: false, error: inspect(reason)})
+    end
+  end</p>
+<p>def check(conn, _params) do
+    conn
+    |&gt; put_status(:bad_request)
+    |&gt; json(%{success: false, error: &quot;Either 'text' or 'url' parameter is required&quot;})
+  end</p>
+<p>defp format_similar_entries(entries) do
+    Enum.map(entries, fn entry -&gt;
+      %{
+        entry_id: entry.entry_id,
+        title: entry.title,
+        entry_type: entry.entry_type,
+        similarity_score: Float.round(entry.similarity, 3),
+        similarity_percent: entry[:similarity_percent] || round(entry.similarity <em> 100),
+        content_preview: entry[:content_preview],
+        overlap_explanation: entry[:overlap_explanation],
+        created_at: entry.created_at
+      }
+    end)
+  end</p>
+<p>defp recommendation_message(:create, _score) do
+    &quot;No similar content found. Safe to create new entry.&quot;
+  end</p>
+<p>defp recommendation_message(:review, score) do
+    &quot;Found similar content (#{round(score </em> 100)}% match). Review existing entries before saving.&quot;
+  end</p>
+<p>defp recommendation_message(:duplicate, score) do
+    &quot;Very similar content exists (#{round(score <em> 100)}% match). This may be a duplicate.&quot;
+  end</p>
+<p>defp parse_float(nil, default), do: default
+  defp parse_float(val, _) when is_float(val), do: val
+  defp parse_float(val, default) when is_binary(val) do
+    case Float.parse(val) do
+      {f, _} -&gt; f
+      :error -&gt; default
+    end
+  end</p>
+<p>defp parse_int(nil, default), do: default
+  defp parse_int(val, _) when is_integer(val), do: val
+  defp parse_int(val, default) when is_binary(val) do
+    case Integer.parse(val) do
+      {i, _} -&gt; i
+      :error -&gt; default
+    end
+  end
+end
+</code></pre></p>
+<strong>Example API Usage:</strong>
+<pre><code class="language-bash"># Check text content for similarity
+curl -X POST https://api.onelist.my/v1/search/similarity_check \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;text&quot;: &quot;This article discusses AI memory systems and how embeddings enable semantic search...&quot;,
+    &quot;threshold&quot;: 0.70,
+    &quot;limit&quot;: 5
+  }'
+<h1>Response when similar content found:</h1>
+{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;similar&quot;: [
+      {
+        &quot;entry_id&quot;: &quot;abc123&quot;,
+        &quot;title&quot;: &quot;AI Memory Systems Overview&quot;,
+        &quot;entry_type&quot;: &quot;article&quot;,
+        &quot;similarity_score&quot;: 0.872,
+        &quot;similarity_percent&quot;: 87,
+        &quot;content_preview&quot;: &quot;This article discusses approaches to AI memory...&quot;,
+        &quot;overlap_explanation&quot;: &quot;Shared topics: memory, embeddings, semantic, retrieval&quot;,
+        &quot;created_at&quot;: &quot;2026-01-15T10:30:00Z&quot;
+      }
+    ],
+    &quot;recommendation&quot;: &quot;duplicate&quot;,
+    &quot;highest_score&quot;: 0.872,
+    &quot;message&quot;: &quot;Very similar content exists (87% match). This may be a duplicate.&quot;
+  }
+}
+<h1>Check URL before clipping</h1>
+curl -X POST https://api.onelist.my/v1/search/similarity_check \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;url&quot;: &quot;https://example.com/article/ai-memory-systems&quot;
+  }'
+</code></pre>
+<h3>5.3 Embedding Management Endpoint</h3>
+<pre><code class="language-elixir"># GET/POST /api/v1/embeddings
+defmodule OnelistWeb.API.V1.EmbeddingController do
+  use OnelistWeb, :controller
+<p>alias Onelist.Searcher</p>
+<p>@doc &quot;&quot;&quot;
+  GET /api/v1/embeddings/:entry_id
+  Check embedding status for an entry.
+  &quot;&quot;&quot;
+  def show(conn, %{&quot;entry_id&quot; =&gt; entry_id}) do
+    case Searcher.get_embedding(entry_id) do
+      [] -&gt;
+        json(conn, %{
+          embedded: false,
+          entry_id: entry_id
+        })</p>
+<p>embeddings -&gt;
+        json(conn, %{
+          embedded: true,
+          entry_id: entry_id,
+          model: hd(embeddings).model_name,
+          chunks: length(embeddings),
+          embedded_at: hd(embeddings).inserted_at
+        })
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  POST /api/v1/embeddings
+  Manually trigger embedding for entries.
+  &quot;&quot;&quot;
+  def create(conn, %{&quot;entry_ids&quot; =&gt; entry_ids}) when is_list(entry_ids) do
+    case Searcher.enqueue_batch_embedding(entry_ids) do
+      {:ok, job} -&gt;
+        json(conn, %{
+          success: true,
+          message: &quot;Embedding jobs enqueued&quot;,
+          entry_count: length(entry_ids),
+          job_id: job.id
+        })</p>
+<p>{:error, reason} -&gt;
+        conn
+        |&gt; put_status(:unprocessable_entity)
+        |&gt; json(%{success: false, error: inspect(reason)})
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  GET /api/v1/embeddings/config
+  Get search configuration.
+  &quot;&quot;&quot;
+  def config(conn, _params) do
+    user_id = conn.assigns.current_user.id</p>
+<p>case Searcher.get_search_config(user_id) do
+      {:ok, config} -&gt;
+        json(conn, %{
+          success: true,
+          config: %{
+            embedding_model: config.embedding_model,
+            default_search_type: config.default_search_type,
+            semantic_weight: config.semantic_weight,
+            keyword_weight: config.keyword_weight,
+            auto_embed_on_create: config.auto_embed_on_create,
+            auto_embed_on_update: config.auto_embed_on_update
+          }
+        })
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  PATCH /api/v1/embeddings/config
+  Update search configuration.
+  &quot;&quot;&quot;
+  def update_config(conn, params) do
+    user_id = conn.assigns.current_user.id</p>
+<p>case Searcher.update_search_config(user_id, params) do
+      {:ok, config} -&gt;
+        json(conn, %{success: true, config: config})</p>
+<p>{:error, changeset} -&gt;
+        conn
+        |&gt; put_status(:unprocessable_entity)
+        |&gt; json(%{success: false, errors: format_errors(changeset)})
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>6. Integration with Entry Lifecycle</h2>
+<h3>6.1 Entry Creation Hook</h3>
+<pre><code class="language-elixir"># In Onelist.Entries context
+defmodule Onelist.Entries do
+  # ... existing code ...
+<p>def create_entry(user, attrs) do
+    Multi.new()
+    |&gt; Multi.insert(:entry, Entry.changeset(%Entry{user_id: user.id}, attrs))
+    |&gt; Multi.run(:representations, fn repo, %{entry: entry} -&gt;
+      generate_representations(entry)
+    end)
+    |&gt; Multi.run(:embedding, fn repo, %{entry: entry} -&gt;
+      # Only enqueue if user has auto-embed enabled
+      case Searcher.get_search_config(user.id) do
+        {:ok, %{auto_embed_on_create: true}} -&gt;
+          Searcher.enqueue_embedding(entry.id)
+        _ -&gt;
+          {:ok, :skipped}
+      end
+    end)
+    |&gt; Repo.transaction()
+    |&gt; case do
+      {:ok, %{entry: entry}} -&gt; {:ok, entry}
+      {:error, _, changeset, _} -&gt; {:error, changeset}
+    end
+  end
+end
+</code></pre></p>
+<h3>6.2 Entry Update Hook</h3>
+<pre><code class="language-elixir">def update_entry(entry, attrs) do
+  Multi.new()
+  |&gt; Multi.update(:entry, Entry.changeset(entry, attrs))
+  |&gt; Multi.run(:representations, fn repo, %{entry: updated} -&gt;
+    regenerate_representations(updated)
+  end)
+  |&gt; Multi.run(:embedding, fn repo, %{entry: updated} -&gt;
+    # Re-embed if content changed and auto-embed enabled
+    if content_changed?(entry, updated) do
+      case Searcher.get_search_config(entry.user_id) do
+        {:ok, %{auto_embed_on_update: true}} -&gt;
+          Searcher.enqueue_embedding(updated.id, priority: 1)
+        _ -&gt;
+          {:ok, :skipped}
+      end
+    else
+      {:ok, :no_change}
+    end
+  end)
+  |&gt; Repo.transaction()
+end
+<p>defp content_changed?(old, new) do
+  old.title != new.title || old.content != new.content
+end
+</code></pre></p>
+<hr>
+<h2>7. Configuration</h2>
+<h3>7.1 Application Config</h3>
+<pre><code class="language-elixir"># config/config.exs
+config :onelist, :searcher,
+  embedding_model: &quot;text-embedding-3-small&quot;,
+  embedding_dimensions: 1536,
+  default_search_type: &quot;hybrid&quot;,
+  default_semantic_weight: 0.7,
+  default_keyword_weight: 0.3,
+  max_chunk_tokens: 500,
+  chunk_overlap_tokens: 50,
+  auto_embed_on_create: true,
+  auto_embed_on_update: true
+<h1>config/runtime.exs</h1>
+config :onelist, :openai_api_key, System.get_env(&quot;OPENAI_API_KEY&quot;)
+</code></pre>
+<h3>7.2 Oban Queue Config</h3>
+<pre><code class="language-elixir"># config/config.exs
+config :onelist, Oban,
+  repo: Onelist.Repo,
+  plugins: [Oban.Plugins.Pruner],
+  queues: [
+    default: 10,
+    embeddings: 5,       # Dedicated queue for embedding jobs
+    embeddings_batch: 2  # Lower concurrency for batch jobs
+  ]
+</code></pre>
+<hr>
+<h2>8. MVP Scope</h2>
+<h3>8.1 MVP Features</h3>
+<table>
+<tr><th>Feature</th><th>Priority</th><th>Status</th></tr>
+<tr><td>Embedding generation (OpenAI)</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Vector storage (pgvector)</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Semantic search</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Keyword search (FTS)</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Hybrid search</td><td>HIGH</td><td>Required</td></tr>
+<tr><td><strong>Two-layer retrieval (atomic memories)</strong></td><td>HIGH</td><td>Required</td></tr>
+<tr><td><strong>Memory embedding (from Reader)</strong></td><td>HIGH</td><td>Required</td></tr>
+<tr><td><strong>Pre-storage similarity check</strong></td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Auto-embed on create/update</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Search API endpoint</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Similarity check API endpoint</td><td>HIGH</td><td>Required</td></tr>
+<tr><td>Basic chunking</td><td>MEDIUM</td><td>Required</td></tr>
+<tr><td>Embedding status API</td><td>MEDIUM</td><td>Required</td></tr>
+</table>
+<h3>8.2 Integration with Reader Agent</h3>
+<p>The Searcher Agent works closely with the Reader Agent:</p>
+<p>1. <strong>Reader extracts atomic memories</strong> from entry content
+2. <strong>Searcher embeds memories</strong> for high-precision retrieval
+3. <strong>Two-layer search</strong> queries memories, injects source chunks</p>
+<pre><code class="language-">Entry Created → Reader processes → Searcher embeds memories
+                     │
+                     ├── Extract atomic memories
+                     ├── Resolve references
+                     └── Detect relationships
+                              │
+                              ▼
+                     Searcher embeds each memory
+                              │
+                              ▼
+                     Search queries memories (Layer 1)
+                     Returns with source chunks (Layer 2)
+</code></pre>
+<h3>8.3 Post-MVP Features</h3>
+<table>
+<tr><th>Feature</th><th>Priority</th><th>Notes</th></tr>
+<tr><td>Temporal reasoning</td><td>MEDIUM</td><td>"When did I..." queries</td></tr>
+<tr><td>Anthropic embedding provider</td><td>MEDIUM</td><td>Alternative to OpenAI</td></tr>
+<tr><td>Local embedding (Ollama)</td><td>MEDIUM</td><td>Privacy-focused users</td></tr>
+<tr><td>Re-embedding on model upgrade</td><td>MEDIUM</td><td>Model migration</td></tr>
+<tr><td>Embedding analytics</td><td>LOW</td><td>Usage tracking</td></tr>
+<tr><td>Custom embedding models</td><td>LOW</td><td>Power users</td></tr>
+<tr><td>Streaming search results</td><td>LOW</td><td>Large result sets</td></tr>
+</table>
+<hr>
+<h2>9. Implementation Timeline</h2>
+<table>
+<tr><th>Phase</th><th>Features</th><th>Effort</th></tr>
+<tr><td>1</td><td>Schema + migrations</td><td>1 day</td></tr>
+<tr><td>2</td><td>OpenAI provider</td><td>1 day</td></tr>
+<tr><td>3</td><td>Embedding worker (Oban)</td><td>2 days</td></tr>
+<tr><td>4</td><td>Hybrid search implementation</td><td>2-3 days</td></tr>
+<tr><td>5</td><td>Pre-storage similarity check</td><td>1-2 days</td></tr>
+<tr><td>6</td><td>API endpoints (search, similarity, embeddings)</td><td>1 day</td></tr>
+<tr><td>7</td><td>Entry lifecycle hooks</td><td>1 day</td></tr>
+<tr><td>8</td><td>Testing + documentation</td><td>2 days</td></tr>
+<tr><td><strong>Total</strong></td><td></td><td><strong>~2 weeks</strong></td></tr>
+</table>
+<hr>
+<h2>10. Testing Strategy</h2>
+<h3>10.1 Unit Tests</h3>
+<pre><code class="language-elixir">defmodule Onelist.Searcher.ChunkerTest do
+  use ExUnit.Case
+  alias Onelist.Searcher.Chunker
+<p>test &quot;short text returns single chunk&quot; do
+    text = &quot;This is a short text.&quot;
+    chunks = Chunker.chunk(text, max_tokens: 100)</p>
+<p>assert length(chunks) == 1
+    assert hd(chunks).text == text
+  end</p>
+<p>test &quot;long text returns multiple overlapping chunks&quot; do
+    text = String.duplicate(&quot;word &quot;, 200)
+    chunks = Chunker.chunk(text, max_tokens: 50, overlap_tokens: 10)</p>
+<p>assert length(chunks) &gt; 1
+    # Verify overlap exists
+    chunk1_end = hd(chunks).end_offset
+    chunk2_start = Enum.at(chunks, 1).start_offset
+    assert chunk2_start &lt; chunk1_end
+  end
+end
+</code></pre></p>
+<h3>10.2 Integration Tests</h3>
+<pre><code class="language-elixir">defmodule Onelist.SearcherTest do
+  use Onelist.DataCase
+<p>alias Onelist.Searcher
+  alias Onelist.Entries</p>
+<p>describe &quot;search/3&quot; do
+    test &quot;returns relevant results for semantic query&quot; do
+      user = insert(:user)
+      entry = insert(:entry, user: user, title: &quot;Machine learning basics&quot;)</p>
+<p># Wait for embedding to complete
+      Oban.drain_queue(queue: :embeddings)</p>
+<p>{:ok, results} = Searcher.search(user.id, &quot;AI and neural networks&quot;)</p>
+<p>assert length(results.results) &gt; 0
+      assert hd(results.results).entry_id == entry.id
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>11. Monitoring & Observability</h2>
+<h3>11.1 Metrics to Track</h3>
+<table>
+<tr><th>Metric</th><th>Description</th></tr>
+<tr><td><code>searcher.embeddings.generated</code></td><td>Count of embeddings generated</td></tr>
+<tr><td><code>searcher.embeddings.failed</code></td><td>Count of failed embedding attempts</td></tr>
+<tr><td><code>searcher.embeddings.latency</code></td><td>Time to generate embeddings</td></tr>
+<tr><td><code>searcher.search.requests</code></td><td>Search request count</td></tr>
+<tr><td><code>searcher.search.latency</code></td><td>Search response time</td></tr>
+<tr><td><code>searcher.search.result_count</code></td><td>Average results per search</td></tr>
+</table>
+<h3>11.2 Logging</h3>
+<pre><code class="language-elixir"># Structured logging for debugging
+Logger.info(&quot;Embedding generated&quot;,
+  entry_id: entry.id,
+  model: &quot;text-embedding-3-small&quot;,
+  chunks: chunk_count,
+  duration_ms: duration
+)
+<p>Logger.info(&quot;Search executed&quot;,
+  user_id: user_id,
+  query_length: String.length(query),
+  search_type: search_type,
+  result_count: length(results),
+  duration_ms: duration
+)
+</code></pre></p>
+<hr>
+<h2>12. Related Documents</h2>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a></li>
+<li><a href="./ai_memory_evolution.md">AI Memory Evolution</a> - Overall memory architecture</li>
+<li><a href="./reader_agent_plan.md">Reader Agent Plan</a> - Atomic memory extraction</li>
+<li><a href="./future_roadmap_openclaw_install.md">OpenClaw Integration</a></li>
+<li><a href="./river_agent_plan.md">River Agent</a></li>
+<li><a href="https://supermemory.ai/research">Supermemory Research</a> - Two-layer retrieval inspiration</li>
+<hr>
+<h2>13. Advanced Improvements (Based on AI Agent Best Practices)</h2>
+<p>Based on analysis of <code>ai_agent_implementation_guide_v2.md</code> and <code>ai_agent_ecosystem_resources_guide.md</code>, the following improvements are recommended to bring the Searcher Agent to production-grade quality.</p>
+<h3>13.1 Reranking Layer</h3>
+<strong>Problem</strong>: Current implementation retrieves results and returns directly without quality filtering.
+<strong>Solution</strong>: Add cross-encoder reranking for improved relevance after initial retrieval.
+<pre><code class="language-">lib/onelist/searcher/
+├── reranker.ex                    # Cross-encoder reranking
+</code></pre>
+<strong>Key Features</strong>:
+<li>Cohere rerank API integration (or local cross-encoder)</li>
+<li>Configurable top_k reranking</li>
+<li>Score threshold filtering</li>
+<li>Cost tracking per rerank operation</li>
+<strong>Integration Point</strong>: After <code>HybridSearch.search/3</code>, before returning results.
+<h3>13.2 Query Reformulation (Agentic RAG)</h3>
+<strong>Problem</strong>: Current search is single-shot; complex queries may miss relevant results.
+<strong>Solution</strong>: Implement iterative retrieval with query reformulation.
+<pre><code class="language-">lib/onelist/searcher/
+├── query_reformulator.ex          # Query expansion and reformulation
+</code></pre>
+<strong>Key Features</strong>:
+<li>Expand abbreviations and acronyms</li>
+<li>Generate synonyms for key terms</li>
+<li>Break complex questions into sub-queries</li>
+<li>Parallel search across query variants</li>
+<li>Use cheaper model (gpt-4o-mini) for reformulation</li>
+<h3>13.3 Self-Verification Loop</h3>
+<strong>Problem</strong>: No validation that results actually answer the query.
+<strong>Solution</strong>: Add verification step that triggers re-search if confidence is low.
+<pre><code class="language-">lib/onelist/searcher/
+├── verifier.ex                    # Result relevance verification
+</code></pre>
+<strong>Key Features</strong>:
+<li>LLM-based relevance scoring</li>
+<li>Automatic query reformulation on low confidence</li>
+<li>Sub-query generation for insufficient results</li>
+<li>Maximum iteration limit (3 rounds)</li>
+<h3>13.4 Observability with OpenTelemetry</h3>
+<strong>Problem</strong>: Current implementation lacks structured observability.
+<strong>Solution</strong>: Add comprehensive telemetry following gen_ai.</em> semantic conventions.
+<pre><code class="language-">lib/onelist/searcher/
+├── telemetry.ex                   # OpenTelemetry instrumentation
+</code></pre>
+<strong>Metrics to Track</strong>:
+<table>
+<tr><th>Metric</th><th>Type</th><th>Description</th></tr>
+<tr><td><code>searcher.search.duration</code></td><td>Histogram</td><td>Search latency</td></tr>
+<tr><td><code>searcher.search.result_count</code></td><td>Histogram</td><td>Results per search</td></tr>
+<tr><td><code>searcher.embed.duration</code></td><td>Histogram</td><td>Embedding generation time</td></tr>
+<tr><td><code>searcher.embed.cost_cents</code></td><td>Counter</td><td>Embedding API costs</td></tr>
+<tr><td><code>searcher.rerank.duration</code></td><td>Histogram</td><td>Reranking latency</td></tr>
+<tr><td><code>searcher.rerank.improvement</code></td><td>Histogram</td><td>Score improvement from reranking</td></tr>
+</table>
+<strong>Trace Attributes</strong> (following OpenTelemetry gen_ai conventions):
+<li><code>gen_ai.operation.name</code>: "search", "embed", "rerank"</li>
+<li><code>gen_ai.request.model</code>: Model used</li>
+<li><code>gen_ai.usage.input_tokens</code>: Tokens consumed</li>
+<li><code>gen_ai.response.finish_reasons</code>: Completion status</li>
+<h3>13.5 Model Routing for Cost Optimization</h3>
+<strong>Problem</strong>: Single model for all operations, no cost optimization.
+<strong>Solution</strong>: Route to appropriate model based on task complexity.
+<pre><code class="language-">lib/onelist/searcher/
+├── model_router.ex                # Dynamic model selection
+</code></pre>
+<strong>Routing Rules</strong>:
+<table>
+<tr><th>Operation</th><th>Simple Query</th><th>Complex Query</th></tr>
+<tr><td>Embedding</td><td>text-embedding-3-small</td><td>text-embedding-3-small</td></tr>
+<tr><td>Query Expansion</td><td>gpt-4o-mini</td><td>gpt-4o</td></tr>
+<tr><td>Reranking</td><td>rerank-multilingual-v2.0</td><td>rerank-english-v3.0</td></tr>
+<tr><td>Verification</td><td>gpt-4o-mini</td><td>gpt-4o-mini</td></tr>
+</table>
+<strong>Expected Savings</strong>: 40-60% cost reduction per the guide's benchmarks.
+<h3>13.6 Rate Limiting per User/Operation</h3>
+<strong>Problem</strong>: No rate limiting; potential for abuse and cost overruns.
+<strong>Solution</strong>: Implement per-user, per-operation rate limits.
+<pre><code class="language-">lib/onelist/searcher/
+├── rate_limiter.ex                # Rate limiting with ETS
+</code></pre>
+<strong>Default Limits</strong>:
+<table>
+<tr><th>Operation</th><th>Limit</th><th>Window</th></tr>
+<tr><td>search</td><td>100</td><td>per minute</td></tr>
+<tr><td>embed</td><td>50</td><td>per hour</td></tr>
+<tr><td>similarity_check</td><td>200</td><td>per minute</td></tr>
+<tr><td>rerank</td><td>50</td><td>per minute</td></tr>
+</table>
+<strong>Features</strong>:
+<li>ETS-based for single-node (Redis for distributed)</li>
+<li>Graceful degradation with retry-after header</li>
+<li>Per-user and global limits</li>
+<li>Burst allowance for premium users</li>
+<h3>13.7 Enhanced Chunking Strategy</h3>
+<strong>Problem</strong>: Current chunker uses character-based splitting, may break mid-sentence.
+<strong>Solution</strong>: Semantic-aware chunking with proper token counting.
+<strong>Improvements</strong>:
+<li>Use tiktoken for accurate token counting</li>
+<li>Prefer splitting at paragraph/sentence boundaries</li>
+<li>512 tokens per chunk (guide recommendation)</li>
+<li>75 token overlap (~15%)</li>
+<li>Preserve semantic units (code blocks, lists, etc.)</li>
+<h3>13.8 MCP Server Exposure (Post-MVP)</h3>
+<strong>Problem</strong>: Searcher is isolated; no external tool integration.
+<strong>Solution</strong>: Expose Searcher as MCP-compatible server.
+<pre><code class="language-">lib/onelist/searcher/
+├── mcp_server.ex                  # MCP protocol handler
+</code></pre>
+<strong>MCP Tools</strong>:
+<li><code>search_memories</code> - Semantic search with filters</li>
+<li><code>find_similar</code> - Find entries similar to given entry</li>
+<li><code>check_duplicate</code> - Pre-storage similarity check</li>
+<li><code>get_embedding_status</code> - Check embedding job status</li>
+<strong>Benefits</strong>:
+<li>Integration with Claude Desktop</li>
+<li>IDE integrations (VSCode, Cursor)</li>
+<li>Third-party AI agent access</li>
+<h3>13.9 Implementation Priority</h3>
+<table>
+<tr><th>Priority</th><th>Enhancement</th><th>Effort</th><th>Impact</th></tr>
+<tr><td>1</td><td>Reranking</td><td>Medium</td><td>High - Quality improvement</td></tr>
+<tr><td>2</td><td>Telemetry/Observability</td><td>Low</td><td>High - Debugging, monitoring</td></tr>
+<tr><td>3</td><td>Rate Limiting</td><td>Low</td><td>Medium - Security, cost control</td></tr>
+<tr><td>4</td><td>Query Reformulation</td><td>Medium</td><td>Medium - Better recall</td></tr>
+<tr><td>5</td><td>Model Routing</td><td>Low</td><td>Medium - Cost savings</td></tr>
+<tr><td>6</td><td>Self-Verification</td><td>High</td><td>Medium - Quality for complex queries</td></tr>
+<tr><td>7</td><td>Enhanced Chunking</td><td>Low</td><td>Low - Marginal improvement</td></tr>
+<tr><td>8</td><td>MCP Server</td><td>Medium</td><td>Future - Ecosystem integration</td></tr>
+</table>
+<h3>13.10 Files to Create</h3>
+<pre><code class="language-">lib/onelist/searcher/
+├── reranker.ex                    # Priority 1
+├── telemetry.ex                   # Priority 2
+├── rate_limiter.ex                # Priority 3
+├── query_reformulator.ex          # Priority 4
+├── model_router.ex                # Priority 5
+├── verifier.ex                    # Priority 6
+└── mcp_server.ex                  # Priority 8 (Post-MVP)
+<p>lib/onelist/searcher/providers/
+└── cohere.ex                      # Cohere reranking provider
+</code></pre></p>
+<h3>13.11 Configuration Additions</h3>
+<pre><code class="language-elixir"># config/config.exs
+config :onelist, :searcher,
+  # ... existing config ...
+<p># Reranking
+  rerank_enabled: true,
+  rerank_provider: :cohere,
+  rerank_model: &quot;rerank-english-v3.0&quot;,
+  rerank_top_k: 10,</p>
+<p># Query Reformulation
+  reformulation_enabled: true,
+  reformulation_model: &quot;gpt-4o-mini&quot;,
+  max_sub_queries: 3,</p>
+<p># Verification
+  verification_enabled: false,  # Enable post-MVP
+  verification_threshold: 0.7,
+  max_verification_rounds: 3,</p>
+<p># Rate Limiting
+  rate_limit_enabled: true,
+  rate_limits: %{
+    search: {100, :per_minute},
+    embed: {50, :per_hour},
+    similarity_check: {200, :per_minute}
+  }</p>
+<h1>config/runtime.exs</h1>
+config :onelist, :cohere_api_key, System.get_env(&quot;COHERE_API_KEY&quot;)
+</code></pre>
+<h3>13.12 Test Files to Create</h3>
+<pre><code class="language-">test/onelist/searcher/
+├── reranker_test.exs
+├── telemetry_test.exs
+├── rate_limiter_test.exs
+├── query_reformulator_test.exs
+├── model_router_test.exs
+├── verifier_test.exs
+└── providers/
+    └── cohere_test.exs
+</code></pre>
+<h3>13.13 Circuit Breaker Pattern</h3>
+<p>External API calls (OpenAI, Cohere) should be protected with circuit breakers to handle failures gracefully and prevent cascade failures.</p>
+<strong>Services to Protect:</strong>
+<table>
+<tr><th>Service</th><th>Failure Threshold</th><th>Reset Timeout</th></tr>
+<tr><td>OpenAI Embeddings API</td><td>5 failures</td><td>30 seconds</td></tr>
+<tr><td>Cohere Rerank API</td><td>5 failures</td><td>30 seconds</td></tr>
+<tr><td>Any future embedding providers</td><td>5 failures</td><td>30 seconds</td></tr>
+</table>
+<strong>Behavior:</strong>
+<li><strong>Closed (normal)</strong>: Requests pass through normally</li>
+<li><strong>Open (failing)</strong>: Requests fail fast with <code>{:error, :circuit_open}</code></li>
+<li><strong>Half-Open (testing)</strong>: Single request allowed to test recovery</li>
+<strong>Integration</strong>: Use <code>Onelist.Agents.CircuitBreaker</code> from <a href="./unified_agent_modules.md">Unified Agent Modules</a>.
+<h3>13.14 Unified Agent Module Integration</h3>
+<p>The Searcher Agent MUST use the shared modules from <a href="./unified_agent_modules.md">Unified Agent Modules</a> for consistency across all agents:</p>
+<table>
+<tr><th>Searcher Component</th><th>Unified Module</th><th>Notes</th></tr>
+<tr><td><code>searcher/telemetry.ex</code></td><td><code>Onelist.Agents.Telemetry</code></td><td>Use <code>trace_agent_operation(:searcher, ...)</code></td></tr>
+<tr><td><code>searcher/rate_limiter.ex</code></td><td><code>Onelist.Agents.RateLimiter</code></td><td>Operations: <code>:searcher_search</code>, <code>:searcher_embed</code></td></tr>
+<tr><td>Cost tracking</td><td><code>Onelist.Agents.CostTracker</code></td><td>Track embedding and reranking costs</td></tr>
+<tr><td>External API calls</td><td><code>Onelist.Agents.CircuitBreaker</code></td><td>Protect OpenAI, Cohere calls</td></tr>
+<tr><td>Input validation</td><td><code>Onelist.Agents.Security.InputValidator</code></td><td>Validate search queries</td></tr>
+<tr><td>Model selection</td><td><code>Onelist.Agents.ModelFleet</code></td><td>Route to appropriate models</td></tr>
+</table>
+<strong>Migration Path:</strong>
+1. Existing <code>searcher/telemetry.ex</code> should delegate to <code>Onelist.Agents.Telemetry</code>
+2. Existing <code>searcher/rate_limiter.ex</code> should delegate to <code>Onelist.Agents.RateLimiter</code>
+3. Add circuit breaker wrapping around all external API calls
+4. Use <code>Onelist.Agents.CostTracker.record_cost/5</code> after each embedding/rerank operation
+<h3>13.15 Implementation Priority Matrix</h3>
+<table>
+<tr><th>Enhancement</th><th>Priority</th><th>Effort</th><th>Impact</th><th>MVP/Post-MVP</th></tr>
+<tr><td>Reranking</td><td>HIGH</td><td>2-3 days</td><td>High</td><td>MVP</td></tr>
+<tr><td>OpenTelemetry Integration</td><td>HIGH</td><td>2-3 days</td><td>High</td><td>MVP</td></tr>
+<tr><td>Rate Limiting</td><td>HIGH</td><td>1-2 days</td><td>Medium</td><td>MVP</td></tr>
+<tr><td>Circuit Breaker</td><td>HIGH</td><td>1 day</td><td>High</td><td>MVP</td></tr>
+<tr><td>Query Reformulation</td><td>MEDIUM</td><td>2-3 days</td><td>Medium</td><td>MVP</td></tr>
+<tr><td>Model Routing</td><td>MEDIUM</td><td>1 day</td><td>Medium</td><td>MVP</td></tr>
+<tr><td>Self-Verification</td><td>MEDIUM</td><td>3-4 days</td><td>Medium</td><td>Post-MVP</td></tr>
+<tr><td>Enhanced Chunking</td><td>LOW</td><td>1 day</td><td>Low</td><td>Post-MVP</td></tr>
+<tr><td>MCP Server</td><td>LOW</td><td>3-4 days</td><td>Medium</td><td>Post-MVP</td></tr>
+</table>
+<h3>13.16 References</h3>
+<li><a href="./ai_agent_implementation_guide.md">AI Agent Implementation Guide</a></li>
+<li><a href="./ai_agent_ecosystem_resources_guide.md">AI Agent Ecosystem Resources Guide</a></li>
+<li><a href="./unified_agent_modules.md">Unified Agent Modules</a></li>
+<li><a href="./reader_agent_plan.md">Reader Agent Plan</a> - Two-layer retrieval integration</li>
+<li><a href="https://supermemory.ai/research">Supermemory Research</a> - Two-layer retrieval inspiration</li>
+</ul>
+<hr>
+<em>Last updated: 2026-01-30</em> (Added unified agent module integration, circuit breaker, priority matrix)
+<em>Status: Active - MVP Component (Implemented)</em>
+  </article>
+</body>
+</html>

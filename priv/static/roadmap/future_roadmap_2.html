@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Future Roadmap: Evolved AI Capabilities &amp; Integration - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Future Roadmap: Evolved AI Capabilities & Integration</h1>
+<strong>Document Version:</strong> 2025-05-06
+<strong>Focus:</strong> Detailing the evolution of AI-driven features, including interactive chat interfaces and daemon functionalities, building upon the previously established Onelist Future Roadmap.
+<blockquote><strong>PARTIAL SUPERSESSION NOTICE</strong>: The "Onelist AI (Global Assistant & Proactive Interface)" concept in Section 2 of this document has been merged with Life Steward and evolved into <strong><a href="./future_roadmap_river_agent.md">River</a></strong> - the unified Onelist AI agent. Section 1 (Contextual AI Chat Pane) concepts may be reconsidered - River may serve as the single chat interface. See the River roadmap for the current comprehensive plan.</blockquote>
+<blockquote>> <em>Updated: 2026-01-28</em></blockquote>
+<h2>Introduction</h2>
+<p>This document outlines the refined vision for advanced AI capabilities within the Onelist ecosystem. It focuses on two primary AI-driven user interaction paradigms—the "Contextual AI Chat Pane" and the "Onelist AI (Global Assistant & Proactive Interface)"—and details their functionalities, interplay, and impact on supporting daemons like the Onelist Searcher. These concepts represent a significant evolution, aiming to deeply integrate AI into the user's "augmented memory" experience.</p>
+<h2>1. The Contextual AI Chat Pane (High-Priority Post-MVP Feature)</h2>
+<p>The Contextual AI Chat Pane is designed as a focused, in-context assistant to help users work with specific Onelist Entries or sets of Entries.</p>
+<strong>A. Core Concept & UI Integration:</strong>
+<em> <strong>Purpose:</strong> Provides AI-powered assistance directly related to the currently viewed/selected content (a single Entry, a filtered list of Entries, or search results).
+</em> <strong>UI:</strong>
+  <em> Integrated directly into the Onelist web interface.
+  </em> Hidden by default and can be toggled for visibility by the user.
+  <em> Operates as a pane or overlay that remains within the context of the current view.
+  </em> Distinct from the global "Onelist AI" assistant; this pane is for focused, contextual tasks.
+<strong>B. LLM Integration & User Control:</strong>
+<em> <strong>User's LLM Accounts:</strong> Primarily leverages the user's own API keys for their existing subscriptions to various LLM providers (e.g., OpenAI, Google Gemini, Anthropic Claude, xAI Grok, Deepseek, etc.).
+</em> <strong>Key Management:</strong> Users can securely add, store (encrypted at rest), and manage these third-party LLM API keys within Onelist. All LLM calls using these keys are proxied through the Onelist backend.
+<em> <strong>Model Selection:</strong> Users can select which of their configured LLM accounts/models to use for interactions within this chat pane.
+</em> <strong>Onelist-Provided LLM (Tiered Access):</strong> For users on a "Premium Onelist Account," there may be an option for a limited number of prompts/calls using Onelist's corporate LLM accounts if the user doesn't provide their own keys.
+<strong>C. Core Functionalities:</strong>
+<em> <strong>Contextual Summarization:</strong> Users can direct the LLM to summarize the current Entry or a set of selected Entries, with an option to save the summary (e.g., as a new <code>representation</code> or metadata).
+</em> <strong>Contextual Tag Recommendation:</strong> The LLM analyzes the current Entry/Entries and existing tags, recommending relevant existing or new tags for the user to apply.
+<em> <strong>Contextual Q&A:</strong> Users can ask questions about the current Entry or set of Entries, with the system providing relevant content to the LLM for generating answers.
+</em> <strong>On-Demand Entry Creation:</strong> Users can instruct the AI to create new Onelist Entries based on the chat conversation or analysis of the current context.
+<em> <strong>Standardized Actions ("Canned" Options):</strong>
+  </em> For common tasks (e.g., "Summarize this entry," "Suggest tags"), the pane will offer quick-action buttons.
+  <em> These actions use standardized prompts that leverage or align with user-defined settings/rules intended for corresponding Onelist Daemons (e.g., Reader daemon settings for summarization style), ensuring consistency even when performed manually.
+<strong>D. Intelligent Chat Session Logging & Management:</strong>
+</em> <strong>Session Initiation:</strong> A chat session (including AI interaction and logging, if enabled) begins only with the <strong>first explicit user interaction</strong> in the pane for the current context. Opening the pane does not start a session.
+<em> <strong>"New Chat" Option:</strong> A button to finalize/save the current session (if logging is on) and reset the pane for a new session.
+</em> <strong>Default Logging State:</strong> Chat content logging is <strong>ON by default</strong> for every new session, creating an <code>entry</code> of <code>entry_type='chat_log'</code>.
+<em> <strong>User Control over Content Logging:</strong>
+  </em> A <strong>toggle switch</strong> (e.g., "Save chat content") in the pane allows users to turn off content logging for the <em>current active session</em>.
+  <em> If turned off mid-session after interactions have occurred, the user is prompted to either:
+        1. <strong>Discard all content</strong> accumulated so far (no content-rich <code>chat_log</code> entry is saved).
+        2. <strong>Save content up to that point</strong> and stop logging further interactions for the session.
+</em> <strong>Dynamic AI-Generated Title & Tags for Chat Logs:</strong>
+  <em> The <code>chat_log</code> entry's title and tags are <strong>automatically generated and dynamically updated by AI</strong> as the conversation evolves, reflecting its content.
+  </em> Users see these evolving metadata items in the UI and can <strong>manually override/edit them at any time</strong>, with user edits taking precedence.
+<em> <strong>Storage Content & Format (for Content-Logged Sessions):</strong>
+  </em> Each saved <code>chat_log</code> entry will have <strong>two <code>representations</code></strong>:
+        1. <strong>Structured (e.g., JSON):</strong> The canonical source (<code>type='application/json'</code> or <code>'chat_log_structured'</code>), detailing turns, speakers, timestamps, LLM used, etc.
+        2. <strong>Markdown:</strong> A human-readable version (<code>type='text/markdown'</code>) derived from the structured data.
+<em> <strong>Automatic Save Triggers (if content logging is on for the session):</strong>
+  </em> User closes the chat pane.
+  <em> User clicks "New chat."
+  </em> User navigates away from the current Onelist context (which also auto-closes the chat pane).
+  <em> User-configurable inactivity timeout (default: 30 mins, min: 10 mins).
+  </em> Best-effort save on browser tab/window close.
+<em> <strong>Minimal Session Metadata Logging (for API Call Tracking):</strong>
+  </em> <strong>Regardless of whether chat <em>content</em> is saved</strong>, a minimal metadata record associated with the chat session (e.g., within the <code>chat_log</code> entry stub or a separate tracking system) is logged.
+  <em> This minimal log <strong>will not contain chat prompts/responses or an AI-generated title/tags if content saving was off/discarded.</strong>
+  </em> Its purpose is tracking LLM API call counts, session duration, LLM provider used, etc. Users must be informed about this non-content metadata logging.
+<em> <strong>"Deletion" (Content, Title, and Links Purge) of Saved Chat Logs:</strong>
+  </em> "Deleting" a saved <code>chat_log</code> entry removes its <strong>title</strong>, its <strong>content <code>representations</code></strong>, and any associated <strong><code>entry_links</code> records</strong>.
+  <em> The base <code>chat_log</code> <strong><code>entry</code> record itself is retained as a stub</strong> with its operational metadata (AI used, API call count, original context definition if stored internally) for continued API call tracking. Users must be clearly informed of this specific "delete" behavior.
+</em> <strong>Context Linking (Dependent on <code>entry_links</code> table):</strong> Saved <code>chat_log</code> entries will be robustly linked to their context <code>entry</code>(s) using the <code>entry_links</code> table. Dynamic contexts (searches/filters) might be linked via a reference to a <code>'saved_query'</code> entry or by storing parameters internally.
+<em> <strong>Resumable Chat Sessions & Context Re-evaluation:</strong> Users can resume saved <code>chat_log</code> sessions. The system may allow re-evaluation of the original list/search context to detect and incorporate new matching Entries.
+<strong>E. Dependencies:</strong>
+</em> Full, rich context linking for chat logs relies on the prior implementation of the <strong><code>entry_links</code> table.</strong>
+<em> Secure storage mechanism for user-provided third-party API keys.
+<h2>2. The Onelist AI (Global Assistant & Proactive Interface)</h2>
+<p>This feature represents the evolution of the "Jarvis" concept into a core, personified intelligence for the entire Onelist application.</p>
+<strong>A. Core Concept & Renaming:</strong>
+</em> This AI is the <strong>"voice and personality of Onelist itself"</strong> and will be referred to as <strong>"Onelist AI"</strong> (or simply "Onelist" in conversational contexts).
+<em> It provides a persistent, global conversational interface for users to interact with their entire knowledge base, receive proactive assistance, and manage Onelist.
+<strong>B. User Interface & Interaction Model:</strong>
+</em> A dedicated <strong>"Chat with Onelist" message box/icon will be always accessible</strong> (e.g., at the bottom of the Onelist web interface).
+<em> This global chat is <strong>"always ongoing, always running"</strong> in the background.
+</em> Interacting with "Onelist AI" by opening its chat interface will <strong>take over the main screen view</strong> (e.g., modal, full-screen overlay), indicating a shift from specific content context to a global conversation.
+<strong>C. Proactive Messaging & Notifications:</strong>
+<em> "Onelist AI" can <strong>proactively send messages, suggestions, alerts, or insights</strong> to the user.
+</em> If the main "Onelist AI" chat interface is closed, these messages will appear as <strong>notifications</strong> within the Onelist application.
+<strong>D. Core Functionalities:</strong>
+<em> <strong>Global Natural Language Interaction:</strong> Users can ask questions, make requests, or seek information across their </em>entire<em> Onelist database (not limited to a specific UI context).
+</em> <strong>Cross-Cutting Information Retrieval & Synthesis:</strong> Finds, retrieves, and synthesizes information from multiple, disparate Entries.
+<em> <strong>General Briefing & Report Generation:</strong> Creates summaries or briefings on broad topics spanning the user's knowledge base.
+</em> <strong>Persistent Dialogue Management:</strong> Maintains context across extended, ongoing conversations within the global "Onelist AI" chat.
+<em> <strong>Onelist Application Feature Control via Natural Language:</strong>
+  </em> Users can manage Onelist features and settings (e.g., creating/modifying entries, managing tags, initiating global searches, adjusting application preferences like dark mode or chat inactivity timeouts) through commands to "Onelist AI."
+<em> <strong>Daemon Orchestration, Recommendation, and Configuration:</strong>
+  </em> <strong>Daemon Recommendation:</strong> If a user's request to "Onelist AI" aligns with a specialized daemon's capability, the AI will explain the daemon's relevance and offer to help activate/configure it.
+  <em> <strong>Natural Language Configuration of Daemons:</strong> "Onelist AI" will allow users to customize daemon behavior by creating/managing <strong>user-defined overrides</strong> to the daemons' </em>default, non-adjustable<em> operational rules. This provides a conversational interface for tailoring automation.
+  </em> <strong>Task Delegation:</strong> "Onelist AI" can orchestrate complex tasks by delegating sub-tasks to appropriate daemons (e.g., instruct Searcher to gather info, then Writer to draft a report).
+<strong>E. LLM Backend Considerations:</strong>
+<em> <strong>Base Tier Users:</strong> May power "Onelist AI" using their own configured LLM API key (if shared from the Contextual AI Chat Pane setup) or experience limited functionality/interactions with a basic Onelist-provided model.
+</em> <strong>Premium Onelist Account / Bundled Subscriptions:</strong> "Onelist AI" will typically be powered by Onelist's corporate LLM accounts, offering a more seamless and potentially more capable experience.
+<em> <strong>User Choice:</strong> If a premium user also has their own LLM keys, a setting will clarify which LLM powers the "Onelist AI."
+<h2>3. Refined Role of Supporting Daemons</h2>
+<p>The introduction of these interactive AI interfaces clarifies and often elevates the roles of backend daemons.</p>
+<strong>A. Onelist Searcher (Daemon - Enhanced Core Service):</strong>
+</em> <strong>Critical Foundational Service:</strong> Its importance is significantly increased as it underpins both user-facing search and the context retrieval for AI features.
+<em> <strong>Advanced Indexing:</strong> Focuses on robust Full-Text Search (FTS) indexes and, crucially, <strong>generating and indexing vector embeddings</strong> from content using AI models for semantic search.
+</em> <strong>Retrieval Augmented Generation (RAG) Backbone:</strong> Acts as the primary "retrieval" engine for RAG pipelines used by the Contextual AI Chat Pane and "Onelist AI" to provide relevant information to LLMs.
+<em> <strong>Internal API for Context Retrieval:</strong> Exposes an API for other services to fetch relevant content chunks or entries.
+<strong>B. Other Specialized Daemons (Reader, Writer, Librarian, Feeder, Planner):</strong>
+</em> <strong>Focus on Automation:</strong> Daemons remain centered on automated, background processing.
+<em> <strong>Configurable via Overrides:</strong> Their behavior is governed by default, non-adjustable rules plus user-defined overrides (potentially managed via "Onelist AI" or a settings UI).
+</em> <strong>Synergy with Interactive AI:</strong>
+  <em> The Contextual AI Chat Pane can offer "canned actions" that mirror the logic of these daemons for manual, on-demand execution.
+  </em> "Onelist AI" can recommend their use, help configure them, and delegate tasks to them.
+  <em> For example, the Writer daemon's "Dynamic Document Maintenance" (creating "living papers" from evolving search contexts) can be initiated or configured via "Onelist AI" and leverage contexts defined through chat sessions.
+<h2>4. Key Dependencies & Broader Roadmap Integration</h2>
+</em> <strong><code>entry_links</code> Table:</strong> The full realization of rich context linking for chat logs, inter-entry relationships for AI synthesis, and some advanced daemon functionalities depends on the robust implementation of the <code>entry_links</code> table post-MVP. Its priority is heightened by these AI features.
+<em> <strong>Secure Storage for User LLM Keys:</strong> Essential for both the Contextual AI Chat Pane and potentially for tiered access to "Onelist AI." This is a critical post-MVP (or late MVP groundwork) security feature.
+</em> <strong>Monetization & Service Tiers:</strong> The varied ways LLMs can be utilized (user's keys vs. Onelist's keys) and the different levels of AI service (interactive chat vs. automated daemons vs. global assistant) tie directly into the "Monetization & Service Tiers (Conceptual Framework)" previously outlined. These AI features provide concrete value propositions for different tiers.
+<h2>Conclusion</h2>
+<p>This evolved vision for AI in Onelist introduces powerful, integrated, and distinct conversational interfaces, backed by intelligent daemons and a flexible approach to LLM utilization. The "Contextual AI Chat Pane" provides focused assistance, while the "Onelist AI (Global Assistant)" acts as the overarching intelligence and personality of the system. Together, they aim to significantly enhance Onelist's capability as a truly "augmented memory" and proactive knowledge management tool. The successful implementation will rely on a robust core platform (MVP), careful security considerations, and the phased introduction of these advanced capabilities.</p>
+  </article>
+</body>
+</html>

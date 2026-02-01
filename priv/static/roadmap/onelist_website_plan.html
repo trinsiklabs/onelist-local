@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Corporate Website Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Corporate Website Plan</h1>
+<h2>Overview</h2>
+<p>The Onelist corporate website at <strong>onelist.my</strong> serves as the central hub for marketing, documentation, user accounts, and billing. Built with <strong>Beacon CMS for Phoenix</strong>, it combines content management flexibility with the performance and real-time capabilities of Phoenix LiveView.</p>
+<h2>Domain Structure</h2>
+<table>
+<tr><th>Domain</th><th>Purpose</th></tr>
+<tr><td><code>onelist.my</code></td><td>Corporate website, marketing, docs</td></tr>
+<tr><td><code>app.onelist.my</code></td><td>Account dashboard, billing, device management</td></tr>
+<tr><td><code>[username].onelist.my</code></td><td>VM tier user instances (full web UI)</td></tr>
+<tr><td><code>api.onelist.my</code></td><td>Headless cloud API (sync, storage)</td></tr>
+</table>
+<hr>
+<h2>Technology Stack</h2>
+<h3>Beacon CMS</h3>
+<ul>
+<li>Phoenix-native CMS with LiveView</li>
+<li>Visual page builder for marketing pages</li>
+<li>Content management for docs/blog</li>
+<li>SEO-friendly with static generation options</li>
+<li>Custom components for interactive elements</li>
+<h3>Why Beacon?</h3>
+<li>Same tech stack as Onelist Core (Elixir/Phoenix)</li>
+<li>No separate CMS infrastructure needed</li>
+<li>LiveView for interactive pricing calculators, demos</li>
+<li>Easy to extend with custom components</li>
+<li>Open source, self-hostable</li>
+<hr>
+<h2>Site Structure</h2>
+<h3>Public Pages (Marketing)</h3>
+<pre><code class="language-">onelist.my/
+├── /                           # Homepage
+├── /features                   # Feature overview
+│   ├── /features/memory        # AI memory capabilities
+│   ├── /features/sync          # E2EE cloud sync
+│   ├── /features/search        # Hybrid search
+│   └── /features/agents        # Agent ecosystem
+├── /pricing                    # Pricing calculator
+├── /security                   # Security &amp; privacy deep-dive
+├── /open-source                # Open source info, GitHub links
+├── /download                   # App downloads (Mac, iOS, Docker)
+├── /blog                       # Company blog
+├── /docs                       # Documentation
+│   ├── /docs/getting-started
+│   ├── /docs/api
+│   ├── /docs/self-hosting
+│   └── /docs/openclaw
+├── /about                      # About the company
+├── /contact                    # Contact form
+├── /legal
+│   ├── /legal/privacy          # Privacy policy
+│   ├── /legal/terms            # Terms of service
+│   └── /legal/security         # Security policy
+└── /status                     # Service status page
+</code></pre>
+<h3>Account Portal (app.onelist.my)</h3>
+<pre><code class="language-">app.onelist.my/
+├── /signup                     # Account creation
+├── /login                      # Login (magic link / password / OAuth)
+├── /                           # Dashboard (after login)
+├── /settings
+│   ├── /settings/account       # Account settings
+│   ├── /settings/security      # Passphrase, recovery key, 2FA
+│   └── /settings/notifications # Email preferences
+├── /billing
+│   ├── /billing                # Current plan, usage
+│   ├── /billing/upgrade        # Plan/tier changes
+│   └── /billing/history        # Invoice history
+├── /devices                    # Device management
+│   ├── /devices                # List devices
+│   └── /devices/add            # Add new device (QR code)
+├── /storage                    # Storage management
+│   ├── /storage                # Usage overview
+│   └── /storage/tier           # Standard/Redundant selection
+└── /support                    # Support tickets, help
+</code></pre>
+<h3>VM Tier Instances ([username].onelist.my)</h3>
+<p>Full Onelist web application for users who purchase VM tier:
+<li>Complete web UI for viewing/editing content</li>
+<li>All features available in Mac app</li>
+<li>Custom subdomain per user</li></p>
+<hr>
+<h2>Page Designs</h2>
+<h3>Homepage (onelist.my)</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  [Logo] Onelist                    Features  Pricing  Docs  Blog  [Login]  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                    Your Second Brain.                                        │
+│                    For You and Your AI.                                      │
+│                                                                              │
+│         The augmented memory system that grows with you.                    │
+│         End-to-end encrypted. Open source. Self-hostable.                   │
+│                                                                              │
+│              [Get Started Free]  [View on GitHub]                           │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
+│  │  Zero-Knowledge  │  │  AI-Native       │  │  Open Source     │          │
+│  │  ──────────────  │  │  ──────────────  │  │  ──────────────  │          │
+│  │  Your data is    │  │  Built for AI    │  │  Run it yourself │          │
+│  │  encrypted. We   │  │  agents like     │  │  or use our      │          │
+│  │  can't read it.  │  │  OpenClaw.        │  │  hosted service. │          │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘          │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                    How It Works                                              │
+│                    ────────────                                              │
+│                                                                              │
+│  1. Install the app (Mac, iOS, or Docker)                                   │
+│  2. Your AI and you write to the same memory                                │
+│  3. Everything syncs encrypted to the cloud                                 │
+│  4. Search across all your knowledge instantly                              │
+│                                                                              │
+│                    [See it in action →]                                     │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                    Trusted By                                                │
+│                    ──────────                                                │
+│                                                                              │
+│        [OpenClaw logo]  [Other integration logos...]                         │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Footer: About | Contact | Privacy | Terms | Status | GitHub                │
+│  © 2026 Onelist                                                             │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Pricing Page (onelist.my/pricing)</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│                    Simple, Usage-Based Pricing                              │
+│                    ───────────────────────────                              │
+│                                                                              │
+│         Pay for what you use. No surprises. Cancel anytime.                 │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  CLOUD SYNC (Headless)              WEB ACCESS (VM)                         │
+│  ─────────────────────              ───────────────                         │
+│                                                                              │
+│  ┌─────────────────────────┐       ┌─────────────────────────┐             │
+│  │                         │       │                         │             │
+│  │  Base: $3/month         │       │  Starting at $15/month  │             │
+│  │                         │       │                         │             │
+│  │  + Storage: $0.10/GB    │       │  Includes:              │             │
+│  │  + Assets:              │       │  • Full web interface   │             │
+│  │    Standard: $0.02/GB   │       │  • Your own subdomain   │             │
+│  │    Redundant: $0.035/GB │       │  • 20GB included        │             │
+│  │  + Bandwidth: $0.05/GB  │       │  • All agents included  │             │
+│  │                         │       │                         │             │
+│  │  [Get Started]          │       │  [Get Started]          │             │
+│  │                         │       │                         │             │
+│  │  ✓ End-to-end encrypted │       │  ✓ Access from anywhere │             │
+│  │  ✓ Unlimited devices    │       │  ✓ No app required      │             │
+│  │  ✓ Mac &amp; iOS apps       │       │  ✓ Priority support     │             │
+│  │                         │       │                         │             │
+│  └─────────────────────────┘       └─────────────────────────┘             │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  SELF-HOSTED (Free)                                                         │
+│  ──────────────────                                                         │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                      │   │
+│  │  $0 forever                                                         │   │
+│  │                                                                      │   │
+│  │  Run Onelist on your own infrastructure.                            │   │
+│  │  Full source code available. MIT licensed.                          │   │
+│  │                                                                      │   │
+│  │  [View on GitHub]  [Self-Hosting Docs]                              │   │
+│  │                                                                      │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  PRICING CALCULATOR                                                         │
+│  ──────────────────                                                         │
+│                                                                              │
+│  Estimate your monthly cost:                                                │
+│                                                                              │
+│  Entries &amp; metadata:  [====|=========] 5 GB                                │
+│  Assets (photos, etc): [==|===========] 20 GB                              │
+│  Storage tier: ○ Standard  ● Redundant                                     │
+│  Monthly bandwidth:   [=|============] 10 GB                               │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  Estimated monthly cost: $4.90                                      │   │
+│  │                                                                      │   │
+│  │  Base fee:           $3.00                                          │   │
+│  │  Storage (5 GB):     $0.50                                          │   │
+│  │  Assets (20 GB):     $0.70  (Redundant)                             │   │
+│  │  Bandwidth (10 GB):  $0.50                                          │   │
+│  │  ─────────────────────────                                          │   │
+│  │  Total:              $4.70                                          │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Account Dashboard (app.onelist.my)</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  [Logo] Onelist                                          [User ▼] [Logout] │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────┐                                                            │
+│  │  Dashboard  │ ← selected                                                 │
+│  │  Devices    │                                                            │
+│  │  Storage    │                                                            │
+│  │  Billing    │                                                            │
+│  │  Settings   │                                                            │
+│  │  Support    │                                                            │
+│  └─────────────┘                                                            │
+│                                                                              │
+│  OVERVIEW                                                                   │
+│  ────────                                                                   │
+│                                                                              │
+│  ┌──────────────────────────────┐  ┌──────────────────────────────┐       │
+│  │  SYNC STATUS                 │  │  THIS MONTH                  │       │
+│  │                              │  │                              │       │
+│  │  ✓ All devices synced       │  │  Current spend: $4.27        │       │
+│  │  Last sync: 5 minutes ago   │  │  Projected:     $5.10        │       │
+│  │                              │  │                              │       │
+│  │  Devices: 3 connected       │  │  [View Details]              │       │
+│  └──────────────────────────────┘  └──────────────────────────────┘       │
+│                                                                              │
+│  ┌──────────────────────────────┐  ┌──────────────────────────────┐       │
+│  │  STORAGE                     │  │  QUICK ACTIONS               │       │
+│  │                              │  │                              │       │
+│  │  Entries:  2.4 GB           │  │  [+ Add Device]              │       │
+│  │  Assets:   12.1 GB          │  │  [Download App]              │       │
+│  │  Tier:     Redundant        │  │  [View Docs]                 │       │
+│  │                              │  │                              │       │
+│  │  [Manage Storage]           │  │                              │       │
+│  └──────────────────────────────┘  └──────────────────────────────┘       │
+│                                                                              │
+│  RECENT ACTIVITY                                                            │
+│  ───────────────                                                            │
+│                                                                              │
+│  • Today 3:45 PM    MacBook Pro synced 12 items                            │
+│  • Today 2:30 PM    iPhone synced 3 items                                  │
+│  • Today 11:00 AM   Mac Mini completed full sync                           │
+│  • Yesterday        New device &quot;iPhone&quot; added                              │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>Beacon CMS Components</h2>
+<h3>Custom Components to Build</h3>
+<table>
+<tr><th>Component</th><th>Purpose</th></tr>
+<tr><td><code>PricingCalculator</code></td><td>Interactive pricing estimator with sliders</td></tr>
+<tr><td><code>FeatureComparison</code></td><td>Comparison table with tooltips</td></tr>
+<tr><td><code>DownloadButtons</code></td><td>Platform-aware download links</td></tr>
+<tr><td><code>CodeBlock</code></td><td>Syntax-highlighted code examples</td></tr>
+<tr><td><code>ApiReference</code></td><td>Auto-generated API documentation</td></tr>
+<tr><td><code>StatusBadge</code></td><td>Real-time service status indicator</td></tr>
+<tr><td><code>TestimonialCarousel</code></td><td>Customer quotes rotation</td></tr>
+<tr><td><code>DemoVideo</code></td><td>Embedded video player with chapters</td></tr>
+</table>
+<h3>Content Types</h3>
+<table>
+<tr><th>Type</th><th>Fields</th></tr>
+<tr><td><code>BlogPost</code></td><td>title, slug, content, author, published_at, tags, featured_image</td></tr>
+<tr><td><code>DocPage</code></td><td>title, slug, content, category, order, related_pages</td></tr>
+<tr><td><code>ChangelogEntry</code></td><td>version, date, changes (breaking, features, fixes)</td></tr>
+<tr><td><code>TeamMember</code></td><td>name, role, bio, photo, social_links</td></tr>
+<tr><td><code>FAQ</code></td><td>question, answer, category</td></tr>
+</table>
+<hr>
+<h2>Implementation Phases</h2>
+<h3>Phase 1: Foundation</h3>
+<li>[ ] Set up Beacon CMS in new Phoenix project</li>
+<li>[ ] Configure domain routing (onelist.my, app.onelist.my)</li>
+<li>[ ] Basic layout and navigation</li>
+<li>[ ] Homepage with placeholder content</li>
+<li>[ ] Pricing page with static content</li>
+<h3>Phase 2: Account Portal</h3>
+<li>[ ] Signup flow with Stripe Checkout integration</li>
+<li>[ ] Login (magic link, password, OAuth)</li>
+<li>[ ] Account dashboard</li>
+<li>[ ] Billing integration (Stripe Customer Portal)</li>
+<li>[ ] Device management UI</li>
+<h3>Phase 3: Marketing Content</h3>
+<li>[ ] Features pages with interactive demos</li>
+<li>[ ] Security deep-dive page</li>
+<li>[ ] Documentation structure and initial content</li>
+<li>[ ] Blog setup</li>
+<li>[ ] SEO optimization</li>
+<h3>Phase 4: VM Tier Subdomains</h3>
+<li>[ ] Wildcard subdomain routing</li>
+<li>[ ] VM provisioning integration</li>
+<li>[ ] Per-user instance management</li>
+<li>[ ] Custom domain support (future)</li>
+<h3>Phase 5: Polish</h3>
+<li>[ ] Pricing calculator component</li>
+<li>[ ] Status page integration</li>
+<li>[ ] Analytics integration</li>
+<li>[ ] A/B testing for conversion</li>
+<li>[ ] Performance optimization</li>
+<hr>
+<h2>Design System</h2>
+<h3>Colors</h3>
+<pre><code class="language-">Primary:    #2563EB (Blue)
+Secondary:  #7C3AED (Purple)
+Success:    #10B981 (Green)
+Warning:    #F59E0B (Amber)
+Error:      #EF4444 (Red)
+Background: #FFFFFF / #0F172A (dark mode)
+Text:       #1E293B / #F8FAFC (dark mode)
+</code></pre>
+<h3>Typography</h3>
+<pre><code class="language-">Headings:   Inter (700, 600)
+Body:       Inter (400, 500)
+Code:       JetBrains Mono
+</code></pre>
+<h3>Components</h3>
+<li>Tailwind CSS for styling</li>
+<li>Consistent with Mac app design language</li>
+<li>Dark mode support</li>
+<li>Mobile-responsive</li>
+<hr>
+<h2>SEO & Marketing</h2>
+<h3>Target Keywords</h3>
+<li>"AI memory"</li>
+<li>"second brain app"</li>
+<li>"OpenClaw memory"</li>
+<li>"encrypted note-taking"</li>
+<li>"self-hosted knowledge base"</li>
+<li>"AI agent memory"</li>
+<h3>Content Strategy</h3>
+<li>Blog posts about AI memory, productivity, privacy</li>
+<li>Integration guides (OpenClaw, other AI agents)</li>
+<li>Comparison pages (vs. Notion, Obsidian, mem.ai)</li>
+<li>Case studies from early users</li>
+<h3>Analytics</h3>
+<li>Plausible or Fathom (privacy-friendly)</li>
+<li>Conversion tracking for signups</li>
+<li>Funnel analysis</li>
+<hr>
+<h2>Open Questions</h2>
+<li>[x] <strong>Q56</strong>: Custom domain support for VM tier users?</li>
+  <li><strong>DECIDED</strong>: Post-MVP</li>
+  <li>Allow users to point their own domain to their instance</li>
+  <li>Adds complexity (SSL via Let's Encrypt, DNS verification)</li>
+<li>[x] <strong>Q57</strong>: Blog comments system?</li>
+  <li><strong>DECIDED</strong>: Onelist-powered. Comments stored as Onelist entries, linked via entry_links</li>
+  <li>Commenters with accounts get copy in their Onelist (federated)</li>
+  <li>Anonymous comments stored only in post author's Onelist</li>
+  <li>See <code>future_roadmap_forum.md</code> for full forum system (same architecture)</li>
+<li>[x] <strong>Q58</strong>: Documentation versioning?</li>
+  <li><strong>DECIDED</strong>: Dropdown selector in UI + git-based canonical source</li>
+  <li>Docs tagged with releases in git</li>
+  <li>Version selector in docs UI (like React/Elixir docs)</li>
+  <li>Change history preserved in git</li>
+<li>[x] <strong>Q59</strong>: Localization/i18n?</li>
+  <li><strong>DECIDED</strong>: English-only MVP with i18n-ready architecture (Gettext)</li>
+  <li>Rollout: English → Spanish → Portuguese (BR) → German → French → Japanese</li>
+  <li>Covers ~3B+ potential users with 6 languages</li>
+<li>[x] <strong>Q60</strong>: Community section?</li>
+  <li><strong>DECIDED</strong>: Onelist-powered forum at <code>onelist.my/community/</code></li>
+  <li>All posts/replies are Onelist entries</li>
+  <li>User-deployable: any user can create forum under their namespace</li>
+  <li>See <code>future_roadmap_forum.md</code> for full specification</li>
+<hr>
+<h2>Pre-Launch Requirements</h2>
+<p>The following need detailed planning before launch:</p>
+<h3>API Documentation Structure</h3>
+<li>[ ] <strong>TODO</strong>: Create detailed plan for API documentation</li>
+<li>OpenAPI/Swagger specification</li>
+<li>Interactive API explorer</li>
+<li>Code examples in multiple languages (Elixir, Python, JavaScript, cURL)</li>
+<li>Authentication guide</li>
+<li>Rate limiting documentation</li>
+<li>Versioning strategy</li>
+<li>Webhook documentation</li>
+<li>See: <code>/docs/api</code> in site structure</li>
+<h3>Onboarding Email Sequences</h3>
+<li>[ ] <strong>TODO</strong>: Design email sequences for user onboarding</li>
+<li>Welcome email (account created)</li>
+<li>Getting started guide (first steps)</li>
+<li>Feature discovery (drip campaign)</li>
+<li>Upgrade prompts (free → paid, cloud → VM)</li>
+<li>Re-engagement (inactive users)</li>
+<li>Billing notifications (usage alerts, payment reminders)</li>
+<li>Security notifications (new device, password change)</li>
+<h3>Support/Help System (Built on Onelist)</h3>
+<li>[ ] <strong>TODO</strong>: Design support system using Onelist entries</li>
+<li>Knowledge base as Onelist entries (<code>entry_type='help_article'</code>)</li>
+<li>Support tickets as entries with <code>entry_type='support_ticket'</code></li>
+<li>Ticket linked to user's account via entry_links</li>
+<li>Support agent replies as linked entries</li>
+<li>Status tracking via metadata</li>
+<li>Integration with forum for community support</li>
+<li>Escalation path: Community → Knowledge Base → Ticket</li>
+<hr>
+<h2>Detailed Page Plans</h2>
+<h3>Homepage (onelist.my/)</h3>
+<strong>Purpose:</strong> First impression. Communicate value proposition, build trust, drive signups.
+<strong>Hero Section:</strong>
+<table>
+<tr><th>Element</th><th>Content</th></tr>
+<tr><td>Headline</td><td>"Your Second Brain. For You and Your AI."</td></tr>
+<tr><td>Subheadline</td><td>"The augmented memory system that grows with you. End-to-end encrypted. Open source. Self-hostable."</td></tr>
+<tr><td>Primary CTA</td><td>"Get Started Free" → Signup</td></tr>
+<tr><td>Secondary CTA</td><td>"View on GitHub" → GitHub repo</td></tr>
+<tr><td>Visual</td><td>Animated demo or hero image showing app interface</td></tr>
+</table>
+<strong>Value Props Section (3 cards):</strong>
+<table>
+<tr><th>Card</th><th>Title</th><th>Description</th></tr>
+<tr><td>1</td><td>Zero-Knowledge</td><td>"Your data is encrypted before it leaves your device. We literally cannot read it."</td></tr>
+<tr><td>2</td><td>AI-Native</td><td>"Built for AI agents like OpenClaw. Your AI and you share the same memory."</td></tr>
+<tr><td>3</td><td>Open Source</td><td>"Run it yourself or use our hosted service. MIT licensed. No lock-in."</td></tr>
+</table>
+<strong>How It Works Section:</strong>
+1. Install the app (Mac, iOS, or Docker)
+2. Your AI and you write to the same memory
+3. Everything syncs encrypted to the cloud
+4. Search across all your knowledge instantly
+<strong>Social Proof Section:</strong>
+<li>OpenClaw integration logo</li>
+<li>"Used by X developers" (when applicable)</li>
+<li>GitHub stars badge</li>
+<li>Testimonial quotes (when available)</li>
+<strong>Footer CTA:</strong>
+<li>"Ready to remember everything?" + Signup button</li>
+<hr>
+<h3>Features Overview (onelist.my/features)</h3>
+<strong>Purpose:</strong> Overview of all major features with links to deep-dive pages.
+<strong>Structure:</strong>
+<pre><code class="language-">Hero: &quot;Everything you need for augmented memory&quot;
+<p>Feature Grid (4 cards, link to sub-pages):
+┌─────────────────────┐  ┌─────────────────────┐
+│  AI Memory          │  │  E2EE Cloud Sync    │
+│  [icon]             │  │  [icon]             │
+│  Store, search,     │  │  Sync across all    │
+│  and retrieve       │  │  devices with       │
+│  memories for AI    │  │  zero-knowledge     │
+│  [Learn more →]     │  │  [Learn more →]     │
+└─────────────────────┘  └─────────────────────┘
+┌─────────────────────┐  ┌─────────────────────┐
+│  Hybrid Search      │  │  Agent Ecosystem    │
+│  [icon]             │  │  [icon]             │
+│  Full-text +        │  │  Extensible with    │
+│  semantic vector    │  │  AI agents and      │
+│  search combined    │  │  daemons            │
+│  [Learn more →]     │  │  [Learn more →]     │
+└─────────────────────┘  └─────────────────────┘</p>
+<p>Additional Features List:
+<li>Version history for all entries</li>
+<li>Tags and organization</li>
+<li>Multiple entry types (notes, photos, tasks, etc.)</li>
+<li>Asset storage (photos, files, documents)</li>
+<li>Public pages and sharing</li>
+<li>Forums and comments</li>
+<li>API access</li>
+</code></pre></p>
+<hr>
+<h3>Feature: AI Memory (onelist.my/features/memory)</h3>
+<strong>Purpose:</strong> Explain how Onelist serves as memory for AI agents.
+<strong>Sections:</strong>
+<p>1. <strong>Hero</strong>
+   <li>Headline: "Memory That Works for Both of You"</li>
+   <li>Subheadline: "Give your AI agent persistent, searchable memory that you can see, edit, and trust."</li></p>
+<p>2. <strong>The Problem</strong>
+   <li>AI agents forget everything between sessions</li>
+   <li>Chat history is linear, not searchable</li>
+   <li>No way to see what your AI "remembers"</li>
+   <li>You and your AI can't share knowledge</li></p>
+<p>3. <strong>The Solution</strong>
+   <li>Onelist as shared memory store</li>
+   <li>AI writes memories via API</li>
+   <li>Human reviews, edits, organizes</li>
+   <li>Both search the same knowledge base</li></p>
+<p>4. <strong>How It Works (diagram)</strong>
+   <pre><code class="language-">   ┌─────────┐         ┌─────────┐
+   │   You   │◄───────►│ Onelist │◄───────►│   AI    │
+   └─────────┘  Read/  └─────────┘  Read/   └─────────┘
+               Write                Write</p>
+<p>Same entries. Same search. Shared understanding.
+   </code></pre></p>
+<p>5. <strong>Use Cases</strong>
+   <li>OpenClaw remembering your preferences</li>
+   <li>Research assistant accumulating findings</li>
+   <li>Personal AI learning your context</li>
+   <li>Project notes shared between you and AI</li></p>
+<p>6. <strong>Integration Example</strong>
+   <li>Code snippet showing API usage</li>
+   <li>OpenClaw configuration example</li></p>
+<p>7. <strong>CTA</strong>
+   <li>"Try it with OpenClaw" → OpenClaw setup guide</li>
+   <li>"Get Started" → Signup</li></p>
+<hr>
+<h3>Feature: E2EE Sync (onelist.my/features/sync)</h3>
+<strong>Purpose:</strong> Explain zero-knowledge sync and build trust around privacy.
+<strong>Sections:</strong>
+<p>1. <strong>Hero</strong>
+   <li>Headline: "Sync Everywhere. Trust No One."</li>
+   <li>Subheadline: "End-to-end encrypted sync means your data is protected even from us."</li></p>
+<p>2. <strong>What E2EE Means</strong>
+   <li>Data encrypted on your device before upload</li>
+   <li>We store encrypted blobs we cannot read</li>
+   <li>Only your passphrase can decrypt</li>
+   <li>Even if we're hacked, your data is safe</li></p>
+<p>3. <strong>Trust Model Comparison</strong>
+   | Service | Trust Required |
+   |---------|----------------|
+   | Google Drive | Trust Google completely |
+   | Dropbox | Trust Dropbox completely |
+   | iCloud | Trust Apple completely |
+   | <strong>Onelist</strong> | <strong>Trust no one (E2EE)</strong> |</p>
+<p>4. <strong>How It Works (diagram)</strong>
+   <pre><code class="language-">   Your Device                Onelist Cloud              Your Other Device
+   ───────────                ────────────               ─────────────────
+   1. Write entry
+   2. Encrypt with your key
+   3. Upload blob ─────────► 4. Store blob ────────────► 5. Download blob
+                              (cannot read)              6. Decrypt with key
+                                                        7. Read entry
+   </code></pre></p>
+<p>5. <strong>Sync Options</strong>
+   <li>Free tier: P2P sync (device-to-device)</li>
+   <li>Cloud tier: Always-available encrypted sync</li>
+   <li>Self-hosted: Your own infrastructure</li></p>
+<p>6. <strong>Security Details</strong>
+   <li>Encryption: AES-256-GCM</li>
+   <li>Key derivation: Argon2id from passphrase</li>
+   <li>Perfect forward secrecy</li>
+   <li>Open source, auditable</li></p>
+<p>7. <strong>CTA</strong>
+   <li>"Read our security whitepaper" → /security</li>
+   <li>"Get Started" → Signup</li></p>
+<hr>
+<h3>Feature: Hybrid Search (onelist.my/features/search)</h3>
+<strong>Purpose:</strong> Explain the power of combined full-text + semantic search.
+<strong>Sections:</strong>
+<p>1. <strong>Hero</strong>
+   <li>Headline: "Find Anything. Instantly."</li>
+   <li>Subheadline: "Full-text search meets AI-powered semantic understanding."</li></p>
+<p>2. <strong>The Problem with Traditional Search</strong>
+   <li>Keyword search misses context</li>
+   <li>"What was that article about productivity?" fails</li>
+   <li>Can't search by meaning, only by words</li></p>
+<p>3. <strong>Hybrid Search Explained</strong>
+   | Search Type | What It Finds | Example |
+   |-------------|---------------|---------|
+   | Full-text | Exact words | "PostgreSQL tutorial" |
+   | Semantic | Similar meaning | "database learning resources" |
+   | Hybrid | Best of both | Finds both matches, ranks intelligently |</p>
+<p>4. <strong>How It Works</strong>
+   <li>PostgreSQL FTS for keyword matching</li>
+   <li>pgvector for embedding similarity</li>
+   <li>Combined scoring and ranking</li>
+   <li>All happens locally (privacy preserved)</li></p>
+<p>5. <strong>Search Examples (interactive demo?)</strong>
+   <li>Query: "that meeting about the product launch"</li>
+   <li>Results: Meeting notes, related emails, action items</li></p>
+<p>6. <strong>Powered By</strong>
+   <li>PostgreSQL + pgvector</li>
+   <li>Local embedding generation (configurable model)</li>
+   <li>Runs entirely on your device or server</li></p>
+<p>7. <strong>CTA</strong>
+   <li>"See it in action" → Demo video</li>
+   <li>"Get Started" → Signup</li></p>
+<hr>
+<h3>Feature: Agent Ecosystem (onelist.my/features/agents)</h3>
+<strong>Purpose:</strong> Explain extensibility through agents/daemons.
+<strong>Sections:</strong>
+<p>1. <strong>Hero</strong>
+   <li>Headline: "Agents That Work While You Sleep"</li>
+   <li>Subheadline: "Extend Onelist with AI-powered agents that organize, summarize, and enhance your knowledge."</li></p>
+<p>2. <strong>What Are Agents?</strong>
+   <li>Background services that process your entries</li>
+   <li>Read via API, write results back</li>
+   <li>Run locally or in cloud (your choice)</li>
+   <li>Open ecosystem, build your own</li></p>
+<p>3. <strong>Available Agents</strong>
+   | Agent | What It Does |
+   |-------|--------------|
+   | Reader | Summarizes entries, extracts key points |
+   | Librarian | Organizes tags, suggests improvements |
+   | Researcher | Finds related external content |
+   | Planner | Extracts action items from notes |
+   | Searcher | Enhanced semantic search indexing |</p>
+<p>4. <strong>OpenClaw Integration</strong>
+   <li>Featured integration</li>
+   <li>How OpenClaw uses Onelist as memory</li>
+   <li>Setup instructions link</li></p>
+<p>5. <strong>Build Your Own</strong>
+   <li>Agents are just API clients</li>
+   <li>Python, JavaScript, any language</li>
+   <li>Example agent code</li>
+   <li>Link to agent development docs</li></p>
+<p>6. <strong>Self-Hosted vs Cloud</strong>
+   <li>Run agents locally for privacy</li>
+   <li>Or use cloud agents for convenience</li>
+   <li>Mix and match</li></p>
+<p>7. <strong>CTA</strong>
+   <li>"Browse available agents" → Agent directory</li>
+   <li>"Build an agent" → Developer docs</li></p>
+<hr>
+<h3>Security Page (onelist.my/security)</h3>
+<strong>Purpose:</strong> Deep-dive on security for privacy-conscious users. Build trust.
+<strong>Sections:</strong>
+<p>1. <strong>Hero</strong>
+   <li>Headline: "Security Without Compromise"</li>
+   <li>Subheadline: "How we protect your data with end-to-end encryption and zero-knowledge architecture."</li></p>
+<p>2. <strong>Our Security Philosophy</strong>
+   <li>"Can't be evil" vs "Won't be evil"</li>
+   <li>We designed the system so we cannot access your data</li>
+   <li>Even under legal compulsion, we have nothing to give</li></p>
+<p>3. <strong>Encryption Details</strong>
+   | Component | Implementation |
+   |-----------|----------------|
+   | Encryption algorithm | AES-256-GCM |
+   | Key derivation | Argon2id (memory-hard) |
+   | Key storage | Never leaves your devices |
+   | Transport | TLS 1.3 + E2EE |
+   | At-rest (cloud) | Encrypted blobs only |</p>
+<p>4. <strong>What We Can and Cannot See</strong>
+   | Data | Visible to Onelist? |
+   |------|---------------------|
+   | Email address | Yes |
+   | Account metadata | Yes |
+   | Entry content | <strong>No</strong> |
+   | Entry titles | <strong>No</strong> |
+   | Search queries | <strong>No</strong> |
+   | File contents | <strong>No</strong> |</p>
+<p>5. <strong>Architecture Diagram</strong>
+   <li>Visual showing encryption flow</li>
+   <li>Where keys live</li>
+   <li>What cloud stores</li></p>
+<p>6. <strong>Recovery & Key Management</strong>
+   <li>Passphrase requirements</li>
+   <li>Recovery key backup</li>
+   <li>What happens if you lose passphrase</li>
+   <li>No backdoors, no master keys</li></p>
+<p>7. <strong>Open Source Transparency</strong>
+   <li>All code is public</li>
+   <li>Security audits (when available)</li>
+   <li>Bug bounty program (when available)</li>
+   <li>How to report vulnerabilities</li></p>
+<p>8. <strong>Compliance & Certifications</strong>
+   <li>GDPR compliance</li>
+   <li>Data residency options</li>
+   <li>Future: SOC 2, etc.</li></p>
+<p>9. <strong>CTA</strong>
+   <li>"Read the source code" → GitHub</li>
+   <li>"Report a vulnerability" → Security contact</li></p>
+<hr>
+<h3>Pricing Page (onelist.my/pricing)</h3>
+<strong>Purpose:</strong> Clear pricing, interactive calculator, drive conversions.
+<em>Note: Mockup already exists in document. Additional details:</em>
+<strong>Key Messages:</strong>
+<li>"Pay for what you use. No surprises."</li>
+<li>"Free tier available - no credit card required"</li>
+<li>"Self-host for free, forever"</li>
+<strong>Tier Details:</strong>
+<table>
+<tr><th>Tier</th><th>Price</th><th>Best For</th></tr>
+<tr><td>Free (P2P)</td><td>$0</td><td>Privacy maximalists, casual users</td></tr>
+<tr><td>Cloud Sync</td><td>$3/mo + usage</td><td>Most users, reliable sync</td></tr>
+<tr><td>VM Tier</td><td>$15/mo+</td><td>Power users, web access</td></tr>
+<tr><td>Self-Hosted</td><td>$0</td><td>Developers, enterprises</td></tr>
+</table>
+<strong>Calculator Inputs:</strong>
+<li>Number of entries (estimate storage)</li>
+<li>Photos/assets (GB)</li>
+<li>Storage tier (Standard/Redundant)</li>
+<li>Estimated bandwidth</li>
+<strong>FAQ Section:</strong>
+<li>"What counts as storage?"</li>
+<li>"How is bandwidth calculated?"</li>
+<li>"Can I change tiers?"</li>
+<li>"What happens if I cancel?"</li>
+<hr>
+<h3>Open Source Page (onelist.my/open-source)</h3>
+<strong>Purpose:</strong> Attract developers, build community trust.
+<strong>Sections:</strong>
+<p>1. <strong>Hero</strong>
+   <li>Headline: "Open Source. Open Future."</li>
+   <li>Subheadline: "Onelist is MIT licensed. Run it yourself, modify it, contribute back."</li></p>
+<p>2. <strong>Why Open Source?</strong>
+   <li>Transparency (see exactly how your data is handled)</li>
+   <li>Longevity (project survives even if company doesn't)</li>
+   <li>Community (contributions make it better for everyone)</li>
+   <li>Trust (verify, don't trust)</li></p>
+<p>3. <strong>Repositories</strong>
+   | Repo | Description |
+   |------|-------------|
+   | onelist-core | Main Phoenix application |
+   | onelist-mac | macOS native wrapper |
+   | onelist-ios | iOS app |
+   | onelist-agents | Agent implementations |
+   | onelist-docs | Documentation |</p>
+<p>4. <strong>Contributing</strong>
+   <li>How to contribute</li>
+   <li>Development setup</li>
+   <li>Code of conduct</li>
+   <li>Issue templates</li></p>
+<p>5. <strong>Self-Hosting</strong>
+   <li>Docker deployment</li>
+   <li>Kubernetes helm charts</li>
+   <li>Configuration options</li>
+   <li>Link to self-hosting docs</li></p>
+<p>6. <strong>Commercial vs Open Source</strong>
+   <li>Core is always open source</li>
+   <li>Hosted service is the business model</li>
+   <li>No "open core" bait-and-switch</li></p>
+<p>7. <strong>CTA</strong>
+   <li>"View on GitHub" → GitHub org</li>
+   <li>"Read self-hosting docs" → /docs/self-hosting</li></p>
+<hr>
+<h3>Download Page (onelist.my/download)</h3>
+<strong>Purpose:</strong> Get users to install the app.
+<strong>Structure:</strong>
+<pre><code class="language-">Hero: &quot;Get Onelist&quot;
+<p>Platform Cards:
+┌─────────────────────┐  ┌─────────────────────┐  ┌─────────────────────┐
+│  macOS              │  │  iOS                │  │  Self-Hosted        │
+│  [Apple logo]       │  │  [Apple logo]       │  │  [Docker logo]      │
+│                     │  │                     │  │                     │
+│  Requires macOS 13+ │  │  Requires iOS 17+   │  │  Docker or K8s      │
+│                     │  │                     │  │                     │
+│  [Download .dmg]    │  │  [App Store]        │  │  [View Docs]        │
+│                     │  │                     │  │                     │
+│  Intel | Apple      │  │  iPhone | iPad      │  │  docker pull...     │
+│  Silicon            │  │                     │  │                     │
+└─────────────────────┘  └─────────────────────┘  └─────────────────────┘</p>
+<p>Coming Soon:
+<li>Windows (planned)</li>
+<li>Android (planned)</li>
+<li>Linux desktop (use self-hosted + browser)</li></p>
+<p>System Requirements:
+<li>macOS: 13.0+, 4GB RAM</li>
+<li>iOS: 17.0+</li>
+<li>Docker: 2GB RAM, 10GB storage</li>
+</code></pre></p>
+<hr>
+<h3>About Page (onelist.my/about)</h3>
+<strong>Purpose:</strong> Company story, team, mission.
+<strong>Sections:</strong>
+<p>1. <strong>Mission</strong>
+   <li>"Building the memory layer for humans and AI"</li>
+   <li>Why augmented memory matters</li>
+   <li>Privacy-first approach</li></p>
+<p>2. <strong>Story</strong>
+   <li>How Onelist started</li>
+   <li>The problem we experienced</li>
+   <li>Why we built this</li></p>
+<p>3. <strong>Team</strong> (when applicable)
+   <li>Founder(s) bio</li>
+   <li>Key team members</li>
+   <li>Hiring link</li></p>
+<p>4. <strong>Values</strong>
+   <li>Privacy by design</li>
+   <li>Open source commitment</li>
+   <li>User ownership of data</li>
+   <li>Sustainable business model</li></p>
+<p>5. <strong>Press/Media Kit</strong>
+   <li>Logos</li>
+   <li>Screenshots</li>
+   <li>Press contact</li></p>
+<hr>
+<h3>Contact Page (onelist.my/contact)</h3>
+<strong>Purpose:</strong> Support and business inquiries.
+<strong>Structure:</strong>
+<pre><code class="language-">General Inquiries:     hello@onelist.my
+Support:               support@onelist.my (or link to support system)
+Security:              security@onelist.my
+Press:                 press@onelist.my
+<p>Contact Form:
+<li>Name</li>
+<li>Email</li>
+<li>Subject (dropdown: Support, Sales, Partnership, Press, Other)</li>
+<li>Message</li></p>
+<p>Links:
+<li>Community Forum → /community</li>
+<li>Documentation → /docs</li>
+<li>GitHub Issues → GitHub</li>
+<li>Status Page → /status</li>
+</ul></code></pre></p>
+<hr>
+<h3>Documentation Structure (onelist.my/docs)</h3>
+<strong>Top-Level Categories:</strong>
+<pre><code class="language-">/docs
+├── /getting-started
+│   ├── Quick start guide
+│   ├── Creating an account
+│   ├── Installing the app
+│   ├── Your first entry
+│   └── Adding a second device
+├── /concepts
+│   ├── Entries and representations
+│   ├── Tags and organization
+│   ├── Search (FTS + semantic)
+│   ├── Encryption and security
+│   └── Sync architecture
+├── /apps
+│   ├── Mac app guide
+│   ├── iOS app guide
+│   └── Web interface (VM tier)
+├── /api
+│   ├── Authentication
+│   ├── Entries API
+│   ├── Tags API
+│   ├── Assets API
+│   ├── Search API
+│   └── Webhooks
+├── /self-hosting
+│   ├── Docker deployment
+│   ├── Kubernetes deployment
+│   ├── Configuration reference
+│   ├── Backup and restore
+│   └── Upgrading
+├── /agents
+│   ├── What are agents?
+│   ├── Available agents
+│   ├── Building custom agents
+│   └── OpenClaw integration
+└── /reference
+    ├── Entry types
+    ├── Representation types
+    ├── Metadata schemas
+    └── Error codes
+</code></pre>
+  </article>
+</body>
+</html>

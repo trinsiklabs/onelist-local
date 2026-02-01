@@ -1,0 +1,107 @@
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="app-sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href={~p"/app"} class="sidebar-logo">
+        <span>📚</span>
+        <span>Onelist</span>
+      </a>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <!-- Main Navigation -->
+      <div class="nav-section">
+        <a href={~p"/app"} class={["nav-item", assigns[:current_path] == "/app" && "active"]}>
+          <span class="nav-item-icon">📥</span>
+          <span>Inbox</span>
+          <%= if assigns[:inbox_count] && @inbox_count > 0 do %>
+            <span class="nav-item-badge"><%= @inbox_count %></span>
+          <% end %>
+        </a>
+        
+        <a href={~p"/app/river"} class={["nav-item", assigns[:current_path] == "/app/river" && "active"]}>
+          <span class="nav-item-icon">🌊</span>
+          <span>River</span>
+        </a>
+        
+        <a href={~p"/app/library"} class={["nav-item", String.starts_with?(assigns[:current_path] || "", "/app/library") && "active"]}>
+          <span class="nav-item-icon">📚</span>
+          <span>Library</span>
+        </a>
+        
+        <a href={~p"/app/memories"} class={["nav-item", assigns[:current_path] == "/app/memories" && "active"]}>
+          <span class="nav-item-icon">🧠</span>
+          <span>Memories</span>
+        </a>
+        
+        <a href={~p"/app/search"} class={["nav-item", assigns[:current_path] == "/app/search" && "active"]}>
+          <span class="nav-item-icon">🔍</span>
+          <span>Search</span>
+        </a>
+      </div>
+      
+      <!-- Tags Section -->
+      <div class="nav-section">
+        <div class="nav-section-title">Tags</div>
+        <a href={~p"/app/tags"} class={["nav-item", assigns[:current_path] == "/app/tags" && "active"]}>
+          <span class="nav-item-icon">🏷️</span>
+          <span>All Tags</span>
+        </a>
+        <!-- Dynamic tags would go here -->
+      </div>
+      
+      <!-- System Section -->
+      <div class="nav-section">
+        <div class="nav-section-title">System</div>
+        <a href={~p"/app/activity"} class={["nav-item", assigns[:current_path] == "/app/activity" && "active"]}>
+          <span class="nav-item-icon">📊</span>
+          <span>Activity</span>
+        </a>
+        <a href={~p"/app/settings"} class={["nav-item", String.starts_with?(assigns[:current_path] || "", "/app/settings") && "active"]}>
+          <span class="nav-item-icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </div>
+    </nav>
+    
+    <!-- User Section -->
+    <div class="sidebar-footer" style="padding: var(--space-4); border-top: 1px solid var(--color-border);">
+      <a href={~p"/users/settings"} class="nav-item">
+        <span class="nav-item-icon">👤</span>
+        <span><%= if assigns[:current_user], do: @current_user.email, else: "Account" %></span>
+      </a>
+    </div>
+  </aside>
+  
+  <!-- Main Content -->
+  <main class="app-main">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-search">
+        <div style="position: relative;">
+          <span style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--color-text-subtle);">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            placeholder="Search entries and memories... (⌘K)"
+            phx-keydown="open_search"
+            phx-key="k"
+          />
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button class="btn btn-primary" phx-click="new_entry">
+          <span style="margin-right: 0.5rem;">+</span>
+          New Entry
+        </button>
+      </div>
+    </header>
+    
+    <!-- Page Content -->
+    <div class="app-content">
+      <.flash_group flash={@flash} />
+      <%= @inner_content %>
+    </div>
+  </main>
+</div>

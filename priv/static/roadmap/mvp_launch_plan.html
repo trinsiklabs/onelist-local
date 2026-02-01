@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist MVP Launch Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist MVP Launch Plan</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Active Development
+<strong>Focus:</strong> Rapid MVP launch with OpenClaw integration, Beacon CMS, and community forum
+<hr>
+<h2>1. Executive Summary</h2>
+<h3>1.1 Vision</h3>
+<p>Launch Onelist as the "augmented memory" platform with three deployment models:
+1. <strong>Self-hosted</strong> (Free) - OpenClaw users and privacy-focused developers
+2. <strong>Cloud Sync</strong> ($3/mo + usage) - E2EE cloud backup with public pages
+3. <strong>Web Access</strong> ($20/mo) - Fully managed with Beacon sites and agents</p>
+<h3>1.2 Strategic Priorities</h3>
+<table>
+<tr><th>Priority</th><th>Feature</th><th>Rationale</th></tr>
+<tr><td><strong>HIGHEST</strong></td><td>OpenClaw Integration</td><td>Key adoption path - users already have VPS</td></tr>
+<tr><td><strong>HIGHEST</strong></td><td>Searcher Agent</td><td>Two-layer retrieval, memory embedding, similarity check</td></tr>
+<tr><td><strong>HIGHEST</strong></td><td>Reader Agent</td><td>Atomic memory extraction, reference resolution (Supermemory-inspired)</td></tr>
+<tr><td><strong>HIGH</strong></td><td>Web Clipper</td><td>Core content ingestion, "send links to save" use case</td></tr>
+<tr><td>HIGH</td><td>Asset Enrichment Agent</td><td>Transcription, OCR, action item extraction</td></tr>
+<tr><td>HIGH</td><td>River Agent</td><td>Intelligent assistant, GTD, queries</td></tr>
+<tr><td>HIGH</td><td>Beacon CMS (Corporate)</td><td>Professional site, dogfooding</td></tr>
+<tr><td>HIGH</td><td>Community Forum</td><td>User support, community building</td></tr>
+<tr><td>HIGH</td><td>Public Entry Sharing</td><td>Content sharing, discovery</td></tr>
+<tr><td>HIGH</td><td>Stripe Billing</td><td>Revenue enablement</td></tr>
+</table>
+<h3>1.3 Key Decisions Made</h3>
+<table>
+<tr><th>Decision</th><th>Choice</th><th>Rationale</th></tr>
+<tr><td>Hosting</td><td>Fly.io</td><td>Phoenix expertise, fast deployment</td></tr>
+<tr><td>Primary Storage</td><td>Cloudflare R2</td><td>Zero egress fees, predictable costs</td></tr>
+<tr><td>Backup Storage</td><td>Backblaze B2</td><td>Lowest cost, S3-compatible</td></tr>
+<tr><td>Docker Registry</td><td>GitHub Container Registry</td><td>Native GitHub Actions integration</td></tr>
+<tr><td>CMS</td><td>Beacon</td><td>LiveView-native, dogfooding</td></tr>
+<tr><td>Pricing Model</td><td>Usage-based billing</td><td>Card on file, monthly settlement</td></tr>
+</table>
+<hr>
+<h2>2. Current Development Status</h2>
+<h3>2.1 Completed (Ready for MVP) ✅</h3>
+<table>
+<tr><th>Component</th><th>Status</th><th>Test Coverage</th></tr>
+<tr><td><strong>Phase 1: Core UI & Auth</strong></td><td>100%</td><td>Full</td></tr>
+<tr><td>User registration/login</td><td>✅ Done</td><td>Phoenix auth</td></tr>
+<tr><td>Social login (GitHub, Google, Apple)</td><td>✅ Done</td><td>OAuth complete</td></tr>
+<tr><td>Session management</td><td>✅ Done</td><td>GDPR compliant</td></tr>
+<tr><td>Entry/Tag/API Key management</td><td>✅ Done</td><td>118 tests</td></tr>
+<tr><td><strong>Phase 2: REST API</strong></td><td>100%</td><td>61+ tests</td></tr>
+<tr><td>API key authentication</td><td>✅ Done</td><td>Bearer tokens</td></tr>
+<tr><td>Entry CRUD endpoints</td><td>✅ Done</td><td>Full REST</td></tr>
+<tr><td>Tag CRUD endpoints</td><td>✅ Done</td><td>With entry counts</td></tr>
+<tr><td>Representation management</td><td>✅ Done</td><td>Version tracking</td></tr>
+<tr><td><strong>Phase 3: Version History</strong></td><td>100%</td><td>49 tests</td></tr>
+<tr><td>Snapshot/diff system</td><td>✅ Done</td><td>Hybrid storage</td></tr>
+<tr><td>Oban background jobs</td><td>✅ Done</td><td>Daily sweeps</td></tr>
+<tr><td>ETS caching</td><td>✅ Done</td><td>TTL-based</td></tr>
+<tr><td><strong>Asset Storage System</strong></td><td>100%</td><td>57 tests</td></tr>
+<tr><td>Multi-backend (Local, S3, GCS)</td><td>✅ Done</td><td>S3-compatible</td></tr>
+<tr><td>E2EE encrypted backend</td><td>✅ Done</td><td>AES-256-GCM</td></tr>
+<tr><td>Asset mirroring</td><td>✅ Done</td><td>Async workers</td></tr>
+<tr><td>BYOB support</td><td>✅ Done</td><td>User credentials</td></tr>
+<tr><td>Tiered sync</td><td>✅ Done</td><td>Thumbnails/stubs</td></tr>
+<tr><td><strong>Overall Test Coverage</strong></td><td>75.06%</td><td>Threshold met</td></tr>
+</table>
+<h3>2.2 MVP Blockers - Not Yet Done ⬜</h3>
+<table>
+<tr><th>Component</th><th>Priority</th><th>Effort</th><th>Status</th></tr>
+<tr><td>OpenClaw Docker packaging</td><td>HIGHEST</td><td>1 week</td><td>Not started</td></tr>
+<tr><td>~~<strong>Searcher Agent</strong>~~ (+ Similarity Check, Two-Layer Retrieval)</td><td>~~<strong>HIGHEST</strong>~~</td><td>~~2 weeks~~</td><td>✅ Done</td></tr>
+<tr><td>~~<strong>Reader Agent</strong>~~ (Atomic Memories, Reference Resolution)</td><td>~~<strong>HIGHEST</strong>~~</td><td>~~2 weeks~~</td><td>✅ Done</td></tr>
+<tr><td><strong>Web Clipper</strong> (Feeder Agent MVP)</td><td><strong>HIGH</strong></td><td>1-2 weeks</td><td>Not started</td></tr>
+<tr><td>~~<strong>Asset Enrichment Agent</strong>~~</td><td>~~HIGH~~</td><td>~~2 weeks~~</td><td>✅ Done</td></tr>
+<tr><td><strong>River Agent</strong></td><td>HIGH</td><td>2.5 weeks</td><td>Not started</td></tr>
+<tr><td>Beacon CMS integration</td><td>HIGH</td><td>1 week</td><td>Not started</td></tr>
+<tr><td>Forum (basic)</td><td>HIGH</td><td>1 week</td><td>Not started</td></tr>
+<tr><td>Public entry sharing</td><td>HIGH</td><td>3-4 days</td><td>Not started</td></tr>
+<tr><td>Stripe billing</td><td>HIGH</td><td>1 week</td><td>Not started</td></tr>
+<tr><td>Production deployment</td><td>HIGH</td><td>3-4 days</td><td>Not started</td></tr>
+<tr><td>~~<code>entry_links</code> migration~~</td><td>~~HIGH~~</td><td>~~1 day~~</td><td>✅ Done</td></tr>
+<tr><td>Tag system enhancements</td><td>HIGH</td><td>2-3 weeks</td><td>Not started</td></tr>
+<tr><td><strong>Application UI</strong></td><td><strong>HIGH</strong></td><td>5 weeks</td><td>Not started</td></tr>
+<tr><td>Self-hosted documentation</td><td>MEDIUM</td><td>2-3 days</td><td>Not started</td></tr>
+<tr><td>User Beacon sites</td><td>MEDIUM</td><td>3-4 days</td><td>Not started</td></tr>
+</table>
+<hr>
+<h2>3. Architecture Overview</h2>
+<h3>3.0 Agent Implementation Standards</h3>
+<blockquote><strong>REQUIRED:</strong> Before implementing any agent, consult the <a href="#agent-implementation-reference-required-reading">Agent Implementation Reference</a> guides in Appendix B.</blockquote>
+<strong>Core Principles (all agents):</strong>
+<ul>
+<li><strong>Passive Context Strategy:</strong> Embed knowledge indexes in prompts over active retrieval</li>
+<li><strong>SQ-BCP Precondition Checking:</strong> Track Sat/Viol/Unk states for uncertain actions</li>
+<li><strong>Detailed Tool Definitions:</strong> 3-4+ sentence descriptions with input examples</li>
+<li><strong>Observability from Day One:</strong> Trace multi-step workflows, log tool calls</li>
+<li><strong>Use Unified Modules:</strong> All agents MUST use the <a href="./unified_agent_modules.md">Unified Agent Modules</a> for telemetry, security, model selection, and cost tracking</li>
+<strong>Agent Run Styles:</strong>
+<p>Not all agents need to be always-running. Each agent's run style should be evaluated during planning:</p>
+<table>
+<tr><th>Agent</th><th>Run Style(s)</th><th>Trigger</th><th>Notes</th></tr>
+<tr><td><strong>River</strong></td><td>Always-running, Looping</td><td>User conversation</td><td>Only agent requiring persistent loop; user-facing</td></tr>
+<tr><td><strong>Reader</strong></td><td>Event-triggered</td><td>Entry create/update</td><td>Oban worker; processes then exits</td></tr>
+<tr><td><strong>Searcher</strong></td><td>On-demand + Event-triggered</td><td>Query request / Entry create</td><td>Query-time search; background embedding</td></tr>
+<tr><td><strong>Asset Enrichment</strong></td><td>Event-triggered</td><td>Asset upload</td><td>Oban worker; processes then exits</td></tr>
+<tr><td><strong>Feeder</strong></td><td>Event-triggered + Scheduled</td><td>Clip request / RSS schedule</td><td>On-demand clips; scheduled feed polling</td></tr>
+</table>
+<strong>Run Style Definitions:</strong>
+<li><strong>Always-running:</strong> Persistent process with conversation loop (River only)</li>
+<li><strong>Event-triggered:</strong> Spawned by Oban on specific events, processes, then exits</li>
+<li><strong>On-demand:</strong> Invoked synchronously at request time</li>
+<li><strong>Scheduled:</strong> Runs on cron-like schedule (Oban cron)</li>
+<li><strong>Orchestrated:</strong> Invoked by River as a sub-agent/tool</li>
+<p>River may orchestrate other agents as tools for complex multi-step tasks, but those agents don't maintain their own loops.</p>
+<h3>3.1 Onelist Ecosystem</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ONELIST MVP ECOSYSTEM                                │
+│                                                                              │
+│  ONELIST.MY (Beacon CMS)                                                    │
+│  ├── Corporate pages (/, /features, /docs/<em>, /pricing)                      │
+│  ├── Community forum (/community/)                                           │
+│  ├── User public entries (/:username/:public_id)                            │
+│  └── User Beacon sites (/:username/site/</em> - Web Access tier)                │
+│                                                                              │
+│  DEPLOYMENT MODELS:                                                          │
+│  ┌─────────────┐  ┌─────────────────┐  ┌─────────────────────┐             │
+│  │ SELF-HOSTED │  │   CLOUD SYNC    │  │    WEB ACCESS       │             │
+│  │   (Free)    │  │  ($3/mo+usage)  │  │     ($20/mo)        │             │
+│  │             │  │                 │  │                     │             │
+│  │ • Docker    │  │ • E2EE cloud DB │  │ • Dedicated VPS     │             │
+│  │ • OpenClaw   │  │ • Public pages  │  │ • Beacon sites      │             │
+│  │ • P2P sync  │  │ • Forum sync    │  │ • All agents        │             │
+│  │ • BYOB      │  │ • Usage billing │  │ • 20GB included     │             │
+│  └─────────────┘  └─────────────────┘  └─────────────────────┘             │
+│                                                                              │
+│  OPENCLAW INTEGRATION (Key Adoption Path):                                    │
+│  └── Full Onelist stack alongside OpenClaw on user's existing VPS            │
+│      └── Files remain source of truth, PostgreSQL provides enhanced search  │
+│                                                                              │
+│  MVP AGENTS (Supermemory-Inspired Memory Optimization):                     │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │ READER         │ SEARCHER         │ ASSET ENRICHMENT │ RIVER        │    │
+│  │                │                  │                  │              │    │
+│  │ • Atomic       │ • Two-layer      │ • Transcription  │ • Chat       │    │
+│  │   memories     │   retrieval      │ • OCR            │ • NL queries │    │
+│  │ • Reference    │ • Memory embed   │ • Action items   │ • GTD tasks  │    │
+│  │   resolution   │ • Hybrid search  │ • Decisions      │ • Briefings  │    │
+│  │ • Relationship │ • Similarity     │                  │              │    │
+│  │   detection    │   check          │                  │              │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.2 Request Routing</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PHOENIX ROUTER                                       │
+│                                                                              │
+│  ONELIST APP:                                                               │
+│  /app/<em>              → Onelist Web (LiveView app)                           │
+│  /api/</em>              → Onelist API (REST endpoints)                         │
+│                                                                              │
+│  BEACON CMS (Corporate Site):                                               │
+│  /                   → Homepage                                             │
+│  /features           → Feature pages                                        │
+│  /docs/<em>             → Documentation                                        │
+│  /pricing            → Pricing                                              │
+│  /community/</em>        → Forum                                                │
+│                                                                              │
+│  PUBLIC CONTENT (Core - no Beacon):                                         │
+│  /:username/:public_id → Render entry html_public representation            │
+│                                                                              │
+│  USER BEACON SITES (Web Access tier):                                       │
+│  /:username/site/<em>   → User's Beacon-managed site                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>4. Pricing & Billing</h2>
+<h3>4.1 Tier Structure</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ONELIST PRICING                                      │
+│                                                                              │
+│  FREE                    CLOUD SYNC               WEB ACCESS                 │
+│  $0/month                $3/month + usage         $20/month                  │
+│                                                                              │
+│  • Self-hosted only      • E2EE cloud sync        • Everything in Cloud Sync│
+│  • P2P sync              • Unlimited devices      • Dedicated VPS           │
+│  • Unlimited local       • Unlimited public pages • Your own subdomain      │
+│  • Forum participation   • Storage: $0.10/GB/mo   • Beacon sites            │
+│  • BYOB storage          • Assets: $0.02-0.035/GB • 20 GB storage included  │
+│                          • Forum sync to Onelist  • All agents included     │
+│                          • Email support          • Priority support        │
+│                                                                              │
+│  SELF-HOSTED: $0 forever - Run on your own infrastructure                  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.2 Usage-Based Billing Model</h3>
+<strong>Cloud Sync and Web Access tiers use metered billing:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         STORAGE BILLING MODEL                                │
+│                                                                              │
+│  CLOUD SYNC ($3/mo base + usage)                                            │
+│  ├── Card on file required at signup                                        │
+│  ├── Usage metered daily: storage GB × days prorated                        │
+│  ├── Monthly invoice: base fee + usage charges                              │
+│  ├── Rates: $0.10/GB storage, $0.02-0.035/GB assets                         │
+│  ├── Spending cap: $50/mo default (user-adjustable)                         │
+│  └── At cap: new uploads blocked, warning email sent                        │
+│                                                                              │
+│  WEB ACCESS ($20/mo)                                                        │
+│  ├── 20 GB included in base                                                 │
+│  ├── Overage: same $0.10/GB rate                                            │
+│  ├── Same spending cap logic                                                │
+│  └── Monthly invoice if overage                                             │
+│                                                                              │
+│  BILLING ALERTS:                                                            │
+│  ├── 50% of spending cap → Email notification                               │
+│  ├── 80% of spending cap → Email + in-app warning                           │
+│  └── 100% of spending cap → Uploads blocked, email sent                     │
+│                                                                              │
+│  FAILED PAYMENTS:                                                           │
+│  ├── Grace period: 7 days                                                   │
+│  ├── Retry: 3 attempts                                                      │
+│  └── After grace: downgrade to Free tier                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.3 Feature Flags by Tier</h3>
+<table>
+<tr><th>Feature</th><th>Free</th><th>Cloud Sync</th><th>Web Access</th></tr>
+<tr><td>Self-hosted installation</td><td>✅</td><td>✅</td><td>N/A</td></tr>
+<tr><td>OpenClaw integration</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>P2P sync (LAN)</td><td>✅</td><td>✅</td><td>N/A</td></tr>
+<tr><td>Cloud sync</td><td>❌</td><td>✅ (E2EE)</td><td>✅</td></tr>
+<tr><td>Public pages</td><td>❌</td><td>✅ Unlimited</td><td>✅</td></tr>
+<tr><td>Beacon site</td><td>❌</td><td>❌</td><td>✅</td></tr>
+<tr><td>Forum participation</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Forum posts sync to Onelist</td><td>❌</td><td>✅</td><td>✅</td></tr>
+<tr><td>Mobile access</td><td>Own endpoint</td><td>Own endpoint</td><td>✅</td></tr>
+<tr><td>Searcher Agent</td><td>Run locally</td><td>Run locally</td><td>✅ Included</td></tr>
+<tr><td>Asset Enrichment Agent</td><td>Run locally</td><td>Run locally</td><td>✅ Included</td></tr>
+<tr><td>River Agent</td><td>Run locally</td><td>Run locally</td><td>✅ Included</td></tr>
+<tr><td>Cloud storage</td><td>BYOB only</td><td>$0.10/GB</td><td>20GB included</td></tr>
+</table>
+<h3>4.4 Unit Economics</h3>
+<table>
+<tr><th>Tier</th><th>Price</th><th>Our Cost</th><th>Gross Margin</th><th>Margin %</th></tr>
+<tr><td>Free</td><td>$0</td><td>$0.01</td><td>-$0.01</td><td>-100%</td></tr>
+<tr><td>Cloud Sync (base only)</td><td>$3</td><td>$0.10</td><td>$2.90</td><td>97%</td></tr>
+<tr><td>Cloud Sync (typical: 5GB)</td><td>$3.50</td><td>$0.50</td><td>$3.00</td><td>86%</td></tr>
+<tr><td>Web Access</td><td>$20</td><td>$8</td><td>$12.00</td><td>60%</td></tr>
+<tr><td>+10 GB Storage</td><td>$1</td><td>$0.15</td><td>$0.85</td><td>85%</td></tr>
+</table>
+<strong>Break-even: ~15 paying users</strong> (at $8.75/mo average, $80 fixed costs)
+<hr>
+<h2>5. OpenClaw Integration (HIGHEST PRIORITY)</h2>
+<h3>5.1 Architecture</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         OPENCLAW VPS - FULL STACK                             │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                         OPENCLAW                                      │   │
+│  │                                                                      │   │
+│  │  memory_write() ──────────────────────────────► ~/openclaw/memory/   │   │
+│  │  memory_search() ────┐                              │                │   │
+│  │                      │                              │ (files always  │   │
+│  │                      │                              │  written first)│   │
+│  └──────────────────────┼──────────────────────────────┼────────────────┘   │
+│                         │                              │                    │
+│                         │                              ▼                    │
+│  ┌──────────────────────┼─────────────────────────────────────────────┐    │
+│  │                      │         ONELIST STACK                        │    │
+│  │                      ▼                                              │    │
+│  │  ┌─────────────────────────────────────────────────────────────┐   │    │
+│  │  │                    FILE SYNC LAYER                           │   │    │
+│  │  │  • File watcher: files → DB (OpenClaw writes)                │   │    │
+│  │  │  • DB watcher: DB → files (Web UI / River writes)           │   │    │
+│  │  │  • Bidirectional: files always complete                     │   │    │
+│  │  └──────────────────────────┬──────────────────────────────────┘   │    │
+│  │                             │                                       │    │
+│  │  ┌──────────────────────────┴──────────────────────────────────┐   │    │
+│  │  │                    PostgreSQL 16+ (pgvector)                 │   │    │
+│  │  │  • Mirrors all files for enhanced search                    │   │    │
+│  │  │  • Full-text search + vector embeddings                     │   │    │
+│  │  └─────────────────────────────────────────────────────────────┘   │    │
+│  │                             │                                       │    │
+│  │  ┌──────────────────────────┴──────────────────────────────────┐   │    │
+│  │  │  Onelist Core   │  Onelist Web   │  Agents (Optional)       │   │    │
+│  │  │  (Phoenix API)  │  (LiveView UI) │  (River, Reader, etc.)   │   │    │
+│  │  │  [REQUIRED]     │  [OPTIONAL]    │  [OPTIONAL]              │   │    │
+│  │  └─────────────────────────────────────────────────────────────┘   │    │
+│  │                                                                     │    │
+│  │  IF ONELIST FAILS: OpenClaw uses files directly, works as before   │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.2 Key Principle</h3>
+<strong>Files are ALWAYS the source of truth.</strong> PostgreSQL mirrors files and provides enhanced capabilities, but OpenClaw can always fall back to native file operations if Onelist is unavailable.
+<h3>5.3 Deliverables</h3>
+<table>
+<tr><th>Deliverable</th><th>Description</th></tr>
+<tr><td>Docker images</td><td><code>ghcr.io/onelist/onelist:latest</code></td></tr>
+<tr><td>docker-compose.yml</td><td>PostgreSQL + pgvector, Onelist Core</td></tr>
+<tr><td>File sync layer</td><td>Bidirectional ~/openclaw/memory ↔ PostgreSQL</td></tr>
+<tr><td>onelist-openclaw SDK</td><td>Python package for OpenClaw integration</td></tr>
+<tr><td>Install script</td><td><code>curl -sSL https://onelist.my/install.sh \</td><td>bash</code></td></tr>
+<tr><td>Documentation</td><td>Installation guide, configuration, troubleshooting</td></tr>
+</table>
+<h3>5.4 System Requirements</h3>
+<table>
+<tr><th>Resource</th><th>Minimum</th><th>Recommended</th></tr>
+<tr><td>RAM</td><td>2 GB</td><td>4 GB</td></tr>
+<tr><td>CPU</td><td>2 vCPU</td><td>2-4 vCPU</td></tr>
+<tr><td>Disk</td><td>20 GB</td><td>50 GB+</td></tr>
+<tr><td>OS</td><td>Ubuntu 22.04+ / Debian 12+</td><td></td></tr>
+</table>
+<hr>
+<h2>6. Beacon CMS Integration</h2>
+<h3>6.1 Corporate Site (onelist.my)</h3>
+<p>Content as Onelist entries, rendered via Beacon:</p>
+<table>
+<tr><th>URL</th><th>Content Source</th></tr>
+<tr><td><code>onelist.my/</code></td><td>Homepage entry</td></tr>
+<tr><td><code>onelist.my/features</code></td><td>Features entry</td></tr>
+<tr><td><code>onelist.my/features/core</code></td><td>Core features entry</td></tr>
+<tr><td><code>onelist.my/pricing</code></td><td>Pricing entry</td></tr>
+<tr><td><code>onelist.my/docs</code></td><td>Docs index entry</td></tr>
+<tr><td><code>onelist.my/docs/getting-started</code></td><td>Getting started entry</td></tr>
+<tr><td><code>onelist.my/about</code></td><td>About entry</td></tr>
+<tr><td><code>onelist.my/community/</em></code></td><td>Forum</td></tr>
+</table>
+<h3>6.2 User Beacon Sites (Web Access Tier)</h3>
+<p>Users with Web Access can create full Beacon-managed websites:
+<li>Multiple linked pages with navigation</li>
+<li>Custom themes/styling</li>
+<li>RSS feeds</li>
+<li>URL: <code>onelist.my/:username/site/<em></code> or subdomain</li></p>
+<h3>6.3 Deliverables</h3>
+<table>
+<tr><th>Deliverable</th><th>Description</th></tr>
+<tr><td>Beacon dependency</td><td>Add <code>beacon_live_admin</code> to mix.exs</td></tr>
+<tr><td>Marketing layout</td><td>Header, footer, hero components</td></tr>
+<tr><td>Documentation layout</td><td>Sidebar navigation</td></tr>
+<tr><td>System account</td><td>For corporate content entries</td></tr>
+<tr><td>Migration script</td><td>Static HTML → Onelist entries</td></tr>
+<tr><td>Route configuration</td><td>Beacon routes for corporate site</td></tr>
+</table>
+<hr>
+<h2>7. Community Forum</h2>
+<h3>7.1 Architecture</h3>
+<p>Forum is a "view" into tagged Onelist entries, rendered via Beacon.</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         FORUM ARCHITECTURE                                   │
+│                                                                              │
+│  Forum Topic = Entry with entry_type='forum_topic'                          │
+│  Forum Reply = Entry with entry_type='forum_reply'                          │
+│  Categories = Tags with prefix 'forum:' (e.g., forum:general, forum:help)   │
+│                                                                              │
+│  entry_links table connects:                                                │
+│  ├── Topic → Replies (link_type='has_reply')                                │
+│  └── Reply → Parent (link_type='reply_to')                                  │
+│                                                                              │
+│  URL Structure (onelist.my/community/):                                     │
+│  ├── /                      → Forum home                                    │
+│  ├── /[category]/           → Category view                                 │
+│  ├── /[category]/[topic]    → Topic with replies                            │
+│  └── /new                   → Create new topic                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>7.2 Entry Links Schema ✅ (Implemented 2025-01-29)</h3>
+<pre><code class="language-sql">CREATE TABLE entry_links (
+  id UUID PRIMARY KEY,
+  source_entry_id UUID NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+  target_entry_id UUID NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+  link_type VARCHAR(50) NOT NULL,
+  metadata JSONB,
+  inserted_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL
+);
+<p>CREATE INDEX entry_links_source_idx ON entry_links(source_entry_id);
+CREATE INDEX entry_links_target_idx ON entry_links(target_entry_id);
+CREATE INDEX entry_links_type_idx ON entry_links(link_type);
+</code></pre></p>
+<strong>Link Types:</strong>
+<li><code>has_reply</code> - Topic → Reply</li>
+<li><code>reply_to</code> - Reply → Parent Reply (threading)</li>
+<li><code>comment_on</code> - Comment on any entry</li>
+<li><code>derived_from</code> - Content derivation</li>
+<li><code>cites</code> - References</li>
+<li><code>related_to</code> - General relationships</li>
+<h3>7.3 MVP Forum Features</h3>
+<table>
+<tr><th>Feature</th><th>MVP</th><th>Post-MVP</th></tr>
+<tr><td>Create topics</td><td>✅</td><td></td></tr>
+<tr><td>Reply to topics (flat)</td><td>✅</td><td></td></tr>
+<tr><td>Categories via tags</td><td>✅</td><td></td></tr>
+<tr><td>Anonymous posting</td><td>✅</td><td></td></tr>
+<tr><td>Account-based posting</td><td>✅</td><td></td></tr>
+<tr><td>Lock/pin/hide topics</td><td>✅</td><td></td></tr>
+<tr><td>Threaded replies</td><td></td><td>✅</td></tr>
+<tr><td>Voting</td><td></td><td>✅</td></tr>
+<tr><td>Notifications</td><td></td><td>✅</td></tr>
+</table>
+<h3>7.4 Forum Scope</h3>
+<li><strong>MVP:</strong> Forum for onelist.my only (<code>/community/</code>)</li>
+<li><strong>Post-MVP:</strong> User-deployable forums under their namespace</li>
+<hr>
+<h2>8. Public Content Sharing</h2>
+<h3>8.1 Architecture</h3>
+<p>All representations stored in PostgreSQL. <code>html_public</code> is always generated alongside encrypted representations.</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  CONTENT CHANGE (create/update)                                              │
+│       │                                                                      │
+│       ▼                                                                      │
+│  Generate ALL representations:                                               │
+│  ├── markdown (encrypted=true) ──► User's private copy                      │
+│  ├── summary (encrypted=true) ───► AI-generated summary                     │
+│  └── html_public (encrypted=false) ► Always generated, ready for public     │
+│                                                                              │
+│  TOGGLE TO PUBLIC                                                            │
+│       │                                                                      │
+│       ▼                                                                      │
+│  entry.public = true (instant)                                              │
+│  html_public now served at /:username/:public_id                            │
+│                                                                              │
+│  TOGGLE TO PRIVATE                                                           │
+│       │                                                                      │
+│       ▼                                                                      │
+│  entry.public = false                                                       │
+│  html_public no longer served (but still exists)                            │
+│  Public assets cleaned up via reference counting                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>8.2 Public Assets</h3>
+<p>When entry goes public, linked assets are decrypted and uploaded to R2 public bucket:</p>
+<pre><code class="language-">assets table additions:
+├── public_url (string, nullable) ────► URL in R2 public bucket
+├── public_entry_ids (uuid array) ────► Entries referencing this publicly
+└── public_random_id (string) ────────► For stable URL generation
+</code></pre>
+<h3>8.3 User Consent</h3>
+<p>Users must confirm when making content public:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MAKE ENTRY PUBLIC                                         │
+│                                                                              │
+│  ⚠️  This entry contains 3 files that will be made public                   │
+│                                                                              │
+│  When you make this entry public:                                           │
+│                                                                              │
+│  • The entry text will be stored UNENCRYPTED                                │
+│  • These files will be DECRYPTED and stored at public URLs                  │
+│  • Anyone with the link can view this content                               │
+│  • Your private copies remain end-to-end encrypted                          │
+│  • Making this entry private again will remove the public copies            │
+│                                                                              │
+│  Public URL: onelist.my/username/abc123xyz                                  │
+│                                                                              │
+│                    [Cancel]  [Make Public]                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>9. Infrastructure</h2>
+<h3>9.1 Hosting: Fly.io</h3>
+<table>
+<tr><th>Resource</th><th>MVP Config</th><th>Growth Config (500+ users)</th></tr>
+<tr><td>App</td><td>shared-cpu-1x, 1GB RAM (~$6/mo)</td><td>dedicated-cpu-1x, 2GB (~$29/mo)</td></tr>
+<tr><td>PostgreSQL</td><td>1GB free tier (~$0/mo)</td><td>4GB (~$36/mo)</td></tr>
+<tr><td>Bandwidth</td><td><100GB free (~$0/mo)</td><td>~200GB (~$2/mo)</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>~$6-10/mo</strong></td><td><strong>~$67/mo</strong></td></tr>
+</table>
+<h3>9.2 Storage: Cloudflare R2 + Backblaze B2</h3>
+<table>
+<tr><th>Provider</th><th>Role</th><th>Cost</th></tr>
+<tr><td>Cloudflare R2</td><td>Primary</td><td>$0.015/GB/mo, zero egress</td></tr>
+<tr><td>Backblaze B2</td><td>Redundant tier</td><td>$0.006/GB/mo</td></tr>
+</table>
+<h3>9.3 Accounts to Create</h3>
+<table>
+<tr><th>Service</th><th>Purpose</th><th>Free Tier?</th><th>Estimated Cost</th></tr>
+<tr><td>Fly.io</td><td>App hosting</td><td>Yes</td><td>$0-30/mo</td></tr>
+<tr><td>Cloudflare</td><td>DNS, R2 storage, CDN</td><td>Yes</td><td>$0-20/mo</td></tr>
+<tr><td>Backblaze B2</td><td>Backup storage</td><td>10 GB free</td><td>$0-5/mo</td></tr>
+<tr><td>Stripe</td><td>Payments</td><td>2.9% + $0.30</td><td>Per transaction</td></tr>
+<tr><td>Postmark/SES</td><td>Transactional email</td><td>Limited free</td><td>$0-15/mo</td></tr>
+<tr><td>Sentry</td><td>Error tracking</td><td>Free tier</td><td>$0</td></tr>
+<tr><td>GitHub Actions</td><td>CI/CD</td><td>Free for public</td><td>$0</td></tr>
+</table>
+<h3>9.4 Environment Variables</h3>
+<pre><code class="language-bash"># Fly.io secrets
+fly secrets set \
+  DATABASE_URL=&quot;postgres://...&quot; \
+  SECRET_KEY_BASE=&quot;...&quot; \
+  PHX_HOST=&quot;onelist.my&quot; \
+<p># Cloudflare R2
+  R2_ACCOUNT_ID=&quot;...&quot; \
+  R2_ACCESS_KEY_ID=&quot;...&quot; \
+  R2_SECRET_ACCESS_KEY=&quot;...&quot; \
+  R2_BUCKET=&quot;onelist-assets-prod&quot; \
+  R2_ENDPOINT=&quot;https://{account_id}.r2.cloudflarestorage.com&quot; \</p>
+<p># Backblaze B2
+  B2_KEY_ID=&quot;...&quot; \
+  B2_APPLICATION_KEY=&quot;...&quot; \
+  B2_BUCKET=&quot;onelist-backup-prod&quot; \
+  B2_ENDPOINT=&quot;https://s3.us-west-004.backblazeb2.com&quot; \</p>
+<p># Stripe
+  STRIPE_SECRET_KEY=&quot;sk_live_...&quot; \
+  STRIPE_WEBHOOK_SECRET=&quot;whsec_...&quot; \</p>
+<p># Email
+  POSTMARK_API_KEY=&quot;...&quot;
+</code></pre></p>
+<hr>
+<h2>10. Implementation Phases</h2>
+<h3>Phase 0.5: Unified Agent Modules (Week 1, parallel with Phase 1)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Implement Telemetry module</td><td>OpenTelemetry instrumentation for all agents</td></tr>
+<tr><td>Implement Security modules</td><td>Input validation, prompt scaffolding</td></tr>
+<tr><td>Implement Model Fleet</td><td>Model selection and routing</td></tr>
+<tr><td>Implement Cost Tracker</td><td>Budget management and alerts</td></tr>
+<tr><td>Implement Rate Limiter</td><td>Unified rate limiting</td></tr>
+<tr><td>Implement Circuit Breaker</td><td>External service resilience</td></tr>
+</table>
+<p>See <a href="./unified_agent_modules.md">Unified Agent Modules</a> for full specifications.</p>
+<h3>Phase 1: OpenClaw Integration (Week 1) - HIGHEST PRIORITY</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Create Dockerfile</td><td>Production-ready image</td></tr>
+<tr><td>Create docker-compose.yml</td><td>PostgreSQL + pgvector + Onelist</td></tr>
+<tr><td>Implement file sync layer</td><td>Bidirectional file ↔ DB sync</td></tr>
+<tr><td>Create onelist-openclaw SDK</td><td>Python package</td></tr>
+<tr><td>Write install script</td><td>Automated installer</td></tr>
+<tr><td>Write documentation</td><td>Installation guide</td></tr>
+</table>
+<h3>Phase 1.5: Searcher Agent (Week 1-2, parallel)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Add pgvector to PostgreSQL</td><td>Migration, extension setup</td></tr>
+<tr><td>Create embeddings schema</td><td>embeddings, search_configs tables</td></tr>
+<tr><td>Implement OpenAI provider</td><td>Embedding generation</td></tr>
+<tr><td>Create Oban workers</td><td>Embed on create/update</td></tr>
+<tr><td>Implement hybrid search</td><td>FTS + vector combined</td></tr>
+<tr><td><strong>Implement similarity check</strong></td><td>Pre-storage duplicate detection</td></tr>
+<tr><td><strong>Implement two-layer retrieval</strong></td><td>Search atomic memories, inject source chunks</td></tr>
+<tr><td><strong>Implement memory embedding</strong></td><td>Embed memories from Reader Agent</td></tr>
+<tr><td>Create search API</td><td>/api/v1/search, /api/v1/search/similarity_check</td></tr>
+</table>
+<h3>Phase 1.55: Reader Agent (Week 2, parallel with Searcher)</h3>
+<p>Based on <a href="https://supermemory.ai/research">Supermemory.ai research</a>, the Reader Agent extracts atomic memories for high-precision retrieval. This is a critical OpenClaw optimization.</p>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Create memories schema</td><td>memories, tag_suggestions, reader_configs tables</td></tr>
+<tr><td>Implement atomic memory extraction</td><td>LLM-based fact extraction</td></tr>
+<tr><td>Implement reference resolution</td><td>Pronouns → names, "yesterday" → dates</td></tr>
+<tr><td>Implement relationship detection</td><td>Supersedes/refines for knowledge evolution</td></tr>
+<tr><td>Implement summary generation</td><td>Token-efficient summaries</td></tr>
+<tr><td>Implement tag suggestion</td><td>Content-based recommendations</td></tr>
+<tr><td>Create Oban workers</td><td>Process entries on create/update</td></tr>
+<tr><td>Create memories API</td><td>/api/v1/memories endpoint</td></tr>
+</table>
+<h3>Phase 1.56: Web Clipper (Week 2-3, parallel with Asset Enrichment)</h3>
+<p>Enhanced web capture with tiered architecture. See <a href="./web_content_capture_plan.md">Web Content Capture Plan</a> for detailed specifications.</p>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Implement WebClipper adapter</td><td>URL capture, content extraction</td></tr>
+<tr><td>Article extraction</td><td>Readability-style parsing</td></tr>
+<tr><td>Metadata extraction</td><td>Open Graph, Twitter Cards</td></tr>
+<tr><td>YouTube handling</td><td>Metadata + transcript fetching</td></tr>
+<tr><td>Similarity integration</td><td>Pre-save duplicate check</td></tr>
+<tr><td>Create clip API</td><td>/api/v1/clip, /api/v1/clip/preview</td></tr>
+<tr><td><strong>Tier 1: Simple Fetch</strong></td><td>HTTP-based capture with retry logic</td></tr>
+<tr><td><strong>Tier 2: Browser Use</strong></td><td>Sidecar service for JS-heavy sites</td></tr>
+<tr><td>Site classification</td><td>Learn optimal tier per domain</td></tr>
+</table>
+<h3>Phase 1.7: Asset Enrichment Agent (Week 2-3, parallel)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Create enrichment schema</td><td>asset_enrichments, extracted_items tables</td></tr>
+<tr><td>Implement orchestrator worker</td><td>Asset type routing</td></tr>
+<tr><td>Implement image worker</td><td>Description, OCR via OpenAI Vision</td></tr>
+<tr><td>Implement audio worker</td><td>Transcription via Whisper</td></tr>
+<tr><td>Implement action item extractor</td><td>LLM-based extraction</td></tr>
+<tr><td>Create enrichment API</td><td>Status, triggers, extracted items</td></tr>
+</table>
+<h3>Phase 1.8: River Agent (Week 2-4, parallel)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Create River schema</td><td>conversations, messages, tasks, reminders</td></tr>
+<tr><td>Implement chat context</td><td>Conversation management</td></tr>
+<tr><td>Implement intent classification</td><td>Pattern matching + LLM</td></tr>
+<tr><td>Implement query engine</td><td>RAG with Searcher</td></tr>
+<tr><td>Implement GTD tasks</td><td>Inbox, next actions, waiting</td></tr>
+<tr><td>Create River API</td><td>Chat, tasks endpoints</td></tr>
+<tr><td>Create LiveView chat</td><td>Chat UI component</td></tr>
+</table>
+<h3>Phase 1.9: Application UI (Week 3-7)</h3>
+<p>Comprehensive UI implementation for web and desktop platforms. See <a href="./ui_plan.md">UI Plan</a> for complete specifications.</p>
+<strong>Phase 1.9.1: Foundation (Week 3)</strong>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Set up Tailwind CSS with design tokens</td><td>Custom CSS variables for colors, typography, spacing</td></tr>
+<tr><td>Create base HTML templates</td><td>Application shell, layouts</td></tr>
+<tr><td>Build static component library</td><td>HTML/CSS prototypes in <code>/static_prototype/</code></td></tr>
+<tr><td>Implement application shell</td><td>Header, sidebar navigation</td></tr>
+<tr><td>Build navigation components</td><td>Sidebar, breadcrumb, tabs</td></tr>
+</table>
+<strong>Phase 1.9.2: Core Views (Week 4)</strong>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Library list view</td><td>Entry cards, filters, pagination</td></tr>
+<tr><td>Entry detail view with tabs</td><td>Content, Memories, Assets, History tabs</td></tr>
+<tr><td>Memories tab within entry</td><td>Per-entry memory display</td></tr>
+<tr><td>Tag sidebar with suggestions</td><td>Accept/reject tag suggestions</td></tr>
+<tr><td>Processing status indicators</td><td>Real-time status display</td></tr>
+</table>
+<strong>Phase 1.9.3: Memories & Search (Week 5)</strong>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Global Memories page</td><td>All AI-extracted memories with filters</td></tr>
+<tr><td>Memory cards with full metadata</td><td>Type badges, confidence, entities, source links</td></tr>
+<tr><td>Search interface</td><td>Unified search across entries + memories</td></tr>
+<tr><td>Search results display</td><td>Grouped results (memories, entries)</td></tr>
+<tr><td>Filter components</td><td>Type, date, tags, processing status</td></tr>
+</table>
+<strong>Phase 1.9.4: Activity & Settings (Week 6)</strong>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Activity log page</td><td>Agent activity with costs</td></tr>
+<tr><td>Settings pages</td><td>Reader, Enrichment, Storage, API</td></tr>
+<tr><td>Modal components</td><td>Confirmation, tag suggestions</td></tr>
+<tr><td>Form components</td><td>Inputs, selects, tag input</td></tr>
+<tr><td>Error states</td><td>Failed operations, retry UI</td></tr>
+</table>
+<strong>Phase 1.9.5: Polish & Integration (Week 7)</strong>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Responsive testing</td><td>Mobile, tablet, desktop</td></tr>
+<tr><td>Accessibility audit</td><td>WCAG 2.1 AA compliance</td></tr>
+<tr><td>Animation polish</td><td>Transitions, loading states</td></tr>
+<tr><td>Phoenix LiveView integration</td><td>Convert static prototypes to LiveView</td></tr>
+<tr><td>Desktop app shell</td><td>WebView wrapper (post-MVP)</td></tr>
+</table>
+<h3>Phase 2: Beacon CMS + Forum (Week 7-8)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Add Beacon dependency</td><td>mix.exs update</td></tr>
+<tr><td>Create layouts</td><td>Marketing, Docs layouts</td></tr>
+<tr><td>Create system account</td><td>For corporate entries</td></tr>
+<tr><td>Migrate static site</td><td>HTML → entries</td></tr>
+<tr><td>~~Create entry_links migration~~</td><td>✅ Done (2025-01-29)</td></tr>
+<tr><td>Implement forum entry types</td><td>forum_topic, forum_reply</td></tr>
+<tr><td>Create Beacon components</td><td>Forum UI</td></tr>
+</table>
+<h3>Phase 3: Public Content + Billing (Week 8-9)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Add <code>encrypted</code> field</td><td>Representations migration</td></tr>
+<tr><td>Implement html_public generation</td><td>On every save</td></tr>
+<tr><td>Create public entry controller</td><td>GET /:username/:public_id</td></tr>
+<tr><td>Build toggle UI</td><td>Make Public dialog</td></tr>
+<tr><td>Implement asset publishing</td><td>R2 public bucket</td></tr>
+<tr><td>Set up Stripe</td><td>Products, prices</td></tr>
+<tr><td>Build checkout flow</td><td>LiveView integration</td></tr>
+<tr><td>Implement webhooks</td><td>Subscription lifecycle</td></tr>
+<tr><td>Build usage metering</td><td>Daily snapshots</td></tr>
+<tr><td>Create spending caps</td><td>Alerts and limits</td></tr>
+</table>
+<h3>Phase 4: Production Deployment (Week 9-10)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Create Fly.io account</td><td>App + PostgreSQL</td></tr>
+<tr><td>Set up Cloudflare</td><td>DNS, R2, CDN rules</td></tr>
+<tr><td>Set up Backblaze B2</td><td>Redundant bucket</td></tr>
+<tr><td>Configure CI/CD</td><td>GitHub Actions</td></tr>
+<tr><td>Set up monitoring</td><td>Sentry, Fly metrics</td></tr>
+<tr><td>Run load tests</td><td>100 concurrent users</td></tr>
+<tr><td>Security review</td><td>OWASP checklist</td></tr>
+</table>
+<h3>Phase 5: Polish + Launch (Week 10-11)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Update landing page</td><td>Pricing, features</td></tr>
+<tr><td>Complete self-hosted docs</td><td>Full installation guide</td></tr>
+<tr><td>Implement User Beacon sites</td><td>Web Access feature</td></tr>
+<tr><td>Create email templates</td><td>Welcome, billing, reset</td></tr>
+<tr><td>Legal review</td><td>ToS, Privacy Policy</td></tr>
+<tr><td>Soft launch</td><td>Invite-only beta</td></tr>
+<tr><td>Limited launch</td><td>Waitlist opens</td></tr>
+</table>
+<hr>
+<h2>11. Launch Strategy</h2>
+<h3>Phase 0: Soft Launch (Week 10)</h3>
+<li>Deploy to production infrastructure</li>
+<li>Invite-only beta (friends, family, early supporters)</li>
+<li>Validate core flows work</li>
+<li>Monitor costs closely</li>
+<h3>Phase 1: Limited Launch (Week 11)</h3>
+<li>Open signups with waitlist</li>
+<li>Control growth to monitor unit economics</li>
+<li>Adjust pricing if needed before wide launch</li>
+<h3>Phase 2: Public Launch (Week 12+)</h3>
+<li>Remove waitlist</li>
+<li>Marketing push</li>
+<li>Monitor and optimize</li>
+<hr>
+<h2>12. Monitoring & Alerts</h2>
+<h3>12.1 Key Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Alert Threshold</th><th>Tool</th></tr>
+<tr><td>App response time</td><td>>500ms avg</td><td>Fly.io metrics</td></tr>
+<tr><td>Error rate</td><td>>1%</td><td>Sentry</td></tr>
+<tr><td>Database connections</td><td>>80% pool</td><td>Fly.io PostgreSQL</td></tr>
+<tr><td>R2 storage usage</td><td>>80% of budget</td><td>Cloudflare dashboard</td></tr>
+<tr><td>Monthly costs</td><td>>120% of projection</td><td>Manual review</td></tr>
+<tr><td>User signups/day</td><td>Track trend</td><td>Custom dashboard</td></tr>
+<tr><td>Paying conversion</td><td><5%</td><td>Custom dashboard</td></tr>
+</table>
+<h3>12.2 Cost Monitoring</h3>
+<strong>Weekly review:</strong>
+1. Fly.io billing dashboard
+2. Cloudflare R2 usage
+3. Backblaze B2 usage
+4. Stripe revenue
+5. Calculate actual cost per user
+<strong>Monthly review:</strong>
+1. Compare projected vs. actual costs
+2. Identify heavy users
+3. Adjust projections
+4. Review pricing if needed
+<hr>
+<h2>13. Risk Analysis</h2>
+<h3>13.1 Technical Risks</h3>
+<table>
+<tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+<tr><td>Fly.io outage</td><td>Low</td><td>High</td><td>Multi-region, status monitoring</td></tr>
+<tr><td>R2 outage</td><td>Very Low</td><td>High</td><td>B2 failover ready</td></tr>
+<tr><td>Database corruption</td><td>Very Low</td><td>Critical</td><td>Daily backups, PITR</td></tr>
+<tr><td>DDoS attack</td><td>Medium</td><td>High</td><td>Cloudflare protection</td></tr>
+</table>
+<h3>13.2 Business Risks</h3>
+<table>
+<tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+<tr><td>Low conversion rate</td><td>Medium</td><td>High</td><td>Adjust pricing, improve onboarding</td></tr>
+<tr><td>High churn</td><td>Medium</td><td>Medium</td><td>Improve product, engagement</td></tr>
+<tr><td>Competitor launches</td><td>Medium</td><td>Medium</td><td>Differentiate (privacy, BYOB, API)</td></tr>
+</table>
+<h3>13.3 Cost Risks</h3>
+<table>
+<tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+<tr><td>Storage costs spike</td><td>Low</td><td>Medium</td><td>Spending caps, BYOB</td></tr>
+<tr><td>Heavy user abuse</td><td>Medium</td><td>Low</td><td>Rate limits, ToS enforcement</td></tr>
+<tr><td>Free tier costs</td><td>Medium</td><td>Low</td><td>P2P only, minimal infrastructure</td></tr>
+</table>
+<hr>
+<h2>14. Open Questions</h2>
+<h3>Resolved ✅</h3>
+<table>
+<tr><th>Question</th><th>Decision</th></tr>
+<tr><td>Hosting platform</td><td>Fly.io</td></tr>
+<tr><td>Storage provider</td><td>Cloudflare R2 + Backblaze B2</td></tr>
+<tr><td>Pricing tiers</td><td>$0 / $3+usage / $20</td></tr>
+<tr><td>Free tier cloud storage</td><td>No (P2P + BYOB only)</td></tr>
+<tr><td>Docker registry</td><td>GitHub Container Registry</td></tr>
+<tr><td>Forum scope</td><td>onelist.my only at launch</td></tr>
+<tr><td>Billing model</td><td>Usage-based, card on file, monthly settlement</td></tr>
+</table>
+<h3>Still Open ⬜</h3>
+<li>[ ] <strong>Q1</strong>: Annual pricing? (20% discount)</li>
+<li>[ ] <strong>Q2</strong>: Team tier at launch or post-MVP?</li>
+<li>[ ] <strong>Q4</strong>: Web Access Pro ($35/mo) at launch?</li>
+<li>[ ] <strong>Q5</strong>: Grandfather early users if prices change?</li>
+<li>[ ] <strong>Q6</strong>: Waitlist or open signup at launch?</li>
+<hr>
+<h2>15. Decision Log</h2>
+<table>
+<tr><th>Date</th><th>Decision</th><th>Rationale</th></tr>
+<tr><td>2026-01-28</td><td>Fly.io for MVP hosting</td><td>Phoenix expertise, fast deployment</td></tr>
+<tr><td>2026-01-28</td><td>Cloudflare R2 for primary storage</td><td>Zero egress fees, predictable costs</td></tr>
+<tr><td>2026-01-28</td><td>Backblaze B2 for redundant tier</td><td>Lowest storage cost, S3-compatible</td></tr>
+<tr><td>2026-01-28</td><td>$0/$3+usage/$20 pricing tiers</td><td>Usage-based, sustainable margins</td></tr>
+<tr><td>2026-01-29</td><td>OpenClaw integration highest priority</td><td>Key adoption path</td></tr>
+<tr><td>2026-01-29</td><td>Beacon CMS for corporate site</td><td>Dogfooding, professional presence</td></tr>
+<tr><td>2026-01-29</td><td>Forum in MVP</td><td>Community support essential</td></tr>
+<tr><td>2026-01-29</td><td>Usage-based billing with spending caps</td><td>Predictable for users, sustainable for us</td></tr>
+<tr><td>2026-01-29</td><td>GHCR for Docker images</td><td>Native GitHub Actions integration</td></tr>
+<tr><td>2026-01-29</td><td>Forum for onelist.my only at launch</td><td>Manageable scope, user forums post-launch</td></tr>
+<tr><td>2026-01-29</td><td>Searcher, Asset Enrichment, River agents in MVP</td><td>Critical for OpenClaw value proposition</td></tr>
+<tr><td>2026-01-29</td><td>Pre-storage similarity check in Searcher Agent</td><td>Prevents duplicate content, user feedback</td></tr>
+<tr><td>2026-01-29</td><td>Web Clipper (Feeder Agent) in MVP</td><td>Core content ingestion, "send links to save" use case</td></tr>
+<tr><td>2026-01-30</td><td>Reader Agent implemented</td><td>Atomic memory extraction, tag suggestions, reference resolution</td></tr>
+<tr><td>2026-01-30</td><td>UI Implementation prioritized</td><td>All data (including memories) must be visible to users</td></tr>
+<tr><td>2026-01-30</td><td>Static prototype approach</td><td>HTML/CSS prototypes before LiveView integration</td></tr>
+</table>
+<hr>
+<h2>Appendix A: Competitor Pricing Reference</h2>
+<table>
+<tr><th>Competitor</th><th>Comparable Tier</th><th>Price</th><th>Storage</th></tr>
+<tr><td>Notion</td><td>Plus</td><td>$10/mo</td><td>Unlimited</td></tr>
+<tr><td>Obsidian Sync</td><td>Sync</td><td>$8/mo</td><td>10 GB</td></tr>
+<tr><td>Roam Research</td><td>Pro</td><td>$15/mo</td><td>Unlimited</td></tr>
+<tr><td>Craft</td><td>Pro</td><td>$5/mo</td><td>Unlimited</td></tr>
+<tr><td>Apple Notes</td><td>iCloud+</td><td>$3/mo</td><td>200 GB (shared)</td></tr>
+<tr><td>Evernote</td><td>Personal</td><td>$15/mo</td><td>20 GB</td></tr>
+</table>
+<strong>Our positioning:</strong>
+<li>Cloud Sync at $3/mo + usage undercuts most competitors for light users</li>
+<li>Web Access at $20/mo is premium but includes dedicated VPS + agents</li>
+<li>Self-hosted option differentiates from all competitors</li>
+<hr>
+<h2>Appendix B: Related Documents</h2>
+<h3>Core Plans</h3>
+<li><a href="./project_plan.md">Project Plan</a> - Full MVP specifications</li>
+<li><a href="./launch_plan.md">Launch Plan</a> - Original infrastructure analysis</li>
+<li><a href="./asset_storage_plan.md">Asset Storage Plan</a> - Storage architecture</li>
+<li><a href="./mvp_public_content_plan.md">MVP Public Content Plan</a> - Public sharing details</li>
+<h3>Agent Plans (MVP)</h3>
+<li><a href="./searcher_agent_plan.md">Searcher Agent Plan</a> - Embedding generation, two-layer retrieval, hybrid search</li>
+<li><a href="./reader_agent_plan.md">Reader Agent Plan</a> - Atomic memory extraction, reference resolution, compaction</li>
+<li><a href="./asset_enrichment_agent_plan.md">Asset Enrichment Agent Plan</a> - Transcription, OCR, action items</li>
+<li><a href="./river_agent_plan.md">River Agent Plan</a> - Intelligent assistant, GTD, queries</li>
+<li><a href="./feeder_agent_plan.md">Feeder Agent Plan</a> - Web Clipper, RSS, external integrations</li>
+<h3>Unified Agent Infrastructure</h3>
+<li><a href="./unified_agent_modules.md">Unified Agent Modules</a> - Shared telemetry, security, model selection, cost tracking</li>
+<h3>Agent Implementation Reference (REQUIRED READING)</h3>
+<strong>These guides MUST be consulted before implementing any agent:</strong>
+<table>
+<tr><th>Guide</th><th>Purpose</th><th>Applies To</th></tr>
+<tr><td><a href="./ai_agent_implementation_guide.md">AI Agent Implementation Guide</a></td><td>Core patterns, tool use, prompting, RAG, verification, evaluation</td><td>All agents</td></tr>
+<tr><td><a href="./ai_agent_ecosystem_resources_guide.md">AI Agent Ecosystem Resources Guide</a></td><td>Frameworks, tools, services, and ecosystem resources</td><td>All agents</td></tr>
+<tr><td><a href="./always_running_agents_comprehensive_guide.md">Always Running Agents Guide</a></td><td>Long-running agents, state management, reliability patterns</td><td>River (primarily); others if orchestrated</td></tr>
+</table>
+<strong>Key Requirements (All Agents):</strong>
+<li>Tool definitions must include detailed descriptions (3-4+ sentences)</li>
+<li>Implement SQ-BCP precondition checking for uncertain actions</li>
+<li>Use passive context over active retrieval where possible</li>
+<li>Include observability/tracing from day one</li>
+<li>Follow the KERNEL prompt pattern for reliability</li>
+<strong>Run Style Considerations:</strong>
+<li>Evaluate each agent's run style during planning (see Section 3.0)</li>
+<li>Only River requires always-running loop pattern</li>
+<li>Event-triggered agents (Reader, Asset Enrichment) use Oban workers</li>
+<li>River may orchestrate other agents as sub-agents/tools for complex tasks</li>
+<h3>Memory Optimization (Supermemory-Inspired)</h3>
+<li><a href="./ai_memory_evolution.md">AI Memory Evolution</a> - Overall memory architecture and supermemory recommendations</li>
+<h3>UI & Design</h3>
+<li><a href="./ui_plan.md">UI Plan</a> - Application UI specifications, design system, component library</li>
+<h3>Feature Plans</h3>
+<li><a href="./web_content_capture_plan.md">Web Content Capture Plan</a> - Tiered web capture architecture (Hyperbrowser, Browser Use)</li>
+<li><a href="./tag_system_plan.md">Tag System Plan</a> - Enhanced tagging</li>
+<li><a href="./future_roadmap_beacon_cms.md">Beacon CMS Roadmap</a> - Beacon integration</li>
+<li><a href="./future_roadmap_forum.md">Forum Roadmap</a> - Forum specifications</li>
+<li><a href="./future_roadmap_openclaw_install.md">OpenClaw Integration</a> - OpenClaw details</li>
+<li><a href="./future_roadmap_free_tier.md">Free Tier</a> - Self-hosted architecture</li>
+<li><a href="./mac_desktop_app_plan.md">Mac Desktop App Plan</a> - Desktop application</li>
+</ul>
+<hr>
+<h2>Appendix C: Detailed R2 Cost Calculator</h2>
+<pre><code class="language-">Monthly R2 Cost = (Storage GB × $0.015) + (Class A ops / 1M × $0.36) + (Class B ops / 1M × $0.036)
+<p>Example: 1000 users, 500 MB avg storage, 100 uploads/mo, 500 downloads/mo</p>
+<p>Storage:  1000 × 0.5 GB × $0.015 = $7.50
+Class A:  1000 × 100 / 1,000,000 × $0.36 = $0.036
+Class B:  1000 × 500 / 1,000,000 × $0.036 = $0.018
+──────────────────────────────────────────────────
+Total: $7.55/month for 1000 users
+Per user: $0.00755/month (less than 1 cent)
+</code></pre></p>
+<h2>Appendix D: Fly.io Pricing Reference</h2>
+<pre><code class="language-">Shared CPU VMs:
+  shared-cpu-1x, 256MB:  ~$1.94/mo
+  shared-cpu-1x, 512MB:  ~$3.88/mo
+  shared-cpu-1x, 1GB:    ~$5.70/mo
+  shared-cpu-1x, 2GB:    ~$11.40/mo
+<p>Dedicated CPU VMs:
+  performance-1x, 2GB:   ~$29/mo
+  performance-2x, 4GB:   ~$58/mo
+  performance-4x, 8GB:   ~$116/mo</p>
+<p>PostgreSQL:
+  1 shared CPU, 1GB RAM, 10GB disk:    Free tier
+  1 shared CPU, 2GB RAM, 20GB disk:    ~$15/mo
+  1 shared CPU, 4GB RAM, 40GB disk:    ~$36/mo
+  2 dedicated CPU, 8GB RAM, 80GB disk: ~$72/mo</p>
+<p>Bandwidth:
+  Outbound: First 100GB free, then $0.02/GB
+  Inbound: Free
+</code></pre></p>
+<h2>Appendix E: Hosting Platform Comparison</h2>
+<table>
+<tr><th>Platform</th><th>Monthly Cost (Small)</th><th>PostgreSQL</th><th>Phoenix Optimized</th><th>Scaling</th></tr>
+<tr><td><strong>Fly.io</strong></td><td>$30-60</td><td>Included</td><td>Excellent (Chris McCord)</td><td>Global</td></tr>
+<tr><td><strong>Gigalixir</strong></td><td>$40-60</td><td>Included</td><td>Built for BEAM</td><td>Good</td></tr>
+<tr><td><strong>Render</strong></td><td>$14+ ($7 app + $7 DB)</td><td>Separate</td><td>Limited</td><td>Simple</td></tr>
+<tr><td><strong>Hetzner VPS</strong></td><td>$20-40</td><td>Self-managed</td><td>DIY</td><td>Manual</td></tr>
+<tr><td><strong>DigitalOcean</strong></td><td>$20-50</td><td>$15+ managed</td><td>DIY</td><td>Droplets</td></tr>
+</table>
+<strong>When to Switch to VPS:</strong>
+Breakpoint: ~$200/month on Fly.io. At this point, consider 2-3 Hetzner VPS (~$50/month total) + DigitalOcean Managed PostgreSQL (~$15-30/month). Total: ~$65-80/month (60% savings). Only switch when you have DevOps capacity.
+<h2>Appendix F: Heavy User Cost Scenarios</h2>
+<strong>Power User (10 GB stored, 5000 downloads/mo):</strong>
+<table>
+<tr><th>Provider</th><th>Storage</th><th>API</th><th>Egress</th><th>Total</th></tr>
+<tr><td>R2</td><td>$0.15</td><td>$0.18</td><td>$0</td><td>$0.33/mo</td></tr>
+<tr><td>S3</td><td>$0.23</td><td>$0.03</td><td>$45</td><td>$45.26/mo</td></tr>
+</table>
+<strong>R2 saves $45/month per heavy user</strong> due to zero egress.
+<hr>
+</em>Last updated: 2026-01-31<em>
+</em>Status: Active Development*
+  </article>
+</body>
+</html>

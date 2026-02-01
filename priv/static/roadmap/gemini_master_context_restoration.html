@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Project - Master Context &amp; Session State Document - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  <div style="background: rgba(107, 114, 128, 0.2); border: 1px solid #6b7280; border-radius: 0.5rem; padding: 1rem; margin-bottom: 2rem;">
+  <strong>⚠️ Deprecated:</strong> This document has been superseded or archived. It is retained for historical reference.
+</div>
+
+  <article>
+    <h1>Onelist Project - Master Context & Session State Document</h1>
+<strong>Snapshot Date:</strong> May 23, 2025
+<strong>Snapshot Time:</strong> ~4:39 PM EDT
+<strong>Location Context:</strong> Concord, North Carolina, United States
+<strong>Current High-Level Goal:</strong> Iteratively planning the Onelist platform, including its core (MVP & v2.0 Foundation), and detailed future feature branches.
+<strong>Last Specific Point Discussed:</strong> Agreement on the strategy for context restoration using this master document with placeholders. We are currently about to select the next feature branch from the queue for detailed planning.
+<hr>
+<h2>I. Overarching Onelist Vision & Guiding Principles</h2>
+<em> <strong>Core Vision:</strong> Onelist as a user-centric "augmented memory," a single source of truth for managing personal and professional information, with strong privacy, user control, and AI-agnostic capabilities (allowing users to leverage their own AI models/keys where appropriate). It aims to reduce app/subscription explosion by integrating diverse functionalities.
+</em> <strong>Key Principles:</strong>
+  <em> User Data Ownership & Control.
+  </em> Privacy by Design.
+  <em> API-First for extensibility.
+  </em> AI-Agnostic where user choice is paramount.
+  <em> Ecosystem of core functionality, specialized agents (evolving from "daemons"), and integrated applications.
+  </em> Progressive Enhancement & MVP Focus for large features.
+  <em> Clear Distinction between Onelist Core and Client Applications (e.g., Xamlr).
+<hr>
+<h2>II. Onelist Core Platform Definition ("Onelist v2.0 Foundation")</h2>
+<p>This section outlines the foundational Onelist platform, comprising the initial MVP and key enhancements that form the "v2.0 Foundation" upon which more advanced feature branches are built.</p>
+<h3>A. Onelist MVP Project Plan</h3>
+</em> <strong>Concise Summary of Core MVP Goals and Features:</strong> The Onelist MVP aims to create a lightweight, multi-user content storage and retrieval application. Core features include flexible entry/representation/asset storage (with initial focus on plaintext/Markdown notes), Markdown rendering & editing (Toast UI), robust version control for editable representations, API access with rate limiting, basic tagging (as "Topics"), multi-user support (isolated data), Full-Text Search (PostgreSQL), strong security/privacy by design, single-user multi-tab conflict prevention (Phoenix.PubSub), social login integration, and canonical URLs for public Onelist entries.
+<em> `<code>
+  </em> <em>(Instruction: In a new session, if detailed MVP specifics are needed for a discussion, you can provide the full MVP plan here. This was outputted around May 6, 2025, ~9:07 AM EDT).</em>
+<h3>B. Key Onelist Core Enhancements Defining "v2.0 Foundation"</h3>
+<em>(These are foundational system capabilities in Onelist, many identified as prerequisites or co-requisites during the planning of Xamlr, Comments, and Consumption Tracking. They are considered part of the baseline for building further feature branches.)</em>
+<p>1. <strong>Core Taxonomy System:</strong>
+    <em> <strong></code>taxonomies<code> Table:</strong> Manages distinct vocabularies (e.g., "Topics," "Consumption Status," "Marks"). Schema: </code>id<code>, </code>name<code>, </code>description<code>, </code>owner_user_id<code> (NULL for system), </code>is_system_taxonomy<code>, </code>is_terms_locked<code>.
+        </em> <em>Seed:</em> "Topics" (system, user-managed terms), "Consumption Status" (system, locked terms), "Marks" (system, locked core terms, potentially admin-extendable).
+    <em> <strong></code>terms<code> Table (Evolved </code>tags<code> table):</strong> Stores individual terms within each taxonomy. Schema: </code>id<code>, </code>taxonomy_id<code>, </code>name<code>, </code>description<code>, </code>is_system_term<code>, </code>creator_user_id<code>. Unique on </code>(taxonomy_id, name)<code>.
+        </em> <em>Seed:</em> Predefined terms for "Consumption Status" (e.g., </code>to_consume<code>, </code>in_progress<code>, </code>consumed<code>, </code>consumption_archived<code>) and "Marks" (e.g., </code>action_needed<code>, </code>important<code>, </code>idea<code>, </code>decision<code>, </code>commitment<code>).
+    <em> <strong></code>entry_applied_terms<code> Table (Replaces </code>entry_tags<code>):</strong> Links </code>entries<code> to </code>terms<code>. Schema: </code>id<code>, </code>entry_id<code>, </code>term_id<code>, </code>user_id<code> (Nullable: for user-specific applications like Marks/Consumption Status vs. owner-applied global Topics), </code>applied_at<code>, </code>metadata<code> (JSONB - to track AI-initiated term applications, decision context, etc.).
+    </em> <strong>API Support:</strong> For managing taxonomies (admin), terms (user for Topics), applying/removing terms, and querying entries by terms.
+    <em> </em>(This system was detailed in the "Addendum: Onelist Core Platform Enhancement - Core Taxonomy System" document, outputted around May 23, 2025, ~3:58 PM EDT).<em>
+    </em> </code><code></p>
+<p>2. <strong>Enhanced </code>entries<code> Table Functionality:</strong>
+    <em> <strong></code>origin_entry_id<code> Field:</strong> (UUID, Nullable, FK to </code>entries.id<code>, Indexed). Stores the </code>id<code> of the ultimate root </code>entry<code> of a thread (e.g., for comments) or a copy/reblog chain (e.g., for Xamlr). Populated by Onelist Core logic during entry creation.
+    </em> <strong>Standard Metadata Field </code>autoblog_by_tag<code>:</strong> </code>entries.metadata<code> supports </code>autoblog_by_tag: "yes"|"no"<code> for all entries, controlling eligibility for automated content sourcing by tag by connected apps like Xamlr.
+    <em> <strong>Generation of </code>'display_html'<code> Representation:</strong> Onelist will generate and store a </code>'display_html'<code> </code>representation<code> for <strong>all feasible </code>entry_types<code></strong>, regardless of the </code>entry.public<code> flag, as the primary renderable format for API consumers.</p>
+<p>3. <strong>User Account & Global Settings Enhancements (in Onelist):</strong>
+    </em> <strong>User-Configurable Defaults for </code>autoblog_by_tag<code>:</strong> Onelist user settings allow defining default </code>autoblog_by_tag<code> behavior ("yes" or "no") per </code>entry_type<code>.
+    <em> <strong>Storage for User's Global Blocked Tags List (for Xamlr context):</strong> User's Onelist profile/settings store a list of tags the user wants globally blocked from </em>their<em> Xamlr feeds.
+    </em> <strong>API Access:</strong> Onelist API allows authorized apps to read/manage these user-level preferences.</p>
+<p>4. <strong>Onelist API Capabilities (General Enhancements for v2.0 Foundation - Summary):</strong>
+    <em> Robust Authentication & Authorization (OAuth2 for client apps).
+    </em> Comprehensive Entry/Representation/Asset Management (CRUD, sophisticated entry copying with control over representations/tags/metadata, return of internal </code>entry.id<code>).
+    <em> Fetch by internal </code>entry.id<code> (with auth).
+    </em> Management and querying of the Core Taxonomy System (</code>taxonomies<code>, </code>terms<code>, </code>entry_applied_terms<code>).
+    <em> Management and querying of </code>entry.metadata<code> fields (like </code>autoblog_by_tag<code>).
+    </em> Advanced Search & Querying (filters for </code>entry_type<code>, </code>public<code> status, multiple tags, </code>metadata.autoblog_by_tag<code>, </code>origin_entry_id<code>, applied taxonomy terms).
+    <em> Robust pagination (cursor-based preferred).
+    </em> Specialized </code>entry_type<code> support (e.g., for managing </code>'blog_config'<code> entry metadata).
+    <em> Asset Management API (uploads, stable URLs).
+    </em> Voting API (record votes, retrieve scores - for Comments System).
+    <em> Consumption Tracking API (update/retrieve user-entry consumption states & progress - for Content Consumption Tracking).</p>
+<p>5. <strong>Onelist UI Enhancement: Configurable View Modes:</strong>
+    </em> The main Onelist entry listing UI will support user-configurable view modes (e.g., "List," "Grid," "Consumption List"), with settings for primary/secondary modes, order, and shortcuts.</p>
+<p>6. <strong>Onelist Core Responsibilities (Post-v2.0 Foundational Enhancements Driven by App Needs):</strong>
+    <em> <strong>Webhook System:</strong> To allow external applications to subscribe to events in Onelist.
+    </em> <strong>Advanced Asset Management:</strong> Deduplication, reference counting, garbage collection for Onelist </code>assets<code>.</p>
+<hr>
+<h2>III. Detailed Feature Branch Plans (Built on Onelist v2.0 Foundation)</h2>
+<em>(For each detailed plan, an executive summary is provided here. The full Markdown for each has been generated previously and can be inserted by the user into the placeholders when needed in a new session).</em>
+<em> <strong>A. Xamlr Blogging Platform:</strong>
+  </em> <strong>Executive Summary:</strong> Xamlr is a separate Elixir/Phoenix application using Onelist as a headless CMS. It manages its own database for a distinct social layer (blog-to-blog follows, likes), </code>blog_publications<code> (linking Xamlr posts with Xamlr-specific </code>public_id<code>s to Onelist </code>entries<code> via their internal </code>onelist_entry_id<code>, and storing </code>publication_status<code>, </code>publication_timestamp<code>, </code>publication_tags<code>), themes, publishing queues, and Xamlr-specific settings. Onelist stores blog configurations as </code>'blog_config'<code> </code>entries<code>. Xamlr supports multi-blog with strong privacy, flexible content origination (Onelist-first or Xamlr-editor), a unique reblog-as-Onelist-copy mechanism with rich comment chain attribution (MVP), a 4-pane dashboard, "Save to Onelist" feature, and NSFW/Age Verification basics. It relies on Onelist's </code>autoblog_by_tag<code> system for content sourcing control.
+  <em> </code><code>
+</em> <strong>B. Entry Groups:</strong>
+  <em> <strong>Executive Summary:</strong> Groups are Onelist </code>entries<code> (</code>entry_type='group'<code>). Members (other Onelist </code>entries<code>) are linked via </code>entry_links<code> (storing </code>sequence<code> and </code>parent_member_link_id<code> in link </code>metadata<code> for default order/hierarchy). Groups have multiple </code>representations<code> for different views (List, Notebook, Kanban for MVP; Outline, Mindmap, Pinterest Board, Photo Album with detailed settings post-MVP). View-specific ordering and state are stored in the group's </code>representation.metadata<code>.
+  </em> </code><code>
+<em> <strong>C. Habits & Habit Stacks:</strong>
+  </em> <strong>Executive Summary:</strong> Introduces a new </code>entry_type='habit'<code> with metadata for description, frequency, target, streaks, status, and establishment criteria. A new </code>habit_progress_logs<code> table tracks engagement. "Habit Stacks" are Entry Groups of </code>'habit'<code> entries, with </code>progression_logic<code> defined in the group's metadata for sequential habit implementation (automated progression is post-MVP). MVP focuses on individual habit definition/logging and basic stacks with manual progression.
+  <em> </code><code>
+</em> <strong>D. Content Consumption Tracking & Engagement:</strong>
+  <em> <strong>Executive Summary:</strong> (Evolved from "Read-it-Later"). Uses the "Core Taxonomy System" for status (terms like </code>to_consume<code>, </code>in_progress<code>, </code>consumed<code>, </code>consumption_archived<code> from the "Consumption Status" taxonomy, applied via </code>entry_applied_terms<code> per user per entry). A </code>user_entry_consumption_states<code> table tracks </code>progress_percentage<code> (decimal), </code>fully_consumed_at<code>, </code>last_known_position_details<code>. Features explicit "Save for Consumption" action. MVP includes scroll tracking for text, state reload, UI indicators, a "Consumption List" view mode with filtering, estimated time to read (text), auto-archiving with override, and a basic AI summary/next-step prompt on 100% consumption. Post-MVP includes advanced AI "next steps" (task generation, mindmap additions, etc.), tracking for other media, and sharing integration.
+  </em> </code><code>
+<em> <strong>E. Comments System (Reddit-Style Functionality):</strong>
+  </em> <strong>Executive Summary:</strong> Comments are Onelist </code>entries<code> (</code>entry_type='comment'<code>, no title, </code>origin_entry_id<code> linking to root post). Threading via </code>entry_links<code> (</code>link_type='comment_on'<code>). New </code>user_entry_votes<code> table for up/downvoting posts and comments. Entry Groups act as "subreddits." Context-dependent comment behavior: "Best" sort default for boards; "Old" sort default for documents; "Notes" on </code>'event'<code> entries have no replies and "Old" sort. MVP includes basic threading, voting, "New"/"Top" sorts for posts in groups and comments (with UI for all sort options), universal commentability. Post-MVP includes full "Best"/"Hot" algorithms, "follow comment" notifications, AI for summaries/replies, audible AI conversations as comments. </code>auto_mark_new_entries_for_consumption<code> for groups has user default but can be forced by admin (post-MVP for force, with warning).
+  <em> </code><code>
+<hr>
+<h2>IV. Queue of Future Feature Branches for Detailed Exploration</h2>
+</em>(This list contains other significant feature directions identified, to be explored and planned in future sessions. The order does not imply strict priority at this stage.)<em>
+<p>1. <strong>Social Graph (Advanced):</strong>
+    </em> (Evolved from "Relationship Entry Types") Enabling users to define specific types of relationships (friend, family, colleague, boss) with other Onelist users.
+    <em> <strong>AI Integration:</strong> Users defining goals for relationships with AI assistance; Virtual Assistant (VA) agent analyzing interactions for personality/communication styles to help users craft effective messages and plan strategic interactions.
+2. <strong>Content Monetization:</strong>
+    </em> Allowing users to potentially sell subscriptions for access to specific Entry Groups they create or for content associated with particular tags they manage.
+3. <strong>Task Management (Advanced - </code>entry_type='task'<code>):</strong>
+    <em> Expanding on the idea of a task </code>entry_type<code> to build a comprehensive task and project management system, potentially integrating GTD (Getting Things Done) principles, and linking with AI-suggested tasks from consumed content or VA agent interactions.
+4. <strong>Calendar / Event Management (Advanced - </code>entry_type='event'<code>):</strong>
+    </em> Developing a full-featured calendar and event management system within Onelist.
+5. <strong>Encryption/Security Features (Advanced):</strong>
+    <em> Focusing on advanced encryption models like end-to-end encryption (E2EE) for entry content.
+    </em> Exploring AI access to E2EE data via user-held keys, ensuring Onelist administrators have zero knowledge/access to encrypted content.
+    <em> Secure handling of </code>'display_html'<code> representations for shared/published E2EE entries.
+6. <strong>Password & Secrets Management (1Password-style):</strong>
+    </em> Transforming Onelist into a secure vault for passwords, secure notes, API keys, and other sensitive secrets.
+    <em> Potentially includes an AI-integrated browser extension for intelligent form filling and credential capture.
+7. <strong>Virtual Assistant Agent (GTD-Aware, Proactive):</strong>
+    </em> (Evolved from "daemon") A sophisticated AI agent that deeply understands GTD principles.
+    <em> Proactively manages the user's calendar and tasks.
+    </em> Schedules and initiates meetings (potentially calling/notifying the user to start).
+    <em> Conducts automated or guided weekly reviews and daily priority planning sessions.
+8. <strong>Notifications System (Advanced):</strong>
+    </em> A comprehensive, user-configurable notifications system within Onelist.
+    <em> Features priority levels, Do Not Disturb (DND) settings, focus modes.
+    </em> Integration with the Virtual Assistant agent for high-urgency notifications potentially delivered via calls or texts.
+9. <strong>Chat System (Slack/Discord Style):</strong>
+    <em> Implementing full-featured real-time chat functionality within Onelist.
+    </em> This would go beyond the "Comments System" and support channels (perhaps based on Entry Groups or dedicated chat </code>entry_types`), direct messaging, and team/community communication features.
+10. <strong>Full Email Account Integration:</strong>
+    <em> Extending Onelist to be a full-featured email client and repository, treating emails as first-class Onelist Entries.
+11. <strong>Full Export Support:</strong>
+    </em> Providing users with the ability to export their <em>entire</em> Onelist data archive in a portable format.
+12. <strong>Self-Hosted Onelist Server & Migration Support:</strong>
+    <em> Enabling users to set up their own Onelist server instances.
+    </em> Providing simple migration tools for users to move their data between Onelist servers.
+13. <strong>Contacts Management:</strong>
+    <em> A dedicated system for managing contacts (people, organizations), with deep integration with the "Social Graph" feature.
+14. <strong>Browser Extension (Advanced):</strong>
+    </em> Beyond simple "save for consumption," an AI-integrated browser extension capable of intelligent form filling, contextual article capture, and marking items for various Onelist workflows.</p>
+<hr>
+<h2>V. User's Stored Information for Personalization (Reminder)</h2>
+<ul>
+<li><strong>[2025-02-14] Marketing Ideas:</strong> Keep track of all marketing ideas. Want to refine and definitely incorporate them into the Onelist MVP website.</li>
+</ul>
+<hr>
+  </article>
+</body>
+</html>

@@ -1,0 +1,151 @@
+# Onelist Local + OpenClaw
+# Single-command deployment for self-hosted AI with memory
+#
+# Usage:
+#   curl -fsSL https://get.onelist.my/local | bash
+#   # or manually:
+#   docker-compose -f docker-compose.local.yml up -d
+#
+# This sets up:
+#   - Onelist (Phoenix app with River agent)
+#   - PostgreSQL with pgvector
+#   - OpenClaw (AI agent runtime)
+#   - Auto-configured memory integration
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # PostgreSQL with pgvector for embeddings
+  # ===========================================
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: onelist-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: onelist
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-onelist_local_dev}
+      POSTGRES_DB: onelist_local
+    volumes:
+      - onelist_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U onelist"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # Onelist - Memory system with River agent
+  # ===========================================
+  onelist:
+    image: ghcr.io/onelist/onelist-local:latest
+    container_name: onelist-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: postgres://onelist:${DB_PASSWORD:-onelist_local_dev}@postgres:5432/onelist_local
+      
+      # Phoenix
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-generate_me_on_first_run}
+      PHX_HOST: ${PHX_HOST:-localhost}
+      PORT: 4000
+      
+      # OpenAI for embeddings (user provides)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      
+      # Single-user mode
+      ONELIST_MODE: local
+      ONELIST_SINGLE_USER: "true"
+      
+    ports:
+      - "4000:4000"
+    volumes:
+      - onelist_uploads:/app/uploads
+      - onelist_config:/app/config/runtime
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # OpenClaw - AI agent runtime
+  # ===========================================
+  openclaw:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: openclaw
+    restart: unless-stopped
+    depends_on:
+      onelist:
+        condition: service_healthy
+    environment:
+      # Anthropic API (user provides)
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      
+      # Gateway config
+      OPENCLAW_MODE: local
+      OPENCLAW_PORT: 18789
+      
+      # Onelist integration (auto-configured)
+      ONELIST_API_URL: http://onelist:4000
+      ONELIST_API_KEY: ${ONELIST_API_KEY:-auto_generated}
+      ONELIST_MEMORY_ENABLED: "true"
+      
+      # Telegram (optional)
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      
+    ports:
+      - "18789:18789"
+    volumes:
+      - openclaw_workspace:/root/.openclaw/workspace
+      - openclaw_config:/root/.openclaw
+    
+  # ===========================================
+  # Setup helper - runs once on first start
+  # ===========================================
+  setup:
+    image: ghcr.io/onelist/onelist-local:latest
+    container_name: onelist-setup
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://onelist:${DB_PASSWORD:-onelist_local_dev}@postgres:5432/onelist_local
+    command: |
+      sh -c '
+        echo "🌊 Running Onelist setup..."
+        mix ecto.create
+        mix ecto.migrate
+        echo "✅ Database ready!"
+        
+        # Generate API key for OpenClaw integration if not set
+        if [ -z "$ONELIST_API_KEY" ]; then
+          echo "🔑 Generating Onelist API key for OpenClaw..."
+          mix run -e "
+            {:ok, user} = Onelist.Accounts.create_user(%{
+              email: \"local@onelist.local\",
+              password: \"$(openssl rand -hex 16)\",
+              account_type: \"ai\"
+            })
+            {:ok, key} = Onelist.Accounts.create_api_key(user, \"openclaw\")
+            IO.puts(\"ONELIST_API_KEY=#{key.key}\")
+          " >> /app/config/runtime/.env
+        fi
+        
+        echo "🚀 Setup complete! Run: docker-compose up -d"
+      '
+    profiles:
+      - setup
+
+volumes:
+  onelist_pgdata:
+  onelist_uploads:
+  onelist_config:
+  openclaw_workspace:
+  openclaw_config:
+
+networks:
+  default:
+    name: onelist-network

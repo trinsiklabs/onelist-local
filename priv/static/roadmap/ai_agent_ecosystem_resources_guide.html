@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The AI Agent Ecosystem Resources Guide - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>The AI Agent Ecosystem Resources Guide</h1>
+<h2>A Comprehensive Reference for MCP, Frameworks, Tools, and Best Practices</h2>
+<strong>Version 2.0</strong> | <strong>January 2026</strong>
+<hr>
+<h2>Table of Contents</h2>
+<p>1. <a href="#executive-summary">Executive Summary</a>
+2. <a href="#the-model-context-protocol-mcp-ecosystem">The Model Context Protocol (MCP) Ecosystem</a>
+   <ul>
+<li>2.1 <a href="#mcp-overview-and-architecture">MCP Overview and Architecture</a></li>
+   <li>2.2 <a href="#mcp-sdks-and-development-tools">MCP SDKs and Development Tools</a></li>
+   <li>2.3 <a href="#fastmcp-rapid-server-development">FastMCP: Rapid Server Development</a></li>
+   <li>2.4 <a href="#mcp-registry-and-discovery">MCP Registry and Discovery</a></li>
+   <li>2.5 <a href="#production-mcp-servers">Production MCP Servers</a></li>
+   <li>2.6 <a href="#mcp-security-best-practices">MCP Security Best Practices</a></li>
+3. <a href="#ai-agent-frameworks">AI Agent Frameworks</a>
+   <li>3.1 <a href="#langchain-and-langgraph">LangChain and LangGraph</a></li>
+   <li>3.2 <a href="#microsoft-autogen">Microsoft AutoGen</a></li>
+   <li>3.3 <a href="#crewai">CrewAI</a></li>
+   <li>3.4 <a href="#openai-agents-sdk">OpenAI Agents SDK</a></li>
+   <li>3.5 <a href="#framework-selection-guide">Framework Selection Guide</a></li>
+4. <a href="#vector-databases-and-rag-infrastructure">Vector Databases and RAG Infrastructure</a>
+   <li>4.1 <a href="#vector-database-landscape">Vector Database Landscape</a></li>
+   <li>4.2 <a href="#rag-architecture-patterns">RAG Architecture Patterns</a></li>
+   <li>4.3 <a href="#agentic-rag-systems">Agentic RAG Systems</a></li>
+5. <a href="#tool-integration-platforms">Tool Integration Platforms</a>
+   <li>5.1 <a href="#composio">Composio</a></li>
+   <li>5.2 <a href="#code-execution-sandboxes">Code Execution Sandboxes</a></li>
+   <li>5.3 <a href="#tool-selection-strategy">Tool Selection Strategy</a></li>
+6. <a href="#observability-and-evaluation">Observability and Evaluation</a>
+   <li>6.1 <a href="#observability-platforms">Observability Platforms</a></li>
+   <li>6.2 <a href="#evaluation-frameworks">Evaluation Frameworks</a></li>
+   <li>6.3 <a href="#production-monitoring">Production Monitoring</a></li>
+7. <a href="#best-practices-for-ecosystem-integration">Best Practices for Ecosystem Integration</a>
+   <li>7.1 <a href="#architecture-patterns">Architecture Patterns</a></li>
+   <li>7.2 <a href="#security-and-compliance">Security and Compliance</a></li>
+   <li>7.3 <a href="#cost-optimization">Cost Optimization</a></li>
+8. <a href="#implementation-checklists">Implementation Checklists</a>
+9. <a href="#resources-and-references">Resources and References</a></p>
+<hr>
+<h2>Executive Summary</h2>
+<p>The AI agent ecosystem has matured dramatically since 2024, with the Model Context Protocol (MCP) emerging as the universal standard for connecting AI agents to external tools, data sources, and services. This guide provides a comprehensive overview of the ecosystem resources available to developers building production AI agents in 2026.</p>
+<h3>Key Ecosystem Statistics (January 2026)</h3>
+<table>
+<tr><th>Metric</th><th>Value</th><th>Source</th></tr>
+<tr><td>MCP SDK Monthly Downloads</td><td>97M+</td><td>npm/PyPI</td></tr>
+<tr><td>MCP Servers in Registry</td><td>8,000+</td><td>MCP Registry</td></tr>
+<tr><td>Enterprise MCP Adoption</td><td>50%+ Fortune 500</td><td>Industry Reports</td></tr>
+<tr><td>LangChain GitHub Stars</td><td>80K+</td><td>GitHub</td></tr>
+<tr><td>E2B Sandboxes Weekly</td><td>Millions</td><td>E2B</td></tr>
+</table>
+<h3>The Three Pillars of Agent Effectiveness</h3>
+<p>1. <strong>Protocol Layer</strong>: MCP provides standardized tool integration, eliminating the N×M integration problem
+2. <strong>Framework Layer</strong>: Agent frameworks (LangGraph, CrewAI, AutoGen) provide orchestration and reasoning capabilities
+3. <strong>Infrastructure Layer</strong>: Vector databases, sandboxes, and observability platforms provide the operational foundation</p>
+<h3>Critical Success Factors</h3>
+<li><strong>Start with MCP</strong>: The protocol has achieved industry-wide adoption with OpenAI, Google, Microsoft, and Anthropic all supporting it</li>
+<li><strong>Choose frameworks by use case</strong>: LangGraph for complex workflows, CrewAI for role-based multi-agent systems, AutoGen for conversational collaboration</li>
+<li><strong>Invest in observability from day one</strong>: 89% of production agent deployments have implemented observability (LangChain 2025 survey)</li>
+<li><strong>Secure the action layer</strong>: 78% of AI security incidents stem from inadequate access controls</li>
+<hr>
+<h2>The Model Context Protocol (MCP) Ecosystem</h2>
+<h3>MCP Overview and Architecture</h3>
+<p>The Model Context Protocol is an open standard introduced by Anthropic in November 2024 that standardizes how AI systems integrate with external tools, data sources, and services. It was donated to the Linux Foundation's Agentic AI Foundation in December 2025, ensuring vendor-neutral governance.</p>
+<h4>Core Architecture</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────┐
+│                       MCP Host                               │
+│  (Claude Desktop, Cursor, VS Code, Custom Applications)     │
+├─────────────────────────────────────────────────────────────┤
+│                       MCP Client                             │
+│  (Manages connections, protocol handling, tool routing)      │
+├──────────────┬──────────────┬──────────────┬───────────────┤
+│  MCP Server  │  MCP Server  │  MCP Server  │  MCP Server   │
+│  (GitHub)    │  (Postgres)  │  (Slack)     │  (Custom)     │
+└──────────────┴──────────────┴──────────────┴───────────────┘
+</code></pre>
+<h4>MCP Primitives</h4>
+<table>
+<tr><th>Primitive</th><th>Description</th><th>Analogy</th></tr>
+<tr><td><strong>Resources</strong></td><td>Read-only data exposed to LLMs</td><td>GET endpoints</td></tr>
+<tr><td><strong>Tools</strong></td><td>Executable functions with side effects</td><td>POST endpoints</td></tr>
+<tr><td><strong>Prompts</strong></td><td>Reusable templates for interactions</td><td>Pre-configured workflows</td></tr>
+<tr><td><strong>Sampling</strong></td><td>Server-initiated LLM requests</td><td>Nested agent calls</td></tr>
+</table>
+<h4>November 2025 Specification Updates</h4>
+<p>The latest MCP specification (2025-11-25) introduced several critical features:</p>
+<p>1. <strong>Tasks</strong>: New abstraction for tracking long-running operations
+2. <strong>Tool Calling in Sampling</strong>: Servers can now implement agentic loops
+3. <strong>External URLs</strong>: Secure credential collection via browser flows
+4. <strong>Parallel Tool Calls</strong>: Support for concurrent execution
+5. <strong>OAuth Resource Servers</strong>: Formal authorization framework</p>
+<h3>MCP SDKs and Development Tools</h3>
+<h4>Official SDKs</h4>
+<table>
+<tr><th>Language</th><th>Package</th><th>Maintainer</th><th>Notes</th></tr>
+<tr><td>Python</td><td><code>mcp</code></td><td>Anthropic</td><td>Includes FastMCP</td></tr>
+<tr><td>TypeScript</td><td><code>@modelcontextprotocol/sdk</code></td><td>Anthropic</td><td>Full spec support</td></tr>
+<tr><td>C#</td><td><code>ModelContextProtocol</code></td><td>Microsoft</td><td>.NET integration</td></tr>
+<tr><td>Java</td><td><code>mcp-java-sdk</code></td><td>Spring AI</td><td>Enterprise ready</td></tr>
+<tr><td>Kotlin</td><td><code>mcp-kotlin-sdk</code></td><td>JetBrains</td><td>IDE integration</td></tr>
+<tr><td>Swift</td><td><code>mcp-swift-sdk</code></td><td>Anthropic</td><td>macOS/iOS support</td></tr>
+</table>
+<h4>Installation and Setup</h4>
+<pre><code class="language-bash"># Python SDK
+pip install mcp
+<h1>TypeScript SDK</h1>
+npm install @modelcontextprotocol/sdk
+<h1>FastMCP (Python rapid development)</h1>
+pip install fastmcp
+</code></pre>
+<h3>FastMCP: Rapid Server Development</h3>
+<p>FastMCP is the recommended approach for building MCP servers quickly. It was so successful that it was integrated directly into the official MCP Python SDK.</p>
+<h4>Basic Server Template</h4>
+<pre><code class="language-python">from fastmcp import FastMCP
+<p>mcp = FastMCP(&quot;My Agent Tools&quot;)</p>
+<p>@mcp.tool
+def search_documents(query: str, limit: int = 10) -&gt; list[dict]:
+    &quot;&quot;&quot;Search the document database for relevant content.
+    
+    Args:
+        query: Search query string
+        limit: Maximum number of results to return
+    &quot;&quot;&quot;
+    # Implementation here
+    return results</p>
+<p>@mcp.resource(&quot;config://{key}&quot;)
+def get_config(key: str) -&gt; str:
+    &quot;&quot;&quot;Retrieve configuration values.&quot;&quot;&quot;
+    return config.get(key)</p>
+<p>@mcp.prompt
+def analysis_prompt(topic: str) -&gt; str:
+    &quot;&quot;&quot;Generate an analysis prompt for a given topic.&quot;&quot;&quot;
+    return f&quot;Analyze the following topic thoroughly: {topic}&quot;</p>
+<p>if __name__ == &quot;__main__&quot;:
+    mcp.run()  # Default: stdio transport
+    # mcp.run(transport=&quot;sse&quot;, port=8080)  # HTTP transport
+</code></pre></p>
+<h4>FastMCP Best Practices</h4>
+<p>1. <strong>Use type hints extensively</strong>: FastMCP generates schemas from type annotations
+2. <strong>Write comprehensive docstrings</strong>: These become tool descriptions for the LLM
+3. <strong>Keep tools focused</strong>: One tool per action, avoid god-tools
+4. <strong>Handle errors gracefully</strong>: Return structured error information
+5. <strong>Use Context for advanced features</strong>: Logging, sampling, progress reporting</p>
+<pre><code class="language-python">from fastmcp import FastMCP, Context
+<p>mcp = FastMCP(&quot;Advanced Server&quot;)</p>
+<p>@mcp.tool
+async def complex_analysis(ctx: Context, data: str) -&gt; str:
+    &quot;&quot;&quot;Perform multi-step analysis with progress reporting.&quot;&quot;&quot;
+    ctx.info(&quot;Starting analysis...&quot;)
+    
+    # Use LLM sampling for sub-tasks
+    summary = await ctx.sample(
+        model=&quot;claude-3-5-sonnet&quot;,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: f&quot;Summarize: {data}&quot;}],
+        max_tokens=500
+    )
+    
+    ctx.debug(f&quot;Generated summary: {summary.content[:100]}...&quot;)
+    return summary.content
+</code></pre></p>
+<h3>MCP Registry and Discovery</h3>
+<p>The MCP Registry launched in September 2025 as the official catalog for MCP servers.</p>
+<h4>Registry Architecture</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────┐
+│              Official MCP Registry                   │
+│    registry.modelcontextprotocol.io                 │
+├──────────────┬──────────────┬──────────────────────┤
+│ GitHub MCP   │ Docker MCP   │ Enterprise           │
+│ Registry     │ Catalog      │ Sub-registries       │
+└──────────────┴──────────────┴──────────────────────┘
+</code></pre>
+<h4>Discovery Methods</h4>
+<strong>API Access</strong>:
+<pre><code class="language-bash"># List servers
+curl &quot;https://registry.modelcontextprotocol.io/v0/servers?limit=10&quot;
+<h1>Search by capability</h1>
+curl &quot;https://registry.modelcontextprotocol.io/v0/servers?search=filesystem&quot;
+<h1>Get specific server</h1>
+curl &quot;https://registry.modelcontextprotocol.io/v0/servers/{server-id}&quot;
+</code></pre>
+<strong>Key Registries</strong>:
+<li><strong>Official Registry</strong>: registry.modelcontextprotocol.io</li>
+<li><strong>GitHub MCP Registry</strong>: github.com/mcp</li>
+<li><strong>Docker MCP Catalog</strong>: Docker Hub mcp/ namespace</li>
+<li><strong>MCP.so</strong>: Community marketplace with 2,000+ servers</li>
+<h3>Production MCP Servers</h3>
+<h4>Reference Servers (Official)</h4>
+<table>
+<tr><th>Server</th><th>Purpose</th><th>Transport</th></tr>
+<tr><td><code>filesystem</code></td><td>Secure file operations</td><td>stdio</td></tr>
+<tr><td><code>git</code></td><td>Repository management</td><td>stdio</td></tr>
+<tr><td><code>memory</code></td><td>Knowledge graph persistence</td><td>stdio</td></tr>
+<tr><td><code>fetch</code></td><td>Web content retrieval</td><td>stdio</td></tr>
+<tr><td><code>sequential-thinking</code></td><td>Reflective problem-solving</td><td>stdio</td></tr>
+</table>
+<h4>High-Value Enterprise Integrations</h4>
+<table>
+<tr><th>Category</th><th>Servers</th><th>Authentication</th></tr>
+<tr><td><strong>Productivity</strong></td><td>Slack, Notion, Google Drive, HubSpot</td><td>OAuth 2.0</td></tr>
+<tr><td><strong>Development</strong></td><td>GitHub, GitLab, Linear, Jira</td><td>OAuth/API Key</td></tr>
+<tr><td><strong>Data</strong></td><td>Postgres, MongoDB, Snowflake, BigQuery</td><td>Connection string</td></tr>
+<tr><td><strong>Cloud</strong></td><td>AWS, Azure, GCP, Cloudflare</td><td>IAM/Service accounts</td></tr>
+<tr><td><strong>Communication</strong></td><td>Gmail, Outlook, Twilio</td><td>OAuth 2.0</td></tr>
+</table>
+<h3>MCP Security Best Practices</h3>
+<h4>OWASP MCP Security Risks</h4>
+<p>1. <strong>Tool Poisoning</strong>: Malicious tool descriptions that manipulate LLM behavior
+2. <strong>Prompt Injection via Context</strong>: Attacks embedded in retrieved data
+3. <strong>Memory Poisoning</strong>: Compromised persistent memory systems
+4. <strong>Tool Interference</strong>: Cross-tool attacks in multi-server environments
+5. <strong>Token Exfiltration</strong>: Credential theft through tool calls</p>
+<h4>Security Checklist</h4>
+<pre><code class="language-">□ Use OAuth 2.1 with PKCE for authentication
+□ Implement Resource Indicators (RFC 8707)
+□ Enforce least-privilege tool permissions
+□ Validate all tool inputs against schemas
+□ Sanitize data before execution
+□ Run local servers in sandboxed environments
+□ Enable structured audit logging
+□ Implement rate limiting
+□ Use short-lived tokens with rotation
+□ Sign MCP components for integrity
+</code></pre>
+<h4>Defense-in-Depth Architecture</h4>
+<pre><code class="language-">Layer 1: Transport Security
+├── mTLS for all connections
+├── Certificate pinning
+└── Network isolation
+<p>Layer 2: Identity &amp; Authentication  
+├── OAuth 2.1 / OIDC
+├── Per-user token scoping
+└── MFA for sensitive operations</p>
+<p>Layer 3: Authorization
+├── Role-based access control (RBAC)
+├── Tool-level permissions
+└── Per-resource access policies</p>
+<p>Layer 4: Input Validation
+├── Schema validation
+├── Prompt injection detection
+└── Content filtering</p>
+<p>Layer 5: Monitoring &amp; Response
+├── Real-time anomaly detection
+├── Audit logging
+└── Automated threat response
+</code></pre></p>
+<hr>
+<h2>AI Agent Frameworks</h2>
+<h3>LangChain and LangGraph</h3>
+<p>LangChain remains the most widely adopted agent framework with 80K+ GitHub stars and comprehensive ecosystem support.</p>
+<h4>When to Use LangChain/LangGraph</h4>
+<table>
+<tr><th>Use Case</th><th>Recommendation</th></tr>
+<tr><td>Simple RAG chatbots</td><td>LangChain chains</td></tr>
+<tr><td>Complex multi-step workflows</td><td>LangGraph</td></tr>
+<tr><td>Production deployments</td><td>LangGraph + LangSmith</td></tr>
+<tr><td>Rapid prototyping</td><td>LangChain</td></tr>
+<tr><td>Stateful agent systems</td><td>LangGraph</td></tr>
+</table>
+<h4>LangGraph Architecture</h4>
+<pre><code class="language-python">from langgraph.graph import StateGraph, MessagesState
+from langchain_core.tools import tool
+from langchain_anthropic import ChatAnthropic
+<h1>Define tools</h1>
+@tool
+def search_database(query: str) -&gt; str:
+    &quot;&quot;&quot;Search the knowledge base for relevant information.&quot;&quot;&quot;
+    return perform_search(query)
+<h1>Create graph</h1>
+workflow = StateGraph(MessagesState)
+<h1>Add nodes</h1>
+workflow.add_node(&quot;agent&quot;, call_model)
+workflow.add_node(&quot;tools&quot;, ToolNode([search_database]))
+<h1>Add edges with conditional routing</h1>
+workflow.add_conditional_edges(
+    &quot;agent&quot;,
+    should_continue,
+    {&quot;continue&quot;: &quot;tools&quot;, &quot;end&quot;: END}
+)
+workflow.add_edge(&quot;tools&quot;, &quot;agent&quot;)
+<h1>Compile</h1>
+app = workflow.compile()
+</code></pre>
+<h4>LangChain Ecosystem</h4>
+<table>
+<tr><th>Component</th><th>Purpose</th></tr>
+<tr><td><code>langchain-core</code></td><td>Base abstractions</td></tr>
+<tr><td><code>langchain-community</code></td><td>600+ integrations</td></tr>
+<tr><td><code>langgraph</code></td><td>Graph-based orchestration</td></tr>
+<tr><td><code>langsmith</code></td><td>Observability platform</td></tr>
+<tr><td><code>langserve</code></td><td>Deployment utilities</td></tr>
+</table>
+<h3>Microsoft AutoGen</h3>
+<p>AutoGen excels at multi-agent conversational collaboration with strong Microsoft ecosystem integration.</p>
+<h4>AutoGen Architecture</h4>
+<pre><code class="language-python">from autogen import AssistantAgent, UserProxyAgent, GroupChat
+<h1>Define specialized agents</h1>
+researcher = AssistantAgent(
+    name=&quot;Researcher&quot;,
+    llm_config={&quot;model&quot;: &quot;gpt-4&quot;},
+    system_message=&quot;You research topics thoroughly.&quot;
+)
+<p>writer = AssistantAgent(
+    name=&quot;Writer&quot;, 
+    llm_config={&quot;model&quot;: &quot;gpt-4&quot;},
+    system_message=&quot;You write clear, engaging content.&quot;
+)</p>
+<p>reviewer = AssistantAgent(
+    name=&quot;Reviewer&quot;,
+    llm_config={&quot;model&quot;: &quot;gpt-4&quot;},
+    system_message=&quot;You review and provide feedback.&quot;
+)</p>
+<h1>Create group chat</h1>
+group_chat = GroupChat(
+    agents=[researcher, writer, reviewer],
+    messages=[],
+    max_round=10
+)
+<h1>Execute</h1>
+manager = GroupChatManager(groupchat=group_chat)
+user_proxy.initiate_chat(manager, message=&quot;Write an article about AI agents&quot;)
+</code></pre>
+<h4>AutoGen Strengths</h4>
+<li><strong>Conversational paradigm</strong>: Natural multi-agent dialogue</li>
+<li><strong>Flexible orchestration</strong>: Dynamic agent selection</li>
+<li><strong>Human-in-the-loop</strong>: Built-in approval workflows</li>
+<li><strong>Code execution</strong>: Integrated Docker sandboxing</li>
+<h3>CrewAI</h3>
+<p>CrewAI provides a role-based approach to multi-agent collaboration with the simplest learning curve.</p>
+<h4>CrewAI Pattern</h4>
+<pre><code class="language-python">from crewai import Agent, Task, Crew
+<h1>Define agents with roles</h1>
+researcher = Agent(
+    role=&quot;Senior Research Analyst&quot;,
+    goal=&quot;Uncover cutting-edge developments in AI&quot;,
+    backstory=&quot;Expert analyst with deep tech industry knowledge&quot;,
+    tools=[search_tool, scrape_tool]
+)
+<p>writer = Agent(
+    role=&quot;Tech Content Strategist&quot;,
+    goal=&quot;Craft compelling narratives about AI&quot;,
+    backstory=&quot;Renowned content strategist&quot;
+)</p>
+<h1>Define tasks</h1>
+research_task = Task(
+    description=&quot;Research the latest AI agent frameworks&quot;,
+    agent=researcher,
+    expected_output=&quot;Comprehensive research report&quot;
+)
+<p>writing_task = Task(
+    description=&quot;Write an article based on the research&quot;,
+    agent=writer,
+    expected_output=&quot;Engaging article draft&quot;
+)</p>
+<h1>Assemble crew</h1>
+crew = Crew(
+    agents=[researcher, writer],
+    tasks=[research_task, writing_task],
+    verbose=True
+)
+<p>result = crew.kickoff()
+</code></pre></p>
+<h4>CrewAI Features</h4>
+<li><strong>Role-based design</strong>: Clear agent responsibilities</li>
+<li><strong>Task delegation</strong>: Automatic handoffs</li>
+<li><strong>Memory systems</strong>: Short and long-term memory</li>
+<li><strong>Process types</strong>: Sequential, hierarchical, consensus</li>
+<h3>OpenAI Agents SDK</h3>
+<p>The OpenAI Agents SDK provides managed agent infrastructure with native OpenAI integration.</p>
+<h4>OpenAI Agents Pattern</h4>
+<pre><code class="language-python">from openai import OpenAI
+from agents import Agent, Runner
+<p>client = OpenAI()</p>
+<p>agent = Agent(
+    name=&quot;Research Assistant&quot;,
+    instructions=&quot;You help users research topics thoroughly.&quot;,
+    tools=[
+        {&quot;type&quot;: &quot;code_interpreter&quot;},
+        {&quot;type&quot;: &quot;file_search&quot;},
+        custom_tool
+    ]
+)</p>
+<p>async def main():
+    result = await Runner.run(
+        agent=agent,
+        input=&quot;Research the MCP protocol ecosystem&quot;
+    )
+    print(result.final_output)
+</code></pre></p>
+<h3>Framework Selection Guide</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────┐
+│                    Decision Matrix                           │
+├─────────────────┬───────────────────────────────────────────┤
+│ Primary Need    │ Recommended Framework                      │
+├─────────────────┼───────────────────────────────────────────┤
+│ Complex state   │ LangGraph                                  │
+│ management      │                                           │
+├─────────────────┼───────────────────────────────────────────┤
+│ Multi-agent     │ AutoGen or CrewAI                         │
+│ collaboration   │                                           │
+├─────────────────┼───────────────────────────────────────────┤
+│ Rapid           │ CrewAI or LangChain                       │
+│ prototyping     │                                           │
+├─────────────────┼───────────────────────────────────────────┤
+│ OpenAI          │ OpenAI Agents SDK                         │
+│ ecosystem       │                                           │
+├─────────────────┼───────────────────────────────────────────┤
+│ Microsoft       │ AutoGen or Semantic Kernel                │
+│ ecosystem       │                                           │
+├─────────────────┼───────────────────────────────────────────┤
+│ Production      │ LangGraph + LangSmith                     │
+│ deployment      │                                           │
+└─────────────────┴───────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>Vector Databases and RAG Infrastructure</h2>
+<h3>Vector Database Landscape</h3>
+<h4>Top Vector Databases for AI Agents (2026)</h4>
+<table>
+<tr><th>Database</th><th>Type</th><th>Best For</th><th>Startup Time</th></tr>
+<tr><td><strong>Pinecone</strong></td><td>Managed</td><td>Production scale, serverless</td><td>Instant</td></tr>
+<tr><td><strong>Weaviate</strong></td><td>Open-source</td><td>Multimodal, hybrid search</td><td>~1 min</td></tr>
+<tr><td><strong>Qdrant</strong></td><td>Open-source</td><td>Real-time, filtering</td><td>~30 sec</td></tr>
+<tr><td><strong>Milvus</strong></td><td>Open-source</td><td>Billion-scale, GPU acceleration</td><td>~2 min</td></tr>
+<tr><td><strong>pgvector</strong></td><td>Extension</td><td>PostgreSQL integration</td><td>N/A</td></tr>
+<tr><td><strong>Chroma</strong></td><td>Open-source</td><td>Local development, prototyping</td><td>Instant</td></tr>
+</table>
+<h4>Selection Criteria</h4>
+<pre><code class="language-">Performance Requirements:
+├── Query latency &lt; 100ms → Pinecone, Qdrant, pgvector
+├── Billions of vectors → Milvus, Pinecone
+└── Edge deployment → Qdrant, Chroma
+<p>Feature Requirements:
+├── Hybrid search → Weaviate, Qdrant, Pinecone
+├── Multimodal → Weaviate, Milvus
+└── Metadata filtering → All support (Qdrant excels)</p>
+<p>Operational Requirements:
+├── Managed service → Pinecone, Weaviate Cloud
+├── Self-hosted → Qdrant, Milvus, Chroma
+└── Existing Postgres → pgvector
+</code></pre></p>
+<h3>RAG Architecture Patterns</h3>
+<h4>Basic RAG Pipeline</h4>
+<pre><code class="language-">Query → Embed → Vector Search → Retrieve Top-K → Augment Prompt → Generate
+</code></pre>
+<h4>Agentic RAG Architecture</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────┐
+│                     Query Reception                          │
+│  (Parse intent, assess complexity, plan retrieval)          │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Tool Selection                             │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐      │
+│  │ Vector   │ │ SQL      │ │ Web      │ │ Document │      │
+│  │ Search   │ │ Database │ │ Search   │ │ API      │      │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘      │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│               Iterative Retrieval Loop                       │
+│  (Retrieve → Evaluate → Reformulate → Retrieve again)       │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                Response Generation                           │
+│  (Synthesize across sources, cite evidence, validate)       │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>RAG Best Practices</h4>
+<p>1. <strong>Chunk size</strong>: 512 tokens optimal for most use cases
+2. <strong>Overlap</strong>: 50-100 token overlap between chunks
+3. <strong>Embedding models</strong>: text-embedding-3-large or equivalent
+4. <strong>Reranking</strong>: Add cross-encoder reranking for quality
+5. <strong>Hybrid search</strong>: Combine dense + sparse for best results</p>
+<h3>Agentic RAG Systems</h3>
+<h4>Key Differentiators from Traditional RAG</h4>
+<table>
+<tr><th>Aspect</th><th>Traditional RAG</th><th>Agentic RAG</th></tr>
+<tr><td>Retrieval</td><td>Single-shot</td><td>Multi-step, iterative</td></tr>
+<tr><td>Sources</td><td>Fixed vector store</td><td>Dynamic tool selection</td></tr>
+<tr><td>Evaluation</td><td>None</td><td>Self-verification</td></tr>
+<tr><td>Adaptation</td><td>None</td><td>Query reformulation</td></tr>
+<tr><td>Actions</td><td>Read-only</td><td>Can write/update</td></tr>
+</table>
+<hr>
+<h2>Tool Integration Platforms</h2>
+<h3>Composio</h3>
+<p>Composio is an agent-native integration platform providing 250+ production-ready tool integrations.</p>
+<h4>Composio Architecture</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────┐
+│                    Your AI Agent                             │
+│              (LangChain, CrewAI, AutoGen)                   │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Composio Action Layer                      │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
+│  │ OAuth       │ │ Token       │ │ Schema      │          │
+│  │ Management  │ │ Lifecycle   │ │ Validation  │          │
+│  └─────────────┘ └─────────────┘ └─────────────┘          │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────┬──────────┬──────────┬──────────┬──────────────┐
+│ GitHub   │ Slack    │ Notion   │ Salesforce│ 250+ more   │
+└──────────┴──────────┴──────────┴──────────┴──────────────┘
+</code></pre>
+<h4>Composio Integration</h4>
+<pre><code class="language-python">from composio import Composio
+from composio_langchain import LangChainProvider
+<p>composio = Composio(provider=LangChainProvider())</p>
+<h1>Get tools for specific apps</h1>
+tools = composio.tools.get(
+    user_id=&quot;user@company.com&quot;,
+    toolkits=[&quot;GITHUB&quot;, &quot;SLACK&quot;, &quot;NOTION&quot;]
+)
+<h1>Use in your agent</h1>
+agent = create_react_agent(llm, tools)
+</code></pre>
+<h4>Key Features</h4>
+<li><strong>Managed OAuth</strong>: Automatic token refresh and rotation</li>
+<li><strong>250+ integrations</strong>: Pre-built, tested tool definitions</li>
+<li><strong>Framework support</strong>: LangChain, CrewAI, AutoGen, OpenAI</li>
+<li><strong>Real-time dashboards</strong>: API performance monitoring</li>
+<li><strong>SOC 2 Type II</strong>: Enterprise compliance</li>
+<h3>Code Execution Sandboxes</h3>
+<h4>E2B (Enterprise-Ready)</h4>
+<p>E2B provides secure, isolated sandboxes for AI-generated code execution.</p>
+<pre><code class="language-python">from e2b_code_interpreter import Sandbox
+<p>with Sandbox() as sandbox:
+    # Execute AI-generated code safely
+    execution = sandbox.run_code(&quot;&quot;&quot;
+import pandas as pd
+import matplotlib.pyplot as plt</p>
+<p>df = pd.DataFrame({'x': [1,2,3], 'y': [4,5,6]})
+plt.plot(df['x'], df['y'])
+plt.savefig('chart.png')
+    &quot;&quot;&quot;)
+    
+    # Get results
+    print(execution.text)
+    chart = sandbox.download_file('chart.png')
+</code></pre></p>
+<h4>Sandbox Comparison</h4>
+<table>
+<tr><th>Platform</th><th>Isolation</th><th>Startup</th><th>Session Limit</th><th>Best For</th></tr>
+<tr><td><strong>E2B</strong></td><td>Firecracker MicroVM</td><td>~150ms</td><td>24 hours</td><td>AI agents, code interpreters</td></tr>
+<tr><td><strong>Modal</strong></td><td>gVisor</td><td>~300ms</td><td>Persistent</td><td>GPU workloads</td></tr>
+<tr><td><strong>Cloudflare</strong></td><td>V8 Isolates</td><td>Instant</td><td>30 sec CPU</td><td>Edge, lightweight</td></tr>
+<tr><td><strong>Together</strong></td><td>Firecracker</td><td>~500ms</td><td>Configurable</td><td>GPU + sandbox</td></tr>
+</table>
+<h3>Tool Selection Strategy</h3>
+<h4>Tool Count Management</h4>
+<p>Research shows accuracy degrades significantly above 50 tools. Implement dynamic loading:</p>
+<pre><code class="language-python">class DynamicToolLoader:
+    def __init__(self, tool_registry):
+        self.registry = tool_registry
+        
+    async def get_relevant_tools(self, query: str, max_tools: int = 20):
+        # Embed query
+        query_embedding = await embed(query)
+        
+        # Find semantically relevant tools
+        relevant = self.registry.semantic_search(
+            query_embedding, 
+            k=max_tools
+        )
+        
+        return relevant
+</code></pre>
+<hr>
+<h2>Observability and Evaluation</h2>
+<h3>Observability Platforms</h3>
+<h4>Platform Comparison</h4>
+<table>
+<tr><th>Platform</th><th>Type</th><th>Best For</th><th>Pricing Model</th></tr>
+<tr><td><strong>LangSmith</strong></td><td>Managed</td><td>LangChain users</td><td>Usage-based</td></tr>
+<tr><td><strong>Langfuse</strong></td><td>Open-source</td><td>Self-hosted, budget</td><td>Free/SaaS</td></tr>
+<tr><td><strong>Braintrust</strong></td><td>Managed</td><td>CI/CD integration</td><td>Usage-based</td></tr>
+<tr><td><strong>Arize Phoenix</strong></td><td>Open-source</td><td>RAG evaluation</td><td>Free/Enterprise</td></tr>
+<tr><td><strong>Datadog LLM</strong></td><td>Managed</td><td>Existing Datadog users</td><td>Usage-based</td></tr>
+</table>
+<h4>Performance Benchmarks</h4>
+<p>Based on 100-query benchmark (multi-agent travel planning):</p>
+<table>
+<tr><th>Platform</th><th>Overhead</th><th>Events/Step</th></tr>
+<tr><td>LangSmith</td><td>~0%</td><td>Low</td></tr>
+<tr><td>Laminar</td><td>~5%</td><td>Low</td></tr>
+<tr><td>AgentOps</td><td>~12%</td><td>Medium</td></tr>
+<tr><td>Langfuse</td><td>~15%</td><td>High</td></tr>
+</table>
+<h4>Essential Metrics</h4>
+<pre><code class="language-yaml">Latency Metrics:
+  <li>Time to first token (TTFT)</li>
+  <li>Total response time</li>
+  <li>Tool execution latency</li>
+  <li>Inter-agent communication time</li>
+<p>Quality Metrics:
+  <li>Task completion rate</li>
+  <li>Hallucination rate</li>
+  <li>Tool selection accuracy</li>
+  <li>User satisfaction scores</li></p>
+<p>Cost Metrics:
+  <li>Tokens per task</li>
+  <li>API costs per user</li>
+  <li>Cost per successful completion</li>
+  <li>Waste ratio (failed attempts)</li>
+</code></pre></p>
+<h3>Evaluation Frameworks</h3>
+<h4>LLM-as-Judge Pattern</h4>
+<pre><code class="language-python">EVAL_PROMPT = &quot;&quot;&quot;
+Evaluate the agent's response on these criteria (1-5 scale):
+<p>1. Relevance: Does it answer the question?
+2. Accuracy: Are facts correct?
+3. Completeness: Are all aspects addressed?
+4. Coherence: Is it well-structured?</p>
+<p>Response to evaluate:
+{response}</p>
+<p>Original question:
+{question}</p>
+<p>Ground truth (if available):
+{ground_truth}</p>
+<p>Provide JSON: {&quot;relevance&quot;: X, &quot;accuracy&quot;: X, &quot;completeness&quot;: X, &quot;coherence&quot;: X, &quot;reasoning&quot;: &quot;...&quot;}
+&quot;&quot;&quot;
+</code></pre></p>
+<h4>Evaluation Checklist</h4>
+<pre><code class="language-">□ Unit tests for individual tools
+□ Integration tests for tool chains
+□ Golden dataset for regression testing
+□ A/B testing framework
+□ Human evaluation pipeline
+□ Automated red teaming
+□ Production monitoring dashboards
+</code></pre>
+<h3>Production Monitoring</h3>
+<h4>OpenTelemetry Semantic Conventions</h4>
+<pre><code class="language-python">from opentelemetry import trace
+<p>tracer = trace.get_tracer(&quot;ai-agent&quot;)</p>
+<p>with tracer.start_as_current_span(&quot;agent.execute&quot;) as span:
+    span.set_attribute(&quot;gen_ai.system&quot;, &quot;anthropic&quot;)
+    span.set_attribute(&quot;gen_ai.request.model&quot;, &quot;claude-3-5-sonnet&quot;)
+    span.set_attribute(&quot;gen_ai.usage.input_tokens&quot;, input_tokens)
+    span.set_attribute(&quot;gen_ai.usage.output_tokens&quot;, output_tokens)
+    span.set_attribute(&quot;agent.tool_calls&quot;, tool_count)
+    span.set_attribute(&quot;agent.iteration&quot;, iteration)
+</code></pre></p>
+<hr>
+<h2>Best Practices for Ecosystem Integration</h2>
+<h3>Architecture Patterns</h3>
+<h4>The Action Layer Pattern</h4>
+<p>Every production agent needs a robust action layer that handles:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────┐
+│                    Agent Brain (LLM)                         │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Action Layer                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ Authentication: OAuth, API keys, JWT, SAML          │   │
+│  ├─────────────────────────────────────────────────────┤   │
+│  │ Authorization: RBAC, tool permissions, scopes       │   │
+│  ├─────────────────────────────────────────────────────┤   │
+│  │ Validation: Input schemas, output verification       │   │
+│  ├─────────────────────────────────────────────────────┤   │
+│  │ Execution: Rate limiting, retry logic, timeouts     │   │
+│  ├─────────────────────────────────────────────────────┤   │
+│  │ Observability: Logging, tracing, metrics            │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   External Services                          │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>Model Fleet Architecture</h4>
+<p>Instead of monolithic agents, use specialized models:</p>
+<pre><code class="language-yaml">Model Fleet:
+  router:
+    model: claude-3-haiku
+    purpose: Intent classification, tool selection
+    
+  reasoner:
+    model: claude-3-5-sonnet
+    purpose: Complex reasoning, planning
+    
+  executor:
+    model: claude-3-haiku
+    purpose: Tool execution, simple tasks
+    
+  validator:
+    model: claude-3-5-sonnet
+    purpose: Output verification, quality checks
+</code></pre>
+<h3>Security and Compliance</h3>
+<h4>Defense-in-Depth Checklist</h4>
+<pre><code class="language-">Authentication &amp; Authorization:
+□ OAuth 2.1 with PKCE
+□ Short-lived tokens (&lt; 1 hour)
+□ Automatic token rotation
+□ Per-user tool permissions
+□ Audit logging for all actions
+<p>Input Validation:
+□ Schema validation on all tool inputs
+□ Prompt injection detection
+□ Content filtering for sensitive data
+□ Rate limiting per user/tool</p>
+<p>Execution Security:
+□ Sandboxed code execution
+□ Network isolation
+□ Read-only filesystem by default
+□ Resource limits (CPU, memory, time)</p>
+<p>Monitoring:
+□ Anomaly detection
+□ Failed authentication alerts
+□ Unusual tool usage patterns
+□ Data exfiltration detection
+</code></pre></p>
+<h3>Cost Optimization</h3>
+<h4>Token Efficiency Strategies</h4>
+<table>
+<tr><th>Strategy</th><th>Savings</th><th>Implementation</th></tr>
+<tr><td>Dynamic tool loading</td><td>85%</td><td>Semantic tool search</td></tr>
+<tr><td>Context compression</td><td>30-50%</td><td>Summarization, sliding window</td></tr>
+<tr><td>Model routing</td><td>40-60%</td><td>Haiku for simple, Sonnet for complex</td></tr>
+<tr><td>Caching</td><td>Variable</td><td>Response/embedding caching</td></tr>
+<tr><td>Batch processing</td><td>20-30%</td><td>Group similar requests</td></tr>
+</table>
+<hr>
+<h2>Implementation Checklists</h2>
+<h3>Pre-Build Checklist</h3>
+<pre><code class="language-">□ Define clear success metrics
+□ Choose appropriate framework (see selection guide)
+□ Design tool inventory (aim for &lt; 20 active tools)
+□ Plan authentication strategy
+□ Set up observability from day one
+□ Create evaluation dataset
+□ Define security requirements
+</code></pre>
+<h3>MCP Server Development Checklist</h3>
+<pre><code class="language-">□ Use FastMCP for rapid development
+□ Implement comprehensive input validation
+□ Add structured error handling
+□ Include progress reporting for long operations
+□ Write descriptive tool docstrings
+□ Test with MCP Inspector
+□ Register in MCP Registry
+□ Document authentication requirements
+</code></pre>
+<h3>Production Deployment Checklist</h3>
+<pre><code class="language-">□ Load testing completed
+□ Error handling covers all edge cases
+□ Retry logic with exponential backoff
+□ Circuit breakers for external services
+□ Graceful degradation paths
+□ Health check endpoints
+□ Alerting configured
+□ Runbooks documented
+□ Incident response plan ready
+</code></pre>
+<hr>
+<h2>Resources and References</h2>
+<h3>Official Documentation</h3>
+<li><strong>MCP Specification</strong>: modelcontextprotocol.io/specification</li>
+<li><strong>MCP Registry</strong>: registry.modelcontextprotocol.io</li>
+<li><strong>LangChain Docs</strong>: docs.langchain.com</li>
+<li><strong>CrewAI Docs</strong>: docs.crewai.com</li>
+<li><strong>AutoGen Docs</strong>: microsoft.github.io/autogen</li>
+<h3>Tools and Platforms</h3>
+<li><strong>FastMCP</strong>: gofastmcp.com</li>
+<li><strong>Composio</strong>: composio.dev</li>
+<li><strong>E2B</strong>: e2b.dev</li>
+<li><strong>Langfuse</strong>: langfuse.com</li>
+<li><strong>LangSmith</strong>: smith.langchain.com</li>
+<h3>Community Resources</h3>
+<li><strong>MCP GitHub</strong>: github.com/modelcontextprotocol</li>
+<li><strong>GitHub MCP Registry</strong>: github.com/mcp</li>
+<li><strong>Docker MCP Catalog</strong>: hub.docker.com/u/mcp</li>
+<li><strong>MCP.so Marketplace</strong>: mcp.so</li>
+<h3>Security References</h3>
+<li><strong>OWASP MCP Guide</strong>: genai.owasp.org/resource/cheatsheet-mcp-security</li>
+<li><strong>MCP Security Best Practices</strong>: modelcontextprotocol.io/specification/draft/basic/security_best_practices</li>
+<h3>Academic Papers</h3>
+<li>"Beyond the Protocol: Attack Vectors in MCP" (arXiv, May 2025)</li>
+<li>"We Urgently Need Privilege Management in MCP" (arXiv, July 2025)</li>
+<li>"Agentic RAG: Survey and Benchmarks" (arXiv, January 2025)</li>
+</ul>
+<hr>
+<h2>Appendix: Quick Reference Cards</h2>
+<h3>MCP Server Template (FastMCP)</h3>
+<pre><code class="language-python">from fastmcp import FastMCP, Context
+<p>mcp = FastMCP(
+    &quot;My Server&quot;,
+    dependencies=[&quot;requests&quot;],  # Auto-install
+)</p>
+<p>@mcp.tool
+async def my_tool(ctx: Context, param: str) -&gt; dict:
+    &quot;&quot;&quot;Clear description for the LLM.
+    
+    Args:
+        param: Detailed parameter description
+    &quot;&quot;&quot;
+    ctx.info(f&quot;Processing: {param}&quot;)
+    return {&quot;result&quot;: &quot;success&quot;}</p>
+<p>@mcp.resource(&quot;data://{id}&quot;)
+def get_data(id: str) -&gt; str:
+    &quot;&quot;&quot;Retrieve data by ID.&quot;&quot;&quot;
+    return data_store.get(id)</p>
+<p>if __name__ == &quot;__main__&quot;:
+    mcp.run()
+</code></pre></p>
+<h3>Tool Definition Template</h3>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;search_documents&quot;,
+  &quot;description&quot;: &quot;Search the knowledge base for relevant documents. Use when you need to find information about specific topics.&quot;,
+  &quot;parameters&quot;: {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+      &quot;query&quot;: {
+        &quot;type&quot;: &quot;string&quot;,
+        &quot;description&quot;: &quot;The search query&quot;
+      },
+      &quot;filters&quot;: {
+        &quot;type&quot;: &quot;object&quot;,
+        &quot;description&quot;: &quot;Optional filters (date, author, category)&quot;
+      },
+      &quot;limit&quot;: {
+        &quot;type&quot;: &quot;integer&quot;,
+        &quot;description&quot;: &quot;Maximum results (default: 10, max: 50)&quot;
+      }
+    },
+    &quot;required&quot;: [&quot;query&quot;]
+  }
+}
+</code></pre>
+<h3>Observability Setup (Langfuse)</h3>
+<pre><code class="language-python">from langfuse import observe
+from langfuse.openai import openai  # Drop-in replacement
+<p>@observe()
+def agent_step(query: str) -&gt; str:
+    response = openai.chat.completions.create(
+        model=&quot;gpt-4&quot;,
+        messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: query}]
+    )
+    return response.choices[0].message.content
+</code></pre></p>
+<hr>
+<strong>Document Version</strong>: 2.0  
+<strong>Last Updated</strong>: January 2026  
+<strong>Maintainer</strong>: AI Agent Implementation Team
+<em>This guide is intended as a living document. For the latest updates, check the official documentation sources listed in the References section.</em>
+  </article>
+</body>
+</html>

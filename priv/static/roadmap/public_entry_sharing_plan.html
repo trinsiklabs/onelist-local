@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Public Entry Sharing Implementation Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Public Entry Sharing Implementation Plan</h1>
+<strong>Document Version:</strong> 2026-01-29 (Revised)
+<strong>Status:</strong> Ready for Implementation
+<strong>Approach:</strong> Test-Driven Development (TDD)
+<strong>Reference:</strong> <a href="./mvp_public_content_plan.md">MVP Public Content Plan</a>
+<hr>
+<h2>1. Overview</h2>
+<p>Enable users to share entries publicly via URLs like <code>onelist.my/:username/:public_id</code>. The system generates <code>html_public</code> representations automatically on every save, and users can toggle entries between public/private with a confirmation dialog showing exactly what will be decrypted.</p>
+<h3>1.1 Core Principles</h3>
+<p>1. <strong>E2EE is non-negotiable</strong> - All content encrypted by default
+2. <strong>Public is opt-in</strong> - User explicitly chooses to make content public
+3. <strong>Full disclosure</strong> - User sees exactly what will be decrypted (text + assets)
+4. <strong>Instant toggle</strong> - <code>html_public</code> pre-generated, toggle is just a permission change
+5. <strong>Cleanup on private</strong> - Public asset copies removed when no longer referenced</p>
+<h3>1.2 Key Features</h3>
+<p>1. <strong>Username for Users</strong> - Required for public URLs
+2. <strong><code>html_public</code> Generation</strong> - Auto-generated on every content save (not just when making public)
+3. <strong>Public Toggle</strong> - Make entries public/private with consent dialog
+4. <strong>Public Entry Controller</strong> - Serve public entries at <code>/:username/:public_id</code>
+5. <strong>API Endpoints</strong> - Publish, unpublish, and preview endpoints
+6. <strong>Public Assets</strong> - Decrypt and upload to R2 public bucket with reference counting
+7. <strong>CDN Integration</strong> - Cloudflare cache invalidation on changes</p>
+<h3>1.3 Implementation Phases</h3>
+<table>
+<tr><th>Phase</th><th>Scope</th></tr>
+<tr><td><strong>Phase 1</strong></td><td>Username + <code>html_public</code> + toggle + controller + API endpoints</td></tr>
+<tr><td><strong>Phase 2</strong></td><td>Public assets (R2 upload, reference counting, CDN cache purge)</td></tr>
+</table>
+<hr>
+<h2>2. Database Changes</h2>
+<h3>2.1 Migration: Add Username to Users</h3>
+<pre><code class="language-elixir"># priv/repo/migrations/TIMESTAMP_add_username_to_users.exs
+defmodule Onelist.Repo.Migrations.AddUsernameToUsers do
+  use Ecto.Migration
+<p>def change do
+    alter table(:users) do
+      add :username, :string, size: 30
+    end</p>
+<p>create unique_index(:users, [:username])
+  end
+end
+</code></pre></p>
+<h3>2.2 Migration: Add Encrypted Flag to Representations</h3>
+<pre><code class="language-elixir"># priv/repo/migrations/TIMESTAMP_add_encrypted_to_representations.exs
+defmodule Onelist.Repo.Migrations.AddEncryptedToRepresentations do
+  use Ecto.Migration
+<p>def change do
+    alter table(:representations) do
+      add :encrypted, :boolean, default: true, null: false
+    end</p>
+<p># Existing representations are encrypted
+    execute &quot;UPDATE representations SET encrypted = true&quot;, &quot;&quot;</p>
+<p># html_public representations are never encrypted
+    execute &quot;UPDATE representations SET encrypted = false WHERE type = 'html_public'&quot;, &quot;&quot;</p>
+<p>create index(:representations, [:entry_id, :type],
+      where: &quot;type = 'html_public'&quot;,
+      name: :representations_html_public_idx)
+  end
+end
+</code></pre></p>
+<h3>2.3 Migration: Add Public Asset Fields (Phase 2)</h3>
+<pre><code class="language-elixir"># priv/repo/migrations/TIMESTAMP_add_public_fields_to_assets.exs
+defmodule Onelist.Repo.Migrations.AddPublicFieldsToAssets do
+  use Ecto.Migration
+<p>def change do
+    alter table(:assets) do
+      add :public_url, :string
+      add :public_random_id, :string, size: 32
+      add :public_entry_ids, {:array, :binary_id}, default: []
+    end</p>
+<p>create unique_index(:assets, [:public_random_id])
+    create index(:assets, [:public_url], where: &quot;public_url IS NOT NULL&quot;)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>3. Schema Changes</h2>
+<h3>3.1 User Schema - Add Username</h3>
+<pre><code class="language-elixir"># In lib/onelist/accounts/user.ex
+field :username, :string
+<h1>Add validation</h1>
+def username_changeset(user, attrs) do
+  user
+  |&gt; cast(attrs, [:username])
+  |&gt; validate_required([:username])
+  |&gt; validate_length(:username, min: 3, max: 30)
+  |&gt; validate_format(:username, ~r/^[a-zA-Z0-9][a-zA-Z0-9_-]<em>[a-zA-Z0-9]$/,
+      message: &quot;must start and end with a letter or number, can contain underscores and hyphens&quot;)
+  |&gt; unique_constraint(:username)
+end
+</code></pre>
+<h3>3.2 Representation Schema - Add Encrypted Flag</h3>
+<pre><code class="language-elixir"># In lib/onelist/entries/representation.ex
+field :encrypted, :boolean, default: true
+<h1>Update @representation_types to include html_public</h1>
+@representation_types ~w(markdown plaintext html html_public editor_json)
+</code></pre>
+<strong>Note:</strong> The current code has <code>public_html</code> which should be changed to <code>html_public</code> to match the roadmap convention.
+<h3>3.3 Asset Schema - Add Public Fields (Phase 2)</h3>
+<pre><code class="language-elixir"># In lib/onelist/entries/asset.ex
+field :public_url, :string
+field :public_random_id, :string
+field :public_entry_ids, {:array, :binary_id}, default: []
+</code></pre>
+<hr>
+<h2>4. API Endpoints</h2>
+<h3>4.1 Public Entry Access (Unauthenticated)</h3>
+<pre><code class="language-">GET /:username/:public_id
+  → Returns rendered html_public with embedded public asset URLs
+  → Cacheable by Cloudflare CDN (Cache-Control: public, max-age=3600)
+  → 404 if entry.public = false or entry/user not found
+</code></pre>
+<h3>4.2 Toggle Visibility (Authenticated)</h3>
+<pre><code class="language-">POST /api/v1/entries/:id/publish
+  → Triggers full publish flow (generate html_public if needed, publish assets)
+  → Returns { public_url: string, assets_published: [...] }
+<p>POST /api/v1/entries/:id/unpublish
+  → Sets entry.public = false
+  → Triggers asset cleanup (remove entry from public_entry_ids, delete if empty)
+  → Purges CDN cache
+  → Returns { assets_removed: [...] }
+</code></pre></p>
+<h3>4.3 Pre-flight Check (Authenticated)</h3>
+<pre><code class="language-">GET /api/v1/entries/:id/publish-preview
+  → Returns list of assets that would be published with sizes
+  → Used to populate consent dialog before user confirms
+  → Returns {
+      public_url_preview: string,
+      assets: [{ filename, size, mime_type }],
+      asset_count: integer
+    }
+</code></pre>
+<hr>
+<h2>5. Test Files to Create (TDD - Write First)</h2>
+<h3>5.1 Schema Tests</h3>
+<h4><code>test/onelist/accounts/user_username_test.exs</code></h4>
+<pre><code class="language-elixir">defmodule Onelist.Accounts.UserUsernameTest do
+  use Onelist.DataCase, async: true
+<p>alias Onelist.Accounts.User</p>
+<p>describe &quot;username_changeset/2&quot; do
+    test &quot;valid username&quot;
+    test &quot;requires username&quot;
+    test &quot;username minimum length 3&quot;
+    test &quot;username maximum length 30&quot;
+    test &quot;username must start with letter or number&quot;
+    test &quot;username must end with letter or number&quot;
+    test &quot;username allows underscores and hyphens in middle&quot;
+    test &quot;username rejects special characters&quot;
+    test &quot;username rejects spaces&quot;
+    test &quot;username unique constraint&quot;
+    test &quot;username allows letters, numbers, underscores, hyphens&quot;
+  end
+end
+</code></pre></p>
+<h4><code>test/onelist/entries/representation_encrypted_test.exs</code></h4>
+<pre><code class="language-elixir">defmodule Onelist.Entries.RepresentationEncryptedTest do
+  use Onelist.DataCase, async: true
+<p>alias Onelist.Entries.Representation</p>
+<p>describe &quot;encrypted field&quot; do
+    test &quot;defaults to true for new representations&quot;
+    test &quot;html_public type sets encrypted to false&quot;
+    test &quot;validates encrypted is boolean&quot;
+  end
+end
+</code></pre></p>
+<h3>5.2 Context Tests</h3>
+<h4><code>test/onelist/accounts_username_test.exs</code></h4>
+<pre><code class="language-elixir">defmodule Onelist.AccountsUsernameTest do
+  use Onelist.DataCase, async: true
+<p>alias Onelist.Accounts</p>
+<p>describe &quot;set_username/2&quot; do
+    test &quot;sets username for user&quot;
+    test &quot;fails for duplicate username&quot;
+    test &quot;fails for invalid username format&quot;
+    test &quot;username is case-insensitive for uniqueness&quot;
+  end</p>
+<p>describe &quot;get_user_by_username/1&quot; do
+    test &quot;returns user by username&quot;
+    test &quot;username lookup is case-insensitive&quot;
+    test &quot;returns nil for non-existent username&quot;
+  end</p>
+<p>describe &quot;username_available?/1&quot; do
+    test &quot;returns true for available username&quot;
+    test &quot;returns false for taken username&quot;
+    test &quot;check is case-insensitive&quot;
+  end
+end
+</code></pre></p>
+<h4><code>test/onelist/entries_public_test.exs</code></h4>
+<pre><code class="language-elixir">defmodule Onelist.EntriesPublicTest do
+  use Onelist.DataCase, async: true
+<p>alias Onelist.Entries</p>
+<p>describe &quot;generate_html_public/1&quot; do
+    test &quot;generates html_public representation from markdown&quot;
+    test &quot;generates html_public with sanitized HTML&quot;
+    test &quot;sets encrypted=false on html_public representation&quot;
+    test &quot;updates existing html_public on re-generation&quot;
+    test &quot;returns error for entry without markdown representation&quot;
+  end</p>
+<p>describe &quot;make_entry_public/1&quot; do
+    test &quot;sets entry.public to true&quot;
+    test &quot;generates html_public if not exists&quot;
+    test &quot;returns entry with html_public preloaded&quot;
+    test &quot;fails for entry without content&quot;
+    test &quot;fails for user without username&quot;
+  end</p>
+<p>describe &quot;make_entry_private/1&quot; do
+    test &quot;sets entry.public to false&quot;
+    test &quot;keeps html_public representation (for quick re-publish)&quot;
+    test &quot;returns updated entry&quot;
+  end</p>
+<p>describe &quot;get_public_entry/2&quot; do
+    test &quot;returns public entry by username and public_id&quot;
+    test &quot;preloads html_public representation&quot;
+    test &quot;returns nil for private entry&quot;
+    test &quot;returns nil for non-existent entry&quot;
+    test &quot;returns nil for non-existent username&quot;
+    test &quot;username lookup is case-insensitive&quot;
+  end</p>
+<p>describe &quot;list_public_entries/1&quot; do
+    test &quot;returns all public entries for user&quot;
+    test &quot;orders by inserted_at descending&quot;
+    test &quot;supports pagination&quot;
+    test &quot;excludes private entries&quot;
+  end</p>
+<p>describe &quot;public_entry_url/1&quot; do
+    test &quot;returns URL for public entry&quot;
+    test &quot;uses username and public_id&quot;
+    test &quot;returns nil for private entry&quot;
+    test &quot;returns nil for user without username&quot;
+  end</p>
+<p>describe &quot;get_publish_preview/1&quot; do
+    test &quot;returns preview URL and asset list&quot;
+    test &quot;includes asset filename, size, mime_type&quot;
+    test &quot;returns asset_count&quot;
+  end
+end
+</code></pre></p>
+<h3>5.3 Controller Tests</h3>
+<h4><code>test/onelist_web/controllers/public_entry_controller_test.exs</code></h4>
+<pre><code class="language-elixir">defmodule OnelistWeb.PublicEntryControllerTest do
+  use OnelistWeb.ConnCase, async: true
+<p>describe &quot;GET /:username/:public_id&quot; do
+    test &quot;renders public entry HTML&quot;
+    test &quot;includes entry title in page title&quot;
+    test &quot;includes meta tags for SEO&quot;
+    test &quot;includes Open Graph tags for social sharing&quot;
+    test &quot;sets Cache-Control header for CDN&quot;
+    test &quot;returns 404 for private entry&quot;
+    test &quot;returns 404 for non-existent entry&quot;
+    test &quot;returns 404 for non-existent username&quot;
+    test &quot;username is case-insensitive&quot;
+    test &quot;renders assets with public URLs&quot; # Phase 2
+  end
+end
+</code></pre></p>
+<h4><code>test/onelist_web/controllers/api/v1/entry_publish_controller_test.exs</code></h4>
+<pre><code class="language-elixir">defmodule OnelistWeb.Api.V1.EntryPublishControllerTest do
+  use OnelistWeb.ConnCase, async: true
+<p>describe &quot;POST /api/v1/entries/:id/publish&quot; do
+    test &quot;publishes entry and returns public_url&quot;
+    test &quot;returns assets_published list&quot;
+    test &quot;requires authentication&quot;
+    test &quot;returns 403 for other user's entry&quot;
+    test &quot;returns 404 for non-existent entry&quot;
+  end</p>
+<p>describe &quot;POST /api/v1/entries/:id/unpublish&quot; do
+    test &quot;unpublishes entry&quot;
+    test &quot;returns assets_removed list&quot;
+    test &quot;requires authentication&quot;
+  end</p>
+<p>describe &quot;GET /api/v1/entries/:id/publish-preview&quot; do
+    test &quot;returns preview URL&quot;
+    test &quot;returns asset list with sizes&quot;
+    test &quot;requires authentication&quot;
+  end
+end
+</code></pre></p>
+<h3>5.4 LiveView Tests</h3>
+<h4><code>test/onelist_web/live/entries/public_toggle_component_test.exs</code></h4>
+<pre><code class="language-elixir">defmodule OnelistWeb.Entries.PublicToggleComponentTest do
+  use OnelistWeb.ConnCase, async: true
+  import Phoenix.LiveViewTest
+<p>describe &quot;public toggle component&quot; do
+    test &quot;renders toggle for private entry&quot;
+    test &quot;renders toggle for public entry&quot;
+    test &quot;shows confirmation dialog when making public&quot;
+    test &quot;dialog lists assets that will be decrypted&quot;
+    test &quot;dialog shows asset sizes&quot;
+    test &quot;dialog shows public URL preview&quot;
+    test &quot;confirms making entry public&quot;
+    test &quot;cancels making entry public&quot;
+    test &quot;makes entry private without confirmation&quot;
+    test &quot;shows success message after toggle&quot;
+    test &quot;copies URL to clipboard&quot;
+  end
+end
+</code></pre></p>
+<h4><code>test/onelist_web/live/account/username_setup_test.exs</code></h4>
+<pre><code class="language-elixir">defmodule OnelistWeb.Account.UsernameSetupTest do
+  use OnelistWeb.ConnCase, async: true
+  import Phoenix.LiveViewTest
+<p>describe &quot;username setup&quot; do
+    test &quot;renders username input&quot;
+    test &quot;shows username availability check&quot;
+    test &quot;validates username format on change&quot;
+    test &quot;shows error for taken username&quot;
+    test &quot;shows error for invalid format&quot;
+    test &quot;saves valid username&quot;
+    test &quot;redirects after successful save&quot;
+    test &quot;prompts for username when making first entry public&quot;
+  end
+end
+</code></pre></p>
+<h3>5.5 Asset Tests (Phase 2)</h3>
+<h4><code>test/onelist/entries_public_assets_test.exs</code></h4>
+<pre><code class="language-elixir">defmodule Onelist.EntriesPublicAssetsTest do
+  use Onelist.DataCase, async: true
+<p>describe &quot;publish_entry_assets/1&quot; do
+    test &quot;uploads assets to R2 public bucket&quot;
+    test &quot;generates public_random_id for URL&quot;
+    test &quot;sets public_url on asset&quot;
+    test &quot;adds entry_id to public_entry_ids&quot;
+    test &quot;reuses existing public_url if asset already public&quot;
+    test &quot;increments reference count for shared asset&quot;
+  end</p>
+<p>describe &quot;unpublish_entry_assets/1&quot; do
+    test &quot;removes entry_id from public_entry_ids&quot;
+    test &quot;deletes from R2 when public_entry_ids empty&quot;
+    test &quot;clears public_url when public_entry_ids empty&quot;
+    test &quot;keeps public_url when other entries reference asset&quot;
+  end
+end
+</code></pre></p>
+<hr>
+<h2>6. Implementation Sequence</h2>
+<h3>Phase 1: Core Public Sharing</h3>
+<h4>Step 1: Write Tests First</h4>
+1. Create all test files from Section 5.1-5.4
+2. Run tests - all should fail (red phase)
+<h4>Step 2: Migrations</h4>
+1. Create <code>add_username_to_users</code> migration
+2. Create <code>add_encrypted_to_representations</code> migration
+3. Run migrations
+<h4>Step 3: Schema Updates</h4>
+1. Add <code>username</code> field and <code>username_changeset/2</code> to User
+2. Add <code>encrypted</code> field to Representation
+3. Update <code>@representation_types</code> to include <code>html_public</code>
+<h4>Step 4: Context Functions</h4>
+1. Add to <code>Onelist.Accounts</code>:
+   <ul>
+<li><code>set_username/2</code></li>
+   <li><code>get_user_by_username/1</code></li>
+   <li><code>username_available?/1</code></li>
+<p>2. Add to <code>Onelist.Entries</code>:
+   <li><code>generate_html_public/1</code></li>
+   <li><code>make_entry_public/1</code></li>
+   <li><code>make_entry_private/1</code></li>
+   <li><code>get_public_entry/2</code></li>
+   <li><code>list_public_entries/1</code></li>
+   <li><code>public_entry_url/1</code></li>
+   <li><code>get_publish_preview/1</code></li></p>
+<h4>Step 5: Public Entry Controller</h4>
+1. Create <code>OnelistWeb.PublicEntryController</code>
+2. Create <code>public_entry.html.heex</code> template
+3. Add route <code>get "/:username/:public_id", PublicEntryController, :show</code>
+<h4>Step 6: API Endpoints</h4>
+1. Create <code>OnelistWeb.Api.V1.EntryPublishController</code>
+2. Add routes for publish, unpublish, publish-preview
+<h4>Step 7: LiveView Components</h4>
+1. Create <code>PublicToggleComponent</code> with confirmation dialog
+2. Create <code>UsernameSetupLive</code> for first-time setup
+3. Integrate into entry editor
+<h3>Phase 2: Public Assets</h3>
+<h4>Step 8: Asset Public Fields Migration</h4>
+1. Create <code>add_public_fields_to_assets</code> migration
+2. Run migration
+<h4>Step 9: Asset Publishing</h4>
+1. Add to <code>Onelist.Storage</code>:
+   <li><code>publish_asset/2</code> - decrypt and upload to R2</li>
+   <li><code>unpublish_asset/2</code> - remove from R2 if refs empty</li>
+<p>2. Add to <code>Onelist.Entries</code>:
+   <li><code>publish_entry_assets/1</code> - orchestrate asset publishing</li>
+   <li><code>unpublish_entry_assets/1</code> - orchestrate cleanup</li></p>
+<p>3. Create <code>Onelist.Workers.AssetPublishWorker</code> for async publishing</p>
+<h4>Step 10: CDN Integration</h4>
+1. Create <code>Onelist.CDN.purge/1</code> wrapper for Cloudflare API
+2. Add cache purge to publish/unpublish flows
+3. Add Cache-Control headers to public entry responses
+<hr>
+<h2>7. File Structure</h2>
+<h3>New Files to Create</h3>
+<pre><code class="language-">lib/
+├── onelist/
+│   ├── cdn.ex                            # Cloudflare CDN integration
+│   └── entries/
+│       └── html_public_generator.ex      # HTML generation from markdown
+├── onelist_web/
+│   ├── controllers/
+│   │   ├── public_entry_controller.ex    # GET /:username/:public_id
+│   │   ├── public_entry_html.ex          # View helpers
+│   │   └── api/v1/
+│   │       └── entry_publish_controller.ex  # Publish API
+│   ├── templates/
+│   │   └── public_entry/
+│   │       └── show.html.heex            # Public entry template
+│   └── live/
+│       ├── entries/
+│       │   └── public_toggle_component.ex # Toggle + confirmation dialog
+│       └── account/
+│           └── username_setup_live.ex    # Username setup
+└── onelist/workers/
+    └── asset_publish_worker.ex           # Async asset publishing
+<p>test/
+├── onelist/
+│   ├── accounts/
+│   │   └── user_username_test.exs
+│   ├── accounts_username_test.exs
+│   ├── entries/
+│   │   └── representation_encrypted_test.exs
+│   ├── entries_public_test.exs
+│   └── entries_public_assets_test.exs
+└── onelist_web/
+    ├── controllers/
+    │   ├── public_entry_controller_test.exs
+    │   └── api/v1/
+    │       └── entry_publish_controller_test.exs
+    └── live/
+        ├── entries/
+        │   └── public_toggle_component_test.exs
+        └── account/
+            └── username_setup_test.exs</p>
+<p>priv/repo/migrations/
+├── TIMESTAMP_add_username_to_users.exs
+├── TIMESTAMP_add_encrypted_to_representations.exs
+└── TIMESTAMP_add_public_fields_to_assets.exs
+</code></pre></p>
+<h3>Files to Modify</h3>
+<pre><code class="language-">lib/
+├── onelist/
+│   ├── accounts/
+│   │   └── user.ex                       # Add username field
+│   ├── accounts.ex                       # Add username functions
+│   ├── entries/
+│   │   ├── representation.ex             # Add encrypted field, fix type name
+│   │   └── asset.ex                      # Add public fields
+│   ├── entries.ex                        # Add public entry functions
+│   └── storage/storage.ex                # Add publish_asset, unpublish_asset
+└── onelist_web/
+    └── router.ex                         # Add routes
+</code></pre>
+<hr>
+<h2>8. Route Configuration</h2>
+<pre><code class="language-elixir"># In lib/onelist_web/router.ex
+<h1>API routes for publish/unpublish</h1>
+scope &quot;/api/v1&quot;, OnelistWeb.Api.V1 do
+  pipe_through [:api, :authenticated]
+<p>post &quot;/entries/:id/publish&quot;, EntryPublishController, :publish
+  post &quot;/entries/:id/unpublish&quot;, EntryPublishController, :unpublish
+  get &quot;/entries/:id/publish-preview&quot;, EntryPublishController, :preview
+end</p>
+<h1>Public entry route - MUST be last to avoid catching other routes</h1>
+scope &quot;/&quot;, OnelistWeb do
+  pipe_through [:browser]
+<p># Other routes first...</p>
+<p># Public entry route (catch-all pattern)
+  get &quot;/:username/:public_id&quot;, PublicEntryController, :show
+end
+</code></pre></p>
+<strong>Important:</strong> The <code>/:username/:public_id</code> route must be defined last to avoid matching other routes like <code>/login</code>, <code>/register</code>, etc.
+<hr>
+<h2>9. html_public Generation</h2>
+<h3>9.1 Generation Flow</h3>
+<pre><code class="language-">CONTENT CHANGE (create/update)
+     │
+     ▼
+Generate ALL representations:
+├── markdown (encrypted=true) ──► User's private copy
+├── summary (encrypted=true) ───► AI-generated summary
+└── html_public (encrypted=false) ► Always generated, ready for public
+<p>TOGGLE TO PUBLIC
+     │
+     ▼
+entry.public = true (instant)
+html_public now served at public URL
+</code></pre></p>
+<h3>9.2 Markdown to HTML Pipeline</h3>
+<pre><code class="language-elixir">defmodule Onelist.Entries.HtmlPublicGenerator do
+  @moduledoc &quot;&quot;&quot;
+  Generates sanitized HTML from markdown for public display.
+  &quot;&quot;&quot;
+<p>@doc &quot;&quot;&quot;
+  Converts markdown content to sanitized public HTML.
+  &quot;&quot;&quot;
+  def generate(markdown_content) when is_binary(markdown_content) do
+    markdown_content
+    |&gt; Earmark.as_html!()
+    |&gt; HtmlSanitizeEx.basic_html()
+    |&gt; wrap_in_article()
+  end</p>
+<p>defp wrap_in_article(html) do
+    ~s(&lt;article class=&quot;prose prose-lg mx-auto&quot;&gt;#{html}&lt;/article&gt;)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>10. Asset Publishing Flow (Phase 2)</h2>
+<h3>10.1 Making Entry Public - Asset Flow</h3>
+<pre><code class="language-">1. User clicks &quot;Make Public&quot;
+<p>2. System identifies linked assets
+   <li>Parse markdown for asset references (![](asset://id))</li>
+   <li>Include directly attached assets</li></p>
+<p>3. For each linked asset:</p>
+<p>IF asset.public_url exists:
+     → Add entry.id to asset.public_entry_ids
+     → Reuse existing public URL</p>
+<p>ELSE:
+     → Client decrypts asset with user's key
+     → Upload plaintext to R2 public bucket
+     → Generate URL: https://pub.r2.onelist.my/{random_id}-{filename}
+     → Store in asset.public_url
+     → Set asset.public_random_id
+     → Add entry.id to asset.public_entry_ids</p>
+<p>4. Generate html_public with public_url references</p>
+<p>5. Set entry.public = true</p>
+<p>6. Purge Cloudflare CDN cache
+</code></pre></p>
+<h3>10.2 Making Entry Private - Asset Cleanup</h3>
+<pre><code class="language-">1. User clicks &quot;Make Private&quot;
+<p>2. Set entry.public = false</p>
+<p>3. For each linked asset:</p>
+<p>→ Remove entry.id from asset.public_entry_ids</p>
+<p>IF asset.public_entry_ids is now empty:
+     → Delete file from R2 public bucket
+     → Set asset.public_url = null
+     → Set asset.public_random_id = null</p>
+<p>4. Purge Cloudflare CDN cache
+</code></pre></p>
+<h3>10.3 Public URL Format</h3>
+<pre><code class="language-">Format: https://pub.r2.onelist.my/{random_id}-{filename}
+<p>Example: https://pub.r2.onelist.my/x7k9m2p4-vacation-photo.jpg</p>
+<p>The random_id is generated once when first published and stored with the asset.
+</code></pre></p>
+<hr>
+<h2>11. Confirmation Dialog UI</h2>
+<h3>With Assets</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MAKE ENTRY PUBLIC                                         │
+│                                                                              │
+│  ⚠️  This entry contains 3 files that will be made public                   │
+│                                                                              │
+│  When you make this entry public:                                           │
+│                                                                              │
+│  • The entry text will be stored UNENCRYPTED                                │
+│  • These files will be DECRYPTED and stored at public URLs:                 │
+│                                                                              │
+│    📷 vacation-photo.jpg (2.3 MB)                                           │
+│    📷 family-dinner.jpg (1.8 MB)                                            │
+│    📄 notes.pdf (450 KB)                                                    │
+│                                                                              │
+│  • Anyone with the link can view this content                               │
+│  • Your private copies remain end-to-end encrypted                          │
+│  • Making this entry private again will remove the public copies            │
+│                                                                              │
+│  Public URL: onelist.my/username/abc123xyz                                  │
+│                                                                              │
+│                    [Cancel]  [Make Public]                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Without Assets</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MAKE ENTRY PUBLIC                                         │
+│                                                                              │
+│  This will make your entry publicly accessible.                             │
+│                                                                              │
+│  • The entry text will be stored UNENCRYPTED                                │
+│  • Anyone with the link can view it                                         │
+│  • Your private copy remains end-to-end encrypted                           │
+│  • You can make it private again at any time                                │
+│                                                                              │
+│  Public URL: onelist.my/username/abc123xyz                                  │
+│                                                                              │
+│                    [Cancel]  [Make Public]                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>12. CDN Integration</h2>
+<h3>12.1 Cache Headers</h3>
+<pre><code class="language-elixir"># In PublicEntryController
+def show(conn, params) do
+  # ...
+  conn
+  |&gt; put_resp_header(&quot;cache-control&quot;, &quot;public, max-age=3600&quot;)
+  |&gt; render(:show, entry: entry)
+end
+</code></pre>
+<h3>12.2 Cache Invalidation</h3>
+<pre><code class="language-elixir">defmodule Onelist.CDN do
+  @moduledoc &quot;&quot;&quot;
+  Cloudflare CDN integration for cache management.
+  &quot;&quot;&quot;
+<p>def purge_public_entry(entry) do
+    if entry.public do
+      url = &quot;https://onelist.my/#{entry.user.username}/#{entry.public_id}&quot;
+      purge_url(url)
+    end
+  end</p>
+<p>defp purge_url(url) do
+    # Cloudflare API call to purge URL
+    Cloudflare.purge_url(url)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>13. Testing Commands</h2>
+<pre><code class="language-bash"># Run all public entry tests
+mix test test/onelist/accounts/user_username_test.exs \
+         test/onelist/accounts_username_test.exs \
+         test/onelist/entries/representation_encrypted_test.exs \
+         test/onelist/entries_public_test.exs \
+         test/onelist_web/controllers/public_entry_controller_test.exs \
+         test/onelist_web/controllers/api/v1/entry_publish_controller_test.exs \
+         test/onelist_web/live/entries/public_toggle_component_test.exs \
+         test/onelist_web/live/account/username_setup_test.exs
+<h1>Run Phase 2 tests</h1>
+mix test test/onelist/entries_public_assets_test.exs
+<h1>Run with coverage</h1>
+mix test --cover | grep -E &quot;(public|username|html_public)&quot;
+<h1>Verify overall coverage still meets threshold</h1>
+mix test --cover | grep Total
+</code></pre>
+<hr>
+<h2>14. Dependencies</h2>
+<h3>Required Packages (add to mix.exs if not present)</h3>
+<pre><code class="language-elixir"># HTML sanitization
+{:html_sanitize_ex, &quot;~&gt; 1.4&quot;}
+<h1>Markdown parsing (likely already present)</h1>
+{:earmark, &quot;~&gt; 1.4&quot;}
+</code></pre>
+<hr>
+<h2>15. Security Considerations</h2>
+<p>1. <strong>Username Squatting</strong> - Reserve common usernames (admin, support, api, app, etc.)
+2. <strong>XSS Prevention</strong> - Sanitize all HTML in html_public generation
+3. <strong>Rate Limiting</strong> - Limit public entry views per IP
+4. <strong>Content Policy</strong> - Terms of service for public content
+5. <strong>Takedown Process</strong> - DMCA/abuse reporting for public content
+6. <strong>Asset Validation</strong> - Validate asset types before publishing to R2</p>
+<hr>
+<h2>16. Naming Convention Note</h2>
+<strong>Important:</strong> The codebase currently uses <code>public_html</code> in <code>representation.ex</code>, but the roadmap documents consistently use <code>html_public</code>. This plan uses <code>html_public</code> to match the roadmap convention. The existing <code>@representation_types</code> should be updated:
+<pre><code class="language-elixir"># Change from:
+@representation_types ~w(markdown plaintext html public_html editor_json)
+<h1>To:</h1>
+@representation_types ~w(markdown plaintext html html_public editor_json)
+</code></pre>
+<strong>Xamlr Note:</strong> The Xamlr roadmap uses <code>display_html</code> as an alternative name for the same concept. For core Onelist, use <code>html_public</code>.
+<hr>
+<h2>17. Open Questions</h2>
+<li>[ ] Should we support custom domains for public pages?</li>
+<li>[ ] Should public entries have view counters?</li>
+<li>[ ] Should we support unlisted (have link, not indexed) entries?</li>
+<li>[ ] Should we add RSS feeds for user's public entries?</li>
+<hr>
+<h2>18. Success Criteria</h2>
+<p>1. ✅ All tests pass (TDD approach)
+2. ✅ Users can set unique usernames
+3. ✅ <code>html_public</code> auto-generated on every save
+4. ✅ Toggle works with detailed consent dialog
+5. ✅ Public entries accessible at <code>/:username/:public_id</code>
+6. ✅ API endpoints for publish/unpublish/preview work
+7. ✅ SEO meta tags present on public pages
+8. ✅ CDN caching and invalidation works
+9. ✅ Asset publishing with reference counting (Phase 2)
+10. ✅ Coverage threshold maintained (75%+)</p>
+<hr>
+<h2>19. Related Documents</h2>
+<li><a href="./mvp_public_content_plan.md">MVP Public Content Plan</a> - Full E2EE/public content architecture</li>
+<li><a href="./asset_storage_plan.md">Asset Storage Plan</a> - Asset storage and BYOB details</li>
+<li><a href="./future_roadmap_beacon_cms.md">Beacon CMS</a> - Public site rendering with Beacon</li>
+<li><a href="./future_roadmap_forum.md">Forum</a> - Forum content is public</li>
+<li><a href="./future_roadmap_xamlr.md">Xamlr</a> - Blog posts are public (uses <code>display_html</code>)</li>
+</ul>
+<hr>
+</em>Last updated: 2026-01-29*
+  </article>
+</body>
+</html>

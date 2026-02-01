@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Feature Branch Plan: Habits &amp; Habit Stacks - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Feature Branch Plan: Habits & Habit Stacks</h1>
+<strong>Document Version:</strong> 2025-05-06
+<strong>Feature Branch:</strong> Habits & Habit Stacks
+<strong>Baseline System:</strong> Onelist v2.0 (MVP + Completed Future Roadmap, including AI features and a functional <code>entry_links</code> table) + "Entry Groups" feature branch implemented.
+<strong>Location Context:</strong> Concord, North Carolina, United States (as of May 6, 2025, ~1:12 PM EDT)
+<h2>1. Feature Branch Goal & Vision</h2>
+<p>The "Habits & Habit Stacks" feature aims to provide users with a sophisticated tool for defining, tracking, and establishing positive habits, moving beyond simple task management. It intends to incorporate principles of human psychology related to motivation and habit formation to support users in achieving their goals. Users will be able to manage individual habits and group them into "Habit Stacks" (e.g., for fitness, wellness, productivity) with planned implementation sequences, fostering a structured approach to personal development.</p>
+<h2>2. Core Entities & Data Model Changes/Additions</h2>
+<p>This feature introduces a new <code>entry_type</code> for habits and new tables for logging habit engagement, while leveraging the "Entry Groups" structure for "Habit Stacks."</p>
+<em> <strong>Habit as an <code>entry</code>:</strong>
+  </em> A "Habit" will be stored as a standard Onelist <code>entry</code>.
+  <em> <code>entry_type</code>: A new type, <code>'habit'</code>.
+  </em> <code>entries.title</code>: The name/description of the habit (e.g., "Meditate for 10 minutes daily," "Read one chapter of a book before bed").
+  <em> <code>entries.metadata</code> (JSONB) or a dedicated side-table <code>habit_details</code> (PK: <code>entry_id</code>):
+    </em> <code>description</code> (Text): Detailed description, personal 'why', cues, routine plan, reward ideas.
+    <em> <code>frequency_rule</code> (JSONB/String): Defines how often the habit should be performed (e.g., <code>{"type": "daily"}</code>, <code>{"type": "weekly", "days": ["Mon", "Wed", "Fri"]}</code>, <code>{"type": "x_times_per_week", "count": 3}</code>).
+    </em> <code>target_metric</code> (JSONB, Optional): Defines a measurable target if applicable (e.g., <code>{"unit": "minutes", "value": 10}</code>, <code>{"unit": "pages", "value": 20}</code>).
+    <em> <code>current_streak</code> (Integer, Default: 0).
+    </em> <code>longest_streak</code> (Integer, Default: 0).
+    <em> <code>status</code> (String): Current state of the habit (e.g., <code>'planning'</code>, <code>'active_forming'</code>, <code>'active_established'</code>, <code>'paused'</code>, <code>'archived'</code>).
+    </em> <code>start_date</code> (Date): When the user intends to start or started actively working on this habit.
+    <em> <code>last_progress_log_date</code> (Date): Last date any progress was logged.
+    </em> <code>establishment_criteria</code> (Text/JSONB): User-defined or system-suggested conditions for when the habit is considered "firmly in place" or "established" (e.g., "consistent daily completion for 30 days," "achieved a streak of 21"). This is key for stack progression.
+    <em> <code>reminder_settings</code> (JSONB): Configuration for notifications.
+</em> <strong><code>habit_progress_logs</code> Table (New Table):</strong>
+  <em> <code>id</code> (UUID, PK)
+  </em> <code>habit_entry_id</code> (UUID, FK to <code>entries.id</code> where <code>entry_type='habit'</code>, Indexed)
+  <em> <code>user_id</code> (UUID, FK to <code>users.id</code>, Indexed)
+  </em> <code>log_timestamp</code> (TimestampTZ, Default: CURRENT_TIMESTAMP)
+  <em> <code>is_completed</code> (Boolean): Indicates if the habit was performed as intended for the relevant period (e.g., for that day).
+  </em> <code>logged_value</code> (String/Numeric, Nullable): If the habit has a <code>target_metric</code>, this stores the actual value achieved (e.g., "15 minutes," "25 pages").
+  <em> <code>notes</code> (Text, Nullable): User's journal entry or reflection related to this habit log.
+  </em> <code>mood_rating</code> (Integer, Nullable, e.g., 1-5): Optional self-reported mood.
+<em> <strong>Habit Stacks (as "Entry Groups"):</strong>
+  </em> A "Habit Stack" will be an <strong>Entry Group</strong> (<code>entry_type='group'</code>).
+  <em> The members of this group (linked via <code>entry_links</code> with <code>link_type='group_member'</code>) will be <code>'habit'</code> entries.
+  </em> The <code>entry_links.metadata.sequence</code> field will define the intended order of habit implementation within the stack.
+  <em> The <code>metadata</code> of the "Habit Stack" group <code>entry</code> itself, or potentially a new specific <code>representation</code> for the group (e.g., <code>type='group_habit_stack_view'</code>), will need to store:
+    </em> <code>stack_goal</code> (Text): The overarching goal this stack is designed to achieve.
+    <em> <code>progression_logic</code> (JSONB): Rules for how the stack progresses. This might define dependencies, e.g., "Habit B (<code>target_entry_id</code>) in this stack starts when Habit A (<code>target_entry_id</code>) achieves <code>status='active_established'</code>." This could be a simple list of dependencies or more complex rules.
+<h2>3. Key Functionalities</h2>
+</em> <strong>Individual Habit Management:</strong>
+  <em> Define new habits with all their parameters (description, frequency, target, cues, rewards, establishment criteria).
+  </em> Log daily/periodic engagement: Mark as completed/not, log specific metrics, add notes/reflections.
+  <em> View habit history, current/longest streaks, progress charts/visualizations.
+  </em> Edit, pause, resume, or archive habits.
+  <em> Receive reminders for habits.
+</em> <strong>Habit Stack Management:</strong>
+  <em> Create "Habit Stacks" as specialized Entry Groups, adding <code>'habit'</code> entries as members.
+  </em> Define a sequence for implementing habits within a stack.
+  <em> Define the overall goal for the stack.
+  </em> <strong>Automated Stack Progression:</strong>
+    <em> The system monitors the <code>status</code> of habits within a stack (particularly whether they become <code>'active_established'</code> based on their <code>establishment_criteria</code> and logged progress).
+    </em> When a precedent habit is deemed "firmly in place," the system can automatically change the <code>status</code> of the next habit in the sequence from <code>'planning'</code> to <code>'active_forming'</code>, potentially notifying the user. This requires a background process or trigger mechanism.
+<em> <strong>Progress Visualization:</strong> Dashboards for individual habits and overall stack progress.
+<h2>4. Integration with Onelist v2.0 & Entry Groups</h2>
+</em> <strong>Habits as Entries:</strong> Habits are first-class <code>entries</code>, benefiting from standard features like tagging, linking (via <code>entry_links</code> beyond group membership), searchability, and potential interaction with AI features.
+<em> <strong>Stacks as Entry Groups:</strong> "Habit Stacks" directly use the "Entry Groups" infrastructure for their creation, naming, member sequencing. They might have a specific default <code>representation</code> (e.g., a view that shows habit status and stack progress).
+</em> <strong>AI Feature Interaction:</strong>
+  <em> <strong>Contextual AI Chat Pane:</strong> Could assist users in reflecting on habit progress, refining habit definitions, or brainstorming strategies for a specific habit.
+  </em> <strong>"Onelist AI" (Global Assistant):</strong>
+    <em> Could help users define new habits or habit stacks through natural language (e.g., "Onelist, help me set up a habit to drink more water," "Onelist, create a 'Morning Productivity' stack with meditation, journaling, and focused work habits").
+    </em> Could provide insights based on psychological principles of habit formation.
+    <em> Could help users review and adjust their <code>establishment_criteria</code> or stack progression logic.
+    </em> Could manage reminders and notifications for habits based on conversational requests.
+<h2>5. Psychological Principles Integration (Conceptual)</h2>
+<p>The design should aim to incorporate evidence-based principles:</p>
+<em> <strong>Cue-Routine-Reward:</strong> Encourage users to define these for each habit.
+</em> <strong>Implementation Intentions:</strong> Help users specify <em>when</em> and <em>where</em> they will perform a habit.
+<em> <strong>Small Wins & Progressive Overload:</strong> Support starting small and gradually increasing difficulty or targets.
+</em> <strong>Identity-Based Habits:</strong> Encourage framing habits in terms of the kind of person the user wants to become.
+<em> <strong>Don't Break the Chain (Streaks):</strong> Visual tracking of streaks for motivation.
+</em> <strong>Flexibility & Self-Compassion:</strong> Allow for "missed days" without necessarily breaking a core streak if within certain rules, or ways to reflect on setbacks constructively.
+<h2>6. UI/UX Considerations</h2>
+<em> <strong>Habit Definition Interface:</strong> Clear forms for setting up all habit parameters.
+</em> <strong>Daily Logging Interface:</strong> Quick and easy way to log habit completion, metrics, and notes (perhaps integrated with a daily journal concept).
+<em> <strong>Habit Dashboard:</strong> Visual overview of active habits, streaks, progress towards establishment.
+</em> <strong>Habit Stack View:</strong> Interface to create/edit stacks, sequence habits, visualize progress through the stack, and see which habit is currently active/next.
+<em> <strong>Notifications & Reminders:</strong> Customizable reminders. Notifications for stack progression.
+</em> <strong>Guidance & Education:</strong> Potentially offer in-app tips or links to resources on habit formation.
+<h2>7. MVP for "Habits" Feature Branch</h2>
+<em> <strong><code>'habit'</code> entry type:</strong> With core metadata (title, description, frequency, status, current/longest streak).
+</em> <strong><code>habit_progress_logs</code> table:</strong> Basic logging (date, completed, simple notes).
+<em> <strong>Manual Status Updates:</strong> User manually changes habit <code>status</code> (e.g., to <code>'active_established'</code>). Streak calculation based on logs.
+</em> <strong>Individual Habit Tracking UI:</strong> View a single habit, log progress, see current streak.
+<em> <strong>Basic "Habit Stacks":</strong> Ability to create an "Entry Group" of habits and manually sequence them. No automated stack progression in MVP.
+</em> Users manually decide when to start the next habit in their stack based on their perception of the previous one being established.
+<h2>8. Future Evolution within this Branch</h2>
+<em> <strong>Advanced Stack Progression Logic:</strong> Implement the automated system for monitoring habit establishment and triggering the next habit in a stack.
+</em> <strong>Sophisticated Visualizations:</strong> More detailed charts, calendars, and progress reports.
+<em> <strong>Community/Social Features (Optional, with care for privacy):</strong> Sharing habit stack templates, accountability groups (if ever desired by userbase).
+</em> <strong>Deeper Integration with Psychological Models:</strong> More guided setup, personalized feedback based on progress patterns.
+<em> <strong>"Habit Review" Prompts:</strong> Periodically prompt users to review active habits, adjust, or archive them.
+</em> <strong>Integration with other Onelist data:</strong> E.g., linking habits to specific projects (if projects become a feature) or goals.
+<em> <strong>Gamification elements</strong> (points, badges) if aligned with user preferences.
+<h2>9. Risks/Challenges</h2>
+</em> <strong>Complexity of Behavior Change:</strong> Habit formation is inherently complex; the tool can only support, not guarantee, success. Setting realistic user expectations is key.
+<em> <strong>Scope Creep:</strong> Many features could be added; maintaining focus on core value is important.
+</em> <strong>User Engagement & Retention:</strong> Keeping users engaged with logging over the long term can be difficult. The UI must be frictionless.
+<em> <strong>Defining "Established":</strong> The logic for determining when a habit is "firmly in place" needs to be flexible and ideally user-tunable, as it can be subjective.
+</em> <strong>Notification Fatigue:</strong> Balancing helpful reminders with overwhelming users.
+<ul>
+<li><strong>Data Analysis & Insights:</strong> Deriving meaningful insights from habit data for the user without being overly prescriptive or simplistic.</li>
+</ul>
+  </article>
+</body>
+</html>

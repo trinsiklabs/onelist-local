@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Feature: User-Deployable Forums - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Feature: User-Deployable Forums</h1>
+<strong>Status:</strong> Planned (Post-MVP)
+<strong>Date:</strong> 2026-01-28
+<h2>1. Vision & Goal</h2>
+<p>Onelist Forums is a forum system built entirely on Onelist entries, allowing any user to deploy a community forum under their namespace. All forum content (topics, replies, configurations) are stored as Onelist entries, enabling:</p>
+<ul>
+<li><strong>Data ownership</strong>: Users own their posts in their own Onelist</li>
+<li><strong>Unified search</strong>: Forum content searchable alongside all other entries</li>
+<li><strong>Content promotion</strong>: Turn any existing entry into a forum topic</li>
+<li><strong>Federated participation</strong>: Replies stored in participant's Onelist with copy in forum owner's</li>
+<li><strong>No extra infrastructure</strong>: Same stack, same database, same Beacon rendering</li>
+<h2>2. Architecture Overview</h2>
+<h3>2.1 Forum as a "View" into Tagged Entries</h3>
+<p>A forum is not a separate system - it's a filtered view of entries with specific tags, rendered with forum-specific UI components in Beacon.</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         USER'S ONELIST                                       │
+│                                                                              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │ Note        │  │ Article     │  │ Photo       │  │ Forum Topic │        │
+│  │ tags: [ai]  │  │ tags: [dev] │  │ tags: [...]│  │ tags:       │        │
+│  │             │  │             │  │             │  │ [forum:help]│        │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘        │
+│                                                                              │
+│                          │                                                   │
+│                          │ Filter by tag prefix &quot;forum:<em>&quot;                   │
+│                          ▼                                                   │
+│                   ┌─────────────────┐                                       │
+│                   │  FORUM VIEW     │                                       │
+│                   │  (Beacon)       │                                       │
+│                   └─────────────────┘                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.2 Deployment Options</h3>
+<table>
+<tr><th>Deployment</th><th>URL Pattern</th><th>Example</th></tr>
+<tr><td>Corporate (Onelist)</td><td><code>onelist.my/community/</code></td><td>Main Onelist community</td></tr>
+<tr><td>User (free tier)</td><td><code>onelist.my/[username]/forum/</code></td><td><code>onelist.my/alice/forum/</code></td></tr>
+<tr><td>User (VM tier)</td><td><code>[username].onelist.my/forum/</code></td><td><code>alice.onelist.my/forum/</code></td></tr>
+<tr><td>Custom path</td><td><code>[username].onelist.my/[custom]/</code></td><td><code>alice.onelist.my/discussions/</code></td></tr>
+</table>
+<h3>2.3 URL Structure</h3>
+<pre><code class="language-">[base]/                              → Forum home (category list + recent topics)
+[base]/[category]/                   → Category view (topics in category)
+[base]/[category]/[topic-slug]       → Topic view (topic + replies)
+[base]/new                           → Create new topic
+[base]/[category]/[topic-slug]/reply → Reply to topic
+</code></pre>
+<h2>3. Data Model</h2>
+<h3>3.1 Entry Types</h3>
+<table>
+<tr><th>Entry Type</th><th>Purpose</th></tr>
+<tr><td><code>forum_config</code></td><td>Forum configuration (one per forum)</td></tr>
+<tr><td><code>forum_topic</code></td><td>A forum topic/thread</td></tr>
+<tr><td><code>forum_reply</code></td><td>A reply to a topic</td></tr>
+</table>
+<p>Note: Any entry type can become a forum topic via "Promote to Forum" - it gains forum tags while retaining its original type.</p>
+<h3>3.2 Forum Configuration Entry</h3>
+<pre><code class="language-">entry_type: 'forum_config'
+visibility: 'private'  # Config not publicly visible
+metadata: {
+  forum_id: 'uuid',                         # Unique identifier
+  path: '/forum',                           # URL path under user's namespace
+  name: 'My Community',                     # Display name
+  description: 'A place to discuss...',    # Forum description
+<p>categories: [
+    {
+      id: 'uuid',
+      tag: 'forum:general',
+      name: 'General Discussion',
+      description: 'Off-topic and general chat',
+      order: 1
+    },
+    {
+      id: 'uuid',
+      tag: 'forum:help',
+      name: 'Help &amp; Support',
+      description: 'Get help with Onelist',
+      order: 2
+    },
+    {
+      id: 'uuid',
+      tag: 'forum:showcase',
+      name: 'Showcase',
+      description: 'Share what you built',
+      order: 3
+    }
+  ],</p>
+<p>permissions: {
+    who_can_view: 'anyone',                 # anyone | accounts_only | invite_only
+    who_can_post: 'accounts_only',          # anyone | accounts_only | invite_only
+    who_can_reply: 'anyone',                # anyone | accounts_only
+    anonymous_allowed: true                  # Allow anonymous replies
+  },</p>
+<p>moderation: {
+    moderators: ['user_id_1', 'user_id_2'], # User IDs with mod powers
+    require_approval: false,                 # Topics need approval before visible
+    auto_lock_after_days: null              # Auto-lock old topics (null = never)
+  },</p>
+<p>appearance: {
+    theme: 'default',                        # Beacon theme override (post-MVP)
+    show_user_avatars: true,
+    show_reply_counts: true,
+    topics_per_page: 25
+  }
+}
+</code></pre></p>
+<h3>3.3 Forum Topic Entry</h3>
+<pre><code class="language-">entry_type: 'forum_topic'  # Or original type if promoted
+visibility: 'public'
+tags: ['forum:help', 'onelist', 'sync']  # Category tag + optional tags
+<p>title: 'How do I set up P2P sync?'</p>
+<p>representations: [
+  { type: 'markdown', content: '...' },
+  { type: 'html_public', content: '...' }  # Rendered by Beacon
+]</p>
+<p>metadata: {
+  forum: {
+    topic_id: 'uuid',
+    promoted_from: null,                    # Original entry_id if promoted
+    pinned: false,
+    locked: false,</p>
+<p># Denormalized counts for performance
+    reply_count: 12,
+    view_count: 247,
+    last_reply_at: '2026-01-28T10:30:00Z',
+    last_reply_by: 'user_id'
+  }
+}</p>
+<h1>Author info</h1>
+user_id: 'author_user_id'  # or null for anonymous
+</code></pre>
+<h3>3.4 Forum Reply Entry</h3>
+<pre><code class="language-">entry_type: 'forum_reply'
+visibility: 'public'
+<p>representations: [
+  { type: 'markdown', content: '...' },
+  { type: 'html_public', content: '...' }
+]</p>
+<p>metadata: {
+  forum: {
+    reply_id: 'uuid',
+    parent_reply_id: null,                  # For threaded replies (post-MVP)</p>
+<p># For federated replies
+    origin: 'local' | 'remote',
+    origin_user_id: 'original_author_id',
+    origin_entry_id: 'original_entry_id'    # In author's Onelist
+  }
+}</p>
+<p>user_id: 'author_user_id'  # or null for anonymous
+</code></pre></p>
+<h3>3.5 Entry Links for Forum Relationships</h3>
+<pre><code class="language-"># Topic → Reply link
+entry_links: {
+  source_entry_id: 'topic_uuid',
+  target_entry_id: 'reply_uuid',
+  link_type: 'has_reply',
+  metadata: {
+    reply_order: 1,
+    created_at: '2026-01-28T10:30:00Z'
+  }
+}
+<h1>Reply → Parent Reply link (for threading, post-MVP)</h1>
+entry_links: {
+  source_entry_id: 'reply_uuid',
+  target_entry_id: 'parent_reply_uuid',
+  link_type: 'reply_to',
+  metadata: {}
+}
+</code></pre>
+<h2>4. Key Features</h2>
+<h3>4.1 "Promote to Forum" Workflow</h3>
+<p>Users can turn any existing entry into a forum topic without duplicating content.</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  BEFORE: Private Note                                                        │
+│  ─────────────────────                                                       │
+│  entry_type: 'note'                                                         │
+│  visibility: 'private'                                                      │
+│  tags: ['ai', 'tips']                                                       │
+│  title: 'My AI workflow tips'                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+                    │
+                    │  User clicks &quot;Promote to Forum&quot;
+                    │  Selects category: &quot;Showcase&quot;
+                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  AFTER: Public Forum Topic (same entry!)                                    │
+│  ───────────────────────────────────────                                    │
+│  entry_type: 'note'                      # Unchanged                        │
+│  visibility: 'public'                    # Changed                          │
+│  tags: ['ai', 'tips', 'forum:showcase']  # Added forum tag                 │
+│  title: 'My AI workflow tips'                                               │
+│  metadata.forum: {                       # Added forum metadata             │
+│    topic_id: 'uuid',                                                        │
+│    promoted_from: null,                  # null = was promoted, not created │
+│    pinned: false,                                                           │
+│    locked: false,                                                           │
+│    reply_count: 0,                                                          │
+│    view_count: 0                                                            │
+│  }                                                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Key points:</strong>
+<li>Same entry, not a copy</li>
+<li>If entry has assets (images, files), they are published to R2 (see Asset Handling below)</li>
+<li>Edits to the note update the forum topic</li>
+<li>Removing forum tag "unpromotes" it back to private</li>
+<li>Original entry type preserved</li>
+<h3>4.2 Federated Reply Model</h3>
+<p>When a logged-in user replies to a topic, the reply is stored in two places:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Alice's Forum                              Bob's Onelist                   │
+│  ─────────────────                          ───────────────                 │
+│                                                                              │
+│  Topic: &quot;Best practices&quot;                    Bob's Entries:                  │
+│  ├── Reply from Bob ◄─────────────────────► Reply: &quot;I think...&quot;            │
+│  │   (copy, origin: remote)                 (original, tagged 'my-replies')│
+│  │                                                                          │
+│  └── Reply from Anonymous                                                   │
+│      (original, no remote copy)                                             │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Benefits:</strong>
+<li>Bob owns his reply data</li>
+<li>Bob can see all his forum replies in his own Onelist</li>
+<li>If Alice deletes Bob's reply from her forum, Bob still has his copy</li>
+<li>If Bob edits his copy, it can sync to Alice's forum (with her permission)</li>
+<strong>Anonymous replies:</strong>
+<li>Stored only in forum owner's Onelist</li>
+<li>No federation (no account to federate to)</li>
+<h3>4.3 Forum Permissions Model</h3>
+<table>
+<tr><th>Permission</th><th>Options</th><th>Description</th></tr>
+<tr><td><code>who_can_view</code></td><td>anyone, accounts_only, invite_only</td><td>Who can see the forum</td></tr>
+<tr><td><code>who_can_post</code></td><td>anyone, accounts_only, invite_only</td><td>Who can create topics</td></tr>
+<tr><td><code>who_can_reply</code></td><td>anyone, accounts_only</td><td>Who can reply to topics</td></tr>
+<tr><td><code>anonymous_allowed</code></td><td>true, false</td><td>Allow anonymous participation</td></tr>
+</table>
+<strong>Invite-only implementation:</strong>
+<li>Forum owner maintains list of invited user IDs</li>
+<li>Invites sent via Onelist notification system (post-MVP)</li>
+<h3>4.4 Moderation Tools</h3>
+<table>
+<tr><th>Action</th><th>Description</th><th>Implementation</th></tr>
+<tr><td>Lock topic</td><td>Prevent new replies</td><td><code>metadata.forum.locked = true</code></td></tr>
+<tr><td>Pin topic</td><td>Show at top of category</td><td><code>metadata.forum.pinned = true</code></td></tr>
+<tr><td>Hide topic</td><td>Remove from listing, still accessible via URL</td><td><code>metadata.forum.hidden = true</code></td></tr>
+<tr><td>Delete topic</td><td>Soft delete</td><td>Standard Onelist soft delete</td></tr>
+<tr><td>Hide reply</td><td>Remove reply from view</td><td><code>metadata.forum.hidden = true</code></td></tr>
+<tr><td>Delete reply</td><td>Soft delete reply</td><td>Standard Onelist soft delete</td></tr>
+<tr><td>Ban user</td><td>Prevent user from posting</td><td>Add to <code>moderation.banned_users</code> list</td></tr>
+</table>
+<h2>5. MVP Features</h2>
+<h3>5.1 Core Functionality</h3>
+<li>[ ] Forum configuration entry type and UI</li>
+<li>[ ] Create forum under user namespace</li>
+<li>[ ] Define categories (as tags)</li>
+<li>[ ] Create topics</li>
+<li>[ ] Reply to topics (flat, not threaded)</li>
+<li>[ ] View topic list (by category, recent)</li>
+<li>[ ] View topic with replies</li>
+<li>[ ] Anonymous posting (if enabled)</li>
+<li>[ ] Account-based posting with attribution</li>
+<h3>5.2 Promote to Forum</h3>
+<li>[ ] "Promote to Forum" action on any entry</li>
+<li>[ ] Category selection during promotion</li>
+<li>[ ] "Unpromote" to revert to private</li>
+<h3>5.3 Basic Moderation</h3>
+<li>[ ] Lock/unlock topics</li>
+<li>[ ] Pin/unpin topics</li>
+<li>[ ] Hide/delete topics</li>
+<li>[ ] Hide/delete replies</li>
+<li>[ ] Forum owner as default moderator</li>
+<h3>5.4 Permissions</h3>
+<li>[ ] Public/accounts-only/invite-only viewing</li>
+<li>[ ] Public/accounts-only/invite-only posting</li>
+<li>[ ] Anonymous toggle</li>
+<h3>5.5 Beacon Integration</h3>
+<li>[ ] Forum home component</li>
+<li>[ ] Category list component</li>
+<li>[ ] Topic list component</li>
+<li>[ ] Topic view component</li>
+<li>[ ] Reply composer component</li>
+<li>[ ] New topic form component</li>
+<h3>5.6 Federated Replies</h3>
+<li>[ ] Store reply in author's Onelist</li>
+<li>[ ] Store copy in forum owner's Onelist</li>
+<li>[ ] Link via entry_links</li>
+<li>[ ] Attribution display</li>
+<h2>6. Post-MVP Features</h2>
+</em>To be expanded after reviewing leading forum software (Discourse, Reddit, Hacker News, etc.)<em>
+<h3>6.1 Threading & Organization</h3>
+<li>[ ] Threaded/nested replies</li>
+<li>[ ] Quote reply</li>
+<li>[ ] Topic merging</li>
+<li>[ ] Topic moving (between categories)</li>
+<li>[ ] Topic splitting</li>
+<h3>6.2 Engagement & Discovery</h3>
+<li>[ ] Reactions (upvote, emoji reactions)</li>
+<li>[ ] User reputation/karma system</li>
+<li>[ ] "Best answer" marking (for help categories)</li>
+<li>[ ] Related topics suggestions</li>
+<li>[ ] Trending/hot topics algorithm</li>
+<li>[ ] Topic bookmarking</li>
+<h3>6.3 Notifications</h3>
+<li>[ ] Reply notifications</li>
+<li>[ ] @mention notifications</li>
+<li>[ ] Topic subscription (watch/mute)</li>
+<li>[ ] Digest emails (daily/weekly)</li>
+<h3>6.4 Rich Content</h3>
+<li>[ ] Markdown preview while composing</li>
+<li>[ ] Image uploads in posts</li>
+<li>[ ] Code syntax highlighting</li>
+<li>[ ] Embeds (YouTube, tweets, etc.)</li>
+<li>[ ] Polls</li>
+<h3>6.5 Advanced Moderation</h3>
+<li>[ ] Multiple moderators</li>
+<li>[ ] Moderator action log</li>
+<li>[ ] User warnings</li>
+<li>[ ] Temporary bans</li>
+<li>[ ] Word/content filters</li>
+<li>[ ] Spam detection</li>
+<li>[ ] Require approval for new users</li>
+<h3>6.6 User Experience</h3>
+<li>[ ] User profiles (post history, reputation)</li>
+<li>[ ] User badges/achievements</li>
+<li>[ ] Signature (optional)</li>
+<li>[ ] Online status indicator</li>
+<li>[ ] Private messaging (via Onelist entries?)</li>
+<h3>6.7 Advanced Features</h3>
+<li>[ ] Full-text search within forum</li>
+<li>[ ] RSS feeds per category</li>
+<li>[ ] API access to forum</li>
+<li>[ ] Webhooks for forum events</li>
+<li>[ ] Custom CSS/themes</li>
+<li>[ ] Single Sign-On (SSO) integration</li>
+<h3>6.8 Analytics</h3>
+<li>[ ] Topic view counts</li>
+<li>[ ] User engagement metrics</li>
+<li>[ ] Popular topics report</li>
+<li>[ ] Active users report</li>
+<h2>7. Technical Considerations</h2>
+<h3>7.1 E2EE and Public Forum Content</h3>
+<strong>Critical Architecture Constraint:</strong> Forum content is inherently public, which has implications for Onelist's E2EE model.
+<strong>The Problem:</strong>
+<li>Onelist private entries are end-to-end encrypted (server cannot read)</li>
+<li>Forum topics and replies must be readable by anyone (public by definition)</li>
+<li>Therefore, all forum content requires <strong>unencrypted</strong> <code>html_public</code> representations</li>
+<strong>How It Works:</strong>
+<p>The <code>html_public</code> representation is generated on every content change, stored alongside encrypted content in PostgreSQL:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  CREATING/EDITING FORUM TOPIC                                                │
+│       │                                                                      │
+│       ▼                                                                      │
+│  Generate ALL representations (stored in PostgreSQL):                        │
+│  ├── markdown (encrypted) ──────► User's private copy, searchable           │
+│  └── html_public (plaintext) ───► Forum display, always generated           │
+│                                                                              │
+│  Forum rendering:                                                           │
+│  - Query returns html_public for public entries                             │
+│  - Cloudflare CDN caches at edge for traffic scaling                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Storage:</strong> All in PostgreSQL (no separate buckets). Access control at query level.
+<table>
+<tr><th>Content</th><th>Encrypted?</th><th>Access</th></tr>
+<tr><td><code>markdown</code> (user's copy)</td><td>Yes (E2EE)</td><td>Owner only</td></tr>
+<tr><td><code>html_public</code> (forum display)</td><td><strong>No</strong></td><td>Anyone (if entry is public)</td></tr>
+<tr><td><code>metadata</code> (counts, dates)</td><td>No</td><td>As needed</td></tr>
+</table>
+<strong>User Consent:</strong>
+<p>When creating a forum topic or reply, the UI should indicate:
+<li>"Forum posts are public and stored unencrypted"</li>
+<li>"Your private Onelist copy remains encrypted"</li></p>
+<strong>"Promote to Forum" Implications:</strong>
+<p>When promoting a private entry to a forum topic:
+1. User confirms they want to make content public
+2. <code>html_public</code> representation already exists (generated on every save)
+3. Entry gains <code>visibility: 'public'</code> and forum tags
+4. <code>html_public</code> is now served to forum viewers
+5. Original <code>markdown</code> representation remains E2EE</p>
+<strong>Unpromoting (Reverting to Private):</strong>
+1. Entry's <code>visibility</code> set back to <code>'private'</code>
+2. <code>html_public</code> still exists but is no longer served
+3. User's E2EE <code>markdown</code> copy unchanged
+4. Assets: entry removed from <code>public_entry_ids</code>, cleaned up if no other refs
+<h3>7.2 Asset Handling for Forum Content</h3>
+<p>Forum posts can contain images and file attachments. Since forum content is public, these assets need public URLs.</p>
+<strong>Creating Forum Topic/Reply with Assets:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  USER CREATES FORUM POST WITH IMAGE                                          │
+│                                                                              │
+│  1. User composes post with embedded image                                  │
+│  2. Image uploaded as E2EE asset (standard flow)                            │
+│  3. On submit (since forum = public):                                       │
+│     ├── Generate html_public representation                                 │
+│     ├── Decrypt image, upload to R2 public bucket                           │
+│     ├── Store public_url on asset                                           │
+│     ├── Add entry.id to asset.public_entry_ids                              │
+│     └── html_public references asset.public_url                             │
+│                                                                              │
+│  Forum viewers see image via R2 public URL                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>"Promote to Forum" with Assets:</strong>
+<p>When promoting a private entry that contains assets:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    PROMOTE TO FORUM                                          │
+│                                                                              │
+│  ⚠️  This entry contains 2 files that will be made public                   │
+│                                                                              │
+│  Promoting to forum will:                                                   │
+│                                                                              │
+│  • Make the entry text publicly viewable                                    │
+│  • DECRYPT and publish these files to public URLs:                          │
+│                                                                              │
+│    📷 screenshot.png (1.2 MB)                                               │
+│    📄 example.pdf (340 KB)                                                  │
+│                                                                              │
+│  • Your private copies remain end-to-end encrypted                          │
+│                                                                              │
+│  Select category: [Help &amp; Support ▼]                                        │
+│                                                                              │
+│                    [Cancel]  [Promote to Forum]                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Federated Replies with Assets:</strong>
+<p>When a user replies to a topic with an image:</p>
+<p>1. Image uploaded to replier's Onelist (E2EE)
+2. Image published to R2 with <code>public_entry_ids</code> pointing to the reply
+3. Copy of reply stored in forum owner's Onelist references same <code>public_url</code>
+4. If original reply deleted, forum owner's copy still has access (asset persists)</p>
+<strong>Cleanup:</strong>
+<p>When forum topic/reply is deleted or unpromoted:
+<li>Remove entry from <code>asset.public_entry_ids</code></li>
+<li>If <code>public_entry_ids</code> empty, delete from R2, set <code>public_url = null</code></li></p>
+<p>See <a href="./mvp_public_content_plan.md">MVP Public Content Plan</a> for full asset handling details.</p>
+<h3>7.3 Performance</h3>
+<p>Forum listing pages need to be fast. Considerations:</p>
+<li><strong>Denormalized counts</strong>: Store <code>reply_count</code>, <code>view_count</code>, <code>last_reply_at</code> on topic entry metadata to avoid counting queries</li>
+<li><strong>Caching</strong>: Cache category and topic list views (using <code>html_public</code> representations)</li>
+<li><strong>Pagination</strong>: Essential for topic lists and long reply threads</li>
+<li><strong>Lazy loading</strong>: Load replies incrementally for long threads</li>
+<h3>7.4 Federation Sync</h3>
+<p>When a federated reply is edited:</p>
+<p>1. Author edits in their Onelist
+2. Change syncs to forum owner's copy (if permitted)
+3. Options: auto-sync, require approval, no sync</p>
+<h3>7.5 Search Integration</h3>
+<p>Forum content should be searchable via standard Onelist search:</p>
+<li>Topics and replies indexed with full-text search</li>
+<li>Filter by <code>entry_type</code> or <code>forum:</em></code> tags</li>
+<li>Forum-specific search UI filters results to forum content</li>
+<h3>7.6 Migration Path</h3>
+<p>If user wants to move forum to different namespace:</p>
+<p>1. Export forum config + all topics/replies
+2. Update paths/URLs
+3. Set up redirects from old URLs
+4. Re-link federated replies (complex)</p>
+<h2>8. Comparison to Existing Solutions</h2>
+<table>
+<tr><th>Feature</th><th>Discourse</th><th>Reddit</th><th>Onelist Forums</th></tr>
+<tr><td>Self-hosted</td><td>Yes</td><td>No</td><td>Yes</td></tr>
+<tr><td>Data ownership</td><td>Server owner</td><td>Reddit</td><td>Individual users</td></tr>
+<tr><td>Federated</td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td>Integrated with notes/docs</td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td>Promote existing content</td><td>No</td><td>Cross-post</td><td>Yes (same entry)</td></tr>
+<tr><td>Anonymous posting</td><td>Plugin</td><td>No</td><td>Yes</td></tr>
+</table>
+<h2>9. Open Questions</h2>
+<li>[ ] <strong>Q61</strong>: Should forum replies support threading from MVP, or start flat?</li>
+<li>[ ] <strong>Q62</strong>: Rate limiting for anonymous posts?</li>
+<li>[ ] <strong>Q63</strong>: How to handle spam for public forums?</li>
+<li>[ ] <strong>Q64</strong>: Should federated reply edits auto-sync or require approval?</li>
+<li>[ ] <strong>Q65</strong>: Minimum account age/activity before posting (anti-spam)?</li>
+<h2>10. References</h2>
+<em>To be populated when reviewing leading forum software:</em>
+<li>Discourse features: [TBD]</li>
+<li>Reddit features: [TBD]</li>
+<li>Hacker News features: [TBD]</li>
+<li>Stack Overflow features: [TBD]</li>
+<li>phpBB features: [TBD]</li>
+</ul>
+  </article>
+</body>
+</html>

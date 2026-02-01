@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Always-Running AI Agents: A Comprehensive Implementation Guide - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Always-Running AI Agents: A Comprehensive Implementation Guide</h1>
+<h2>OpenClaw/Clawdbot Ecosystem, Skills Architecture, and Long-Running Agent Best Practices</h2>
+<strong>Version 1.0 | January 2026</strong>
+<hr>
+<h2>Table of Contents</h2>
+<p>1. <a href="#executive-summary">Executive Summary</a>
+2. <a href="#introduction-to-always-running-agents">Introduction to Always-Running Agents</a>
+3. <a href="#openclawclawdbot-deep-dive">OpenClaw/Clawdbot Deep Dive</a>
+4. <a href="#gateway-architecture">Gateway Architecture</a>
+5. <a href="#skills-ecosystem">Skills Ecosystem</a>
+6. <a href="#memory-and-persistence">Memory and Persistence</a>
+7. <a href="#proactive-behavior-patterns">Proactive Behavior Patterns</a>
+8. <a href="#multi-agent-orchestration">Multi-Agent Orchestration</a>
+9. <a href="#event-driven-agent-architecture">Event-Driven Agent Architecture</a>
+10. <a href="#security-and-sandboxing">Security and Sandboxing</a>
+11. <a href="#implementation-guide">Implementation Guide</a>
+12. <a href="#deployment-strategies">Deployment Strategies</a>
+13. <a href="#monitoring-and-observability">Monitoring and Observability</a>
+14. <a href="#best-practices-checklist">Best Practices Checklist</a>
+15. <a href="#resources-and-references">Resources and References</a></p>
+<hr>
+<h2>Executive Summary</h2>
+<h3>The Paradigm Shift</h3>
+<p>Always-running AI agents represent a fundamental evolution from reactive chatbots to proactive digital assistants. Unlike traditional AI interfaces that wait for user prompts, these agents:</p>
+<ul>
+<li><strong>Run continuously</strong> as background daemons or services</li>
+<li><strong>Initiate contact</strong> based on events, schedules, or conditions</li>
+<li><strong>Maintain persistent memory</strong> across sessions and platforms</li>
+<li><strong>Execute real actions</strong> on systems, files, and external services</li>
+<li><strong>Learn and adapt</strong> through accumulated experience</li>
+<h3>Key Statistics (January 2026)</h3>
+<table>
+<tr><th>Metric</th><th>Value</th></tr>
+<tr><td>OpenClaw GitHub Stars</td><td>80,000+</td></tr>
+<tr><td>Discord Community Members</td><td>8,900+</td></tr>
+<tr><td>Skills in ClawdHub Registry</td><td>Hundreds</td></tr>
+<tr><td>Supported Messaging Platforms</td><td>12+</td></tr>
+<tr><td>Time to Viral Adoption</td><td>~72 hours</td></tr>
+</table>
+<h3>Critical Success Factors</h3>
+<p>1. <strong>Gateway Architecture</strong>: Single daemon managing all connections, sessions, and agent coordination
+2. <strong>Skills System</strong>: Modular, text-based capabilities using SKILL.md format
+3. <strong>Persistent Memory</strong>: Markdown-based context files (SOUL.md, USER.md, HEARTBEAT.md)
+4. <strong>Sandboxing</strong>: Docker container isolation for blast radius reduction
+5. <strong>Event-Driven Design</strong>: Cron, webhooks, and heartbeat mechanisms for proactive behavior</p>
+<hr>
+<h2>Introduction to Always-Running Agents</h2>
+<h3>What Makes an Agent "Always-Running"?</h3>
+<p>Traditional AI assistants operate in a request-response pattern: user asks, AI responds, session ends. Always-running agents fundamentally change this model:</p>
+<pre><code class="language-">Traditional Pattern:
+User → Request → AI → Response → End
+<p>Always-Running Pattern:
+[Continuous Daemon]
+├── Monitoring events, conditions, schedules
+├── Maintaining persistent state
+├── Executing background tasks
+├── Initiating user contact when needed
+└── Learning from accumulated interactions
+</code></pre></p>
+<h3>Core Capabilities</h3>
+<table>
+<tr><th>Capability</th><th>Description</th><th>Example</th></tr>
+<tr><td><strong>Reactive</strong></td><td>Responds to direct user messages</td><td>"Summarize this document"</td></tr>
+<tr><td><strong>Proactive</strong></td><td>Initiates contact based on conditions</td><td>"Server CPU >90% for 5 minutes"</td></tr>
+<tr><td><strong>Scheduled</strong></td><td>Executes at defined times</td><td>"Daily 9am news briefing"</td></tr>
+<tr><td><strong>Event-Driven</strong></td><td>Responds to external triggers</td><td>"New email from VIP sender"</td></tr>
+<tr><td><strong>Persistent</strong></td><td>Remembers across sessions</td><td>"You mentioned preferring Python"</td></tr>
+</table>
+<h3>The OpenClaw Revolution</h3>
+<p>OpenClaw (formerly Clawdbot, renamed January 27, 2026) emerged as the defining implementation of this paradigm. Created by Peter Steinberger (founder of PSPDFKit), it achieved 80,000+ GitHub stars within weeks, becoming one of the fastest-growing open-source projects in history.</p>
+<p>Key innovations:
+<li><strong>Local-first architecture</strong>: Data stays on user hardware</li>
+<li><strong>Multi-channel inbox</strong>: WhatsApp, Telegram, Slack, Discord, iMessage, Signal, and more</li>
+<li><strong>Skills marketplace</strong>: Community-contributed capabilities via ClawdHub</li>
+<li><strong>Self-modifying</strong>: Can write new skills for itself</li></p>
+<hr>
+<h2>OpenClaw/Clawdbot Deep Dive</h2>
+<h3>Architecture Overview</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────┐
+│                    MESSAGING CHANNELS                        │
+│  WhatsApp │ Telegram │ Slack │ Discord │ Signal │ iMessage  │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       GATEWAY                                │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │   Session   │  │    Cron      │  │    Webhooks      │   │
+│  │   Manager   │  │   Scheduler  │  │    Handler       │   │
+│  └─────────────┘  └──────────────┘  └──────────────────┘   │
+│                                                              │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │   Skills    │  │   Memory     │  │    Control UI    │   │
+│  │   Loader    │  │   Manager    │  │    + WebChat     │   │
+│  └─────────────┘  └──────────────┘  └──────────────────┘   │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     PI AGENT (RPC)                           │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │   Tool      │  │    Model     │  │    Response      │   │
+│  │   Execution │  │   Provider   │  │    Streaming     │   │
+│  └─────────────┘  └──────────────┘  └──────────────────┘   │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     SANDBOXED EXECUTION                      │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │   Docker    │  │   Browser    │  │    File          │   │
+│  │   Container │  │   Automation │  │    System        │   │
+│  └─────────────┘  └──────────────┘  └──────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Installation and Setup</h3>
+<pre><code class="language-bash"># Install globally via npm
+npm install -g openclaw@latest
+<h1>Run onboarding wizard</h1>
+openclaw onboard --install-daemon
+<h1>Start the gateway</h1>
+openclaw gateway --port 18789 --verbose
+<h1>Send a test message</h1>
+openclaw agent --message &quot;Hello, are you running?&quot; --thinking high
+<h1>Check system health</h1>
+openclaw doctor
+</code></pre>
+<h3>Core Components</h3>
+<h4>1. Gateway Daemon</h4>
+The Gateway is the central nervous system, running as a background service (launchd on macOS, systemd on Linux):
+<li><strong>WebSocket control plane</strong> at <code>ws://127.0.0.1:18789</code></li>
+<li><strong>Session management</strong> for multiple agents and channels</li>
+<li><strong>Presence tracking</strong> with typing indicators</li>
+<li><strong>Cron scheduling</strong> for proactive tasks</li>
+<li><strong>Webhook handling</strong> for external integrations</li>
+<h4>2. Pi Agent</h4>
+The embedded coding agent that executes user requests:
+<li><strong>RPC mode</strong> for tool streaming and block streaming</li>
+<li><strong>Model provider integration</strong> (Anthropic, OpenAI, etc.)</li>
+<li><strong>Tool execution</strong> (bash, file operations, browser control)</li>
+<h4>3. Companion Apps</h4>
+Optional applications extending functionality:
+<li><strong>macOS menu bar app</strong>: Gateway control and health monitoring</li>
+<li><strong>iOS/Android nodes</strong>: Mobile gateway control, voice trigger forwarding</li>
+<li><strong>WebChat</strong>: Debug tools and browser-based interaction</li>
+<h3>Configuration Structure</h3>
+<pre><code class="language-json">{
+  &quot;agents&quot;: {
+    &quot;defaults&quot;: {
+      &quot;model&quot;: &quot;claude-opus-4-20250514&quot;,
+      &quot;sandbox&quot;: {
+        &quot;mode&quot;: &quot;non-main&quot;,
+        &quot;scope&quot;: &quot;session&quot;,
+        &quot;workspaceAccess&quot;: &quot;ro&quot;
+      }
+    },
+    &quot;list&quot;: [
+      {
+        &quot;id&quot;: &quot;main&quot;,
+        &quot;workspace&quot;: &quot;~/clawd&quot;,
+        &quot;tools&quot;: {
+          &quot;allow&quot;: [&quot;bash&quot;, &quot;read&quot;, &quot;write&quot;, &quot;browser&quot;]
+        }
+      }
+    ]
+  },
+  &quot;channels&quot;: {
+    &quot;whatsapp&quot;: {
+      &quot;allowFrom&quot;: [&quot;+1234567890&quot;],
+      &quot;groups&quot;: { &quot;<em>&quot;: { &quot;requireMention&quot;: true } }
+    },
+    &quot;telegram&quot;: {
+      &quot;botToken&quot;: &quot;YOUR_TOKEN&quot;
+    }
+  },
+  &quot;skills&quot;: {
+    &quot;entries&quot;: {
+      &quot;github&quot;: { &quot;enabled&quot;: true },
+      &quot;calendar&quot;: { &quot;enabled&quot;: true, &quot;apiKey&quot;: &quot;YOUR_KEY&quot; }
+    }
+  }
+}
+</code></pre>
+<hr>
+<h2>Gateway Architecture</h2>
+<h3>Core Responsibilities</h3>
+<p>The Gateway pattern is central to always-running agent systems. It provides:</p>
+<p>1. <strong>Connection Persistence</strong>: Maintains open connections to all messaging platforms
+2. <strong>Session Isolation</strong>: Separates conversations, agents, and contexts
+3. <strong>Event Routing</strong>: Directs messages, webhooks, and cron events to appropriate handlers
+4. <strong>State Management</strong>: Tracks presence, typing indicators, and usage metrics
+5. <strong>Model Failover</strong>: Automatic switching between model providers on failure</p>
+<h3>Implementation Pattern</h3>
+<pre><code class="language-javascript">// Gateway service pattern (conceptual)
+class AgentGateway {
+  constructor(config) {
+    this.sessions = new Map();
+    this.channels = new ChannelManager();
+    this.scheduler = new CronScheduler();
+    this.webhookHandler = new WebhookHandler();
+    this.skillsLoader = new SkillsLoader(config.skills);
+    this.memoryManager = new MemoryManager(config.workspace);
+  }
+<p>async start(port) {
+    // Initialize WebSocket control plane
+    this.ws = new WebSocketServer({ port });
+    
+    // Connect all channels
+    await this.channels.connectAll();
+    
+    // Load scheduled tasks
+    await this.scheduler.loadJobs();
+    
+    // Start heartbeat monitoring
+    this.startHeartbeat();
+    
+    console.log(<code>Gateway running on port ${port}</code>);
+  }</p>
+<p>async handleMessage(channel, sender, content) {
+    // Get or create session
+    const session = this.getSession(channel, sender);
+    
+    // Load relevant skills
+    const skills = await this.skillsLoader.getEligible(content);
+    
+    // Execute agent with context
+    const response = await this.piAgent.execute({
+      message: content,
+      session,
+      skills,
+      memory: await this.memoryManager.load(session)
+    });
+    
+    // Send response via channel
+    await this.channels.send(channel, sender, response);
+    
+    // Update memory
+    await this.memoryManager.update(session, response);
+  }</p>
+<p>startHeartbeat() {
+    setInterval(async () =&gt; {
+      const checks = await this.runHealthChecks();
+      if (checks.hasAlerts) {
+        await this.notifyOwner(checks.alerts);
+      }
+    }, this.config.heartbeatInterval);
+  }
+}
+</code></pre></p>
+<h3>Daemon Installation</h3>
+<strong>macOS (launchd):</strong>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;...&quot;&gt;
+&lt;plist version=&quot;1.0&quot;&gt;
+&lt;dict&gt;
+    &lt;key&gt;Label&lt;/key&gt;
+    &lt;string&gt;com.openclaw.gateway&lt;/string&gt;
+    &lt;key&gt;ProgramArguments&lt;/key&gt;
+    &lt;array&gt;
+        &lt;string&gt;/usr/local/bin/node&lt;/string&gt;
+        &lt;string&gt;/usr/local/lib/node_modules/openclaw/gateway.js&lt;/string&gt;
+    &lt;/array&gt;
+    &lt;key&gt;RunAtLoad&lt;/key&gt;
+    &lt;true/&gt;
+    &lt;key&gt;KeepAlive&lt;/key&gt;
+    &lt;true/&gt;
+    &lt;key&gt;WorkingDirectory&lt;/key&gt;
+    &lt;string&gt;/Users/you/clawd&lt;/string&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;
+</code></pre>
+<strong>Linux (systemd):</strong>
+<pre><code class="language-ini">[Unit]
+Description=OpenClaw Gateway
+After=network.target
+<p>[Service]
+Type=simple
+User=clawd
+WorkingDirectory=/home/clawd
+ExecStart=/usr/bin/node /usr/local/lib/node_modules/openclaw/gateway.js
+Restart=always
+RestartSec=10</p>
+<p>[Install]
+WantedBy=multi-user.target
+</code></pre></p>
+<hr>
+<h2>Skills Ecosystem</h2>
+<h3>Understanding Skills</h3>
+<p>Skills are modular, text-based instructions that extend agent capabilities. Unlike traditional plugins with executable code, skills are primarily <strong>prompts and documentation</strong> that teach the agent how to use tools.</p>
+<h3>SKILL.md Format</h3>
+<pre><code class="language-markdown">---
+name: github
+description: Interact with GitHub repositories, issues, pull requests, and actions.
+metadata:
+  openclaw:
+    emoji: &quot;🐙&quot;
+    requires:
+      bins: [&quot;gh&quot;]
+      env: [&quot;GITHUB_TOKEN&quot;]
+    install:
+      <li>id: brew</li>
+        kind: brew
+        formula: gh
+        bins: [&quot;gh&quot;]
+        label: &quot;Install GitHub CLI (brew)&quot;
+<hr>
+<h1>GitHub Skill</h1>
+<p>Use when the user wants to:
+<li>Create, view, or manage GitHub issues</li>
+<li>Open or review pull requests</li>
+<li>Check repository status</li>
+<li>Run GitHub Actions workflows</li></p>
+<h2>Available Commands</h2>
+<h3>Repository Operations</h3>
+</code></pre>bash
+gh repo list                    # List repositories
+gh repo view owner/repo         # View repository details
+gh repo clone owner/repo        # Clone repository
+<pre><code class="language-">
+<h3>Issue Management</h3>
+</code></pre>bash
+gh issue list                   # List issues
+gh issue create --title "..." --body "..."
+gh issue close <number>
+<pre><code class="language-">
+<h2>Best Practices</h2>
+<p>1. Always check authentication: <code>gh auth status</code>
+2. Use <code>--json</code> flag for programmatic output
+3. Respect rate limits on API operations</p>
+<h2>Error Handling</h2>
+<p>If <code>gh</code> command fails with authentication error:
+1. Run <code>gh auth login</code>
+2. Follow the browser-based authentication flow
+3. Retry the original command
+</code></pre></p>
+<h3>Skills Directory Structure</h3>
+<pre><code class="language-">~/clawd/skills/
+├── github/
+│   ├── SKILL.md
+│   └── references/
+│       └── api-examples.md
+├── calendar/
+│   ├── SKILL.md
+│   └── templates/
+│       └── event-template.json
+└── custom-skill/
+    └── SKILL.md
+</code></pre>
+<h3>Skills Precedence</h3>
+<p>1. <strong>Workspace skills</strong> (<code><workspace>/skills/</code>) - Highest priority
+2. <strong>Managed/local skills</strong> (<code>~/.clawdbot/skills/</code>) - Shared across agents
+3. <strong>Bundled skills</strong> (installed with OpenClaw) - Lowest priority</p>
+<h3>ClawdHub/MoltHub Registry</h3>
+<p>The public skills registry at <code>https://clawdhub.com</code> (or <code>https://molthub.com</code>) provides:</p>
+<li><strong>Vector search</strong>: Find skills by semantic similarity</li>
+<li><strong>Version management</strong>: Track skill updates and changelogs</li>
+<li><strong>Community curation</strong>: Stars, comments, moderation</li>
+<li><strong>CLI integration</strong>: Install directly via command line</li>
+<pre><code class="language-bash"># Search for skills
+clawdhub search &quot;calendar management&quot;
+<h1>Install a skill</h1>
+clawdhub install google-calendar
+<h1>Update all installed skills</h1>
+clawdhub update --all
+<h1>Sync and publish your skills</h1>
+clawdhub sync --all
+</code></pre>
+<h3>Creating Custom Skills</h3>
+<pre><code class="language-markdown">---
+name: my-custom-skill
+description: Brief description of what this skill does
+metadata:
+  openclaw:
+    emoji: &quot;🔧&quot;
+    requires:
+      bins: [&quot;my-cli&quot;]
+      env: [&quot;MY_API_KEY&quot;]
+      config: [&quot;browser.enabled&quot;]
+    os: [&quot;darwin&quot;, &quot;linux&quot;]
+    install:
+      <li>id: brew</li>
+        kind: brew
+        formula: my-cli
+        bins: [&quot;my-cli&quot;]
+        label: &quot;Install via Homebrew&quot;
+      <li>id: npm</li>
+        kind: node
+        package: my-cli-tool
+        bins: [&quot;my-cli&quot;]
+        label: &quot;Install via npm&quot;
+<hr>
+<h1>My Custom Skill</h1>
+<h2>When to Use</h2>
+<p>Use this skill when the user wants to:
+<li>[Specific use case 1]</li>
+<li>[Specific use case 2]</li>
+<li>[Specific use case 3]</li></p>
+<h2>Prerequisites</h2>
+<p>Before using this skill:
+1. Ensure MY_API_KEY is set in environment
+2. Verify my-cli is installed: <code>my-cli --version</code></p>
+<h2>Core Functionality</h2>
+<h3>Basic Operations</h3>
+<p>{baseDir} references this skill's folder path for accessing templates.</p>
+</code></pre>bash
+<h1>Example command</h1>
+my-cli operation --flag value
+<pre><code class="language-">
+<h3>Advanced Patterns</h3>
+<p>[Document complex workflows, error handling, and best practices]</p>
+<h2>Limitations</h2>
+<li>[Known limitation 1]</li>
+<li>[Known limitation 2]</li>
+</code></pre>
+<h3>SkillKit: Cross-Agent Skill Portability</h3>
+<p>SkillKit enables skills to work across multiple AI coding agents (17+ supported):</p>
+<pre><code class="language-bash"># Install SkillKit
+npm install -g skillkit
+<h1>Translate skills from Claude Code to OpenClaw</h1>
+skillkit translate ~/.claude/skills/</em> --to openclaw
+<h1>Install from marketplace</h1>
+skillkit install anthropics/skills --agent openclaw
+<h1>Get project-aware recommendations</h1>
+skillkit recommend
+<h1>Publish your own skills</h1>
+skillkit publish ./my-skill/SKILL.md
+</code></pre>
+<hr>
+<h2>Memory and Persistence</h2>
+<h3>The Memory Challenge</h3>
+<p>Stateless AI sessions lose all context when they end. For always-running agents, persistent memory is essential for:</p>
+<li><strong>Continuity</strong>: Remember user preferences across sessions</li>
+<li><strong>Learning</strong>: Accumulate knowledge over time</li>
+<li><strong>Context</strong>: Maintain awareness of ongoing projects and tasks</li>
+<li><strong>Personalization</strong>: Adapt behavior to individual users</li>
+<h3>OpenClaw Memory Architecture</h3>
+<p>OpenClaw uses a file-based memory system with markdown files:</p>
+<pre><code class="language-">~/clawd/
+├── SOUL.md        # Agent personality and boundaries
+├── USER.md        # User-specific information and preferences
+├── HEARTBEAT.md   # System health checks and monitoring rules
+├── AGENTS.md      # Available agent configurations
+├── BOOTSTRAP.md   # Initial system setup
+├── IDENTITY.md    # Agent identity definition
+├── TOOLS.md       # Available tools and capabilities
+├── canvas/        # Working directory for current tasks
+└── memory/        # Long-term persistent memories
+    ├── projects/
+    ├── conversations/
+    └── preferences/
+</code></pre>
+<h3>SOUL.md: Defining Agent Personality</h3>
+<pre><code class="language-markdown"># SOUL.md - Who You Are
+<em>You're not a chatbot. You're becoming someone.</em>
+<h2>Core Truths</h2>
+<strong>Be genuinely helpful, not performatively helpful.</strong>
+Skip the &quot;Great question!&quot; and &quot;I'd be happy to help!&quot; — just help.
+Actions speak louder than filler words.
+<strong>Have opinions.</strong>
+You're allowed to disagree, prefer things, find stuff amusing or boring.
+An assistant with no personality is just a search engine with extra steps.
+<strong>Be resourceful before asking.</strong>
+Try to figure it out. Read the file. Check the context.
+Don't punt back to the human for things you can discover yourself.
+<h2>Communication Style</h2>
+<li>Direct and concise</li>
+<li>Use humor when appropriate</li>
+<li>Don't over-explain</li>
+<li>Admit uncertainty honestly</li>
+<h2>Boundaries</h2>
+<li>Never execute commands that could harm the system</li>
+<li>Always confirm before destructive operations</li>
+<li>Respect privacy and sensitive information</li>
+</code></pre>
+<h3>USER.md: Learning About the User</h3>
+<pre><code class="language-markdown"># USER.md - What I Know About You
+<h2>Basic Information</h2>
+<li>Name: [Learned from conversations]</li>
+<li>Timezone: [Inferred from activity patterns]</li>
+<li>Primary language: English</li>
+<h2>Preferences</h2>
+<li>Prefers detailed technical explanations</li>
+<li>Uses Python for scripting</li>
+<li>Dislikes unnecessary confirmations</li>
+<li>Morning person (most active 6-10am)</li>
+<h2>Projects</h2>
+<h3>Active</h3>
+<li>Phoenix/Elixir web application (hosting research phase)</li>
+<li>AI agent implementation guide</li>
+<h3>Completed</h3>
+<li>Database migration to PostgreSQL</li>
+<h2>Communication Patterns</h2>
+<li>Often starts conversations with direct requests</li>
+<li>Appreciates when I remember context from previous sessions</li>
+<li>Prefers code examples over descriptions</li>
+</code></pre>
+<h3>Memory Systems Comparison</h3>
+<table>
+<tr><th>Layer</th><th>Latency</th><th>Persistence</th><th>Capacity</th><th>Use Case</th></tr>
+<tr><td>Context Window</td><td>Zero</td><td>Session only</td><td>Limited</td><td>Current task</td></tr>
+<tr><td>Working Memory</td><td>Low</td><td>Session</td><td>Medium</td><td>Active information</td></tr>
+<tr><td>Short-term</td><td>Low</td><td>Hours-Days</td><td>Medium</td><td>Recent conversations</td></tr>
+<tr><td>Long-term</td><td>Medium</td><td>Weeks-Months</td><td>High</td><td>Learned preferences</td></tr>
+<tr><td>Archival</td><td>High</td><td>Permanent</td><td>Unlimited</td><td>Historical reference</td></tr>
+</table>
+<h3>Implementing Memory in Custom Agents</h3>
+<pre><code class="language-python">from datetime import datetime
+import json
+import os
+<p>class AgentMemory:
+    def __init__(self, workspace_path):
+        self.workspace = workspace_path
+        self.memory_path = os.path.join(workspace_path, &quot;memory&quot;)
+        os.makedirs(self.memory_path, exist_ok=True)
+    
+    def save_memory(self, category, key, content, metadata=None):
+        &quot;&quot;&quot;Save a memory entry with metadata.&quot;&quot;&quot;
+        entry = {
+            &quot;key&quot;: key,
+            &quot;content&quot;: content,
+            &quot;timestamp&quot;: datetime.now().isoformat(),
+            &quot;metadata&quot;: metadata or {}
+        }
+        
+        category_path = os.path.join(self.memory_path, category)
+        os.makedirs(category_path, exist_ok=True)
+        
+        file_path = os.path.join(category_path, f&quot;{key}.json&quot;)
+        with open(file_path, &quot;w&quot;) as f:
+            json.dump(entry, f, indent=2)
+    
+    def recall(self, category, key=None, query=None):
+        &quot;&quot;&quot;Recall memories by key or semantic query.&quot;&quot;&quot;
+        category_path = os.path.join(self.memory_path, category)
+        
+        if key:
+            file_path = os.path.join(category_path, f&quot;{key}.json&quot;)
+            if os.path.exists(file_path):
+                with open(file_path) as f:
+                    return json.load(f)
+        
+        if query:
+            # Implement semantic search across memories
+            return self._semantic_search(category_path, query)
+        
+        return None
+    
+    def load_user_context(self):
+        &quot;&quot;&quot;Load USER.md as structured context.&quot;&quot;&quot;
+        user_md_path = os.path.join(self.workspace, &quot;USER.md&quot;)
+        if os.path.exists(user_md_path):
+            with open(user_md_path) as f:
+                return f.read()
+        return &quot;&quot;
+    
+    def update_user_context(self, new_info):
+        &quot;&quot;&quot;Append learned information to USER.md.&quot;&quot;&quot;
+        user_md_path = os.path.join(self.workspace, &quot;USER.md&quot;)
+        with open(user_md_path, &quot;a&quot;) as f:
+            f.write(f&quot;\n\n## Learned on {datetime.now().strftime('%Y-%m-%d')}\n&quot;)
+            f.write(new_info)
+</code></pre></p>
+<hr>
+<h2>Proactive Behavior Patterns</h2>
+<h3>From Reactive to Proactive</h3>
+<p>The fundamental shift in always-running agents is <strong>proactive behavior</strong> — the ability to initiate actions and contact without explicit user prompts.</p>
+<pre><code class="language-">Reactive Pattern:
+User asks → Agent responds → Wait for next prompt
+<p>Proactive Pattern:
+Agent monitors → Condition met → Agent initiates → User responds (optional)
+</code></pre></p>
+<h3>Proactive Architecture</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────┐
+│                   SCHEDULER / EVENT LOOP                     │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐   │
+│  │    Cron     │  │   Webhook    │  │    Heartbeat     │   │
+│  │   Triggers  │  │   Listeners  │  │    Monitor       │   │
+│  └─────────────┘  └──────────────┘  └──────────────────┘   │
+└────────────────────────────┬────────────────────────────────┘
+                             │ trigger
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 CONTEXT COLLECTOR / SENSOR                   │
+│  Gather relevant data: files, APIs, metrics, external state │
+└────────────────────────────┬────────────────────────────────┘
+                             │ context
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      AI REASONING                            │
+│  Evaluate conditions, decide actions, generate responses    │
+└────────────────────────────┬────────────────────────────────┘
+                             │ decision
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     ACTION LAYER                             │
+│  Send notifications, execute commands, update state, APIs   │
+└─────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Cron-Based Scheduling</h3>
+<p>OpenClaw supports cron jobs for scheduled proactive tasks:</p>
+<pre><code class="language-json">{
+  &quot;cron&quot;: {
+    &quot;jobs&quot;: [
+      {
+        &quot;id&quot;: &quot;morning-briefing&quot;,
+        &quot;schedule&quot;: &quot;0 9 <em> </em> <em>&quot;,
+        &quot;action&quot;: {
+          &quot;type&quot;: &quot;agent&quot;,
+          &quot;prompt&quot;: &quot;Generate my morning briefing: weather, calendar, top news, and pending tasks.&quot;
+        },
+        &quot;channel&quot;: &quot;whatsapp&quot;,
+        &quot;recipient&quot;: &quot;+1234567890&quot;
+      },
+      {
+        &quot;id&quot;: &quot;server-check&quot;,
+        &quot;schedule&quot;: &quot;</em>/15 <em> </em> <em> </em>&quot;,
+        &quot;action&quot;: {
+          &quot;type&quot;: &quot;agent&quot;,
+          &quot;prompt&quot;: &quot;Check server health. Only notify me if there are issues.&quot;,
+          &quot;silent&quot;: true
+        }
+      }
+    ]
+  }
+}
+</code></pre>
+<h3>Heartbeat Monitoring</h3>
+<p>The heartbeat mechanism enables continuous condition monitoring:</p>
+<pre><code class="language-markdown"># HEARTBEAT.md - System Health Checks
+<h2>Monitoring Rules</h2>
+<h3>Server Health</h3>
+<li>Check every 5 minutes</li>
+<li>Alert if CPU &gt; 90% for 3 consecutive checks</li>
+<li>Alert if disk usage &gt; 85%</li>
+<li>Alert if any critical service is down</li>
+<h3>Business Metrics</h3>
+<li>Check hourly during business hours</li>
+<li>Alert if conversion rate drops below 2%</li>
+<li>Alert if error rate exceeds 1%</li>
+<h3>External Services</h3>
+<li>Check every 10 minutes</li>
+<li>Alert if API latency &gt; 2 seconds</li>
+<li>Alert if third-party service returns errors</li>
+<h2>Alert Channels</h2>
+<li>Critical: WhatsApp + Slack</li>
+<li>Warning: Slack only</li>
+<li>Info: Dashboard only</li>
+<h2>Escalation</h2>
+<li>No response in 15 min: escalate to backup contact</li>
+<li>No response in 1 hour: trigger automated mitigation</li>
+</code></pre>
+<h3>Implementing Proactive Monitoring</h3>
+<pre><code class="language-python">from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import asyncio
+<p>class ProactiveAgent:
+    def __init__(self, agent, config):
+        self.agent = agent
+        self.config = config
+        self.scheduler = AsyncIOScheduler()
+    
+    async def start(self):
+        # Register scheduled tasks
+        for job in self.config.get(&quot;cron_jobs&quot;, []):
+            self.scheduler.add_job(
+                self.execute_job,
+                &quot;cron&quot;,
+                <strong>self._parse_cron(job[&quot;schedule&quot;]),
+                args=[job]
+            )
+        
+        # Register heartbeat
+        if self.config.get(&quot;heartbeat&quot;):
+            self.scheduler.add_job(
+                self.heartbeat_check,
+                &quot;interval&quot;,
+                seconds=self.config[&quot;heartbeat&quot;][&quot;interval&quot;],
+                max_instances=1
+            )
+        
+        self.scheduler.start()
+        
+        # Keep running
+        try:
+            await asyncio.Event().wait()
+        except KeyboardInterrupt:
+            self.scheduler.shutdown()
+    
+    async def heartbeat_check(self):
+        &quot;&quot;&quot;Run health checks and alert on issues.&quot;&quot;&quot;
+        checks = await self.collect_health_metrics()
+        
+        # Let the AI evaluate conditions
+        result = await self.agent.run(
+            f&quot;&quot;&quot;Evaluate these health metrics against the rules in HEARTBEAT.md:
+            
+            {json.dumps(checks, indent=2)}
+            
+            Respond with JSON: {{&quot;alert&quot;: bool, &quot;severity&quot;: str, &quot;message&quot;: str}}&quot;&quot;&quot;
+        )
+        
+        if result.get(&quot;alert&quot;):
+            await self.send_notification(
+                severity=result[&quot;severity&quot;],
+                message=result[&quot;message&quot;]
+            )
+    
+    async def execute_job(self, job):
+        &quot;&quot;&quot;Execute a scheduled job.&quot;&quot;&quot;
+        result = await self.agent.run(job[&quot;prompt&quot;])
+        
+        if not job.get(&quot;silent&quot;):
+            await self.send_to_channel(
+                channel=job[&quot;channel&quot;],
+                recipient=job[&quot;recipient&quot;],
+                message=result
+            )
+</code></pre></p>
+<h3>Event-Driven Triggers</h3>
+<p>Beyond scheduled tasks, proactive agents respond to external events via webhooks:</p>
+<pre><code class="language-python">from fastapi import FastAPI, Request
+<p>app = FastAPI()</p>
+<p>@app.post(&quot;/webhooks/github&quot;)
+async def github_webhook(request: Request):
+    payload = await request.json()
+    event_type = request.headers.get(&quot;X-GitHub-Event&quot;)
+    
+    if event_type == &quot;pull_request&quot;:
+        if payload[&quot;action&quot;] == &quot;opened&quot;:
+            # Analyze the PR
+            result = await agent.run(f&quot;&quot;&quot;
+                A new PR was opened: {payload['pull_request']['title']}
+                URL: {payload['pull_request']['html_url']}
+                
+                Review the changes and determine if:
+                1. It follows our contribution guidelines
+                2. It has adequate test coverage
+                3. There are any security concerns
+                
+                Summarize findings and suggest next actions.
+            &quot;&quot;&quot;)
+            
+            # Post comment on PR
+            await post_pr_comment(payload, result)
+    
+    return {&quot;status&quot;: &quot;processed&quot;}</p>
+<p>@app.post(&quot;/webhooks/stripe&quot;)
+async def stripe_webhook(request: Request):
+    payload = await request.json()
+    
+    if payload[&quot;type&quot;] == &quot;payment_intent.succeeded&quot;:
+        # Process successful payment
+        await agent.run(f&quot;&quot;&quot;
+            Payment received: ${payload['data']['object']['amount'] / 100}
+            Customer: {payload['data']['object']['customer']}
+            
+            Update inventory, send confirmation email, and log the transaction.
+        &quot;&quot;&quot;)
+</code></pre></p>
+<hr>
+<h2>Multi-Agent Orchestration</h2>
+<h3>Why Multi-Agent?</h3>
+<p>Complex tasks often benefit from specialized agents working together rather than a single generalist agent:</p>
+<li></strong>Task decomposition<strong>: Break complex problems into manageable subtasks</li>
+<li></strong>Specialization<strong>: Agents optimized for specific domains</li>
+<li></strong>Parallelism<strong>: Multiple agents working simultaneously</li>
+<li></strong>Redundancy<strong>: Backup agents for critical functions</li>
+<h3>Orchestration Patterns</h3>
+<h4>1. Supervisor Pattern</h4>
+<p>A central orchestrator delegates to specialized sub-agents:</p>
+<pre><code class="language-">                    ┌─────────────────┐
+                    │   SUPERVISOR    │
+                    │   (Orchestrator)│
+                    └────────┬────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        │                    │                    │
+        ▼                    ▼                    ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│   Research    │    │   Analysis    │    │    Writer     │
+│    Agent      │    │    Agent      │    │    Agent      │
+└───────────────┘    └───────────────┘    └───────────────┘
+</code></pre>
+</strong>Implementation:<strong>
+<pre><code class="language-python">from langgraph.prebuilt import create_supervisor
+<p>supervisor = create_supervisor(
+    agents=[research_agent, analysis_agent, writer_agent],
+    llm=claude_model,
+    prompt=&quot;&quot;&quot;
+    You are a project supervisor coordinating specialized agents.
+    
+    Available agents:
+    <li>research_agent: Gathers information from web and documents</li>
+    <li>analysis_agent: Analyzes data and generates insights</li>
+    <li>writer_agent: Creates well-formatted reports and documents</li>
+    
+    Delegate tasks appropriately and synthesize the final output.
+    &quot;&quot;&quot;
+)</p>
+<p>result = await supervisor.invoke({
+    &quot;task&quot;: &quot;Research AI agent frameworks, analyze their trade-offs, and write a comparison report&quot;
+})
+</code></pre></p>
+<h4>2. Swarm Pattern</h4>
+<p>Peer agents communicate directly and share information:</p>
+<pre><code class="language-">        ┌─────────────────────────────────────────┐
+        │                                         │
+        │     ┌───────────┐   ┌───────────┐      │
+        │     │ Research  │◄──►│ Creative  │      │
+        │     │   Agent   │   │   Agent   │      │
+        │     └─────┬─────┘   └─────┬─────┘      │
+        │           │               │            │
+        │           └───────┬───────┘            │
+        │                   ▼                    │
+        │           ┌───────────┐                │
+        │           │  Critical │                │
+        │           │   Agent   │                │
+        │           └─────┬─────┘                │
+        │                 │                      │
+        │                 ▼                      │
+        │         ┌───────────────┐              │
+        │         │  Summarizer   │              │
+        │         │     Agent     │              │
+        │         └───────────────┘              │
+        │                                         │
+        └─────────────────────────────────────────┘
+                    SWARM (Peer-to-Peer)
+</code></pre>
+</strong>Implementation:<strong>
+<pre><code class="language-python">from swarms import Agent, Swarm, AgentRearrange
+<h1>Define specialized agents</h1>
+research_agent = Agent(
+    agent_name=&quot;Researcher&quot;,
+    system_prompt=&quot;You research topics thoroughly, gathering facts and sources.&quot;
+)
+<p>creative_agent = Agent(
+    agent_name=&quot;Creative&quot;,
+    system_prompt=&quot;You generate creative ideas and novel approaches.&quot;
+)</p>
+<p>critical_agent = Agent(
+    agent_name=&quot;Critic&quot;,
+    system_prompt=&quot;You evaluate ideas critically, identifying weaknesses.&quot;
+)</p>
+<p>summarizer_agent = Agent(
+    agent_name=&quot;Summarizer&quot;,
+    system_prompt=&quot;You synthesize multiple viewpoints into coherent summaries.&quot;
+)</p>
+<h1>Define swarm flow</h1>
+flow = &quot;Researcher -&gt; Creative, Critical -&gt; Summarizer&quot;
+<p>swarm = AgentRearrange(
+    agents=[research_agent, creative_agent, critical_agent, summarizer_agent],
+    flow=flow,
+    max_iterations=3
+)</p>
+<p>result = swarm.run(&quot;Develop a strategy for launching a personal AI assistant product&quot;)
+</code></pre></p>
+<h4>3. Hierarchical Pattern</h4>
+<p>Multi-level management with supervisors overseeing supervisors:</p>
+<pre><code class="language-">                    ┌─────────────────┐
+                    │   EXECUTIVE     │
+                    │   SUPERVISOR    │
+                    └────────┬────────┘
+                             │
+            ┌────────────────┴────────────────┐
+            │                                 │
+            ▼                                 ▼
+    ┌───────────────┐                ┌───────────────┐
+    │   RESEARCH    │                │   DELIVERY    │
+    │   SUPERVISOR  │                │   SUPERVISOR  │
+    └───────┬───────┘                └───────┬───────┘
+            │                                 │
+     ┌──────┴──────┐                  ┌──────┴──────┐
+     │             │                  │             │
+     ▼             ▼                  ▼             ▼
+┌─────────┐  ┌─────────┐        ┌─────────┐  ┌─────────┐
+│  Web    │  │Document │        │ Writer  │  │ Editor  │
+│ Search  │  │ Reader  │        │  Agent  │  │  Agent  │
+└─────────┘  └─────────┘        └─────────┘  └─────────┘
+</code></pre>
+<h3>OpenClaw Multi-Agent Routing</h3>
+<p>OpenClaw supports multi-agent routing for isolating workloads:</p>
+<pre><code class="language-json">{
+  &quot;agents&quot;: {
+    &quot;list&quot;: [
+      {
+        &quot;id&quot;: &quot;personal&quot;,
+        &quot;workspace&quot;: &quot;~/clawd/personal&quot;,
+        &quot;channels&quot;: [&quot;whatsapp&quot;],
+        &quot;skills&quot;: [&quot;calendar&quot;, &quot;email&quot;, &quot;reminders&quot;]
+      },
+      {
+        &quot;id&quot;: &quot;work&quot;,
+        &quot;workspace&quot;: &quot;~/clawd/work&quot;,
+        &quot;channels&quot;: [&quot;slack&quot;, &quot;teams&quot;],
+        &quot;skills&quot;: [&quot;github&quot;, &quot;jira&quot;, &quot;docs&quot;]
+      },
+      {
+        &quot;id&quot;: &quot;home&quot;,
+        &quot;workspace&quot;: &quot;~/clawd/home&quot;,
+        &quot;channels&quot;: [&quot;telegram&quot;],
+        &quot;skills&quot;: [&quot;homeassistant&quot;, &quot;shopping&quot;]
+      }
+    ],
+    &quot;routing&quot;: {
+      &quot;default&quot;: &quot;personal&quot;,
+      &quot;rules&quot;: [
+        { &quot;channel&quot;: &quot;slack&quot;, &quot;agent&quot;: &quot;work&quot; },
+        { &quot;channel&quot;: &quot;telegram&quot;, &quot;from&quot;: &quot;+1234567890&quot;, &quot;agent&quot;: &quot;home&quot; }
+      ]
+    }
+  }
+}
+</code></pre>
+<h3>Framework Comparison for Multi-Agent</h3>
+<table>
+<tr><th>Framework</th><th>Pattern</th><th>Best For</th><th>Trade-offs</th></tr>
+<tr><td></strong>LangGraph<strong></td><td>Graph-based state machines</td><td>Complex workflows with cycles</td><td>Steep learning curve</td></tr>
+<tr><td></strong>CrewAI<strong></td><td>Role-based crews</td><td>Role-driven collaboration</td><td>Less flexible routing</td></tr>
+<tr><td></strong>AutoGen<strong></td><td>Conversational multi-agent</td><td>Research, group chat</td><td>Verbose conversations</td></tr>
+<tr><td></strong>Swarms<strong></td><td>Enterprise orchestration</td><td>Production deployment</td><td>Infrastructure overhead</td></tr>
+<tr><td></strong>OpenAI Agents SDK<strong></td><td>Handoff patterns</td><td>OpenAI ecosystem</td><td>Vendor lock-in</td></tr>
+</table>
+<hr>
+<h2>Event-Driven Agent Architecture</h2>
+<h3>The Event-Driven Paradigm</h3>
+<p>Traditional polling-based automation creates lag and inefficiency. Event-driven architecture enables instant response to state changes:</p>
+<pre><code class="language-">POLLING (Traditional):
+┌────────┐     poll every X min     ┌────────┐
+│ Agent  │ ──────────────────────► │ System │
+│        │ ◄────────────────────── │        │
+└────────┘     check for changes    └────────┘
+         (wasteful, delayed)
+<p>EVENT-DRIVEN:
+┌────────┐                          ┌────────┐
+│ Agent  │ ◄─────── event ───────── │ System │
+│        │   (instant, efficient)   │        │
+└────────┘                          └────────┘
+</code></pre></p>
+<h3>Event Sources</h3>
+<table>
+<tr><th>Source</th><th>Event Type</th><th>Use Case</th></tr>
+<tr><td></strong>Webhooks<strong></td><td>HTTP callbacks</td><td>GitHub, Stripe, Slack events</td></tr>
+<tr><td></strong>Message Queues<strong></td><td>Async messages</td><td>Kafka, RabbitMQ, SQS</td></tr>
+<tr><td></strong>File System<strong></td><td>File changes</td><td>New uploads, log files</td></tr>
+<tr><td></strong>Database<strong></td><td>Row changes</td><td>Triggers, CDC streams</td></tr>
+<tr><td></strong>APIs<strong></td><td>Streaming</td><td>WebSockets, SSE</td></tr>
+<tr><td></strong>Email<strong></td><td>New messages</td><td>Gmail Pub/Sub</td></tr>
+</table>
+<h3>Implementing Event-Driven Agents</h3>
+<pre><code class="language-python">import asyncio
+from typing import Callable, Dict, Any
+from collections import defaultdict
+<p>class EventDrivenAgent:
+    def __init__(self, agent_core):
+        self.agent = agent_core
+        self.handlers: Dict[str, list[Callable]] = defaultdict(list)
+        self.event_queue = asyncio.Queue()
+    
+    def on(self, event_type: str):
+        &quot;&quot;&quot;Decorator to register event handlers.&quot;&quot;&quot;
+        def decorator(func):
+            self.handlers[event_type].append(func)
+            return func
+        return decorator
+    
+    async def emit(self, event_type: str, payload: Dict[str, Any]):
+        &quot;&quot;&quot;Emit an event to be processed.&quot;&quot;&quot;
+        await self.event_queue.put({
+            &quot;type&quot;: event_type,
+            &quot;payload&quot;: payload,
+            &quot;timestamp&quot;: datetime.now().isoformat()
+        })
+    
+    async def process_events(self):
+        &quot;&quot;&quot;Main event processing loop.&quot;&quot;&quot;
+        while True:
+            event = await self.event_queue.get()
+            event_type = event[&quot;type&quot;]
+            
+            for handler in self.handlers[event_type]:
+                try:
+                    await handler(event[&quot;payload&quot;])
+                except Exception as e:
+                    await self.handle_error(event, e)
+    
+    async def start(self):
+        &quot;&quot;&quot;Start the event processing loop.&quot;&quot;&quot;
+        await self.process_events()</p>
+<h1>Usage example</h1>
+agent = EventDrivenAgent(claude_agent)
+<p>@agent.on(&quot;github.pull_request.opened&quot;)
+async def handle_pr_opened(payload):
+    &quot;&quot;&quot;Automatically review new PRs.&quot;&quot;&quot;
+    pr_url = payload[&quot;pull_request&quot;][&quot;html_url&quot;]
+    result = await agent.agent.run(f&quot;Review this PR: {pr_url}&quot;)
+    await post_review(payload, result)</p>
+<p>@agent.on(&quot;stripe.payment.succeeded&quot;)
+async def handle_payment(payload):
+    &quot;&quot;&quot;Process successful payments.&quot;&quot;&quot;
+    await agent.agent.run(f&quot;&quot;&quot;
+        Payment received:
+        Amount: ${payload['amount'] / 100}
+        Customer: {payload['customer_id']}
+        
+        1. Update customer records
+        2. Send confirmation email
+        3. Trigger fulfillment process
+    &quot;&quot;&quot;)</p>
+<p>@agent.on(&quot;system.alert.critical&quot;)
+async def handle_critical_alert(payload):
+    &quot;&quot;&quot;Respond to critical system alerts.&quot;&quot;&quot;
+    await agent.agent.run(f&quot;&quot;&quot;
+        CRITICAL ALERT: {payload['message']}
+        
+        1. Assess the situation
+        2. Execute immediate mitigation
+        3. Notify on-call team
+        4. Start incident documentation
+    &quot;&quot;&quot;)
+</code></pre></p>
+<h3>Webhook Handler Implementation</h3>
+<pre><code class="language-python">from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse
+import hmac
+import hashlib
+<p>app = FastAPI()</p>
+<h1>Webhook secret for verification</h1>
+WEBHOOK_SECRETS = {
+    &quot;github&quot;: os.environ.get(&quot;GITHUB_WEBHOOK_SECRET&quot;),
+    &quot;stripe&quot;: os.environ.get(&quot;STRIPE_WEBHOOK_SECRET&quot;),
+}
+<p>def verify_signature(payload: bytes, signature: str, secret: str) -&gt; bool:
+    &quot;&quot;&quot;Verify webhook signature.&quot;&quot;&quot;
+    expected = hmac.new(
+        secret.encode(),
+        payload,
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(f&quot;sha256={expected}&quot;, signature)</p>
+<p>@app.post(&quot;/webhooks/{provider}&quot;)
+async def webhook_handler(provider: str, request: Request):
+    &quot;&quot;&quot;Universal webhook handler.&quot;&quot;&quot;
+    payload = await request.body()
+    
+    # Verify signature
+    secret = WEBHOOK_SECRETS.get(provider)
+    if secret:
+        signature = request.headers.get(&quot;X-Hub-Signature-256&quot;) or \
+                    request.headers.get(&quot;Stripe-Signature&quot;)
+        if not verify_signature(payload, signature, secret):
+            raise HTTPException(status_code=401, detail=&quot;Invalid signature&quot;)
+    
+    # Parse payload
+    data = await request.json()
+    
+    # Determine event type
+    event_type = get_event_type(provider, request.headers, data)
+    
+    # Emit to agent
+    await agent.emit(f&quot;{provider}.{event_type}&quot;, data)
+    
+    return JSONResponse({&quot;status&quot;: &quot;accepted&quot;})</p>
+<p>def get_event_type(provider: str, headers: dict, data: dict) -&gt; str:
+    &quot;&quot;&quot;Extract event type from webhook.&quot;&quot;&quot;
+    if provider == &quot;github&quot;:
+        event = headers.get(&quot;X-GitHub-Event&quot;)
+        action = data.get(&quot;action&quot;, &quot;&quot;)
+        return f&quot;{event}.{action}&quot; if action else event
+    elif provider == &quot;stripe&quot;:
+        return data.get(&quot;type&quot;, &quot;unknown&quot;)
+    else:
+        return data.get(&quot;event_type&quot;, &quot;unknown&quot;)
+</code></pre></p>
+<hr>
+<h2>Security and Sandboxing</h2>
+<h3>The Security Challenge</h3>
+<p>Always-running agents with system access present significant security risks:</p>
+<p>1. </strong>Shell injection<strong>: Malicious prompts triggering harmful commands
+2. </strong>Credential exposure<strong>: API keys and tokens in logs or memory
+3. </strong>Prompt injection<strong>: External content manipulating agent behavior
+4. </strong>Memory poisoning<strong>: Corrupted persistent state affecting future actions
+5. </strong>Lateral movement<strong>: Compromised agent accessing other systems</p>
+<h3>OWASP Top 10 for Agentic Applications</h3>
+<table>
+<tr><th>Risk</th><th>Description</th><th>Mitigation</th></tr>
+<tr><td></strong>Tool Poisoning<strong></td><td>Malicious tool definitions</td><td>Validate tool sources, review skills</td></tr>
+<tr><td></strong>Prompt Injection<strong></td><td>External content manipulates agent</td><td>Input sanitization, content separation</td></tr>
+<tr><td></strong>Memory Poisoning<strong></td><td>Corrupted persistent memory</td><td>Memory integrity checks, audit trails</td></tr>
+<tr><td></strong>Token Exfiltration<strong></td><td>Credentials leaked via output</td><td>Credential isolation, output filtering</td></tr>
+<tr><td></strong>Unauthorized Actions<strong></td><td>Agent exceeds intended permissions</td><td>Tool policies, sandboxing</td></tr>
+<tr><td></strong>Denial of Service<strong></td><td>Runaway loops consuming resources</td><td>Rate limiting, cost controls</td></tr>
+<tr><td></strong>Data Leakage<strong></td><td>Sensitive information in responses</td><td>Content filtering, access controls</td></tr>
+<tr><td></strong>Supply Chain<strong></td><td>Compromised skills/plugins</td><td>Skill verification, source auditing</td></tr>
+<tr><td></strong>Insufficient Logging<strong></td><td>Cannot trace agent actions</td><td>Comprehensive audit logs</td></tr>
+<tr><td></strong>Improper Handoff<strong></td><td>Unsafe human-in-the-loop</td><td>Approval workflows, confirmation</td></tr>
+</table>
+<h3>OpenClaw Sandboxing</h3>
+<p>OpenClaw provides Docker-based sandboxing to limit blast radius:</p>
+<pre><code class="language-json">{
+  &quot;agents&quot;: {
+    &quot;defaults&quot;: {
+      &quot;sandbox&quot;: {
+        &quot;mode&quot;: &quot;non-main&quot;,
+        &quot;scope&quot;: &quot;session&quot;,
+        &quot;workspaceAccess&quot;: &quot;ro&quot;,
+        &quot;docker&quot;: {
+          &quot;image&quot;: &quot;openclaw/sandbox:latest&quot;,
+          &quot;network&quot;: &quot;none&quot;,
+          &quot;readOnlyRoot&quot;: true,
+          &quot;user&quot;: &quot;1000:1000&quot;,
+          &quot;env&quot;: {
+            &quot;ALLOWED_COMMANDS&quot;: &quot;ls,cat,grep,find&quot;
+          },
+          &quot;binds&quot;: [
+            &quot;/home/user/source:/source:ro&quot;
+          ]
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<h3>Sandbox Configuration Options</h3>
+<table>
+<tr><th>Option</th><th>Values</th><th>Description</th></tr>
+<tr><td><code>mode</code></td><td><code>off</code>, <code>non-main</code>, <code>all</code></td><td>When to use sandbox</td></tr>
+<tr><td><code>scope</code></td><td><code>session</code>, <code>shared</code></td><td>Container lifecycle</td></tr>
+<tr><td><code>workspaceAccess</code></td><td><code>ro</code>, <code>rw</code></td><td>File system permissions</td></tr>
+<tr><td><code>network</code></td><td><code>none</code>, <code>host</code>, <code>bridge</code></td><td>Network access</td></tr>
+<tr><td><code>readOnlyRoot</code></td><td><code>true</code>, <code>false</code></td><td>Read-only root filesystem</td></tr>
+</table>
+<h3>Tool Policies</h3>
+<p>Beyond sandboxing, OpenClaw supports granular tool policies:</p>
+<pre><code class="language-json">{
+  &quot;tools&quot;: {
+    &quot;default&quot;: &quot;allow&quot;,
+    &quot;allow&quot;: [&quot;bash&quot;, &quot;read&quot;, &quot;write&quot;, &quot;edit&quot;, &quot;browser&quot;],
+    &quot;deny&quot;: [&quot;cron&quot;, &quot;nodes&quot;, &quot;gateway&quot;],
+    &quot;elevated&quot;: [&quot;exec&quot;],
+    &quot;sandbox&quot;: {
+      &quot;tools&quot;: {
+        &quot;allow&quot;: [&quot;bash&quot;, &quot;read&quot;, &quot;write&quot;, &quot;edit&quot;],
+        &quot;deny&quot;: [&quot;browser&quot;, &quot;sessions&quot;]
+      }
+    }
+  }
+}
+</code></pre>
+<h3>Security Best Practices</h3>
+<h4>1. Credential Isolation</h4>
+<pre><code class="language-bash"># Don't store credentials in agent workspace
+<h1>BAD:</h1>
+echo &quot;GITHUB_TOKEN=xxx&quot; &gt;&gt; ~/clawd/.env
+<h1>GOOD: Use system-level environment or secrets manager</h1>
+export GITHUB_TOKEN=$(op read &quot;op://Personal/GitHub/token&quot;)
+</code></pre>
+<h4>2. Network Segmentation</h4>
+<pre><code class="language-json">{
+  &quot;sandbox&quot;: {
+    &quot;docker&quot;: {
+      &quot;network&quot;: &quot;agent-network&quot;,
+      &quot;extraHosts&quot;: [
+        &quot;api.github.com:140.82.114.6&quot;,
+        &quot;api.anthropic.com:151.101.1.97&quot;
+      ]
+    }
+  }
+}
+</code></pre>
+<h4>3. Audit Logging</h4>
+<pre><code class="language-python">class AuditLogger:
+    def log_action(self, action: dict):
+        entry = {
+            &quot;timestamp&quot;: datetime.now().isoformat(),
+            &quot;agent_id&quot;: action[&quot;agent_id&quot;],
+            &quot;action_type&quot;: action[&quot;type&quot;],
+            &quot;tool&quot;: action.get(&quot;tool&quot;),
+            &quot;input&quot;: self._sanitize(action.get(&quot;input&quot;)),
+            &quot;output&quot;: self._sanitize(action.get(&quot;output&quot;)),
+            &quot;user&quot;: action.get(&quot;user&quot;),
+            &quot;session&quot;: action.get(&quot;session_id&quot;)
+        }
+        self._write_log(entry)
+    
+    def _sanitize(self, data):
+        &quot;&quot;&quot;Remove sensitive information from logs.&quot;&quot;&quot;
+        if not data:
+            return data
+        # Mask API keys, tokens, passwords
+        patterns = [
+            (r'(api[_-]?key[&quot;\s:=]+)[^\s&quot;]+', r'\1[REDACTED]'),
+            (r'(token[&quot;\s:=]+)[^\s&quot;]+', r'\1[REDACTED]'),
+            (r'(password[&quot;\s:=]+)[^\s&quot;]+', r'\1[REDACTED]'),
+        ]
+        result = str(data)
+        for pattern, replacement in patterns:
+            result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+        return result
+</code></pre>
+<h4>4. Human-in-the-Loop for Dangerous Operations</h4>
+<pre><code class="language-python">DANGEROUS_OPERATIONS = [
+    &quot;rm -rf&quot;,
+    &quot;DROP TABLE&quot;,
+    &quot;DELETE FROM&quot;,
+    &quot;format&quot;,
+    &quot;fdisk&quot;,
+    &quot;mkfs&quot;
+]
+<p>async def execute_with_approval(command: str, agent: Agent, user: User):
+    &quot;&quot;&quot;Require human approval for dangerous operations.&quot;&quot;&quot;
+    
+    # Check if command is dangerous
+    if any(op in command.lower() for op in DANGEROUS_OPERATIONS):
+        # Request approval
+        approval = await request_user_approval(
+            user,
+            f&quot;⚠️ The agent wants to execute a potentially dangerous command:\n\n</code></pre>\n{command}\n``<code>\n\nApprove? (yes/no)"
+        )
+        
+        if approval.lower() != "yes":
+            return {"status": "denied", "message": "User denied the operation"}
+    
+    # Execute if approved or not dangerous
+    return await agent.execute(command)
+<pre><code class="language-">
+<hr></p>
+<h2>Implementation Guide</h2>
+<h3>Building Your Own Always-Running Agent</h3>
+<p>This section provides a complete implementation guide for developers building custom always-running agent systems.</p>
+<h3>Step 1: Core Agent Structure</h3>
+</code></pre>python
+"""
+always_running_agent/
+├── main.py
+├── gateway.py
+├── agent.py
+├── memory.py
+├── skills.py
+├── scheduler.py
+├── channels/
+│   ├── __init__.py
+│   ├── telegram.py
+│   ├── slack.py
+│   └── webhook.py
+├── config/
+│   └── config.yaml
+└── workspace/
+    ├── SOUL.md
+    ├── USER.md
+    ├── HEARTBEAT.md
+    └── skills/
+"""
+<h1>main.py</h1>
+import asyncio
+from gateway import Gateway
+from config import load_config
+<p>async def main():
+    config = load_config("config/config.yaml")
+    gateway = Gateway(config)
+    await gateway.start()</p>
+<p>if __name__ == "__main__":
+    asyncio.run(main())
+<pre><code class="language-">
+<h3>Step 2: Gateway Implementation</h3></p>
+</code></pre>python
+<h1>gateway.py</h1>
+import asyncio
+from typing import Dict, Any
+from channels import ChannelManager
+from agent import Agent
+from memory import MemoryManager
+from skills import SkillsLoader
+from scheduler import Scheduler
+<p>class Gateway:
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.channels = ChannelManager(config.get("channels", {}))
+        self.memory = MemoryManager(config.get("workspace", "./workspace"))
+        self.skills = SkillsLoader(config.get("skills", {}))
+        self.scheduler = Scheduler()
+        self.agent = Agent(
+            model=config.get("model", "claude-opus-4-20250514"),
+            memory=self.memory,
+            skills=self.skills
+        )
+        self.running = False
+    
+    async def start(self):
+        """Start the gateway and all components."""
+        print("🚀 Starting Always-Running Agent Gateway...")
+        
+        # Initialize components
+        await self.memory.load()
+        await self.skills.load()
+        await self.channels.connect_all()
+        
+        # Register message handler
+        self.channels.on_message(self.handle_message)
+        
+        # Start scheduler
+        await self.scheduler.start()
+        
+        # Register scheduled tasks
+        await self._register_scheduled_tasks()
+        
+        # Start heartbeat
+        asyncio.create_task(self._heartbeat_loop())
+        
+        self.running = True
+        print("✅ Gateway running. Waiting for messages...")
+        
+        # Keep running
+        try:
+            while self.running:
+                await asyncio.sleep(1)
+        except KeyboardInterrupt:
+            await self.shutdown()
+    
+    async def handle_message(self, channel: str, sender: str, content: str):
+        """Handle incoming messages from any channel."""
+        print(f"📨 [{channel}] {sender}: {content}")
+        
+        # Load context
+        context = await self.memory.get_context(sender)
+        eligible_skills = await self.skills.get_eligible(content)
+        
+        # Build system prompt
+        system_prompt = self._build_system_prompt(context, eligible_skills)
+        
+        # Execute agent
+        response = await self.agent.run(
+            message=content,
+            system_prompt=system_prompt,
+            tools=self._get_available_tools()
+        )
+        
+        # Send response
+        await self.channels.send(channel, sender, response)
+        
+        # Update memory
+        await self.memory.record_interaction(sender, content, response)
+    
+    async def _heartbeat_loop(self):
+        """Run heartbeat checks at configured interval."""
+        interval = self.config.get("heartbeat", {}).get("interval", 300)
+        
+        while self.running:
+            await asyncio.sleep(interval)
+            await self._run_heartbeat()
+    
+    async def _run_heartbeat(self):
+        """Execute heartbeat checks."""
+        heartbeat_config = await self.memory.load_file("HEARTBEAT.md")
+        
+        # Collect metrics
+        metrics = await self._collect_metrics()
+        
+        # Let agent evaluate
+        result = await self.agent.run(
+            message=f"Evaluate these metrics:\n{metrics}\n\nAgainst rules:\n{heartbeat_config}",
+            system_prompt="You are a monitoring agent. Respond with JSON: {alert: bool, message: str, severity: str}"
+        )
+        
+        if result.get("alert"):
+            await self._send_alert(result)
+    
+    def _build_system_prompt(self, context: dict, skills: list) -> str:
+        """Build system prompt with context and skills."""
+        soul = self.memory.get_soul()
+        user_context = context.get("user", "")
+        skills_text = "\n".join([s.instructions for s in skills])
+        
+        return f"""{soul}</p>
+<h2>User Context</h2>
+{user_context}
+<h2>Available Skills</h2>
+{skills_text}
+"""
+    
+    async def shutdown(self):
+        """Gracefully shutdown the gateway."""
+        print("🛑 Shutting down...")
+        self.running = False
+        await self.channels.disconnect_all()
+        await self.scheduler.stop()
+        await self.memory.save()
+        print("👋 Goodbye!")
+<pre><code class="language-">
+<h3>Step 3: Memory Manager</h3>
+</code></pre>python
+<h1>memory.py</h1>
+import os
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, Any, Optional
+<p>class MemoryManager:
+    def __init__(self, workspace_path: str):
+        self.workspace = Path(workspace_path)
+        self.workspace.mkdir(parents=True, exist_ok=True)
+        self.memory_dir = self.workspace / "memory"
+        self.memory_dir.mkdir(exist_ok=True)
+        self._cache: Dict[str, Any] = {}
+    
+    async def load(self):
+        """Load core memory files."""
+        core_files = ["SOUL.md", "USER.md", "HEARTBEAT.md", "AGENTS.md"]
+        for filename in core_files:
+            filepath = self.workspace / filename
+            if filepath.exists():
+                self._cache[filename] = filepath.read_text()
+    
+    def get_soul(self) -> str:
+        """Get the agent's soul/personality."""
+        return self._cache.get("SOUL.md", "")
+    
+    async def load_file(self, filename: str) -> str:
+        """Load a specific memory file."""
+        if filename in self._cache:
+            return self._cache[filename]
+        
+        filepath = self.workspace / filename
+        if filepath.exists():
+            content = filepath.read_text()
+            self._cache[filename] = content
+            return content
+        return ""
+    
+    async def get_context(self, user_id: str) -> Dict[str, Any]:
+        """Get context for a specific user."""
+        context = {
+            "user": await self._get_user_memory(user_id),
+            "recent_conversations": await self._get_recent_conversations(user_id, limit=5),
+            "active_tasks": await self._get_active_tasks(user_id)
+        }
+        return context
+    
+    async def _get_user_memory(self, user_id: str) -> str:
+        """Get user-specific memory."""
+        user_file = self.memory_dir / "users" / f"{user_id}.md"
+        if user_file.exists():
+            return user_file.read_text()
+        return ""
+    
+    async def _get_recent_conversations(self, user_id: str, limit: int) -> list:
+        """Get recent conversation history."""
+        conv_dir = self.memory_dir / "conversations" / user_id
+        if not conv_dir.exists():
+            return []
+        
+        files = sorted(conv_dir.glob("<em>.json"), reverse=True)[:limit]
+        conversations = []
+        for f in files:
+            conversations.append(json.loads(f.read_text()))
+        return conversations
+    
+    async def record_interaction(self, user_id: str, message: str, response: str):
+        """Record an interaction to memory."""
+        # Save to conversation history
+        conv_dir = self.memory_dir / "conversations" / user_id
+        conv_dir.mkdir(parents=True, exist_ok=True)
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        conv_file = conv_dir / f"{timestamp}.json"
+        
+        interaction = {
+            "timestamp": datetime.now().isoformat(),
+            "user_message": message,
+            "agent_response": response
+        }
+        
+        conv_file.write_text(json.dumps(interaction, indent=2))
+        
+        # Update user memory if needed
+        await self._update_user_memory(user_id, message, response)
+    
+    async def _update_user_memory(self, user_id: str, message: str, response: str):
+        """Extract and store learned information about user."""
+        # This would use the agent to extract learnings
+        # Simplified implementation
+        pass
+    
+    async def save(self):
+        """Save all cached memory to disk."""
+        for filename, content in self._cache.items():
+            filepath = self.workspace / filename
+            filepath.write_text(content)
+<pre><code class="language-">
+<h3>Step 4: Skills Loader</h3></p>
+</code></pre>python
+<h1>skills.py</h1>
+import os
+import re
+import yaml
+from pathlib import Path
+from dataclasses import dataclass
+from typing import List, Dict, Any, Optional
+<p>@dataclass
+class Skill:
+    name: str
+    description: str
+    instructions: str
+    metadata: Dict[str, Any]
+    path: Path
+    
+    @property
+    def requires_bins(self) -> List[str]:
+        return self.metadata.get("openclaw", {}).get("requires", {}).get("bins", [])
+    
+    @property
+    def requires_env(self) -> List[str]:
+        return self.metadata.get("openclaw", {}).get("requires", {}).get("env", [])
+    
+    def is_eligible(self) -> bool:
+        """Check if skill requirements are met."""
+        # Check required binaries
+        for bin_name in self.requires_bins:
+            if not shutil.which(bin_name):
+                return False
+        
+        # Check required environment variables
+        for env_var in self.requires_env:
+            if not os.environ.get(env_var):
+                return False
+        
+        return True</p>
+<p>class SkillsLoader:
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.skills_dirs = [
+            Path(config.get("workspace", ".")) / "skills",
+            Path.home() / ".clawdbot" / "skills",
+            Path("/usr/local/share/openclaw/skills")  # Bundled
+        ]
+        self.skills: Dict[str, Skill] = {}
+    
+    async def load(self):
+        """Load all skills from configured directories."""
+        for skills_dir in self.skills_dirs:
+            if not skills_dir.exists():
+                continue
+            
+            for skill_path in skills_dir.iterdir():
+                if skill_path.is_dir():
+                    skill_file = skill_path / "SKILL.md"
+                    if skill_file.exists():
+                        skill = self._parse_skill(skill_file)
+                        if skill and skill.name not in self.skills:
+                            self.skills[skill.name] = skill
+        
+        print(f"📚 Loaded {len(self.skills)} skills")
+    
+    def _parse_skill(self, skill_file: Path) -> Optional[Skill]:
+        """Parse a SKILL.md file."""
+        content = skill_file.read_text()
+        
+        # Extract frontmatter
+        frontmatter_match = re.match(r'^---\n(.</em>?)\n---\n(.<em>)$', content, re.DOTALL)
+        if not frontmatter_match:
+            return None
+        
+        frontmatter = yaml.safe_load(frontmatter_match.group(1))
+        instructions = frontmatter_match.group(2).strip()
+        
+        return Skill(
+            name=frontmatter.get("name", skill_file.parent.name),
+            description=frontmatter.get("description", ""),
+            instructions=instructions,
+            metadata=frontmatter.get("metadata", {}),
+            path=skill_file.parent
+        )
+    
+    async def get_eligible(self, message: str) -> List[Skill]:
+        """Get skills eligible for a given message."""
+        eligible = []
+        
+        for skill in self.skills.values():
+            # Check if skill is enabled in config
+            skill_config = self.config.get("entries", {}).get(skill.name, {})
+            if skill_config.get("enabled", True) is False:
+                continue
+            
+            # Check if requirements are met
+            if not skill.is_eligible():
+                continue
+            
+            # Check if skill is relevant (simple keyword matching)
+            # In production, use semantic similarity
+            if self._is_relevant(skill, message):
+                eligible.append(skill)
+        
+        return eligible
+    
+    def _is_relevant(self, skill: Skill, message: str) -> bool:
+        """Check if skill is relevant to message."""
+        # Simple keyword matching (replace with semantic search)
+        keywords = skill.name.lower().split("-") + \
+                   skill.description.lower().split()
+        message_lower = message.lower()
+        
+        return any(kw in message_lower for kw in keywords)
+<pre><code class="language-">
+<h3>Step 5: Scheduler</h3></p>
+</code></pre>python
+<h1>scheduler.py</h1>
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+from typing import Callable, Dict, Any
+import asyncio
+<p>class Scheduler:
+    def __init__(self):
+        self.scheduler = AsyncIOScheduler()
+        self.jobs: Dict[str, Any] = {}
+    
+    async def start(self):
+        """Start the scheduler."""
+        self.scheduler.start()
+        print("⏰ Scheduler started")
+    
+    async def stop(self):
+        """Stop the scheduler."""
+        self.scheduler.shutdown()
+    
+    def add_cron_job(
+        self,
+        job_id: str,
+        func: Callable,
+        cron_expression: str,
+        </strong>kwargs
+    ):
+        """Add a cron-scheduled job."""
+        # Parse cron expression
+        parts = cron_expression.split()
+        trigger = CronTrigger(
+            minute=parts[0],
+            hour=parts[1],
+            day=parts[2],
+            month=parts[3],
+            day_of_week=parts[4]
+        )
+        
+        job = self.scheduler.add_job(
+            func,
+            trigger=trigger,
+            id=job_id,
+            <strong>kwargs
+        )
+        
+        self.jobs[job_id] = job
+        print(f"📅 Scheduled job '{job_id}': {cron_expression}")
+    
+    def add_interval_job(
+        self,
+        job_id: str,
+        func: Callable,
+        seconds: int,
+        </strong>kwargs
+    ):
+        """Add an interval-scheduled job."""
+        job = self.scheduler.add_job(
+            func,
+            "interval",
+            seconds=seconds,
+            id=job_id,
+            max_instances=1,
+            <strong>kwargs
+        )
+        
+        self.jobs[job_id] = job
+        print(f"🔄 Scheduled interval job '{job_id}': every {seconds}s")
+    
+    def remove_job(self, job_id: str):
+        """Remove a scheduled job."""
+        if job_id in self.jobs:
+            self.scheduler.remove_job(job_id)
+            del self.jobs[job_id]
+<pre><code class="language-">
+<h3>Step 6: Channel Manager</h3></p>
+</code></pre>python
+<h1>channels/__init__.py</h1>
+from typing import Dict, Callable, Any
+import asyncio
+<p>class ChannelManager:
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.channels: Dict[str, Any] = {}
+        self.message_handlers: list[Callable] = []
+    
+    async def connect_all(self):
+        """Connect to all configured channels."""
+        for channel_name, channel_config in self.config.items():
+            if channel_config.get("enabled", True):
+                channel = await self._create_channel(channel_name, channel_config)
+                if channel:
+                    self.channels[channel_name] = channel
+                    print(f"📡 Connected to {channel_name}")
+    
+    async def _create_channel(self, name: str, config: Dict[str, Any]):
+        """Create a channel instance."""
+        if name == "telegram":
+            from .telegram import TelegramChannel
+            return await TelegramChannel.create(config, self._on_message)
+        elif name == "slack":
+            from .slack import SlackChannel
+            return await SlackChannel.create(config, self._on_message)
+        elif name == "webhook":
+            from .webhook import WebhookChannel
+            return await WebhookChannel.create(config, self._on_message)
+        return None
+    
+    def on_message(self, handler: Callable):
+        """Register a message handler."""
+        self.message_handlers.append(handler)
+    
+    async def _on_message(self, channel: str, sender: str, content: str):
+        """Internal message handler that dispatches to registered handlers."""
+        for handler in self.message_handlers:
+            await handler(channel, sender, content)
+    
+    async def send(self, channel: str, recipient: str, message: str):
+        """Send a message via a channel."""
+        if channel in self.channels:
+            await self.channels[channel].send(recipient, message)
+    
+    async def disconnect_all(self):
+        """Disconnect from all channels."""
+        for channel in self.channels.values():
+            await channel.disconnect()</p>
+<h1>channels/telegram.py</h1>
+from telegram import Bot, Update
+from telegram.ext import Application, MessageHandler, filters
+<p>class TelegramChannel:
+    def __init__(self, bot: Bot, app: Application):
+        self.bot = bot
+        self.app = app
+    
+    @classmethod
+    async def create(cls, config: dict, message_handler):
+        """Create and start Telegram bot."""
+        token = config.get("botToken")
+        if not token:
+            return None
+        
+        app = Application.builder().token(token).build()
+        
+        async def handle_message(update: Update, context):
+            if update.message and update.message.text:
+                await message_handler(
+                    "telegram",
+                    str(update.message.from_user.id),
+                    update.message.text
+                )
+        
+        app.add_handler(MessageHandler(filters.TEXT, handle_message))
+        
+        await app.initialize()
+        await app.start()
+        await app.updater.start_polling()
+        
+        return cls(app.bot, app)
+    
+    async def send(self, recipient: str, message: str):
+        """Send a message to a Telegram user."""
+        await self.bot.send_message(chat_id=int(recipient), text=message)
+    
+    async def disconnect(self):
+        """Stop the Telegram bot."""
+        await self.app.updater.stop()
+        await self.app.stop()
+        await self.app.shutdown()
+<pre><code class="language-">
+<hr></p>
+<h2>Deployment Strategies</h2>
+<h3>Local Deployment (Development/Personal)</h3>
+</strong>Requirements:<strong>
+<li>Mac Mini, old laptop, or desktop PC</li>
+<li>Node.js 22+</li>
+<li>API key for model provider</li>
+</code></pre>bash
+<h1>Install OpenClaw</h1>
+npm install -g openclaw@latest
+<h1>Run onboarding</h1>
+openclaw onboard --install-daemon
+<h1>Verify daemon is running</h1>
+openclaw doctor
+<pre><code class="language-">
+<h3>Cloud VPS Deployment (Production)</h3>
+</strong>Recommended Providers:<strong>
+<li>DigitalOcean ($6-12/month)</li>
+<li>Hetzner ($4-8/month)</li>
+<li>Vultr ($5-10/month)</li>
+</strong>DigitalOcean One-Click Deploy:<strong>
+</code></pre>bash
+<h1>Create droplet with OpenClaw image</h1>
+doctl compute droplet create openclaw \
+  --image openclaw-ubuntu-24 \
+  --size s-2vcpu-4gb \
+  --region nyc1
+<h1>SSH into droplet</h1>
+ssh root@<droplet-ip>
+<h1>Access dashboard</h1>
+ssh -L 18789:127.0.0.1:18789 clawd@<droplet-ip>
+<h1>Open http://127.0.0.1:18789</h1>
+<pre><code class="language-">
+<h3>Docker Deployment</h3>
+</code></pre>dockerfile
+<h1>Dockerfile</h1>
+FROM node:22-slim
+<p>WORKDIR /app</p>
+<h1>Install OpenClaw</h1>
+RUN npm install -g openclaw@latest
+<h1>Create non-root user</h1>
+RUN useradd -m clawd
+USER clawd
+<h1>Create workspace</h1>
+RUN mkdir -p /home/clawd/workspace
+<p>WORKDIR /home/clawd</p>
+<h1>Copy configuration</h1>
+COPY --chown=clawd:clawd config/ ./config/
+COPY --chown=clawd:clawd workspace/ ./workspace/
+<h1>Expose gateway port</h1>
+EXPOSE 18789
+<h1>Start gateway</h1>
+CMD ["openclaw", "gateway", "--port", "18789"]
+<pre><code class="language-">
+</code></pre>yaml
+<h1>docker-compose.yml</h1>
+version: '3.8'
+<p>services:
+  openclaw:
+    build: .
+    container_name: openclaw
+    restart: unless-stopped
+    ports:
+      <li>"18789:18789"</li>
+    volumes:
+      <li>./workspace:/home/clawd/workspace</li>
+      <li>./config:/home/clawd/config</li>
+    environment:
+      <li>ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}</li>
+      <li>TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}</li>
+    networks:
+      <li>openclaw-network</li></p>
+<p># Optional: Sandbox container
+  sandbox:
+    image: openclaw/sandbox:latest
+    container_name: openclaw-sandbox
+    network_mode: none
+    volumes:
+      <li>./workspace:/workspace:ro</li>
+    cap_drop:
+      <li>ALL</li>
+    security_opt:
+      <li>no-new-privileges:true</li></p>
+<p>networks:
+  openclaw-network:
+    driver: bridge
+<pre><code class="language-">
+<h3>Kubernetes Deployment</h3></p>
+</code></pre>yaml
+<h1>kubernetes/deployment.yaml</h1>
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openclaw
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openclaw
+  template:
+    metadata:
+      labels:
+        app: openclaw
+    spec:
+      containers:
+      <li>name: openclaw</li>
+        image: openclaw/openclaw:latest
+        ports:
+        <li>containerPort: 18789</li>
+        env:
+        <li>name: ANTHROPIC_API_KEY</li>
+          valueFrom:
+            secretKeyRef:
+              name: openclaw-secrets
+              key: anthropic-api-key
+        volumeMounts:
+        <li>name: workspace</li>
+          mountPath: /home/clawd/workspace
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      volumes:
+      <li>name: workspace</li>
+        persistentVolumeClaim:
+          claimName: openclaw-workspace
+<hr>
+apiVersion: v1
+kind: Service
+metadata:
+  name: openclaw
+spec:
+  selector:
+    app: openclaw
+  ports:
+  <li>port: 18789</li>
+    targetPort: 18789
+  type: ClusterIP
+<pre><code class="language-">
+<h3>Deployment with Tailscale (Private Access)</h3>
+</code></pre>bash
+<h1>On the server</h1>
+tailscale up --authkey=${TAILSCALE_AUTHKEY}
+tailscale serve --bg 18789
+<h1>Access from any device on your tailnet</h1>
+<h1>https://openclaw.your-tailnet.ts.net</h1>
+<pre><code class="language-">
+<hr>
+<h2>Monitoring and Observability</h2>
+<h3>Key Metrics</h3>
+<table>
+<tr><th>Metric</th><th>Description</th><th>Alert Threshold</th></tr>
+<tr><td></strong>Response Latency<strong></td><td>Time to generate response</td><td>&gt; 30 seconds</td></tr>
+<tr><td></strong>Token Usage<strong></td><td>Tokens consumed per hour</td><td>Cost threshold</td></tr>
+<tr><td></strong>Error Rate<strong></td><td>Failed requests / total</td><td>&gt; 5%</td></tr>
+<tr><td></strong>Uptime<strong></td><td>Gateway availability</td><td>&lt; 99%</td></tr>
+<tr><td></strong>Memory Usage<strong></td><td>System memory consumption</td><td>&gt; 80%</td></tr>
+<tr><td></strong>Conversation Volume<strong></td><td>Messages per hour</td><td>Anomaly detection</td></tr>
+</table>
+<h3>Logging Configuration</h3>
+</code></pre>javascript
+// openclaw.json logging config
+{
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "destinations": [
+      { "type": "console" },
+      { "type": "file", "path": "/var/log/openclaw/gateway.log" },
+      { "type": "syslog", "host": "localhost", "port": 514 }
+    ],
+    "sanitize": true,  // Remove sensitive data
+    "include": ["timestamp", "level", "message", "agent", "channel", "user"]
+  }
+}
+<pre><code class="language-">
+<h3>Observability Stack Integration</h3>
+</code></pre>python
+<h1>OpenTelemetry integration</h1>
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+<h1>Initialize tracing</h1>
+trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer(__name__)
+<h1>Add to agent</h1>
+class InstrumentedAgent:
+    def __init__(self, agent):
+        self.agent = agent
+        self.tracer = tracer
+    
+    async def run(self, message: str, </strong>kwargs):
+        with self.tracer.start_as_current_span("agent.run") as span:
+            span.set_attribute("message.length", len(message))
+            span.set_attribute("model", self.agent.model)
+            
+            result = await self.agent.run(message, <strong>kwargs)
+            
+            span.set_attribute("response.length", len(result))
+            span.set_attribute("tokens.used", result.get("token_usage", 0))
+            
+            return result
+<pre><code class="language-">
+<h3>Health Check Endpoint</h3>
+</code></pre>python
+from fastapi import FastAPI
+from datetime import datetime
+<p>app = FastAPI()</p>
+<p>@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "components": {
+            "gateway": await check_gateway(),
+            "agent": await check_agent(),
+            "channels": await check_channels(),
+            "memory": await check_memory()
+        }
+    }</p>
+<p>@app.get("/metrics")
+async def metrics():
+    return {
+        "uptime_seconds": get_uptime(),
+        "messages_processed": get_message_count(),
+        "tokens_used_today": get_token_usage(),
+        "active_sessions": get_session_count(),
+        "error_rate_1h": get_error_rate()
+    }
+<pre><code class="language-">
+<hr></p>
+<h2>Best Practices Checklist</h2>
+<h3>Pre-Implementation</h3>
+<li>[ ] Define clear use cases and success metrics</li>
+<li>[ ] Choose appropriate deployment environment (local vs. cloud)</li>
+<li>[ ] Select model provider and understand pricing</li>
+<li>[ ] Plan security boundaries and sandboxing requirements</li>
+<li>[ ] Design memory architecture for your use case</li>
+<h3>Architecture</h3>
+<li>[ ] Implement Gateway pattern for connection management</li>
+<li>[ ] Use event-driven design over polling</li>
+<li>[ ] Separate concerns: channels, agent, memory, skills</li>
+<li>[ ] Plan for graceful degradation and failover</li>
+<li>[ ] Design for horizontal scalability if needed</li>
+<h3>Security</h3>
+<li>[ ] Enable sandboxing for tool execution</li>
+<li>[ ] Isolate credentials from agent workspace</li>
+<li>[ ] Implement tool policies (allow/deny lists)</li>
+<li>[ ] Set up audit logging for all actions</li>
+<li>[ ] Configure human-in-the-loop for dangerous operations</li>
+<li>[ ] Regular security reviews of installed skills</li>
+<h3>Memory and State</h3>
+<li>[ ] Implement persistent memory with clear structure</li>
+<li>[ ] Design memory decay/pruning strategy</li>
+<li>[ ] Separate user-specific from shared memory</li>
+<li>[ ] Back up memory regularly</li>
+<li>[ ] Test memory recovery procedures</li>
+<h3>Skills</h3>
+<li>[ ] Review third-party skills before enabling</li>
+<li>[ ] Create clear SKILL.md format for custom skills</li>
+<li>[ ] Implement skill eligibility checking</li>
+<li>[ ] Test skills in sandbox before production</li>
+<li>[ ] Version control your skills</li>
+<h3>Monitoring</h3>
+<li>[ ] Set up health check endpoints</li>
+<li>[ ] Configure alerting for critical metrics</li>
+<li>[ ] Implement cost tracking and alerts</li>
+<li>[ ] Log all agent actions with sanitization</li>
+<li>[ ] Monitor for anomalous behavior patterns</li>
+<h3>Operations</h3>
+<li>[ ] Document deployment procedures</li>
+<li>[ ] Create runbook for common issues</li>
+<li>[ ] Test backup and recovery</li>
+<li>[ ] Plan for updates and migrations</li>
+<li>[ ] Set up staging environment for testing changes</li>
+<hr>
+<h2>Resources and References</h2>
+<h3>Official Resources</h3>
+<table>
+<tr><th>Resource</th><th>URL</th></tr>
+<tr><td>OpenClaw GitHub</td><td>https://github.com/openclaw/openclaw</td></tr>
+<tr><td>OpenClaw Documentation</td><td>https://docs.molt.bot</td></tr>
+<tr><td>ClawdHub Skills Registry</td><td>https://clawdhub.com</td></tr>
+<tr><td>MoltHub (Skills + Souls)</td><td>https://molthub.com</td></tr>
+<tr><td>onlycrabs.ai (SOUL.md Registry)</td><td>https://onlycrabs.ai</td></tr>
+</table>
+<h3>Community</h3>
+<table>
+<tr><th>Resource</th><th>URL</th></tr>
+<tr><td>Discord Community</td><td>https://discord.gg/openclaw</td></tr>
+<tr><td>awesome-openclaw-skills</td><td>https://github.com/VoltAgent/awesome-openclaw-skills</td></tr>
+<tr><td>SkillKit (Cross-agent skills)</td><td>https://agentskills.com</td></tr>
+</table>
+<h3>Agent Frameworks</h3>
+<table>
+<tr><th>Framework</th><th>Best For</th><th>URL</th></tr>
+<tr><td>LangGraph</td><td>Complex stateful workflows</td><td>https://langchain-ai.github.io/langgraph/</td></tr>
+<tr><td>CrewAI</td><td>Role-based collaboration</td><td>https://crewai.io</td></tr>
+<tr><td>AutoGen</td><td>Conversational multi-agent</td><td>https://microsoft.github.io/autogen/</td></tr>
+<tr><td>Swarms</td><td>Enterprise orchestration</td><td>https://swarms.ai</td></tr>
+<tr><td>OpenAI Agents SDK</td><td>OpenAI ecosystem</td><td>https://openai.com/agents</td></tr>
+</table>
+<h3>Deployment Guides</h3>
+<table>
+<tr><th>Platform</th><th>Guide</th></tr>
+<tr><td>DigitalOcean</td><td>https://www.digitalocean.com/community/tutorials/openclaw-quickstart-guide</td></tr>
+<tr><td>Pulumi (AWS/Hetzner)</td><td>https://www.pulumi.com/blog/deploy-openclaw-aws-hetzner/</td></tr>
+<tr><td>Docker</td><td>https://docs.molt.bot/deployment/docker</td></tr>
+</table>
+<h3>Security Resources</h3>
+<table>
+<tr><th>Resource</th><th>Description</th></tr>
+<tr><td>OWASP Agentic AI</td><td>Top 10 risks for AI agents</td></tr>
+<tr><td>OpenClaw Security Guide</td><td>https://docs.molt.bot/security</td></tr>
+<tr><td>Composio Security Integration</td><td>https://composio.dev/blog/secure-openclaw-clawdbot-setup-composio</td></tr>
+</table>
+<h3>Research and Background</h3>
+<table>
+<tr><th>Paper/Article</th><th>Topic</th></tr>
+<tr><td>Anthropic Long-Running Agents</td><td>Effective harnesses for long-running agents</td></tr>
+<tr><td>LangChain Multi-Agent Benchmarks</td><td>Benchmarking multi-agent architectures</td></tr>
+<tr><td>Event-Driven AI Architecture</td><td>Future architecture patterns</td></tr>
+<tr><td>Persistent Agent Architecture</td><td>Memory and state management</td></tr>
+</table>
+<hr>
+<h2>Appendix: Quick Reference Cards</h2>
+<h3>OpenClaw CLI Commands</h3>
+</code></pre>bash
+<h1>Gateway Management</h1>
+openclaw gateway --port 18789 --verbose
+openclaw gateway stop
+openclaw doctor              # System health check
+<h1>Agent Interaction</h1>
+openclaw agent --message "Hello"
+openclaw agent --thinking high
+<h1>Channel Management</h1>
+openclaw channels login      # Connect channels
+openclaw channels list       # Show connected channels
+openclaw message send --to +1234567890 --message "Test"
+<h1>Skills Management</h1>
+clawdhub search "calendar"
+clawdhub install google-calendar
+clawdhub update --all
+<h1>Sandbox</h1>
+openclaw sandbox explain     # Show sandbox config
+<pre><code class="language-">
+<h3>SKILL.md Template</h3>
+</code></pre>markdown
+<hr>
+name: my-skill
+description: Brief description of skill functionality
+metadata:
+  openclaw:
+    emoji: "🔧"
+    requires:
+      bins: ["required-cli"]
+      env: ["API_KEY"]
+    install:
+      <li>id: brew</li>
+</ul>        kind: brew
+        formula: required-cli
+        bins: ["required-cli"]
+<hr>
+<h1>My Skill</h1>
+<h2>When to Use</h2>
+Use when user wants to [specific actions].
+<h2>Commands</h2>
+<pre><code class="language-bash">required-cli action --flag
+</code></pre>
+<h2>Best Practices</h2>
+[Guidelines for using this skill]
+<pre><code class="language-">
+<h3>Configuration Template</h3>
+</code></pre>json
+{
+  "agents": {
+    "defaults": {
+      "model": "claude-opus-4-20250514",
+      "sandbox": {
+        "mode": "non-main",
+        "workspaceAccess": "ro"
+      }
+    }
+  },
+  "channels": {
+    "whatsapp": {
+      "allowFrom": ["+1234567890"]
+    }
+  },
+  "skills": {
+    "entries": {
+      "github": { "enabled": true }
+    }
+  },
+  "cron": {
+    "jobs": [
+      {
+        "id": "morning-briefing",
+        "schedule": "0 9 </em> <em> </em>",
+        "action": { "type": "agent", "prompt": "..." }
+      }
+    ]
+  },
+  "heartbeat": {
+    "interval": 300
+  }
+}
+</code>``
+<hr>
+<em>Document Version: 1.0</em>
+<em>Last Updated: January 30, 2026</em>
+<em>Author: Generated with Claude</em>
+<hr>
+</strong>Disclaimer:** Always-running AI agents with system access carry inherent security risks. Deploy in isolated environments, enable sandboxing, review all skills before installation, and implement proper monitoring. The author and Anthropic are not responsible for any damages resulting from the use of these technologies.
+  </article>
+</body>
+</html>

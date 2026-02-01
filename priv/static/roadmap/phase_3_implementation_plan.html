@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 3: Version Control, Tagging Enhancements, and Caching - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Phase 3: Version Control, Tagging Enhancements, and Caching</h1>
+<h2>Overview</h2>
+<p>Phase 3 focuses on implementing representation versioning (the hybrid snapshot + diff system), enhancing tag-based filtering in the UI, adding documentation, and implementing caching for performance.</p>
+<h2>Current State Assessment</h2>
+<table>
+<tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+<tr><td>Representation versioning</td><td>❌ Not started</td><td>No schema, no Oban, no diffy</td></tr>
+<tr><td>Tagging API</td><td>✅ Complete</td><td>CRUD + entry associations via REST API</td></tr>
+<tr><td>Tags UI</td><td>✅ Partial</td><td>TagListLive exists for management</td></tr>
+<tr><td>Filter by tag (UI)</td><td>⏳ Needs work</td><td>API supports it, UI may need updates</td></tr>
+<tr><td>Public IDs</td><td>✅ Complete</td><td><code>public_id</code> exists on entries</td></tr>
+<tr><td>Documentation</td><td>❌ Not started</td><td>No ExDoc configured</td></tr>
+<tr><td>Caching</td><td>❌ Not started</td><td>No ETS/Cachex</td></tr>
+</table>
+<hr>
+<h2>Part 1: Dependencies Setup</h2>
+<h3>1.1 Add Required Dependencies</h3>
+<strong>File:</strong> <code>mix.exs</code>
+<pre><code class="language-elixir"># Add to deps()
+{:oban, &quot;~&gt; 2.17&quot;},           # Background job processing
+{:diffy, &quot;~&gt; 1.1&quot;},           # Diff generation (jondot/diffy)
+{:ex_doc, &quot;~&gt; 0.31&quot;, only: :dev, runtime: false},  # Documentation
+</code></pre>
+<h3>1.2 Configure Oban</h3>
+<strong>File:</strong> <code>config/config.exs</code>
+<pre><code class="language-elixir">config :onelist, Oban,
+  repo: Onelist.Repo,
+  plugins: [Oban.Plugins.Pruner],
+  queues: [default: 10, snapshots: 5]
+</code></pre>
+<strong>File:</strong> <code>config/test.exs</code>
+<pre><code class="language-elixir">config :onelist, Oban, testing: :inline
+</code></pre>
+<strong>File:</strong> <code>lib/onelist/application.ex</code>
+<p>Add <code>{Oban, Application.fetch_env!(:onelist, Oban)}</code> to children.</p>
+<hr>
+<h2>Part 2: Representation Versioning Schema</h2>
+<h3>2.1 Create Migration</h3>
+<strong>File:</strong> <code>priv/repo/migrations/TIMESTAMP_create_representation_versions.exs</code>
+<pre><code class="language-elixir">defmodule Onelist.Repo.Migrations.CreateRepresentationVersions do
+  use Ecto.Migration
+<p>def change do
+    create table(:representation_versions, primary_key: false) do
+      add :id, :binary_id, primary_key: true
+      add :representation_id, references(:representations, type: :binary_id, on_delete: :delete_all), null: false
+      add :user_id, references(:users, type: :binary_id, on_delete: :nilify_all), null: false
+      add :content, :text  # Full snapshot (null if diff)
+      add :diff, :text     # Diff from previous (null if snapshot)
+      add :version, :integer, null: false  # representations.version before this change
+      add :version_type, :string, null: false, default: &quot;diff&quot;  # &quot;snapshot&quot; or &quot;diff&quot;
+      add :byte_size, :integer  # Size of content or diff for tracking</p>
+<p>timestamps(type: :utc_datetime_usec, updated_at: false)
+    end</p>
+<p>create index(:representation_versions, [:representation_id])
+    create index(:representation_versions, [:representation_id, :version])
+    create index(:representation_versions, [:representation_id, :inserted_at])
+    create index(:representation_versions, [:user_id])</p>
+<p># Constraint: either content OR diff must be present, not both
+    create constraint(:representation_versions, :content_or_diff_present,
+      check: &quot;(content IS NOT NULL AND diff IS NULL) OR (content IS NULL AND diff IS NOT NULL)&quot;
+    )
+  end
+end
+</code></pre></p>
+<h3>2.2 Create Schema</h3>
+<strong>File:</strong> <code>lib/onelist/entries/representation_version.ex</code>
+<pre><code class="language-elixir">defmodule Onelist.Entries.RepresentationVersion do
+  use Ecto.Schema
+  import Ecto.Changeset
+<p>@primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id</p>
+<p>schema &quot;representation_versions&quot; do
+    belongs_to :representation, Onelist.Entries.Representation
+    belongs_to :user, Onelist.Accounts.User</p>
+<p>field :content, :string      # Full snapshot
+    field :diff, :string         # Diff from previous version
+    field :version, :integer     # Version number before this change
+    field :version_type, :string # &quot;snapshot&quot; or &quot;diff&quot;
+    field :byte_size, :integer</p>
+<p>timestamps(type: :utc_datetime_usec, updated_at: false)
+  end</p>
+<p>@max_diff_size 1_048_576  # 1MB</p>
+<p>def changeset(version, attrs) do
+    version
+    |&gt; cast(attrs, [:representation_id, :user_id, :content, :diff, :version, :version_type, :byte_size])
+    |&gt; validate_required([:representation_id, :user_id, :version, :version_type])
+    |&gt; validate_inclusion(:version_type, [&quot;snapshot&quot;, &quot;diff&quot;])
+    |&gt; validate_content_or_diff()
+    |&gt; foreign_key_constraint(:representation_id)
+    |&gt; foreign_key_constraint(:user_id)
+  end</p>
+<p>defp validate_content_or_diff(changeset) do
+    content = get_field(changeset, :content)
+    diff = get_field(changeset, :diff)</p>
+<p>cond do
+      is_nil(content) and is_nil(diff) -&gt;
+        add_error(changeset, :content, &quot;either content or diff must be present&quot;)
+      not is_nil(content) and not is_nil(diff) -&gt;
+        add_error(changeset, :diff, &quot;cannot have both content and diff&quot;)
+      true -&gt;
+        changeset
+    end
+  end</p>
+<p>def max_diff_size, do: @max_diff_size
+end
+</code></pre></p>
+<hr>
+<h2>Part 3: Version History Context Functions</h2>
+<h3>3.1 Add to Entries Context</h3>
+<strong>File:</strong> <code>lib/onelist/entries.ex</code> (add functions)
+<pre><code class="language-elixir"># Version History Functions
+<p>@doc &quot;&quot;&quot;
+Creates a version record for a representation.
+If the diff exceeds max size, creates a snapshot instead.
+&quot;&quot;&quot;
+def create_version(representation, user, old_content, new_content) do
+  diff = Diffy.diff(old_content || &quot;&quot;, new_content || &quot;&quot;)
+  diff_text = Diffy.format(diff, :text)
+  diff_size = byte_size(diff_text)</p>
+<p>if diff_size &gt; RepresentationVersion.max_diff_size() do
+    create_snapshot(representation, user)
+  else
+    create_diff_version(representation, user, diff_text, diff_size)
+  end
+end</p>
+<p>@doc &quot;&quot;&quot;
+Creates a full snapshot version.
+&quot;&quot;&quot;
+def create_snapshot(representation, user) do
+  attrs = %{
+    representation_id: representation.id,
+    user_id: user.id,
+    content: representation.content,
+    version: representation.version,
+    version_type: &quot;snapshot&quot;,
+    byte_size: byte_size(representation.content || &quot;&quot;)
+  }</p>
+<p>%RepresentationVersion{}
+  |&gt; RepresentationVersion.changeset(attrs)
+  |&gt; Repo.insert()
+end</p>
+<p>defp create_diff_version(representation, user, diff_text, diff_size) do
+  attrs = %{
+    representation_id: representation.id,
+    user_id: user.id,
+    diff: diff_text,
+    version: representation.version,
+    version_type: &quot;diff&quot;,
+    byte_size: diff_size
+  }</p>
+<p>%RepresentationVersion{}
+  |&gt; RepresentationVersion.changeset(attrs)
+  |&gt; Repo.insert()
+end</p>
+<p>@doc &quot;&quot;&quot;
+Lists version history for a representation.
+&quot;&quot;&quot;
+def list_representation_versions(representation, opts \\ []) do
+  limit = Keyword.get(opts, :limit, 50)</p>
+<p>from(v in RepresentationVersion,
+    where: v.representation_id == ^representation.id,
+    order_by: [desc: v.inserted_at],
+    limit: ^limit
+  )
+  |&gt; Repo.all()
+end</p>
+<p>@doc &quot;&quot;&quot;
+Reconstructs content at a specific version by applying diffs.
+&quot;&quot;&quot;
+def get_content_at_version(representation, target_version) do
+  versions = from(v in RepresentationVersion,
+    where: v.representation_id == ^representation.id,
+    where: v.version &gt;= ^target_version,
+    order_by: [asc: v.version]
+  )
+  |&gt; Repo.all()</p>
+<p># Find the nearest snapshot at or before target version
+  {snapshot, remaining} = find_nearest_snapshot(versions)</p>
+<p>case snapshot do
+    nil -&gt;
+      {:error, :no_snapshot_found}</p>
+<p>%{content: base_content} -&gt;
+      # Apply diffs in reverse order to get to target version
+      content = apply_diffs_reverse(base_content, remaining, target_version)
+      {:ok, content}
+  end
+end</p>
+<p>@doc &quot;&quot;&quot;
+Reverts a representation to a specific version.
+&quot;&quot;&quot;
+def revert_to_version(representation, version, user) do
+  with {:ok, content} &lt;- get_content_at_version(representation, version) do
+    update_representation(representation, %{content: content}, user)
+  end
+end</p>
+<p>@doc &quot;&quot;&quot;
+Checks if a snapshot is needed (e.g., daily or after N diffs).
+&quot;&quot;&quot;
+def needs_snapshot?(representation, opts \\ []) do
+  max_diffs = Keyword.get(opts, :max_diffs_between_snapshots, 50)
+  max_hours = Keyword.get(opts, :max_hours_between_snapshots, 24)</p>
+<p>last_snapshot = from(v in RepresentationVersion,
+    where: v.representation_id == ^representation.id,
+    where: v.version_type == &quot;snapshot&quot;,
+    order_by: [desc: v.inserted_at],
+    limit: 1
+  )
+  |&gt; Repo.one()</p>
+<p>case last_snapshot do
+    nil -&gt;
+      true</p>
+<p>snapshot -&gt;
+      hours_since = DateTime.diff(DateTime.utc_now(), snapshot.inserted_at, :hour)
+      diffs_since = count_diffs_since(representation.id, snapshot.inserted_at)</p>
+<p>hours_since &gt;= max_hours or diffs_since &gt;= max_diffs
+  end
+end</p>
+<p>defp count_diffs_since(representation_id, since) do
+  from(v in RepresentationVersion,
+    where: v.representation_id == ^representation_id,
+    where: v.version_type == &quot;diff&quot;,
+    where: v.inserted_at &gt; ^since,
+    select: count(v.id)
+  )
+  |&gt; Repo.one()
+end
+</code></pre></p>
+<hr>
+<h2>Part 4: Oban Workers</h2>
+<h3>4.1 Periodic Snapshot Worker</h3>
+<strong>File:</strong> <code>lib/onelist/workers/snapshot_worker.ex</code>
+<pre><code class="language-elixir">defmodule Onelist.Workers.SnapshotWorker do
+  @moduledoc &quot;&quot;&quot;
+  Oban worker that creates periodic snapshots for active representations.
+  Runs daily to ensure version history can be efficiently reconstructed.
+  &quot;&quot;&quot;
+<p>use Oban.Worker, queue: :snapshots, max_attempts: 3</p>
+<p>alias Onelist.Entries
+  alias Onelist.Repo</p>
+<p>@impl Oban.Worker
+  def perform(%Oban.Job{args: %{&quot;representation_id&quot; =&gt; rep_id, &quot;user_id&quot; =&gt; user_id}}) do
+    with {:ok, representation} &lt;- get_representation(rep_id),
+         {:ok, user} &lt;- get_user(user_id),
+         true &lt;- Entries.needs_snapshot?(representation) do
+      Entries.create_snapshot(representation, user)
+    else
+      false -&gt; :ok  # No snapshot needed
+      error -&gt; error
+    end
+  end</p>
+<p>@impl Oban.Worker
+  def perform(%Oban.Job{args: %{&quot;action&quot; =&gt; &quot;sweep&quot;}}) do
+    # Find all representations that need snapshots
+    representations_needing_snapshots()
+    |&gt; Enum.each(fn {rep, user} -&gt;
+      %{representation_id: rep.id, user_id: user.id}
+      |&gt; Onelist.Workers.SnapshotWorker.new()
+      |&gt; Oban.insert()
+    end)</p>
+<p>:ok
+  end</p>
+<p>defp get_representation(id) do
+    case Entries.get_representation(id) do
+      nil -&gt; {:error, :not_found}
+      rep -&gt; {:ok, rep}
+    end
+  end</p>
+<p>defp get_user(id) do
+    case Onelist.Accounts.get_user(id) do
+      nil -&gt; {:error, :not_found}
+      user -&gt; {:ok, user}
+    end
+  end</p>
+<p>defp representations_needing_snapshots do
+    # Query for representations that have been updated recently
+    # and need a snapshot based on time/diff count
+    # Returns list of {representation, user} tuples
+    []  # Implementation details
+  end
+end
+</code></pre></p>
+<h3>4.2 Schedule Daily Snapshots</h3>
+<strong>File:</strong> <code>config/config.exs</code> (update Oban config)
+<pre><code class="language-elixir">config :onelist, Oban,
+  repo: Onelist.Repo,
+  plugins: [
+    Oban.Plugins.Pruner,
+    {Oban.Plugins.Cron,
+      crontab: [
+        {&quot;0 3 <em> </em> <em>&quot;, Onelist.Workers.SnapshotWorker, args: %{&quot;action&quot; =&gt; &quot;sweep&quot;}}
+      ]}
+  ],
+  queues: [default: 10, snapshots: 5]
+</code></pre>
+<hr>
+<h2>Part 5: API Endpoints for Version History</h2>
+<h3>5.1 Version Controller</h3>
+<strong>File:</strong> <code>lib/onelist_web/controllers/api/v1/representation_version_controller.ex</code>
+<pre><code class="language-elixir">defmodule OnelistWeb.Api.V1.RepresentationVersionController do
+  use OnelistWeb, :controller
+<p>alias Onelist.Entries</p>
+<p>action_fallback OnelistWeb.Api.V1.FallbackController</p>
+<p>@doc &quot;&quot;&quot;
+  Lists version history for a representation.
+  GET /api/v1/entries/:entry_id/representations/:representation_id/versions
+  &quot;&quot;&quot;
+  def index(conn, %{&quot;entry_id&quot; =&gt; entry_id, &quot;representation_id&quot; =&gt; rep_id}) do
+    user = conn.assigns.current_user</p>
+<p>with {:ok, entry} &lt;- get_user_entry(user, entry_id),
+         {:ok, representation} &lt;- get_entry_representation(entry, rep_id) do
+      versions = Entries.list_representation_versions(representation)
+      render(conn, :index, versions: versions)
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Shows content at a specific version.
+  GET /api/v1/entries/:entry_id/representations/:representation_id/versions/:version
+  &quot;&quot;&quot;
+  def show(conn, %{&quot;entry_id&quot; =&gt; entry_id, &quot;representation_id&quot; =&gt; rep_id, &quot;id&quot; =&gt; version}) do
+    user = conn.assigns.current_user
+    version = String.to_integer(version)</p>
+<p>with {:ok, entry} &lt;- get_user_entry(user, entry_id),
+         {:ok, representation} &lt;- get_entry_representation(entry, rep_id),
+         {:ok, content} &lt;- Entries.get_content_at_version(representation, version) do
+      render(conn, :show, content: content, version: version)
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Reverts to a specific version.
+  POST /api/v1/entries/:entry_id/representations/:representation_id/versions/:version/revert
+  &quot;&quot;&quot;
+  def revert(conn, %{&quot;entry_id&quot; =&gt; entry_id, &quot;representation_id&quot; =&gt; rep_id, &quot;version_id&quot; =&gt; version}) do
+    user = conn.assigns.current_user
+    version = String.to_integer(version)</p>
+<p>with {:ok, entry} &lt;- get_user_entry(user, entry_id),
+         {:ok, representation} &lt;- get_entry_representation(entry, rep_id),
+         {:ok, updated_rep} &lt;- Entries.revert_to_version(representation, version, user) do
+      render(conn, :show, representation: updated_rep)
+    end
+  end</p>
+<p># Private helpers...
+end
+</code></pre></p>
+<h3>5.2 Update Router</h3>
+<strong>File:</strong> <code>lib/onelist_web/router.ex</code> (add to api_v1 scope)
+<pre><code class="language-elixir">resources &quot;/entries&quot;, EntryController, except: [:new, :edit] do
+  resources &quot;/tags&quot;, EntryTagController, only: [:index, :create, :delete]
+  resources &quot;/representations&quot;, RepresentationController, only: [:index, :show, :update] do
+    resources &quot;/versions&quot;, RepresentationVersionController, only: [:index, :show]
+    post &quot;/versions/:version_id/revert&quot;, RepresentationVersionController, :revert
+  end
+end
+</code></pre>
+<hr>
+<h2>Part 6: Caching Layer</h2>
+<h3>6.1 ETS-based Cache Module</h3>
+<strong>File:</strong> <code>lib/onelist/cache.ex</code>
+<pre><code class="language-elixir">defmodule Onelist.Cache do
+  @moduledoc &quot;&quot;&quot;
+  Simple ETS-based cache for frequently accessed data.
+  &quot;&quot;&quot;
+<p>use GenServer</p>
+<p>@table_name :onelist_cache
+  @default_ttl :timer.minutes(15)</p>
+<p># Client API</p>
+<p>def start_link(opts \\ []) do
+    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+  end</p>
+<p>def get(key) do
+    case :ets.lookup(@table_name, key) do
+      [{^key, value, expires_at}] -&gt;
+        if DateTime.compare(DateTime.utc_now(), expires_at) == :lt do
+          {:ok, value}
+        else
+          delete(key)
+          :miss
+        end</p>
+<p>[] -&gt;
+        :miss
+    end
+  end</p>
+<p>def put(key, value, ttl \\ @default_ttl) do
+    expires_at = DateTime.add(DateTime.utc_now(), ttl, :millisecond)
+    :ets.insert(@table_name, {key, value, expires_at})
+    :ok
+  end</p>
+<p>def delete(key) do
+    :ets.delete(@table_name, key)
+    :ok
+  end</p>
+<p>def fetch(key, ttl \\ @default_ttl, fun) do
+    case get(key) do
+      {:ok, value} -&gt; value
+      :miss -&gt;
+        value = fun.()
+        put(key, value, ttl)
+        value
+    end
+  end</p>
+<p># Server callbacks</p>
+<p>@impl true
+  def init(_opts) do
+    table = :ets.new(@table_name, [:set, :public, :named_table, read_concurrency: true])
+    schedule_cleanup()
+    {:ok, %{table: table}}
+  end</p>
+<p>@impl true
+  def handle_info(:cleanup, state) do
+    cleanup_expired()
+    schedule_cleanup()
+    {:noreply, state}
+  end</p>
+<p>defp schedule_cleanup do
+    Process.send_after(self(), :cleanup, :timer.minutes(5))
+  end</p>
+<p>defp cleanup_expired do
+    now = DateTime.utc_now()
+    :ets.foldl(fn
+      {key, _value, expires_at}, acc -&gt;
+        if DateTime.compare(now, expires_at) != :lt do
+          :ets.delete(@table_name, key)
+        end
+        acc
+    end, nil, @table_name)
+  end
+end
+</code></pre></p>
+<h3>6.2 Add to Application Supervisor</h3>
+<strong>File:</strong> <code>lib/onelist/application.ex</code>
+<pre><code class="language-elixir">children = [
+  # ... existing children
+  Onelist.Cache,
+  # ...
+]
+</code></pre>
+<h3>6.3 Cached Markdown Rendering</h3>
+<strong>File:</strong> <code>lib/onelist/markdown.ex</code> (update existing or create)
+<pre><code class="language-elixir">defmodule Onelist.Markdown do
+  @moduledoc &quot;&quot;&quot;
+  Markdown rendering with caching.
+  &quot;&quot;&quot;
+<p>alias Onelist.Cache</p>
+<p>@cache_ttl :timer.hours(1)</p>
+<p>def render(content) when is_binary(content) do
+    cache_key = {:markdown, :erlang.phash2(content)}</p>
+<p>Cache.fetch(cache_key, @cache_ttl, fn -&gt;
+      render_uncached(content)
+    end)
+  end</p>
+<p>def render(nil), do: &quot;&quot;</p>
+<p>defp render_uncached(content) do
+    content
+    |&gt; Earmark.as_html!(code_class_prefix: &quot;language-&quot;)
+    |&gt; HtmlSanitizeEx.html5()
+  end</p>
+<p>def invalidate(content) do
+    cache_key = {:markdown, :erlang.phash2(content)}
+    Cache.delete(cache_key)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Part 7: Documentation Setup</h2>
+<h3>7.1 Configure ExDoc</h3>
+<strong>File:</strong> <code>mix.exs</code> (update project/0)
+<pre><code class="language-elixir">def project do
+  [
+    app: :onelist,
+    version: &quot;0.1.0&quot;,
+    # ... existing config
+<p># ExDoc configuration
+    name: &quot;Onelist&quot;,
+    source_url: &quot;https://github.com/trinsiklabs/onelist&quot;,
+    docs: [
+      main: &quot;readme&quot;,
+      extras: [&quot;README.md&quot;, &quot;docs/api_guide.md&quot;],
+      groups_for_modules: [
+        &quot;Contexts&quot;: [
+          Onelist.Accounts,
+          Onelist.Entries,
+          Onelist.Tags,
+          Onelist.ApiKeys
+        ],
+        &quot;Schemas&quot;: [
+          Onelist.Accounts.User,
+          Onelist.Entries.Entry,
+          Onelist.Entries.Representation,
+          Onelist.Entries.RepresentationVersion,
+          Onelist.Tags.Tag,
+          Onelist.ApiKeys.ApiKey
+        ],
+        &quot;Web&quot;: [
+          OnelistWeb.Router,
+          OnelistWeb.Api.V1.EntryController,
+          OnelistWeb.Api.V1.TagController
+        ]
+      ]
+    ]
+  ]
+end
+</code></pre></p>
+<h3>7.2 Create API Guide</h3>
+<strong>File:</strong> <code>docs/api_guide.md</code>
+<p>Document all API endpoints, authentication, error responses, etc.</p>
+<hr>
+<h2>Part 8: Tag Filtering in Entry List UI</h2>
+<h3>8.1 Update Entry List LiveView</h3>
+<p>Add tag filter dropdown/chips to the entry list view that filters entries by selected tags.</p>
+<hr>
+<h2>Implementation Sequence</h2>
+<table>
+<tr><th>Order</th><th>Task</th><th>Estimated Effort</th></tr>
+<tr><td>1</td><td>Add dependencies (Oban, diffy, ex_doc)</td><td>Small</td></tr>
+<tr><td>2</td><td>Configure Oban</td><td>Small</td></tr>
+<tr><td>3</td><td>Create RepresentationVersion migration & schema</td><td>Medium</td></tr>
+<tr><td>4</td><td>Implement version history context functions</td><td>Medium</td></tr>
+<tr><td>5</td><td>Create SnapshotWorker</td><td>Medium</td></tr>
+<tr><td>6</td><td>Update representation update flow to create versions</td><td>Medium</td></tr>
+<tr><td>7</td><td>Add version history API endpoints</td><td>Medium</td></tr>
+<tr><td>8</td><td>Implement ETS cache</td><td>Medium</td></tr>
+<tr><td>9</td><td>Add cached markdown rendering</td><td>Small</td></tr>
+<tr><td>10</td><td>Configure ExDoc and write API guide</td><td>Medium</td></tr>
+<tr><td>11</td><td>Add tag filtering to Entry List UI</td><td>Medium</td></tr>
+<tr><td>12</td><td>Write tests for all new functionality</td><td>Large</td></tr>
+</table>
+<hr>
+<h2>Verification</h2>
+<pre><code class="language-bash"># Run tests
+mix test
+<h1>Check Oban jobs</h1>
+iex&gt; Oban.drain_queue(queue: :snapshots)
+<h1>Test version history</h1>
+curl -H &quot;Authorization: Bearer ol_xxx&quot; \
+  http://localhost:4000/api/v1/entries/{id}/representations/{rep_id}/versions
+<h1>Generate docs</h1>
+mix docs
+open doc/index.html
+</code></pre>
+<hr>
+<h2>Files to Create</h2>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>priv/repo/migrations/</em>_create_representation_versions.exs</code></td><td>DB migration</td></tr>
+<tr><td><code>lib/onelist/entries/representation_version.ex</code></td><td>Version schema</td></tr>
+<tr><td><code>lib/onelist/workers/snapshot_worker.ex</code></td><td>Oban worker</td></tr>
+<tr><td><code>lib/onelist/cache.ex</code></td><td>ETS cache module</td></tr>
+<tr><td><code>lib/onelist/markdown.ex</code></td><td>Cached markdown rendering</td></tr>
+<tr><td><code>lib/onelist_web/controllers/api/v1/representation_version_controller.ex</code></td><td>Version API</td></tr>
+<tr><td><code>lib/onelist_web/controllers/api/v1/representation_version_json.ex</code></td><td>Version JSON</td></tr>
+<tr><td><code>docs/api_guide.md</code></td><td>API documentation</td></tr>
+<tr><td><code>test/onelist/entries/representation_version_test.exs</code></td><td>Version tests</td></tr>
+<tr><td><code>test/onelist/workers/snapshot_worker_test.exs</code></td><td>Worker tests</td></tr>
+<tr><td><code>test/onelist/cache_test.exs</code></td><td>Cache tests</td></tr>
+</table>
+<h2>Files to Modify</h2>
+<table>
+<tr><th>File</th><th>Changes</th></tr>
+<tr><td><code>mix.exs</code></td><td>Add deps, ExDoc config</td></tr>
+<tr><td><code>config/config.exs</code></td><td>Oban config</td></tr>
+<tr><td><code>config/test.exs</code></td><td>Oban test config</td></tr>
+<tr><td><code>lib/onelist/application.ex</code></td><td>Add Oban, Cache to supervision tree</td></tr>
+<tr><td><code>lib/onelist/entries.ex</code></td><td>Add version history functions</td></tr>
+<tr><td><code>lib/onelist/entries/representation.ex</code></td><td>Add versions association</td></tr>
+<tr><td><code>lib/onelist_web/router.ex</code></td><td>Add version routes</td></tr>
+</table>
+  </article>
+</body>
+</html>

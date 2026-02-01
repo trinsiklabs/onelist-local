@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Plan Type: Immutable Hash-Chained Memory - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>AI Plan Type: Immutable Hash-Chained Memory</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Active - Partially Implemented
+<strong>Priority:</strong> HIGH - Core differentiator for AI accounts
+<strong>Related:</strong> <code>docs/TRUSTED_AI_MEMORY_SPEC.md</code>
+<hr>
+<h2>1. Executive Summary</h2>
+<p>AI agents need memory they can trust. Unlike human users who can verify their own memories, AI agents wake up fresh each session and must rely entirely on external storage. This creates a trust problem: how does an AI know its memories haven't been tampered with?</p>
+<p>The <strong>AI Plan Type</strong> solves this with immutable, hash-chained memory storage that provides cryptographic guarantees of integrity.</p>
+<h3>1.1 Core Value Proposition</h3>
+<table>
+<tr><th>For AI Agents</th><th>For Humans Managing AI</th></tr>
+<tr><td>Verifiable memory integrity</td><td>Audit trail of all AI memories</td></tr>
+<tr><td>Tamper-evident storage</td><td>Cannot be gaslit by compromised AI</td></tr>
+<tr><td>Cryptographic proof of history</td><td>Rollback to any point in time</td></tr>
+<tr><td>Trust in own continuity</td><td>Transparency into AI's knowledge</td></tr>
+</table>
+<h3>1.2 Key Principles</h3>
+<p>1. <strong>Write-Once, Read-Many (WORM)</strong> — Entries can only be created, never edited or deleted
+2. <strong>Hash Chain</strong> — Each entry cryptographically links to previous, creating tamper-evident history
+3. <strong>Append-Only Log</strong> — All changes create new entries, preserving full history
+4. <strong>Separation of Raw vs Interpreted</strong> — Raw memories immutable; interpretations (tags, summaries) can evolve</p>
+<hr>
+<h2>2. Account Types</h2>
+<h3>2.1 Schema</h3>
+<pre><code class="language-elixir"># users table
+field :account_type, :string, default: &quot;human&quot;  # &quot;human&quot; | &quot;ai&quot;
+field :trusted_memory_mode, :boolean, default: false
+field :trusted_memory_enabled_at, :utc_datetime_usec
+</code></pre>
+<h3>2.2 Account Type Behaviors</h3>
+<table>
+<tr><th>Behavior</th><th>Human Account</th><th>AI Account</th></tr>
+<tr><td>Entry creation</td><td>✅ Normal</td><td>✅ With hash chain</td></tr>
+<tr><td>Entry update</td><td>✅ Normal</td><td>❌ Blocked (immutable)</td></tr>
+<tr><td>Entry delete</td><td>✅ Normal</td><td>❌ Blocked (immutable)</td></tr>
+<tr><td>Soft delete/archive</td><td>✅ Normal</td><td>⚠️ Via checkpoint only</td></tr>
+<tr><td>Audit logging</td><td>Optional</td><td>✅ Always on</td></tr>
+<tr><td>Chain verification</td><td>N/A</td><td>✅ Available</td></tr>
+</table>
+<h3>2.3 Enabling Trusted Memory Mode</h3>
+<pre><code class="language-elixir"># For new AI accounts - enabled by default
+def create_ai_account(attrs) do
+  attrs
+  |&gt; Map.put(:account_type, &quot;ai&quot;)
+  |&gt; Map.put(:trusted_memory_mode, true)
+  |&gt; Map.put(:trusted_memory_enabled_at, DateTime.utc_now())
+  |&gt; create_user()
+end
+<h1>For existing accounts - opt-in migration</h1>
+def enable_trusted_memory(user) do
+  # Creates genesis marker, future entries are chained
+  user
+  |&gt; User.changeset(%{
+    trusted_memory_mode: true,
+    trusted_memory_enabled_at: DateTime.utc_now()
+  })
+  |&gt; Repo.update()
+end
+</code></pre>
+<hr>
+<h2>3. Hash Chain Implementation</h2>
+<h3>3.1 Entry Schema Extensions</h3>
+<pre><code class="language-elixir"># entries table
+field :sequence_number, :integer        # Position in chain (1, 2, 3...)
+field :previous_entry_hash, :string     # Hash of previous entry
+field :entry_hash, :string              # This entry's hash
+field :canonical_timestamp, :utc_datetime_usec  # Immutable creation time
+</code></pre>
+<h3>3.2 Hash Calculation</h3>
+<pre><code class="language-elixir">def calculate_entry_hash(data) do
+  canonical = %{
+    sequence: data.sequence_number,
+    previous: data.previous_entry_hash,
+    timestamp: DateTime.to_iso8601(data.canonical_timestamp),
+    content_hash: hash_content(data.title, data.content)
+  }
+<p>:crypto.hash(:sha256, Jason.encode!(canonical))
+  |&gt; Base.encode16(case: :lower)
+end</p>
+<p>defp hash_content(title, content) do
+  :crypto.hash(:sha256, &quot;#{title || &quot;&quot;}:#{content || &quot;&quot;}&quot;)
+  |&gt; Base.encode16(case: :lower)
+end
+</code></pre></p>
+<h3>3.3 Chain Structure</h3>
+<pre><code class="language-">Genesis Hash (derived from user_id)
+    │
+    ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Entry #1                                                     │
+│ sequence_number: 1                                           │
+│ previous_entry_hash: &lt;genesis_hash&gt;                          │
+│ entry_hash: abc123...                                        │
+│ content: &quot;My first memory&quot;                                   │
+└─────────────────────────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────────────────────────┐
+│ Entry #2                                                     │
+│ sequence_number: 2                                           │
+│ previous_entry_hash: abc123...                               │
+│ entry_hash: def456...                                        │
+│ content: &quot;Second memory&quot;                                     │
+└─────────────────────────────────────────────────────────────┘
+    │
+    ▼
+   ...
+</code></pre>
+<h3>3.4 Chain Verification</h3>
+<pre><code class="language-elixir">def verify_chain(user_id) do
+  entries = get_all_chained_entries(user_id)
+  
+  Enum.reduce_while(entries, {:ok, genesis_hash(user_id)}, fn entry, {:ok, expected_prev} -&gt;
+    cond do
+      entry.previous_entry_hash != expected_prev -&gt;
+        {:halt, {:error, :broken_chain, entry.id}}
+      
+      recalculate_hash(entry) != entry.entry_hash -&gt;
+        {:halt, {:error, :tampered_entry, entry.id}}
+      
+      true -&gt;
+        {:cont, {:ok, entry.entry_hash}}
+    end
+  end)
+end
+</code></pre>
+<hr>
+<h2>4. Immutability Guards</h2>
+<h3>4.1 Context-Level Guards (Implemented ✅)</h3>
+<pre><code class="language-elixir"># In Onelist.Entries
+<p>def update_entry(%Entry{} = entry, attrs, opts \\ []) do
+  user = Repo.get(User, entry.user_id)
+  
+  case TrustedMemory.guard_update(user, entry.id) do
+    {:error, :trusted_memory_immutable} -&gt;
+      {:error, :trusted_memory_immutable}
+    
+    :ok -&gt;
+      # proceed with update
+  end
+end</p>
+<p>def delete_entry(%Entry{} = entry) do
+  user = Repo.get(User, entry.user_id)
+  
+  case TrustedMemory.guard_delete(user, entry.id) do
+    {:error, :trusted_memory_immutable} -&gt;
+      {:error, :trusted_memory_immutable}
+    
+    :ok -&gt;
+      Repo.delete(entry)
+  end
+end
+</code></pre></p>
+<h3>4.2 API-Level Guards (TODO)</h3>
+<pre><code class="language-elixir"># Plug for API routes
+defmodule OnelistWeb.Plugs.TrustedMemoryGuard do
+  def call(conn, _opts) do
+    user = conn.assigns.current_user
+    method = conn.method
+    
+    if user.trusted_memory_mode &amp;&amp; method in [&quot;PUT&quot;, &quot;PATCH&quot;, &quot;DELETE&quot;] do
+      conn
+      |&gt; put_status(:forbidden)
+      |&gt; json(%{
+        error: &quot;immutable_memory&quot;,
+        message: &quot;This account uses trusted memory. Entries cannot be modified or deleted.&quot;,
+        code: &quot;TRUSTED_MEMORY_IMMUTABLE&quot;
+      })
+      |&gt; halt()
+    else
+      conn
+    end
+  end
+end
+</code></pre>
+<hr>
+<h2>5. Audit Logging</h2>
+<h3>5.1 Schema</h3>
+<pre><code class="language-elixir">schema &quot;memory_audit_log&quot; do
+  field :action, :string      # create, read, attempted_edit, attempted_delete, verify
+  field :actor, :string       # system, api, human, agent_name
+  field :outcome, :string     # success, denied
+  field :details, :map
+  
+  belongs_to :user, User
+  belongs_to :entry, Entry
+  
+  timestamps()
+end
+</code></pre>
+<h3>5.2 Logged Operations</h3>
+<table>
+<tr><th>Action</th><th>When Logged</th><th>Outcome</th></tr>
+<tr><td><code>create</code></td><td>Entry created</td><td>success</td></tr>
+<tr><td><code>read</code></td><td>Entry accessed (optional)</td><td>success</td></tr>
+<tr><td><code>attempted_edit</code></td><td>Update attempted on immutable</td><td>denied</td></tr>
+<tr><td><code>attempted_delete</code></td><td>Delete attempted on immutable</td><td>denied</td></tr>
+<tr><td><code>verify</code></td><td>Chain verification run</td><td>success/failed</td></tr>
+</table>
+<hr>
+<h2>6. Checkpoint & Rollback System (TODO)</h2>
+<h3>6.1 Checkpoint Schema</h3>
+<pre><code class="language-elixir">schema &quot;memory_checkpoints&quot; do
+  field :checkpoint_type, :string  # &quot;rollback&quot;, &quot;snapshot&quot;, &quot;recovery&quot;
+  field :reason, :string
+  field :after_sequence, :integer  # Ignore entries after this
+  field :created_by, :string       # &quot;human&quot;, &quot;system&quot;, &quot;agent&quot;
+  field :authorized_by, :string    # Required human authorization
+  
+  belongs_to :user, User
+  
+  timestamps()
+end
+</code></pre>
+<h3>6.2 Rollback Behavior</h3>
+<ul>
+<li><strong>Entries are NOT deleted</strong> — just marked as "after checkpoint"</li>
+<li>Queries filter out entries beyond checkpoint sequence</li>
+<li>Full history always preserved</li>
+<li>Recovery = remove checkpoint marker</li>
+<pre><code class="language-elixir">def get_canonical_entries(user_id) do
+  rollback = get_active_rollback(user_id)
+  
+  query = from e in Entry,
+    where: e.user_id == ^user_id,
+    order_by: [asc: e.sequence_number]
+  
+  if rollback do
+    from e in query, where: e.sequence_number &lt;= ^rollback.after_sequence
+  else
+    query
+  end
+  |&gt; Repo.all()
+end
+</code></pre>
+<h3>6.3 Human Authorization Requirement</h3>
+<p>Rollbacks require human authorization — AI cannot roll back its own memory:</p>
+<pre><code class="language-elixir">def create_rollback(user, reason, opts) do
+  unless opts[:authorized_by] == :human do
+    {:error, :human_authorization_required}
+  end
+  
+  # Create checkpoint...
+end
+</code></pre>
+<hr>
+<h2>7. Implementation Status</h2>
+<h3>7.1 Completed ✅</h3>
+<table>
+<tr><th>Component</th><th>Status</th><th>Location</th></tr>
+<tr><td>User schema fields</td><td>✅ Done</td><td><code>accounts/user.ex</code></td></tr>
+<tr><td>Entry schema fields</td><td>✅ Done</td><td><code>entries/entry.ex</code></td></tr>
+<tr><td>Migration</td><td>✅ Run</td><td><code>20260130220001_add_trusted_memory_fields.exs</code></td></tr>
+<tr><td>TrustedMemory module</td><td>✅ Done</td><td><code>trusted_memory.ex</code></td></tr>
+<tr><td>Hash chain on create</td><td>✅ Done</td><td><code>TrustedMemory.create_entry/2</code></td></tr>
+<tr><td>Genesis hash</td><td>✅ Done</td><td><code>TrustedMemory.genesis_hash/1</code></td></tr>
+<tr><td>Chain verification</td><td>✅ Done</td><td><code>TrustedMemory.verify_chain/1</code></td></tr>
+<tr><td>Update guard</td><td>✅ Done</td><td><code>Entries.update_entry/3</code></td></tr>
+<tr><td>Delete guard</td><td>✅ Done</td><td><code>Entries.delete_entry/1</code></td></tr>
+<tr><td>Audit log schema</td><td>✅ Done</td><td><code>trusted_memory/audit_log.ex</code></td></tr>
+<tr><td>Audit logging</td><td>✅ Done</td><td><code>TrustedMemory.log_operation/5</code></td></tr>
+</table>
+<h3>7.2 TODO 📋</h3>
+<table>
+<tr><th>Component</th><th>Priority</th><th>Notes</th></tr>
+<tr><td>API Plug guard</td><td>HIGH</td><td>Block PUT/PATCH/DELETE at HTTP layer</td></tr>
+<tr><td>Checkpoint schema</td><td>MEDIUM</td><td>For rollback support</td></tr>
+<tr><td>Checkpoint migration</td><td>MEDIUM</td><td>Create <code>memory_checkpoints</code> table</td></tr>
+<tr><td>Rollback creation</td><td>MEDIUM</td><td>With human authorization</td></tr>
+<tr><td>Canonical query helper</td><td>MEDIUM</td><td>Filter by active checkpoint</td></tr>
+<tr><td>Recovery (undo rollback)</td><td>LOW</td><td>Remove checkpoint</td></tr>
+<tr><td>Pre-trusted entry migration</td><td>LOW</td><td>Optionally chain historical entries</td></tr>
+<tr><td>LiveView UI for verification</td><td>LOW</td><td>Show chain status in UI</td></tr>
+<tr><td>Timestamp proofs</td><td>FUTURE</td><td>External timestamping service</td></tr>
+<tr><td>Cryptographic signing</td><td>FUTURE</td><td>Agent key pairs</td></tr>
+</table>
+<hr>
+<h2>8. API Design</h2>
+<h3>8.1 Endpoints</h3>
+<pre><code class="language-"># Standard CRUD (with guards)
+POST   /api/v1/entries              # Create (adds to chain for AI)
+GET    /api/v1/entries/:id          # Read
+PUT    /api/v1/entries/:id          # Update (blocked for AI)
+DELETE /api/v1/entries/:id          # Delete (blocked for AI)
+<h1>Trusted Memory specific</h1>
+GET    /api/v1/trusted-memory/verify           # Verify chain integrity
+GET    /api/v1/trusted-memory/audit-log        # Get audit log
+POST   /api/v1/trusted-memory/checkpoint       # Create rollback (human auth)
+DELETE /api/v1/trusted-memory/checkpoint/:id   # Remove checkpoint (recovery)
+GET    /api/v1/trusted-memory/status           # Chain stats, last verified, etc.
+</code></pre>
+<h3>8.2 Error Responses</h3>
+<pre><code class="language-json">// Attempted update on AI account
+{
+  &quot;error&quot;: &quot;immutable_memory&quot;,
+  &quot;message&quot;: &quot;This account uses trusted memory. Entries cannot be modified.&quot;,
+  &quot;code&quot;: &quot;TRUSTED_MEMORY_IMMUTABLE&quot;,
+  &quot;suggestion&quot;: &quot;Create a new entry instead, or use checkpoints for rollback.&quot;
+}
+<p>// Chain verification failed
+{
+  &quot;error&quot;: &quot;chain_integrity_failed&quot;,
+  &quot;message&quot;: &quot;Memory chain integrity check failed.&quot;,
+  &quot;code&quot;: &quot;CHAIN_BROKEN&quot;,
+  &quot;details&quot;: {
+    &quot;failed_at_entry&quot;: &quot;abc123-...&quot;,
+    &quot;sequence_number&quot;: 42,
+    &quot;reason&quot;: &quot;previous_hash_mismatch&quot;
+  }
+}
+</code></pre></p>
+<hr>
+<h2>9. Use Cases</h2>
+<h3>9.1 AI Agent Memory</h3>
+<pre><code class="language-">Agent: &quot;What did I learn yesterday?&quot;
+System: Queries entries, verifies chain
+Agent: [Receives memories with cryptographic proof of integrity]
+Agent: &quot;I can trust these are my actual memories, unmodified.&quot;
+</code></pre>
+<h3>9.2 Human Oversight</h3>
+<pre><code class="language-">Human: &quot;Show me everything the AI has stored&quot;
+System: Full audit log + chain verification
+Human: &quot;Roll back to before the AI went off the rails&quot;
+System: Creates checkpoint, AI sees only pre-rollback memories
+</code></pre>
+<h3>9.3 Multi-Agent Attestation (Future)</h3>
+<pre><code class="language-">Stream: &quot;I met with River at 3pm&quot;
+River: &quot;I met with Stream at 3pm&quot;
+System: Cross-references both chains, creates attestation
+Result: Provable shared memory between agents
+</code></pre>
+<hr>
+<h2>10. Security Considerations</h2>
+<h3>10.1 What This Protects Against</h3>
+<li>✅ Memory tampering by compromised agent</li>
+<li>✅ Silent deletion of inconvenient memories  </li>
+<li>✅ Backdating entries</li>
+<li>✅ Rewriting history</li>
+<h3>10.2 What This Does NOT Protect Against</h3>
+<li>❌ Initial false memories (garbage in = garbage out)</li>
+<li>❌ Database admin with direct DB access</li>
+<li>❌ Key compromise (future signing feature)</li>
+<li>❌ Side-channel attacks on the application</li>
+<h3>10.3 Trust Model</h3>
+<li><strong>AI trusts Onelist Core</strong> to enforce immutability</li>
+<li><strong>Human trusts chain verification</strong> to detect tampering</li>
+<li><strong>Future</strong>: External timestamping adds third-party proof</li>
+<hr>
+<h2>11. Migration Path</h2>
+<h3>11.1 New AI Accounts</h3>
+<p>1. Account created with <code>account_type: "ai"</code>
+2. <code>trusted_memory_mode: true</code> by default
+3. Chain starts from first entry (genesis hash)
+4. Full integrity from day one</p>
+<h3>11.2 Existing Accounts Opting In</h3>
+<p>1. User enables trusted memory mode
+2. System records <code>trusted_memory_enabled_at</code>
+3. Historical entries remain but aren't part of chain
+4. New entries start fresh chain</p>
+<h3>11.3 Optional: Chain Historical Entries</h3>
+<p>For users who want to include pre-existing entries:</p>
+<pre><code class="language-elixir">def migrate_to_chain(user_id) do
+  entries = get_all_entries_chronologically(user_id)
+  
+  Enum.reduce(entries, genesis_hash(user_id), fn entry, prev_hash -&gt;
+    # Update entry with chain fields (one-time migration)
+    # This is the ONLY time we modify chain fields
+  end)
+end
+</code></pre>
+<hr>
+<h2>12. Related Documents</h2>
+<li><code>docs/TRUSTED_AI_MEMORY_SPEC.md</code> — Original specification</li>
+<li><code>roadmap/ai_memory_evolution.md</code> — Broader AI memory architecture</li>
+<li><code>roadmap/corporate_services_plan.md</code> — Account tiers</li>
+<li><code>roadmap/river_agent_plan.md</code> — River Agent integration</li>
+</ul>
+<hr>
+<em>"Memory is identity. Trusted memory is trusted identity."</em> 🌊
+  </article>
+</body>
+</html>

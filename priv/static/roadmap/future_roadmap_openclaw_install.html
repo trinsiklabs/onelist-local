@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw + Onelist Integration Guide - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>OpenClaw + Onelist Integration Guide</h1>
+<strong>Document Version:</strong> 2026-01-28
+<strong>Status:</strong> Planning
+<strong>Priority:</strong> High - Key Adoption Path
+<h2>Overview</h2>
+<p>This document covers the integration of OpenClaw with Onelist via <strong>Full Stack Installation</strong>. Users run a complete Onelist instance alongside OpenClaw, with bidirectional file sync ensuring OpenClaw's files remain the source of truth.</p>
+<h2>Architecture</h2>
+<h3>Key Principle</h3>
+<strong>Files are ALWAYS the source of truth.</strong> The PostgreSQL database mirrors files and provides enhanced capabilities, but OpenClaw can always fall back to native file operations if Onelist is unavailable.
+<h3>Component Requirements</h3>
+<table>
+<tr><th>Component</th><th>Required</th><th>Notes</th></tr>
+<tr><td>Onelist Core</td><td><strong>Yes</strong></td><td>Phoenix API server</td></tr>
+<tr><td>PostgreSQL</td><td><strong>Yes</strong></td><td>With pgvector extension</td></tr>
+<tr><td>Onelist Web</td><td>Optional</td><td>LiveView UI for browser access</td></tr>
+<tr><td>Agents (River, etc.)</td><td>Optional</td><td>User chooses which to run</td></tr>
+</table>
+<h3>Architecture Diagram</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         OPENCLAW VPS - FULL STACK                             │
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                         OPENCLAW                                      │   │
+│  │                                                                      │   │
+│  │  memory_write() ──────────────────────────────► ~/openclaw/memory/   │   │
+│  │  memory_search() ────┐                              │                │   │
+│  │                      │                              │ (files always  │   │
+│  │                      │                              │  written first)│   │
+│  └──────────────────────┼──────────────────────────────┼────────────────┘   │
+│                         │                              │                    │
+│                         │                              ▼                    │
+│  ┌──────────────────────┼─────────────────────────────────────────────┐    │
+│  │                      │         ONELIST STACK                        │    │
+│  │                      │                                              │    │
+│  │                      ▼                                              │    │
+│  │  ┌─────────────────────────────────────────────────────────────┐   │    │
+│  │  │                    FILE SYNC LAYER                           │   │    │
+│  │  │                                                              │   │    │
+│  │  │  • File watcher: files → DB (OpenClaw writes)                │   │    │
+│  │  │  • DB watcher: DB → files (Web UI / River writes)           │   │    │
+│  │  │  • Bidirectional: files always complete                     │   │    │
+│  │  └──────────────────────────┬──────────────────────────────────┘   │    │
+│  │                             │                                       │    │
+│  │  ┌──────────────────────────┴──────────────────────────────────┐   │    │
+│  │  │                    PostgreSQL 14+ (Port 5433)                │   │    │
+│  │  │  • Mirrors all files for enhanced search                    │   │    │
+│  │  │  • pgvector for embeddings                                  │   │    │
+│  │  │  • Full-text search                                         │   │    │
+│  │  └─────────────────────────────────────────────────────────────┘   │    │
+│  │                             │                                       │    │
+│  │  ┌──────────────────────────┴──────────────────────────────────┐   │    │
+│  │  │  Onelist Core   │  Onelist Web   │  Agents (Optional)       │   │    │
+│  │  │  (Phoenix API)  │  (LiveView UI) │  (River, Reader, etc.)   │   │    │
+│  │  │  [REQUIRED]     │  [OPTIONAL]    │  [OPTIONAL]              │   │    │
+│  │  └─────────────────────────────────────────────────────────────┘   │    │
+│  │                                                                     │    │
+│  │  IF ONELIST FAILS: OpenClaw uses files directly, works as before   │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Bidirectional File Sync</h3>
+<p>The sync layer ensures:
+<ul>
+<li>OpenClaw writes → files → mirrored to DB</li>
+<li>Web UI/River writes → DB → synced back to files</li>
+<li>Files are always complete and authoritative</li>
+<li>If Onelist fails, OpenClaw falls back to native file operations</li></p>
+<h3>Failure Guarantees</h3>
+<table>
+<tr><th>Scenario</th><th>What Happens</th><th>User Impact</th></tr>
+<tr><td>Onelist running normally</td><td>Files written + mirrored to DB; search augmented</td><td>Best experience</td></tr>
+<tr><td>Onelist Core crashes</td><td>Files still written; search uses files only</td><td>Degraded search</td></tr>
+<tr><td>PostgreSQL crashes</td><td>Files still written; search uses files only</td><td>Degraded search</td></tr>
+<tr><td>Onelist completely removed</td><td>Files still written; search uses files only</td><td>Back to native OpenClaw</td></tr>
+<tr><td>User reinstalls Onelist</td><td>File watcher re-syncs all .md files to DB</td><td>Automatic recovery</td></tr>
+</table>
+<h2>System Requirements</h2>
+<table>
+<tr><th>Resource</th><th>Minimum</th><th>Recommended</th></tr>
+<tr><td>RAM</td><td>2 GB</td><td>4 GB</td></tr>
+<tr><td>CPU</td><td>2 vCPU</td><td>2-4 vCPU</td></tr>
+<tr><td>Disk</td><td>20 GB</td><td>50 GB+</td></tr>
+<tr><td>OS</td><td>Ubuntu 22.04+ / Debian 12+</td><td></td></tr>
+</table>
+<h2>Installation</h2>
+<h3>Method A: Docker Compose (Recommended)</h3>
+<pre><code class="language-bash"># Download docker-compose.yml
+curl -sSL https://onelist.my/install/docker-compose.yml -o docker-compose.yml
+<h1>Download environment template</h1>
+curl -sSL https://onelist.my/install/.env.example -o .env
+<h1>Edit configuration</h1>
+nano .env  # Set POSTGRES_PASSWORD, SECRET_KEY_BASE
+<h1>Start everything</h1>
+docker compose up -d
+<h1>Verify</h1>
+curl http://localhost:4000/health
+</code></pre>
+<h4>docker-compose.yml</h4>
+<pre><code class="language-yaml">version: '3.8'
+<p>services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: onelist-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-onelist}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: ${POSTGRES_DB:-onelist_prod}
+    volumes:
+      <li>onelist_pgdata:/var/lib/postgresql/data</li>
+    ports:
+      <li>&quot;127.0.0.1:5433:5432&quot;</li>
+    healthcheck:
+      test: [&quot;CMD-SHELL&quot;, &quot;pg_isready -U onelist&quot;]
+      interval: 10s
+      timeout: 5s
+      retries: 5</p>
+<p>onelist:
+    image: ghcr.io/onelist/onelist:latest
+    container_name: onelist-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ecto://${POSTGRES_USER:-onelist}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-onelist_prod}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?required}
+      PHX_HOST: ${PHX_HOST:-localhost}
+      PORT: 4000
+      # Optional components
+      ENABLE_WEB: ${ENABLE_WEB:-true}
+      ENABLE_AGENTS: ${ENABLE_AGENTS:-false}
+      ENABLE_RIVER: ${ENABLE_RIVER:-false}
+    volumes:
+      <li>onelist_assets:/var/lib/onelist/assets</li>
+      <li>${OPENCLAW_MEMORY_DIR:-~/openclaw/memory}:/openclaw/memory:rw</li>
+    ports:
+      <li>&quot;127.0.0.1:4000:4000&quot;</li>
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:4000/health&quot;]
+      interval: 30s
+      timeout: 10s
+      retries: 3</p>
+<p>volumes:
+  onelist_pgdata:
+  onelist_assets:
+</code></pre></p>
+<h3>Method B: Install Script</h3>
+<pre><code class="language-bash"># Download and run installer
+curl -sSL https://onelist.my/install.sh | bash
+<h1>Or with options</h1>
+curl -sSL https://onelist.my/install.sh | bash -s -- \
+  --postgres-port 5433 \
+  --onelist-port 4000 \
+  --with-openclaw \
+  --enable-web \
+  --no-agents
+</code></pre>
+<p>The install script:
+1. Installs PostgreSQL 16 with pgvector on port 5433
+2. Installs Erlang/Elixir
+3. Downloads and builds Onelist
+4. Creates systemd services
+5. Configures OpenClaw integration</p>
+<h2>Configuration</h2>
+<h3>Environment Variables</h3>
+<pre><code class="language-bash"># Required
+DATABASE_URL=ecto://onelist:password@localhost:5433/onelist_prod
+SECRET_KEY_BASE=your-secret-key-base
+PHX_HOST=localhost
+<h1>OpenClaw integration</h1>
+OPENCLAW_MEMORY_DIR=/home/user/openclaw/memory
+<h1>Optional components (all default to false for minimal install)</h1>
+ENABLE_WEB=true           # Enable Onelist Web UI
+ENABLE_AGENTS=false       # Enable background agents
+ENABLE_RIVER=false        # Enable River AI assistant
+<h1>If enabling agents</h1>
+OPENAI_API_KEY=sk-...     # Or other LLM provider
+</code></pre>
+<h3>OpenClaw SDK Configuration</h3>
+<pre><code class="language-bash"># Install the SDK
+pip install onelist-openclaw
+<h1>Configure to use local Onelist API</h1>
+onelist-openclaw configure \
+  --api-url http://localhost:4000/api/v1 \
+  --memory-dir ~/openclaw/memory
+</code></pre>
+<h4>SDK Config File</h4>
+<pre><code class="language-yaml"># ~/.config/onelist-openclaw/config.yaml
+<h1>OpenClaw memory directory (files remain source of truth)</h1>
+memory_dir: ~/openclaw/memory
+<p>api:
+  url: http://localhost:4000/api/v1
+  key: ${ONELIST_API_KEY}
+  timeout: 30</p>
+<h1>Memory hierarchy (matches ai_memory_evolution.md)</h1>
+memory:
+  hierarchy:
+    foundational_tags: [&quot;memory:foundational&quot;]
+    profile_tags: [&quot;memory:profile&quot;]
+    episodic_tags: [&quot;memory:episodic&quot;]
+<p>preload:
+    enabled: true
+    max_tokens: 3000
+    foundational_budget: 500
+    profile_budget: 800
+    episodic_budget: 1500
+</code></pre></p>
+<h2>What You Get</h2>
+<h3>With Core + PostgreSQL Only (Minimal)</h3>
+<li>File sync layer (bidirectional)</li>
+<li>Enhanced search (full-text, hybrid)</li>
+<li>Vector embeddings (if configured)</li>
+<li>API access to memories</li>
+<li>Fallback guarantee (OpenClaw works if Onelist fails)</li>
+<h3>With Onelist Web (Optional)</h3>
+<li>Full web interface at localhost:4000</li>
+<li>Browser-based memory management</li>
+<li>Visual entry editor</li>
+<li>Tag management UI</li>
+<h3>With Agents (Optional)</h3>
+<li>River agent (GTD-based life management, queries, proactive coaching)</li>
+<li>Reader agent (summarization, key takeaways)</li>
+<li>Librarian agent (tag organization)</li>
+<li>Searcher agent (semantic search, embeddings)</li>
+<h2>Optional Components Decision Guide</h2>
+<table>
+<tr><th>Use Case</th><th>Core + PostgreSQL</th><th>+ Web</th><th>+ Agents</th></tr>
+<tr><td>Just want enhanced OpenClaw search</td><td>Yes</td><td>No</td><td>No</td></tr>
+<tr><td>Want to browse memories in browser</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+<tr><td>Want AI-powered organization</td><td>Yes</td><td>Optional</td><td>Yes</td></tr>
+<tr><td>Want GTD/life management</td><td>Yes</td><td>Yes</td><td>Yes (River)</td></tr>
+<tr><td>Minimal resource usage</td><td>Yes</td><td>No</td><td>No</td></tr>
+</table>
+<h2>Security Considerations</h2>
+<h3>Network Binding</h3>
+<p>Both services bind to localhost only by default:
+<li>PostgreSQL: <code>127.0.0.1:5433</code></li>
+<li>Onelist: <code>127.0.0.1:4000</code></li></p>
+<h3>Exposing Onelist Web (Optional)</h3>
+<p>If you want to access Onelist Web from other devices:</p>
+<pre><code class="language-bash"># Option 1: SSH tunnel (recommended)
+ssh -L 4000:localhost:4000 user@your-vps
+<h1>Option 2: Reverse proxy with auth (nginx)</h1>
+<h1>See docs for nginx configuration</h1>
+<h1>Option 3: Tailscale (recommended for multi-device)</h1>
+<h1>Onelist automatically accessible via Tailscale network</h1>
+</code></pre>
+<h3>Firewall</h3>
+<pre><code class="language-bash"># Only allow SSH
+ufw default deny incoming
+ufw allow ssh
+ufw enable
+</code></pre>
+<h3>Secrets</h3>
+<pre><code class="language-bash"># Generate secure values
+openssl rand -base64 32  # For passwords
+mix phx.gen.secret       # For SECRET_KEY_BASE (if Elixir installed)
+<h1>Restrict permissions</h1>
+chmod 600 .env
+</code></pre>
+<h2>Troubleshooting</h2>
+<table>
+<tr><th>Issue</th><th>Solution</th></tr>
+<tr><td>Search not working</td><td>Check PostgreSQL is running: <code>docker compose ps</code></td></tr>
+<tr><td>Files not syncing to DB</td><td>Check file watcher logs: <code>docker compose logs onelist</code></td></tr>
+<tr><td>OpenClaw can't connect</td><td>Verify API key in config</td></tr>
+<tr><td>Out of memory</td><td>Disable agents, or add swap</td></tr>
+<tr><td>Embeddings not generating</td><td>Check Searcher agent is enabled and has API key</td></tr>
+</table>
+<h3>Logs</h3>
+<pre><code class="language-bash"># Docker Compose
+docker compose logs -f onelist
+docker compose logs -f postgres
+<h1>Native install</h1>
+journalctl -u onelist -f
+journalctl -u postgresql -f
+</code></pre>
+<h3>Health Checks</h3>
+<pre><code class="language-bash"># Check Onelist
+curl http://localhost:4000/health
+<h1>Check PostgreSQL</h1>
+docker compose exec postgres pg_isready -U onelist
+<h1>Check file sync</h1>
+curl http://localhost:4000/api/v1/sync/status
+</code></pre>
+<h2>Cloud Sync (Optional)</h2>
+<p>Full stack installations can optionally sync to Onelist Cloud:</p>
+<h3>Cloud Sync Tier ($3/mo)</h3>
+<pre><code class="language-yaml"># Add to Onelist config
+sync:
+  enabled: true
+  mode: backup  # Sync to cloud as backup
+  cloud_url: https://api.onelist.my/v1
+  cloud_key: your-cloud-api-key
+</code></pre>
+<p>Benefits:
+<li>E2EE backup of all data</li>
+<li>Sync between multiple Onelist instances</li>
+<li>Public pages on onelist.my</li>
+<li>Forum posts in your Onelist</li></p>
+<h3>Hybrid Sync (LAN + Cloud)</h3>
+<p>If you have multiple endpoints:
+<li>Same LAN → P2P sync (faster)</li>
+<li>Different networks → Cloud sync</li>
+<li>Automatic routing based on network</li></p>
+<h2>Implementation Checklist</h2>
+<h3>Onelist Team</h3>
+<li>[ ] Create Docker images (ghcr.io/onelist/onelist)</li>
+<li>[ ] Create install.sh script</li>
+<li>[ ] Implement file sync layer</li>
+<li>[ ] Implement onelist-openclaw SDK</li>
+<li>[ ] Write deployment documentation</li>
+<h3>Documentation</h3>
+<li>[ ] Update static site with installation guide</li>
+<li>[ ] Create video walkthrough</li>
+<li>[ ] Document optional component configuration</li>
+<li>[ ] Troubleshooting guide</li>
+<h2>Related Documents</h2>
+<li><a href="./future_roadmap_free_tier.md">Free Tier</a> - Self-hosted architecture</li>
+<li><a href="./ai_memory_evolution.md">AI Memory Evolution</a> - Memory hierarchy</li>
+<li><a href="./future_roadmap_ai_memory_patterns.md">AI Memory Patterns</a> - Memory patterns</li>
+<li><a href="./future_roadmap_river_agent.md">River Agent</a> - GTD-based agent</li>
+<li><a href="./launch_plan.md">Launch Plan</a> - Pricing tiers</li>
+</ul>
+  </article>
+</body>
+</html>

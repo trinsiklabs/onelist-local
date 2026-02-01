@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Agent UI Components - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Shared Agent UI Components</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Active
+<strong>Parent:</strong> ui_plan.md
+<hr>
+<h2>1. Overview</h2>
+<p>This document defines UI components shared across all Onelist agents (Reader, Searcher, Feeder, River, Asset Enrichment, etc.). Agent-specific UI is documented in separate files.</p>
+<hr>
+<h2>2. Processing Status Component</h2>
+<p>Displays the processing state of an agent for an entry.</p>
+<h3>2.1 States</h3>
+<table>
+<tr><th>State</th><th>Icon</th><th>Color</th><th>Label Example</th></tr>
+<tr><td><strong>Pending</strong></td><td>○</td><td>Gray</td><td>"Pending"</td></tr>
+<tr><td><strong>Processing</strong></td><td>⏳ (animated)</td><td>Blue</td><td>"Processing..."</td></tr>
+<tr><td><strong>Complete</strong></td><td>✓</td><td>Green</td><td>"8 memories"</td></tr>
+<tr><td><strong>Partial</strong></td><td>⚠</td><td>Amber</td><td>"Completed with warnings"</td></tr>
+<tr><td><strong>Failed</strong></td><td>✗</td><td>Red</td><td>"Failed"</td></tr>
+</table>
+<h3>2.2 Component Structure</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────┐
+│  [●] Reader                                    2 min ago │
+│      ✓ 8 memories extracted                             │
+└─────────────────────────────────────────────────────────┘
+<p>┌─────────────────────────────────────────────────────────┐
+│  [●] Searcher                                 Processing │
+│      ⏳ Generating embeddings...                        │
+└─────────────────────────────────────────────────────────┘</p>
+<p>┌─────────────────────────────────────────────────────────┐
+│  [●] Feeder                                     5 min ago│
+│      ✗ Failed to extract content              [Retry]   │
+└─────────────────────────────────────────────────────────┘
+</code></pre></p>
+<h3>2.3 Location</h3>
+<ul>
+<li><strong>Entry Detail Sidebar</strong>: Under "Processing" section</li>
+<li><strong>Activity Page</strong>: As list items</li>
+<li><strong>Inbox</strong>: Compact inline indicator</li>
+<h3>2.4 Hover Behavior (Desktop)</h3>
+<p>On hover over processing status:
+<li>Show detailed progress (e.g., "Chunk 3 of 5")</li>
+<li>Show error details if failed</li>
+<li>Show cost breakdown if applicable</li></p>
+<hr>
+<h2>3. Activity Log Component</h2>
+<p>Used on the Activity page and in activity summaries. Defaults to list view with card view available as toggle.</p>
+<h3>3.1 List View (Default)</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Activity                               [All Agents ▼]  [List ●] [Cards ○] │
+│  ═══════════════════════════════════════════════════════════════════════════│
+│                                                                              │
+│  │ Time     │ Agent      │ Action                    │ Entry        │ Cost  │
+│  ├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│  │ 2 min    │ Reader     │ Processed                 │ Weekly       │ $0.001│
+│  │ ago      │            │ 5 memories • 2 tags       │ Meeting Notes│       │
+│  ├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│  │ 5 min    │ Asset      │ Transcribed               │ Interview    │ $0.05 │
+│  │ ago      │ Enrichment │ 23:45 • 2 speakers        │ Recording    │       │
+│  ├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│  │ 10 min   │ Feeder     │ Clipped                   │ How to Build │ —     │
+│  │ ago      │            │ 1,234 words               │ Better Habits│       │
+│  ├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│  │ 1 hr     │ Asset      │ ❌ Failed: Decode error    │ Corrupted    │ $0.00 │
+│  │ ago      │ Enrichment │                           │ Audio File   │       │
+│  └──────────┴────────────┴───────────────────────────┴──────────────┴───────┘
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>3.2 Row Expansion</h3>
+<p>Clicking a row expands inline for more detail:</p>
+<pre><code class="language-">│ Time     │ Agent      │ Action                    │ Entry        │ Cost  │
+├──────────┼────────────┼───────────────────────────┼──────────────┼───────┤
+│ ▼ 5 min  │ Asset      │ Transcribed               │ Interview    │ $0.05 │
+│   ago    │ Enrichment │ 23:45 • 2 speakers        │ Recording    │       │
+├──────────┴────────────┴───────────────────────────┴──────────────┴───────┤
+│                                                                          │
+│  Enrichment details:                                                     │
+│  ├─ Transcription    ████████░░ 87%    Whisper large-v3                 │
+│  ├─ Speakers         2 detected        John, Sarah                      │
+│  └─ Tasks extracted  0 items                                            │
+│                                                                          │
+│  [View Entry]  [View Transcript]                                        │
+│                                                                          │
+├──────────┬────────────┬───────────────────────────┬──────────────┬───────┤
+</code></pre>
+<h3>3.3 Error Row Expansion</h3>
+<pre><code class="language-">│ ▼ 1 hr   │ Asset      │ ❌ Failed: Decode error    │ Corrupted    │ $0.00 │
+│   ago    │ Enrichment │                           │ Audio File   │       │
+├──────────┴────────────┴───────────────────────────┴──────────────┴───────┤
+│                                                                          │
+│  Error: Unable to decode audio format                                    │
+│  File appears to be corrupted or in an unsupported format.              │
+│                                                                          │
+│  [View Entry]  [Retry]  [Dismiss]                                       │
+│                                                                          │
+├──────────┬────────────┬───────────────────────────┬──────────────┬───────┤
+</code></pre>
+<h3>3.4 Card View (Alternative)</h3>
+<p>Toggle to cards for visual browsing:</p>
+<pre><code class="language-">[List ○] [Cards ●]
+<p>┌─────────────────────────┐  ┌─────────────────────────┐  ┌─────────────────────────┐
+│ [●] Reader              │  │ [●] Asset Enrichment    │  │ [●] Feeder              │
+│                         │  │                         │  │                         │
+│ Processed               │  │ Transcribed             │  │ Clipped                 │
+│ &quot;Weekly Meeting Notes&quot;  │  │ &quot;Interview Recording&quot;   │  │ &quot;How to Build Better    │
+│                         │  │                         │  │  Habits&quot;                │
+│ 5 memories • 2 tags     │  │ 23:45 • 2 speakers      │  │ jamesclear.com          │
+│ $0.001         2 min ago│  │ $0.05          5 min ago│  │ 1,234 words   10 min ago│
+│                         │  │                         │  │                         │
+│ [View Entry →]          │  │ [View Entry →]          │  │ [View Entry →]          │
+└─────────────────────────┘  └─────────────────────────┘  └─────────────────────────┘
+</code></pre></p>
+<h3>3.5 Filtering</h3>
+<p>Activity page filters:
+<li><strong>Agent</strong>: All, Reader, Searcher, Feeder, Asset Enrichment, River</li>
+<li><strong>Status</strong>: All, Completed, Failed, Processing</li>
+<li><strong>Time</strong>: Today, This Week, This Month, All Time</li></p>
+<hr>
+<h2>4. Review Queue (Unified)</h2>
+<p>Single queue for all items needing user review, filterable by source agent.</p>
+<h3>4.1 Location</h3>
+<li>Accessible from sidebar: "Review" with badge count</li>
+<li>URL: <code>/review</code></li>
+<h3>4.2 Filter Bar</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Review Queue (12)                                                          │
+│  ───────────────────────────────────────────────────────────────────────────│
+│  [All Agents ▼]  [All Types ▼]  [Newest First ▼]                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Agent Filter Options:</strong>
+<li>All Agents</li>
+<li>Reader (tag suggestions, quality review)</li>
+<li>River (filing suggestions, task review)</li>
+<li>Feeder (duplicate detection)</li>
+<li>Asset Enrichment (transcription review)</li>
+<strong>Type Filter Options:</strong>
+<li>All Types</li>
+<li>Tag Suggestions</li>
+<li>Quality Review</li>
+<li>Filing Suggestions</li>
+<li>Duplicate Detection</li>
+<li>Transcription Review</li>
+<h3>4.3 Review Item Card Pattern</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  [●] Tag Suggestions                                            from Reader │
+│  ───────────────────────────────────────────────────────────────────────────│
+│                                                                              │
+│  &quot;Understanding Elixir Processes&quot;                                           │
+│                                                                              │
+│  Suggested tags:                                                            │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │  [elixir]      94% confident                    [Accept] [Reject]  │    │
+│  │  [concurrency] 87% confident                    [Accept] [Reject]  │    │
+│  │  [beam]        72% confident                    [Accept] [Reject]  │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  [Accept All]  [Reject All]  [View Entry]                     [Dismiss]    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>4.4 Review Item Types</h3>
+<table>
+<tr><th>Type</th><th>Source Agent</th><th>Actions</th></tr>
+<tr><td><strong>Tag Suggestion</strong></td><td>Reader</td><td>Accept, Reject, Accept All, Reject All</td></tr>
+<tr><td><strong>Quality Review</strong></td><td>Reader</td><td>Keep, Delete, Remind Later</td></tr>
+<tr><td><strong>Filing Suggestion</strong></td><td>River</td><td>Accept, Edit, Reject</td></tr>
+<tr><td><strong>Duplicate Detection</strong></td><td>Feeder</td><td>Merge, Keep Both, Delete New</td></tr>
+<tr><td><strong>Transcription Review</strong></td><td>Asset Enrichment</td><td>Confirm, Edit, Regenerate</td></tr>
+</table>
+<hr>
+<h2>5. Agent Suggestion Pattern</h2>
+<p>Generic pattern for any agent suggestion requiring user decision.</p>
+<h3>5.1 Structure</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  💡 Suggestion from [Agent]                                                 │
+│  ───────────────────────────────────────────────────────────────────────────│
+│                                                                              │
+│  [Suggestion Content]                                                       │
+│                                                                              │
+│  Confidence: ████████░░ 82%                                                │
+│  Reason: [Why this was suggested]                                          │
+│                                                                              │
+│  [Primary Action]  [Secondary Action]                          [Dismiss]   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>5.2 Confidence Display</h3>
+<table>
+<tr><th>Range</th><th>Visual</th><th>Color</th></tr>
+<tr><td>90-100%</td><td>██████████</td><td>Green</td></tr>
+<tr><td>70-89%</td><td>████████░░</td><td>Blue</td></tr>
+<tr><td>50-69%</td><td>██████░░░░</td><td>Amber</td></tr>
+<tr><td><50%</td><td>████░░░░░░</td><td>Gray</td></tr>
+</table>
+<h3>5.3 Hover on Confidence (Desktop)</h3>
+<p>Shows detailed explanation:
+<li>Factors considered</li>
+<li>Similar past decisions</li>
+<li>Model used</li></p>
+<hr>
+<h2>6. Cost/Usage Display</h2>
+<h3>6.1 Activity Page Summary</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Today: 12 entries processed  •  47 memories extracted  •  $0.02           │
+│  This month: 234 entries  •  1,247 memories  •  $0.89 total                │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>6.2 Per-Item Cost</h3>
+<li>Displayed inline on activity items</li>
+<li>Format: "$0.001" (3 decimal places for sub-penny costs)</li>
+<li>Hover shows breakdown by operation type</li>
+<h3>6.3 Budget Warning</h3>
+<p>When approaching user-set budget cap:
+<li>Amber warning banner at top of Activity page</li>
+<li>"You've used $4.50 of your $5.00 monthly budget"</li>
+<li>Link to Settings to adjust</li></p>
+<hr>
+<h2>7. Agent Icon/Badge Component</h2>
+<h3>7.1 Badge Variants</h3>
+<table>
+<tr><th>Size</th><th>Usage</th></tr>
+<tr><td><strong>Small (16px)</strong></td><td>Inline with text, lists</td></tr>
+<tr><td><strong>Medium (24px)</strong></td><td>Cards, activity items</td></tr>
+<tr><td><strong>Large (32px)</strong></td><td>Settings, headers</td></tr>
+</table>
+<h3>7.2 Structure</h3>
+<pre><code class="language-html">&lt;span class=&quot;agent-badge agent-badge--reader agent-badge--medium&quot;&gt;
+  &lt;span class=&quot;agent-badge__dot&quot;&gt;&lt;/span&gt;
+  &lt;span class=&quot;agent-badge__label&quot;&gt;Reader&lt;/span&gt;
+&lt;/span&gt;
+</code></pre>
+<h3>7.3 Dot-Only Variant</h3>
+<p>For compact displays, just the colored dot:
+<li><code>[●]</code> with agent color</li>
+<li>Hover shows agent name</li></p>
+<hr>
+<h2>8. Empty States</h2>
+<h3>8.1 No Activity</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│                              📊                                             │
+│                                                                              │
+│                      No agent activity yet                                  │
+│                                                                              │
+│         Create or import some entries to see agents at work.               │
+│                                                                              │
+│                        [Create Entry]  [Import]                             │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>8.2 Empty Review Queue</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                              │
+│                              ✓                                              │
+│                                                                              │
+│                     All caught up!                                          │
+│                                                                              │
+│             No items need your review right now.                            │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>9. Duplicate/Similarity Warning Pattern</h2>
+<p>Inline warning displayed when creating content that may duplicate existing entries. Used by Feeder (web clipper), imports, and any entry creation flow.</p>
+<h3>9.1 Behavior</h3>
+<li><strong>Non-blocking</strong>: Warning appears inline, does not prevent saving</li>
+<li><strong>Filterable</strong>: Entries with warnings can be filtered in Library/Inbox</li>
+<li><strong>Actionable</strong>: Quick actions to resolve duplicates</li>
+<h3>9.2 Inline Warning Component</h3>
+<p>Appears below entry title or in entry card when similarity detected:</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  📄 &quot;AI Memory Systems Deep Dive&quot;                                           │
+│  ───────────────────────────────────────────────────────────────────────────│
+│                                                                              │
+│  ┌─ ⚠️ Similar Content ─────────────────────────────────────────────────┐  │
+│  │                                                                       │  │
+│  │  87% similar to &quot;AI Memory Systems Overview&quot; (Jan 15)                │  │
+│  │  Shared: memory, embeddings, retrieval                               │  │
+│  │                                                                       │  │
+│  │  [View Original]  [Mark as Unique]  [Merge]                          │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│  Content preview here...                                                    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>9.3 Similarity Badges</h3>
+<table>
+<tr><th>Badge</th><th>Color</th><th>Threshold</th><th>Meaning</th></tr>
+<tr><td>(none)</td><td>-</td><td>< 70%</td><td>No warning shown</td></tr>
+<tr><td><code>SIMILAR</code></td><td>Amber</td><td>70-85%</td><td>Review suggested</td></tr>
+<tr><td><code>LIKELY DUPLICATE</code></td><td>Red</td><td>> 85%</td><td>Probable duplicate</td></tr>
+</table>
+<h3>9.4 Filter Integration</h3>
+<p>In Library/Inbox filter bar:
+<pre><code class="language-">[All ▼]  [Entry Type ▼]  [Tags ▼]  [Has Warnings ▼]
+                                        │
+                                        ├── All
+                                        ├── Similarity Warning
+                                        ├── Quality Warning
+                                        └── No Warnings
+</code></pre></p>
+<h3>9.5 Actions</h3>
+<table>
+<tr><th>Action</th><th>Behavior</th></tr>
+<tr><td><strong>View Original</strong></td><td>Opens original entry in new tab</td></tr>
+<tr><td><strong>Mark as Unique</strong></td><td>Dismisses warning, entry keeps separate</td></tr>
+<tr><td><strong>Merge</strong></td><td>Opens merge dialog to combine entries</td></tr>
+<tr><td><strong>Link</strong></td><td>Creates relationship link between entries</td></tr>
+</table>
+<h3>9.6 Hover Details (Desktop)</h3>
+<p>On hover over similarity percentage:
+<li>Full overlap explanation</li>
+<li>List of shared topics/keywords</li>
+<li>Original entry preview snippet</li></p>
+<hr>
+<h2>10. List View with Grouping</h2>
+<p>Reusable list view that supports hierarchical grouping in the first column while maintaining sortable/filterable columns.</p>
+<h3>10.1 View Toggle</h3>
+<pre><code class="language-">[Grid ○] [List ●]    Group by: [None ▼]
+                               ├── None (flat list)
+                               ├── Tags
+                               ├── Entry Type
+                               ├── Source Type
+                               └── Date
+</code></pre>
+<h3>10.2 Flat Mode (Group by: None)</h3>
+<pre><code class="language-">│ Name              │ Type    │ Status   │ Items │ Last Sync │
+├───────────────────┼─────────┼──────────┼───────┼───────────┤
+│ Hacker News       │ RSS     │✅ Active │ 45    │ 2 hr ago  │
+│ Simon Willison    │ RSS     │✅ Active │ 23    │ 1 day ago │
+│ Work Evernote     │ Evernote│✅ Synced │ 1,247 │ 5 min ago │
+</code></pre>
+<h3>10.3 Grouped Mode (e.g., Group by: Tags)</h3>
+<pre><code class="language-">│ Name                    │ Type    │ Status   │ Items │ Last Sync │
+├─────────────────────────┼─────────┼──────────┼───────┼───────────┤
+│ ▼ tech-news             │         │          │       │           │
+│   ├ Hacker News         │ RSS     │✅ Active │ 45    │ 2 hr ago  │
+│   └ The Verge           │ RSS     │✅ Active │ 112   │ 1 hr ago  │
+│ ▼ blogs                 │         │          │       │           │
+│   ├ Simon Willison      │ RSS     │✅ Active │ 23    │ 1 day ago │
+│   └ Daring Fireball     │ RSS     │✅ Active │ 18    │ 3 hr ago  │
+│ (untagged)              │         │          │       │           │
+│   └ Old Import          │ Import  │○ Done    │ 523   │ Jan 15    │
+</code></pre>
+<h3>10.4 Behavior</h3>
+<li><strong>Group rows</strong>: Collapsible (▼/▶), show aggregate counts if applicable</li>
+<li><strong>Sorting</strong>: Sorts within groups, or flattens and re-sorts</li>
+<li><strong>Filtering</strong>: Filters apply across all groups</li>
+<li><strong>Selection</strong>: Can select items across groups</li>
+<li><strong>Empty groups</strong>: Hidden by default</li>
+<h3>10.5 Column Configuration</h3>
+<p>Users can show/hide columns. Columns are context-aware based on filtered entry type.</p>
+<hr>
+<h2>11. Related Documents</h2>
+<li><a href="./settings_ui_plan.md">Settings UI Plan</a> - Settings patterns, agent colors</li>
+<li><a href="./reader_ui_plan.md">Reader UI Plan</a> - Reader-specific components</li>
+<li><a href="./searcher_ui_plan.md">Searcher UI Plan</a> - Searcher-specific components</li>
+<li><a href="./river_ui_plan.md">River UI Plan</a> - River-specific components</li>
+</ul>
+<hr>
+<em>Last updated: 2026-01-30</em>
+  </article>
+</body>
+</html>

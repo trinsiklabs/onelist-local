@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MVP Implementation Plan: Public Content &amp; E2EE - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>MVP Implementation Plan: Public Content & E2EE</h1>
+<strong>Document Version:</strong> 2026-01-28
+<strong>Status:</strong> Ready for Implementation
+<strong>Priority:</strong> Core MVP Feature
+<h2>Overview</h2>
+<p>This plan covers the implementation of public content sharing while maintaining E2EE as a non-negotiable default. Users can share entries publicly, but must be fully informed when content leaves the encrypted envelope.</p>
+<h2>Core Principles</h2>
+<p>1. <strong>E2EE is non-negotiable</strong> - All content encrypted by default
+2. <strong>Public is opt-in</strong> - User explicitly chooses to make content public
+3. <strong>Full disclosure</strong> - User sees exactly what will be decrypted
+4. <strong>Instant toggle</strong> - Public representations pre-generated, toggle is permission change
+5. <strong>Cleanup on private</strong> - Public copies removed when no longer needed</p>
+<hr>
+<h2>Part 1: Representations (Text Content)</h2>
+<h3>Architecture</h3>
+<p>All representations stored in PostgreSQL. <code>html_public</code> is always generated alongside encrypted representations.</p>
+<pre><code class="language-">representations table:
+├── id
+├── entry_id
+├── type ('markdown', 'summary', 'html_public', etc.)
+├── content (text/bytea)
+├── encrypted (boolean)
+└── timestamps
+</code></pre>
+<h3>Generation Flow</h3>
+<pre><code class="language-">CONTENT CHANGE (create/update)
+     │
+     ▼
+Generate ALL representations:
+├── markdown (encrypted=true) ──► User's private copy
+├── summary (encrypted=true) ───► AI-generated summary
+└── html_public (encrypted=false) ► Always generated, ready for public
+<p>TOGGLE TO PUBLIC
+     │
+     ▼
+entry.public = true (instant)
+html_public now served at public URL
+</code></pre></p>
+<h3>Implementation Tasks</h3>
+<ul>
+<li>[ ] Add <code>encrypted</code> boolean field to representations table</li>
+<li>[ ] Ensure <code>html_public</code> representation generated on every entry save</li>
+<li>[ ] <code>html_public</code> generation: render markdown to styled HTML</li>
+<li>[ ] Access control: only serve <code>html_public</code> when <code>entry.public = true</code></li>
+<li>[ ] Public entry controller: <code>GET /[username]/[public_id]</code> returns <code>html_public</code></li>
+<hr>
+<h2>Part 2: Assets (Files, Images)</h2>
+<h3>Architecture</h3>
+<p>Assets are always E2EE encrypted. Public copies are created on-demand when an entry goes public, stored in Cloudflare R2 public bucket.</p>
+<pre><code class="language-">assets table (additions):
+├── public_url (string, nullable) ────► URL in R2 public bucket
+├── public_entry_ids (uuid array) ────► Entries referencing this publicly
+└── public_random_id (string) ────────► For stable URL generation
+</code></pre>
+<h3>Making Entry Public - Asset Flow</h3>
+<pre><code class="language-">1. User clicks &quot;Make Public&quot;
+<p>2. System identifies linked assets
+   <li>Parse markdown for asset references (![](asset://id))</li>
+   <li>Include directly attached assets</li></p>
+<p>3. For each linked asset:</p>
+<p>IF asset.public_url exists:
+     → Add entry.id to asset.public_entry_ids
+     → Reuse existing public URL</p>
+<p>ELSE:
+     → Client decrypts asset with user's key
+     → Upload plaintext to R2 public bucket
+     → Generate URL: https://pub.r2.onelist.my/{random_id}-{filename}
+     → Store in asset.public_url
+     → Set asset.public_random_id
+     → Add entry.id to asset.public_entry_ids</p>
+<p>4. Generate html_public with public_url references</p>
+<p>5. Set entry.public = true</p>
+<p>6. Purge Cloudflare CDN cache
+</code></pre></p>
+<h3>Making Entry Private - Asset Cleanup</h3>
+<pre><code class="language-">1. User clicks &quot;Make Private&quot;
+<p>2. Set entry.public = false</p>
+<p>3. For each linked asset:</p>
+<p>→ Remove entry.id from asset.public_entry_ids</p>
+<p>IF asset.public_entry_ids is now empty:
+     → Delete file from R2 public bucket
+     → Set asset.public_url = null
+     → Set asset.public_random_id = null</p>
+<p>4. Purge Cloudflare CDN cache
+</code></pre></p>
+<h3>Implementation Tasks</h3>
+<li>[ ] Migration: add <code>public_url</code>, <code>public_entry_ids</code>, <code>public_random_id</code> to assets</li>
+<li>[ ] R2 public bucket configuration</li>
+<li>[ ] <code>Onelist.Storage.publish_asset/2</code> - decrypt and upload to R2</li>
+<li>[ ] <code>Onelist.Storage.unpublish_asset/2</code> - remove from R2 if refs empty</li>
+<li>[ ] <code>Onelist.Entries.make_public/1</code> - orchestrates the full flow</li>
+<li>[ ] <code>Onelist.Entries.make_private/1</code> - orchestrates cleanup</li>
+<li>[ ] Oban worker for async asset publishing (large files)</li>
+<li>[ ] Background cleanup job for orphaned public assets</li>
+<hr>
+<h2>Part 3: User Consent UI</h2>
+<h3>Make Public Dialog</h3>
+<p>User must see exactly what will be decrypted before confirming.</p>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MAKE ENTRY PUBLIC                                         │
+│                                                                              │
+│  ⚠️  This entry contains 3 files that will be made public                   │
+│                                                                              │
+│  When you make this entry public:                                           │
+│                                                                              │
+│  • The entry text will be stored UNENCRYPTED                                │
+│  • These files will be DECRYPTED and stored at public URLs:                 │
+│                                                                              │
+│    📷 vacation-photo.jpg (2.3 MB)                                           │
+│    📷 family-dinner.jpg (1.8 MB)                                            │
+│    📄 notes.pdf (450 KB)                                                    │
+│                                                                              │
+│  • Anyone with the link can view this content                               │
+│  • Your private copies remain end-to-end encrypted                          │
+│  • Making this entry private again will remove the public copies            │
+│                                                                              │
+│  Public URL: onelist.my/username/abc123xyz                                  │
+│                                                                              │
+│                    [Cancel]  [Make Public]                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>No Assets Case</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    MAKE ENTRY PUBLIC                                         │
+│                                                                              │
+│  This will make your entry publicly accessible.                             │
+│                                                                              │
+│  • The entry text will be stored UNENCRYPTED                                │
+│  • Anyone with the link can view it                                         │
+│  • Your private copy remains end-to-end encrypted                           │
+│  • You can make it private again at any time                                │
+│                                                                              │
+│  Public URL: onelist.my/username/abc123xyz                                  │
+│                                                                              │
+│                    [Cancel]  [Make Public]                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Implementation Tasks</h3>
+<li>[ ] <code>PublicToggleLive</code> component with asset enumeration</li>
+<li>[ ] Preview of public URL before confirming</li>
+<li>[ ] Progress indicator for large asset uploads</li>
+<li>[ ] Error handling if asset upload fails (don't make public)</li>
+<hr>
+<h2>Part 4: Traffic Scaling (Cloudflare CDN)</h2>
+<h3>Architecture</h3>
+<p>Cloudflare CDN in front of the application. No separate static serving needed for MVP.</p>
+<pre><code class="language-">PUBLIC PAGE REQUEST
+<p>User ──► Cloudflare Edge ──┬──► (cache HIT) ──► Return cached HTML
+                           │
+                           └──► (cache MISS) ──► Phoenix App ──► PostgreSQL
+                                                      │
+                                                      ▼
+                                      Return html_public, cache at edge
+</code></pre></p>
+<h3>Cache Invalidation</h3>
+<p>When content changes or entry visibility changes:</p>
+<pre><code class="language-elixir"># Purge cache when entry is updated or visibility changes
+def purge_public_cache(entry) do
+  if entry.public do
+    url = &quot;https://onelist.my/#{entry.user.username}/#{entry.public_id}&quot;
+    Cloudflare.purge_url(url)
+  end
+end
+</code></pre>
+<h3>Implementation Tasks</h3>
+<li>[ ] Cloudflare zone configuration</li>
+<li>[ ] Cache headers on public entry responses (e.g., <code>Cache-Control: public, max-age=3600</code>)</li>
+<li>[ ] <code>Onelist.CDN.purge/1</code> wrapper for Cloudflare API</li>
+<li>[ ] Purge on entry update, make private, delete</li>
+<hr>
+<h2>Part 5: Database Schema</h2>
+<h3>Migration: Representations</h3>
+<pre><code class="language-elixir">defmodule Onelist.Repo.Migrations.AddEncryptedToRepresentations do
+  use Ecto.Migration
+<p>def change do
+    alter table(:representations) do
+      add :encrypted, :boolean, default: true
+    end</p>
+<p># Existing representations are encrypted
+    execute &quot;UPDATE representations SET encrypted = true&quot;, &quot;&quot;</p>
+<p># html_public representations are not encrypted
+    execute &quot;UPDATE representations SET encrypted = false WHERE type = 'html_public'&quot;, &quot;&quot;
+  end
+end
+</code></pre></p>
+<h3>Migration: Assets Public Fields</h3>
+<pre><code class="language-elixir">defmodule Onelist.Repo.Migrations.AddPublicFieldsToAssets do
+  use Ecto.Migration
+<p>def change do
+    alter table(:assets) do
+      add :public_url, :string
+      add :public_entry_ids, {:array, :binary_id}, default: []
+      add :public_random_id, :string
+    end</p>
+<p>create index(:assets, [:public_url], where: &quot;public_url IS NOT NULL&quot;)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Part 6: API Endpoints</h2>
+<h3>Public Entry Access</h3>
+<pre><code class="language-">GET /[username]/[public_id]
+  → Returns rendered html_public with embedded public asset URLs
+  → Cacheable by Cloudflare CDN
+  → 404 if entry.public = false
+</code></pre>
+<h3>Toggle Visibility (Authenticated)</h3>
+<pre><code class="language-">POST /api/v1/entries/:id/publish
+  → Triggers full publish flow (assets, cache, etc.)
+  → Returns { public_url, assets_published: [...] }
+<p>POST /api/v1/entries/:id/unpublish
+  → Triggers cleanup flow
+  → Returns { assets_removed: [...] }
+</code></pre></p>
+<h3>Pre-flight Check</h3>
+<pre><code class="language-">GET /api/v1/entries/:id/publish-preview
+  → Returns list of assets that would be published
+  → Used to populate consent dialog before user confirms
+</code></pre>
+<hr>
+<h2>Part 7: Post-MVP Considerations</h2>
+<h3>R2 Direct Serving</h3>
+<p>If traffic grows significantly, consider serving <code>html_public</code> directly from R2 instead of through the app. This would require:</p>
+<li>Storing <code>html_public</code> in R2 (in addition to or instead of PostgreSQL)</li>
+<li>Direct R2 URL for public entries</li>
+<li>More complex cache invalidation</li>
+<strong>For MVP:</strong> Cloudflare CDN in front of PostgreSQL is sufficient.
+<h3>Beacon CMS Integration</h3>
+<p>When Beacon CMS is implemented, public pages will use this same infrastructure:</p>
+<li>Corporate site pages are entries with <code>public = true</code></li>
+<li>User Beacon sites query public entries and render via Beacon layouts</li>
+<li>Same asset handling applies</li>
+<hr>
+<h2>Implementation Sequence</h2>
+<h3>Phase 1: Representations</h3>
+<p>1. Add <code>encrypted</code> field to representations
+2. Ensure <code>html_public</code> generated on save
+3. Public entry controller
+4. Basic "Make Public" toggle (no assets)</p>
+<h3>Phase 2: Assets</h3>
+<p>5. Add public fields to assets table
+6. R2 public bucket setup
+7. Asset publish/unpublish logic
+8. Reference counting
+9. Consent dialog with asset list</p>
+<h3>Phase 3: Polish</h3>
+<p>10. Cloudflare CDN integration
+11. Cache purge on changes
+12. Background cleanup job
+13. Error handling and retries</p>
+<hr>
+<h2>Testing Checklist</h2>
+<li>[ ] Entry with no assets can be made public/private</li>
+<li>[ ] Entry with assets shows consent dialog listing files</li>
+<li>[ ] Assets are uploaded to R2 when entry goes public</li>
+<li>[ ] Same asset in multiple public entries = single R2 copy</li>
+<li>[ ] Making all referencing entries private deletes R2 copy</li>
+<li>[ ] Public URL returns html_public content</li>
+<li>[ ] Public URL returns 404 when entry is private</li>
+<li>[ ] Cloudflare caches public pages</li>
+<li>[ ] Cache is purged when content changes</li>
+<li>[ ] Large asset upload shows progress</li>
+<li>[ ] Failed asset upload prevents entry from going public</li>
+<hr>
+<h2>Related Documents</h2>
+<li><a href="./asset_storage_plan.md">Asset Storage Plan</a> - Full asset storage architecture</li>
+<li><a href="./future_roadmap_beacon_cms.md">Beacon CMS</a> - Public site rendering</li>
+<li><a href="./future_roadmap_forum.md">Forum</a> - Forum content is public</li>
+<li><a href="./future_roadmap_xamlr.md">Xamlr</a> - Blog posts are public</li>
+<li><a href="./future_roadmap_free_tier.md">Free Tier</a> - Public pages for free users</li>
+</ul>
+  </article>
+</body>
+</html>

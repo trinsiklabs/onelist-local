@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Competitive Analysis: Supermemory vs Onelist - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Competitive Analysis: Supermemory vs Onelist</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Strategic Analysis
+<hr>
+<h2>Executive Summary</h2>
+<a href="https://supermemory.ai">Supermemory</a> is a universal memory API for AI applications that provides state-of-the-art memory capabilities with sub-300ms retrieval and graph-based knowledge representation. While Supermemory positions itself as pure AI infrastructure (an API/service), Onelist is a complete <strong>personal knowledge platform</strong> with agents, UI, and self-hosting. Despite different scopes, both compete in the AI memory space.
+<strong>Key Finding:</strong> Supermemory has technical innovations (benchmark-leading performance, temporal reasoning, intelligent forgetting) that Onelist should adopt. However, Onelist's strengths (privacy, self-hosting, full application stack) serve different needs. The optimal strategy is <strong>selective adoption</strong>: implement Supermemory's memory architecture patterns within Onelist's privacy-first framework.
+<hr>
+<h2>1. Platform Positioning</h2>
+<table>
+<tr><th>Aspect</th><th>Supermemory</th><th>Onelist</th></tr>
+<tr><td><strong>Category</strong></td><td>Memory API / Infrastructure</td><td>Personal Knowledge Platform</td></tr>
+<tr><td><strong>Target User</strong></td><td>Developers building AI apps</td><td>End users + developers</td></tr>
+<tr><td><strong>Deployment</strong></td><td>Cloud API (managed SaaS)</td><td>Self-hosted + Cloud options</td></tr>
+<tr><td><strong>Scope</strong></td><td>Memory layer only</td><td>Full stack (storage, agents, UI)</td></tr>
+<tr><td><strong>Business Model</strong></td><td>Usage-based API pricing</td><td>Tiered subscription</td></tr>
+<tr><td><strong>Open Source</strong></td><td>Partial (benchmarks, MCP server)</td><td>Yes (core platform)</td></tr>
+<tr><td><strong>Founded</strong></td><td>2024</td><td>2026</td></tr>
+<tr><td><strong>Funding</strong></td><td>$2.6M seed (Susa, Google execs)</td><td>Bootstrap</td></tr>
+</table>
+<h3>1.1 Fundamental Difference</h3>
+<strong>Supermemory</strong> is a <strong>building block</strong> - developers use it to add memory to their AI applications.
+<strong>Onelist</strong> is a <strong>complete product</strong> - users interact directly with entries, tags, agents, and a UI.
+<p>This means they can be:
+<ul>
+<li><strong>Complementary</strong>: Onelist could theoretically use Supermemory as a backend</li>
+<li><strong>Competitive</strong>: When developers choose how to build AI memory features</li>
+<li><strong>Parallel</strong>: Serving different market segments</li></p>
+<hr>
+<h2>2. Technical Comparison</h2>
+<h3>2.1 Memory Architecture</h3>
+<table>
+<tr><th>Capability</th><th>Supermemory</th><th>Onelist</th><th>Notes</th></tr>
+<tr><td><strong>Atomic Memory Extraction</strong></td><td>Core feature</td><td>Planned (Reader Agent)</td><td>Supermemory pioneered this</td></tr>
+<tr><td><strong>Graph-Based Relationships</strong></td><td>Full knowledge graph</td><td>Entry links + memories table</td><td>Onelist simpler</td></tr>
+<tr><td><strong>Temporal Reasoning</strong></td><td>Bi-temporal (event + ingestion)</td><td>Timestamps on entries</td><td>Supermemory more sophisticated</td></tr>
+<tr><td><strong>Two-Layer Retrieval</strong></td><td>Yes (memories + chunks)</td><td>Planned (Searcher Agent)</td><td>Both implementing</td></tr>
+<tr><td><strong>Intelligent Forgetting</strong></td><td>Built-in decay curves</td><td>Not implemented</td><td>Supermemory advantage</td></tr>
+<tr><td><strong>Semantic Relationships</strong></td><td>Supersedes/Refines/Contradicts</td><td>Supersedes/Refines (planned)</td><td>Similar approach</td></tr>
+</table>
+<h3>2.2 Performance Benchmarks</h3>
+<strong>Supermemory's LongMemEval Results:</strong>
+<table>
+<tr><th>Category</th><th>Supermemory</th><th>Zep</th><th>Mem0</th><th>Industry Average</th></tr>
+<tr><td>Overall</td><td><strong>81.6%</strong></td><td>67.9%</td><td>~65%</td><td>~55%</td></tr>
+<tr><td>Multi-Session</td><td><strong>71.43%</strong></td><td>-</td><td>-</td><td>~45%</td></tr>
+<tr><td>Temporal Reasoning</td><td><strong>76.69%</strong></td><td>-</td><td>-</td><td>~40%</td></tr>
+<tr><td>Knowledge Update</td><td>High</td><td>-</td><td>-</td><td>Poor</td></tr>
+</table>
+<strong>Onelist Status:</strong> No published benchmarks yet. Target: match Supermemory's scores.
+<h3>2.3 Retrieval Performance</h3>
+<table>
+<tr><th>Metric</th><th>Supermemory</th><th>Onelist (Target)</th></tr>
+<tr><td>Latency</td><td>Sub-300ms</td><td>Sub-500ms</td></tr>
+<tr><td>Scale</td><td>50M tokens/user</td><td>TBD</td></tr>
+<tr><td>Throughput</td><td>5B tokens/day</td><td>Self-hosted dependent</td></tr>
+</table>
+<h3>2.4 API & Integration</h3>
+<table>
+<tr><th>Feature</th><th>Supermemory</th><th>Onelist</th></tr>
+<tr><td>REST API</td><td>Comprehensive</td><td>Comprehensive</td></tr>
+<tr><td>SDKs</td><td>TypeScript, Python, cURL</td><td>Elixir, Python (OpenClaw)</td></tr>
+<tr><td>MCP Server</td><td>Yes (portable memory)</td><td>Planned</td></tr>
+<tr><td>Webhooks</td><td>Yes</td><td>Planned</td></tr>
+<tr><td>Connectors</td><td>Google Drive, Notion, OneDrive, S3</td><td>Feeder Agent adapters</td></tr>
+</table>
+<hr>
+<h2>3. Supermemory's Competitive Advantages</h2>
+<h3>3.1 State-of-the-Art Benchmark Performance</h3>
+<strong>What Supermemory Does:</strong>
+<li>Achieves 81.6% on LongMemEval_s (vs 67.9% for Zep, ~65% for Mem0)</li>
+<li>Excels at multi-session reasoning (71.43%) - remembering across conversations</li>
+<li>Excels at temporal reasoning (76.69%) - understanding time-based queries</li>
+<li>Handles knowledge conflicts intelligently</li>
+<strong>Onelist Gap:</strong>
+<li>No published benchmark results</li>
+<li>Reader Agent (atomic extraction) not yet implemented</li>
+<li>Temporal reasoning not specifically addressed</li>
+<h3>3.2 Human-Inspired Memory Architecture</h3>
+<strong>What Supermemory Does:</strong>
+<li>Mimics human memory with intelligent forgetting</li>
+<li>Uses recency/relevance bias (recent items more accessible)</li>
+<li>Implements context rewriting (summaries evolve)</li>
+<li>Builds knowledge graph with relational versioning</li>
+<strong>Onelist Gap:</strong>
+<li>No forgetting/decay mechanism</li>
+<li>Equal weight to all memories regardless of age</li>
+<li>No automatic context evolution</li>
+<h3>3.3 Sub-300ms Latency at Scale</h3>
+<strong>What Supermemory Does:</strong>
+<li>Hierarchical memory layers (hot → cold storage)</li>
+<li>Cloudflare KV for frequently accessed data</li>
+<li>Linear scaling to billions of data points</li>
+<li>10x faster than Zep, 25x faster than Mem0</li>
+<strong>Onelist Status:</strong>
+<li>PostgreSQL + pgvector (proven but not optimized for this use case)</li>
+<li>No tiered memory architecture</li>
+<li>Performance depends on self-hosted infrastructure</li>
+<h3>3.4 Model Context Protocol (MCP) Support</h3>
+<strong>What Supermemory Does:</strong>
+<li>MCP server enables portable memory across AI tools</li>
+<li>"Bluetooth for AI" - universal memory hub</li>
+<li>Works with Claude, ChatGPT, any MCP-compatible client</li>
+<strong>Onelist Gap:</strong>
+<li>No MCP server implementation</li>
+<li>Memory tied to Onelist ecosystem (OpenClaw only)</li>
+<h3>3.5 Production-Ready Infrastructure</h3>
+<strong>What Supermemory Does:</strong>
+<li>SOC 2 compliant</li>
+<li>Enterprise-grade reliability</li>
+<li>Handles multiple enterprise customers</li>
+<li>5 billion tokens processed daily</li>
+<strong>Onelist Status:</strong>
+<li>Early stage, no enterprise deployments</li>
+<li>Self-hosted reliability depends on user</li>
+<hr>
+<h2>4. Onelist's Competitive Advantages</h2>
+<h3>4.1 Complete Application Stack</h3>
+<strong>What Onelist Provides:</strong>
+<li>Full web UI for browsing/editing entries</li>
+<li>Desktop app (planned)</li>
+<li>Agent ecosystem (River, Reader, Searcher, etc.)</li>
+<li>GTD-based life management</li>
+<li>Not just memory API - complete PKM solution</li>
+<strong>Supermemory Limitation:</strong>
+<li>API only - no user-facing interface</li>
+<li>Developers must build everything on top</li>
+<li>No productivity methodology</li>
+<h3>4.2 Self-Hosting & Data Sovereignty</h3>
+<strong>What Onelist Provides:</strong>
+<li>Full self-hosted deployment (Docker)</li>
+<li>E2E encryption for cloud sync</li>
+<li>BYOB (Bring Your Own Bucket) storage</li>
+<li>Zero-knowledge architecture option</li>
+<li>Open source codebase</li>
+<strong>Supermemory Limitation:</strong>
+<li>Cloud-only (no self-hosting)</li>
+<li>Data processed on Supermemory servers</li>
+<li>Trust-dependent model</li>
+<li>Partial open source only</li>
+<h3>4.3 Integrated AI Agents</h3>
+<strong>What Onelist Provides:</strong>
+<li>River Agent: GTD-based life management</li>
+<li>Reader Agent: Atomic memory extraction</li>
+<li>Searcher Agent: Hybrid search + embeddings</li>
+<li>Feeder Agent: External content ingestion</li>
+<li>Asset Enrichment: Transcription, OCR</li>
+<strong>Supermemory Limitation:</strong>
+<li>Memory storage only</li>
+<li>No processing agents</li>
+<li>No workflow automation</li>
+<h3>4.4 OpenClaw Deep Integration</h3>
+<strong>What Onelist Provides:</strong>
+<li>Bidirectional sync with OpenClaw</li>
+<li>File-based memory compatibility</li>
+<li>Enhanced search for OpenClaw users</li>
+<li>Single-command installation</li>
+<strong>Supermemory:</strong>
+<li>Generic AI integration</li>
+<li>No personal AI assistant focus</li>
+<li>Requires custom integration</li>
+<h3>4.5 Personal Knowledge Management</h3>
+<strong>What Onelist Provides:</strong>
+<li>Entry-centric data model</li>
+<li>Tags, hierarchies, relationships</li>
+<li>Version history for all content</li>
+<li>Human-readable storage</li>
+<strong>Supermemory:</strong>
+<li>Optimized for AI consumption</li>
+<li>No native human interface</li>
+<li>Memory as black box</li>
+<hr>
+<h2>5. Feature-by-Feature Comparison</h2>
+<table>
+<tr><th>Feature</th><th>Supermemory</th><th>Onelist</th><th>Winner</th></tr>
+<tr><td><strong>Memory Extraction Quality</strong></td><td>SOTA (LongMemEval)</td><td>TBD (planned)</td><td><strong>Supermemory</strong></td></tr>
+<tr><td><strong>Temporal Reasoning</strong></td><td>76.69% benchmark</td><td>Basic timestamps</td><td><strong>Supermemory</strong></td></tr>
+<tr><td><strong>Retrieval Latency</strong></td><td>Sub-300ms</td><td>Sub-500ms target</td><td><strong>Supermemory</strong></td></tr>
+<tr><td><strong>Graph Relationships</strong></td><td>Full knowledge graph</td><td>Entry links</td><td><strong>Supermemory</strong></td></tr>
+<tr><td><strong>Intelligent Forgetting</strong></td><td>Built-in</td><td>Not implemented</td><td><strong>Supermemory</strong></td></tr>
+<tr><td><strong>Self-Hosting</strong></td><td>No</td><td>Yes (free)</td><td><strong>Onelist</strong></td></tr>
+<tr><td><strong>E2E Encryption</strong></td><td>No (cloud-only)</td><td>Yes</td><td><strong>Onelist</strong></td></tr>
+<tr><td><strong>User Interface</strong></td><td>None (API only)</td><td>Full web/desktop</td><td><strong>Onelist</strong></td></tr>
+<tr><td><strong>Agent Ecosystem</strong></td><td>None</td><td>6+ agents</td><td><strong>Onelist</strong></td></tr>
+<tr><td><strong>Life Management</strong></td><td>None</td><td>GTD/River</td><td><strong>Onelist</strong></td></tr>
+<tr><td><strong>OpenClaw Integration</strong></td><td>Generic</td><td>Deep native</td><td><strong>Onelist</strong></td></tr>
+<tr><td><strong>Open Source</strong></td><td>Partial</td><td>Full</td><td><strong>Onelist</strong></td></tr>
+<tr><td><strong>Connectors</strong></td><td>Native (GDrive, Notion)</td><td>Via Feeder Agent</td><td>Comparable</td></tr>
+<tr><td><strong>MCP Support</strong></td><td>Yes</td><td>Planned</td><td><strong>Supermemory</strong></td></tr>
+<tr><td><strong>Enterprise Scale</strong></td><td>Proven (5B tokens/day)</td><td>Unproven</td><td><strong>Supermemory</strong></td></tr>
+</table>
+<hr>
+<h2>6. Recommended Improvements for Onelist</h2>
+<h3>6.1 HIGH PRIORITY: Implement Supermemory's Memory Architecture</h3>
+<strong>Gap:</strong> Supermemory's atomic memory extraction and two-layer retrieval achieve 81.6% accuracy vs industry ~55%.
+<strong>Recommendation:</strong> Accelerate Reader Agent implementation with full Supermemory-inspired architecture.
+<strong>Already Planned (from ai_memory_evolution.md Section 20):</strong>
+<li>Atomic memory extraction</li>
+<li>Two-layer retrieval (memories + chunks)</li>
+<li>Supersedes/Refines relationships</li>
+<strong>Additionally Needed:</strong>
+<pre><code class="language-elixir"># 1. Add temporal metadata to memories
+defmodule Onelist.Memory do
+  schema &quot;memories&quot; do
+    field :content, :string
+    field :source_entry_id, :binary_id
+    field :source_chunk_index, :integer
+<p># Supermemory-inspired temporal fields
+    field :event_timestamp, :utc_datetime      # When the event occurred
+    field :ingestion_timestamp, :utc_datetime  # When we learned about it
+    field :confidence, :float                  # Extraction confidence</p>
+<p># Relationship tracking
+    field :supersedes_memory_id, :binary_id
+    field :relationship_type, Ecto.Enum, values: [:supersedes, :refines, :contradicts]</p>
+<p>timestamps()
+  end
+end</p>
+<h1>2. Add decay/forgetting mechanism</h1>
+defmodule Onelist.Memory.Decay do
+  @moduledoc &quot;&quot;&quot;
+  Supermemory-inspired intelligent forgetting.
+  Reduces weight of old, unused memories without deleting.
+  &quot;&quot;&quot;
+<p>@decay_rate 0.99  # 1% decay per day
+  @minimum_weight 0.1</p>
+<p>def calculate_relevance(memory) do
+    age_days = days_since(memory.inserted_at)
+    access_boost = memory.access_count <em> 0.1</p>
+<p>base_relevance = :math.pow(@decay_rate, age_days)
+    boosted = base_relevance + access_boost</p>
+<p>max(boosted, @minimum_weight)
+  end
+end
+</code></pre></p>
+<strong>Effort:</strong> 4-6 weeks (builds on existing Reader Agent plan)
+<h3>6.2 HIGH PRIORITY: Add MCP Server Support</h3>
+<strong>Gap:</strong> Supermemory's MCP server enables memory portability across AI tools. Onelist memory is locked to ecosystem.
+<strong>Recommendation:</strong> Implement Onelist MCP server for universal memory access.
+<pre><code class="language-typescript">// MCP Server for Onelist
+const onelistMCP = {
+  name: &quot;onelist-memory&quot;,
+  version: &quot;1.0.0&quot;,
+<p>tools: {
+    // Memory operations
+    &quot;memory_add&quot;: {
+      description: &quot;Add a memory to Onelist&quot;,
+      parameters: {
+        content: &quot;string&quot;,
+        tags: &quot;string[]?&quot;,
+        timestamp: &quot;string?&quot;
+      }
+    },
+    &quot;memory_search&quot;: {
+      description: &quot;Search memories semantically&quot;,
+      parameters: {
+        query: &quot;string&quot;,
+        limit: &quot;number?&quot;,
+        filters: &quot;object?&quot;
+      }
+    },
+    &quot;memory_recall&quot;: {
+      description: &quot;Recall context for a topic&quot;,
+      parameters: {
+        topic: &quot;string&quot;,
+        temporal_range: &quot;object?&quot;
+      }
+    }
+  },</p>
+<p>// Connect to local or cloud Onelist
+  endpoints: {
+    local: &quot;http://localhost:4000/api/v1&quot;,
+    cloud: &quot;https://api.onelist.my/v1&quot;
+  }
+};
+</code></pre></p>
+<strong>Benefits:</strong>
+<li>Claude, ChatGPT, any MCP client can use Onelist memory</li>
+<li>Broader ecosystem compatibility</li>
+<li>Competitive with Supermemory's portable memory</li>
+<strong>Effort:</strong> 2-3 weeks
+<h3>6.3 MEDIUM PRIORITY: Implement Intelligent Forgetting</h3>
+<strong>Gap:</strong> Supermemory mimics human memory with decay curves. Onelist treats all memories equally.
+<strong>Recommendation:</strong> Add relevance decay with access-based boosting.
+<pre><code class="language-elixir">defmodule Onelist.Searcher.RelevanceScorer do
+  @moduledoc &quot;&quot;&quot;
+  Score memories by relevance, incorporating temporal decay.
+  &quot;&quot;&quot;
+<p>def score(memory, query_embedding) do
+    # Semantic similarity (existing)
+    semantic_score = cosine_similarity(memory.embedding, query_embedding)</p>
+<p># Temporal decay (new)
+    age_factor = calculate_age_factor(memory)</p>
+<p># Access recency boost (new)
+    access_boost = calculate_access_boost(memory)</p>
+<p># Combined score
+    semantic_score </em> age_factor + access_boost
+  end</p>
+<p>defp calculate_age_factor(memory) do
+    days_old = Timex.diff(DateTime.utc_now(), memory.inserted_at, :days)</p>
+<p># Exponential decay with floor
+    decay_rate = 0.995  # Slower than Supermemory's aggressive decay
+    max(:math.pow(decay_rate, days_old), 0.2)
+  end</p>
+<p>defp calculate_access_boost(memory) do
+    # Boost for recently accessed memories
+    if memory.last_accessed_at do
+      days_since_access = Timex.diff(DateTime.utc_now(), memory.last_accessed_at, :days)
+      max(0.3 - (days_since_access <em> 0.01), 0)
+    else
+      0
+    end
+  end
+end
+</code></pre></p>
+<strong>Effort:</strong> 1-2 weeks
+<h3>6.4 MEDIUM PRIORITY: Bi-Temporal Data Model</h3>
+<strong>Gap:</strong> Supermemory tracks both event time and ingestion time. Onelist only tracks ingestion.
+<strong>Recommendation:</strong> Add event_timestamp field with extraction support.
+<pre><code class="language-elixir"># In Reader Agent - extract temporal references
+defmodule Onelist.Reader.TemporalExtractor do
+  @doc &quot;&quot;&quot;
+  Extract event timestamps from content.
+  &quot;I met Sarah last Tuesday&quot; → event_timestamp = 2026-01-21
+  &quot;&quot;&quot;
+<p>def extract_event_time(content, ingestion_time) do
+    cond do
+      # Explicit date reference
+      match = Regex.run(~r/on (\d{4}-\d{2}-\d{2})/, content) -&gt;
+        {:ok, parse_date(match)}</p>
+<p># Relative reference
+      match = Regex.run(~r/(yesterday|last \w+|this morning)/, content) -&gt;
+        {:ok, resolve_relative(match, ingestion_time)}</p>
+<p># No temporal reference - use ingestion time
+      true -&gt;
+        {:ok, ingestion_time}
+    end
+  end
+end
+</code></pre></p>
+<strong>Effort:</strong> 2 weeks (part of Reader Agent)
+<h3>6.5 MEDIUM PRIORITY: Publish Benchmark Results</h3>
+<strong>Gap:</strong> Supermemory publishes LongMemEval results. Onelist has no public benchmarks.
+<strong>Recommendation:</strong> Run and publish benchmarks using Supermemory's open-source memorybench.
+<strong>Steps:</strong>
+1. Implement Reader + Searcher agents
+2. Run <a href="https://github.com/supermemoryai/memorybench">memorybench</a> evaluation
+3. Publish results on static site
+4. Target: Match Supermemory's scores
+<strong>Effort:</strong> 1 week (after agents implemented)
+<h3>6.6 LOW PRIORITY: Tiered Memory Storage</h3>
+<strong>Gap:</strong> Supermemory uses Cloudflare KV for hot data, achieving sub-300ms latency. Onelist uses single PostgreSQL.
+<strong>Recommendation:</strong> For self-hosted, this is less critical. For cloud tier, consider adding caching layer.
+<pre><code class="language-elixir"># Memory caching with ETS for hot data
+defmodule Onelist.Memory.Cache do
+  use GenServer
+<p>@hot_memory_ttl :timer.hours(24)</p>
+<p>def get_or_fetch(memory_id) do
+    case :ets.lookup(:hot_memories, memory_id) do
+      [{^memory_id, memory}] -&gt;
+        # Hot path - from cache
+        memory</p>
+<p>[] -&gt;
+        # Cold path - from database
+        memory = Repo.get!(Memory, memory_id)
+        cache_memory(memory)
+        memory
+    end
+  end</p>
+<p>def cache_memory(memory) do
+    :ets.insert(:hot_memories, {memory.id, memory})
+    # Schedule eviction
+    Process.send_after(self(), {:evict, memory.id}, @hot_memory_ttl)
+  end
+end
+</code></pre></p>
+<strong>Effort:</strong> 2 weeks (post-MVP optimization)
+<hr>
+<h2>7. Pricing Comparison</h2>
+<h3>7.1 Supermemory Pricing</h3>
+<table>
+<tr><th>Tier</th><th>Tokens</th><th>Queries</th><th>Price</th></tr>
+<tr><td>Free</td><td>1M/month</td><td>10K/month</td><td>$0</td></tr>
+<tr><td>Overage</td><td>-</td><td>-</td><td>$0.01/1K tokens, $0.10/1K queries</td></tr>
+<tr><td>Enterprise</td><td>Custom</td><td>Custom</td><td>Custom</td></tr>
+</table>
+<h3>7.2 Onelist Pricing</h3>
+<table>
+<tr><th>Tier</th><th>Storage</th><th>Features</th><th>Price</th></tr>
+<tr><td>Self-Hosted</td><td>Unlimited</td><td>Full platform</td><td>$0</td></tr>
+<tr><td>Cloud Sync</td><td>10GB</td><td>E2E sync, search</td><td>$3/mo + usage</td></tr>
+<tr><td>Web Access</td><td>100GB</td><td>Full web app</td><td>$20/mo</td></tr>
+</table>
+<h3>7.3 Cost Comparison (Typical User)</h3>
+<table>
+<tr><th>Usage Pattern</th><th>Supermemory</th><th>Onelist Cloud</th></tr>
+<tr><td>Light (1M tokens/mo)</td><td>$0 (free tier)</td><td>$3/mo</td></tr>
+<tr><td>Medium (10M tokens/mo)</td><td>~$90/mo</td><td>$3-10/mo</td></tr>
+<tr><td>Heavy (100M tokens/mo)</td><td>~$900/mo</td><td>$20/mo</td></tr>
+</table>
+<strong>Key Insight:</strong> Onelist is more predictable and cheaper for heavy users. Supermemory is cheaper for light experimentation but can get expensive at scale.
+<hr>
+<h2>8. Target Market Differentiation</h2>
+<h3>8.1 Choose Supermemory If:</h3>
+<li>You're <strong>building an AI application</strong> and need memory infrastructure</li>
+<li>You want <strong>proven enterprise-scale performance</strong></li>
+<li>You need <strong>fastest possible latency</strong> (sub-300ms)</li>
+<li>You're okay with <strong>cloud-only</strong> deployment</li>
+<li>You don't need a <strong>user-facing interface</strong></li>
+<li>You want <strong>state-of-the-art benchmark scores</strong></li>
+<h3>8.2 Choose Onelist If:</h3>
+<li>You want a <strong>complete PKM solution</strong>, not just an API</li>
+<li>You need <strong>self-hosting</strong> for privacy/compliance</li>
+<li>You want <strong>E2E encryption</strong> for cloud sync</li>
+<li>You use <strong>OpenClaw</strong> and want enhanced memory</li>
+<li>You want <strong>GTD-based life management</strong> (River Agent)</li>
+<li>You prefer <strong>open source</strong> with no vendor lock-in</li>
+<li>You're building for <strong>personal use</strong>, not just developers</li>
+<hr>
+<h2>9. Strategic Positioning</h2>
+<h3>9.1 Not Direct Competition</h3>
+<p>Supermemory and Onelist serve <strong>overlapping but different markets</strong>:</p>
+<li><strong>Supermemory</strong>: "Memory infrastructure for AI developers"</li>
+<li><strong>Onelist</strong>: "Privacy-first second brain for humans and AI"</li>
+<h3>9.2 Recommended Positioning for Onelist</h3>
+<blockquote>"Onelist brings Supermemory-class memory capabilities to a privacy-first, self-hostable platform. Enterprise-grade AI memory that you actually control."</blockquote>
+<h3>9.3 Key Differentiators to Emphasize</h3>
+<p>1. <strong>Self-hosted + E2E encryption</strong> (Supermemory can't offer this)
+2. <strong>Complete application stack</strong> (UI, agents, GTD methodology)
+3. <strong>OpenClaw integration</strong> (personal AI assistant focus)
+4. <strong>Open source</strong> (no vendor lock-in)
+5. <strong>Predictable pricing</strong> (no token overage surprises)</p>
+<hr>
+<h2>10. Implementation Priority Matrix</h2>
+<table>
+<tr><th>Improvement</th><th>Impact</th><th>Effort</th><th>Priority</th></tr>
+<tr><td>Reader Agent (atomic memories)</td><td>High</td><td>High</td><td><strong>P0</strong> (in progress)</td></tr>
+<tr><td>MCP server support</td><td>High</td><td>Medium</td><td><strong>P1</strong></td></tr>
+<tr><td>Temporal metadata (bi-temporal)</td><td>Medium</td><td>Medium</td><td><strong>P1</strong></td></tr>
+<tr><td>Intelligent forgetting/decay</td><td>Medium</td><td>Low</td><td><strong>P1</strong></td></tr>
+<tr><td>Benchmark publication</td><td>Medium</td><td>Low</td><td><strong>P2</strong></td></tr>
+<tr><td>Tiered memory caching</td><td>Low</td><td>Medium</td><td><strong>P3</strong></td></tr>
+</table>
+<hr>
+<h2>11. Conclusion</h2>
+<p>Supermemory represents the <strong>current state-of-the-art in AI memory infrastructure</strong>, with benchmark-leading performance and sophisticated temporal reasoning. Onelist should adopt their key innovations (atomic extraction, two-layer retrieval, temporal metadata) while leveraging its unique advantages (privacy, self-hosting, complete application stack).</p>
+<strong>The winning strategy for Onelist:</strong>
+1. <strong>Adopt Supermemory's memory architecture patterns</strong> in Reader/Searcher agents
+2. <strong>Maintain privacy-first positioning</strong> as a key differentiator
+3. <strong>Add MCP support</strong> for ecosystem compatibility
+4. <strong>Publish benchmarks</strong> to demonstrate competitive performance
+5. <strong>Emphasize complete solution</strong> vs. API-only approach
+<p>Supermemory and Onelist can coexist serving different segments, but technical parity on memory capabilities is essential for Onelist to be credible in the AI memory space.</p>
+<hr>
+<h2>References</h2>
+<h3>Supermemory Sources</h3>
+<li><a href="https://supermemory.ai/">Supermemory.ai</a> - Main website</li>
+<li><a href="https://supermemory.ai/research">Supermemory Research</a> - Benchmark results</li>
+<li><a href="https://supermemory.ai/blog/memory-engine/">Memory Engine Architecture</a> - Technical blog</li>
+<li><a href="https://github.com/supermemoryai">GitHub - supermemoryai</a> - Open source components</li>
+<li><a href="https://techcrunch.com/2025/10/06/a-19-year-old-nabs-backing-from-google-execs-for-his-ai-memory-startup-supermemory/">TechCrunch Coverage</a> - Funding announcement</li>
+<li><a href="https://github.com/supermemoryai/memorybench">MemoryBench</a> - Open benchmark framework</li>
+<h3>Onelist Sources</h3>
+<li><a href="./ai_memory_evolution.md">AI Memory Evolution</a> - Memory architecture</li>
+<li><a href="./reader_agent_plan.md">Reader Agent Plan</a> - Atomic extraction</li>
+<li><a href="./searcher_agent_plan.md">Searcher Agent Plan</a> - Two-layer retrieval</li>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a> - Implementation timeline</li>
+<h3>Research</h3>
+<li><a href="https://github.com/xiaowu0162/LongMemEval">LongMemEval</a> - Memory benchmark</li>
+<li><a href="https://arxiv.org/abs/2501.13956">Zep Paper</a> - Temporal knowledge graphs</li>
+<li><a href="https://arxiv.org/html/2504.19413v1">Mem0 Paper</a> - Memory for agents</li>
+</ul>
+<hr>
+</em>Document created: 2026-01-30<em>
+</em>Status: Strategic Analysis*
+  </article>
+</body>
+</html>

@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Launch Plan: Speed to Market - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Launch Plan: Speed to Market</h1>
+<strong>Document Version:</strong> 2026-01-28
+<strong>Focus:</strong> Rapid MVP launch with sustainable unit economics
+<hr>
+<h2>1. Executive Summary</h2>
+<h3>1.1 Goal</h3>
+<p>Launch Onelist MVP as quickly as possible while ensuring:
+<ul>
+<li>Sustainable unit economics (don't lose money per user)</li>
+<li>Pricing that doesn't need to change dramatically post-launch</li>
+<li>Infrastructure that scales without surprises</li></p>
+<h3>1.2 Key Decisions Needed</h3>
+<table>
+<tr><th>Decision</th><th>Impact</th><th>Section</th></tr>
+<tr><td>Hosting platform</td><td>Monthly fixed costs</td><td>§3</td></tr>
+<tr><td>Storage provider(s)</td><td>Variable costs per user</td><td>§4</td></tr>
+<tr><td>Pricing tiers</td><td>Revenue vs. adoption</td><td>§6</td></tr>
+<tr><td>MVP feature scope</td><td>Time to launch</td><td>§7</td></tr>
+</table>
+<hr>
+<h2>2. Launch Strategy: Phased Approach</h2>
+<h3>Phase 0: Soft Launch (Week 1-2)</h3>
+<li>Deploy to production infrastructure</li>
+<li>Invite-only beta (friends, family, early supporters)</li>
+<li>Validate core flows work</li>
+<li>Monitor costs closely</li>
+<h3>Phase 1: Limited Launch (Week 3-4)</h3>
+<li>Open signups with waitlist</li>
+<li>Control growth to monitor unit economics</li>
+<li>Adjust pricing if needed before wide launch</li>
+<h3>Phase 2: Public Launch (Week 5+)</h3>
+<li>Remove waitlist</li>
+<li>Marketing push</li>
+<li>Monitor and optimize</li>
+<strong>Why phased?</strong> Catch pricing/cost issues before they scale.
+<hr>
+<h2>3. Hosting Infrastructure Analysis</h2>
+<h3>3.1 Platform Comparison</h3>
+<table>
+<tr><th>Platform</th><th>Monthly Cost (Small)</th><th>PostgreSQL</th><th>Phoenix Optimized</th><th>Scaling</th></tr>
+<tr><td><strong>Fly.io</strong></td><td>$30-60</td><td>Included</td><td>Excellent (Chris McCord)</td><td>Global</td></tr>
+<tr><td><strong>Gigalixir</strong></td><td>$40-60</td><td>Included</td><td>Built for BEAM</td><td>Good</td></tr>
+<tr><td><strong>Render</strong></td><td>$14+ ($7 app + $7 DB)</td><td>Separate</td><td>Limited</td><td>Simple</td></tr>
+<tr><td><strong>Hetzner VPS</strong></td><td>$20-40</td><td>Self-managed</td><td>DIY</td><td>Manual</td></tr>
+<tr><td><strong>DigitalOcean</strong></td><td>$20-50</td><td>$15+ managed</td><td>DIY</td><td>Droplets</td></tr>
+</table>
+<h3>3.2 Recommendation: Fly.io</h3>
+<strong>Why Fly.io for MVP:</strong>
+<table>
+<tr><th>Factor</th><th>Fly.io Advantage</th></tr>
+<tr><td>Phoenix expertise</td><td>Chris McCord (Phoenix creator) works there</td></tr>
+<tr><td>Time to launch</td><td>Fastest deployment, great docs</td></tr>
+<tr><td>Scaling</td><td>Global edge deployment built-in</td></tr>
+<tr><td>PostgreSQL</td><td>Managed, included</td></tr>
+<tr><td>BEAM features</td><td>Full clustering, hot reload support</td></tr>
+<tr><td>Cost predictability</td><td>Usage-based, starts free</td></tr>
+</table>
+<strong>Fly.io Estimated Costs (MVP Scale):</strong>
+<table>
+<tr><th>Resource</th><th>Spec</th><th>Monthly Cost</th></tr>
+<tr><td>App (shared-cpu-1x, 256MB)</td><td>1 instance</td><td>~$2</td></tr>
+<tr><td>App (shared-cpu-1x, 1GB)</td><td>1 instance</td><td>~$6</td></tr>
+<tr><td>App (dedicated-cpu-1x, 2GB)</td><td>1 instance</td><td>~$29</td></tr>
+<tr><td>PostgreSQL (1GB)</td><td>Development</td><td>~$0 (free tier)</td></tr>
+<tr><td>PostgreSQL (4GB)</td><td>Production</td><td>~$36</td></tr>
+<tr><td>Bandwidth</td><td>First 100GB free</td><td>$0.02/GB after</td></tr>
+</table>
+<strong>MVP Starting Config:</strong>
+<pre><code class="language-">App:        shared-cpu-1x, 1GB RAM     ~$6/mo
+PostgreSQL: 1GB (free tier)            ~$0/mo
+Bandwidth:  &lt;100GB                     ~$0/mo
+────────────────────────────────────────────────
+TOTAL:                                 ~$6-10/mo
+</code></pre>
+<strong>Growth Config (100-500 users):</strong>
+<pre><code class="language-">App:        dedicated-cpu-1x, 2GB RAM  ~$29/mo
+PostgreSQL: 4GB                        ~$36/mo
+Bandwidth:  ~200GB                     ~$2/mo
+────────────────────────────────────────────────
+TOTAL:                                 ~$67/mo
+</code></pre>
+<h3>3.3 When to Switch to VPS</h3>
+<strong>Breakpoint: ~$200/month on Fly.io</strong>
+<p>At this point, consider:
+<li>2-3 Hetzner VPS (~$50/month total)</li>
+<li>DigitalOcean Managed PostgreSQL ($15-30/month)</li>
+<li>Total: ~$65-80/month (60% savings)</li></p>
+<strong>But</strong>: Only switch when you have DevOps capacity. Developer time > hosting costs until ~$500/mo spend.
+<hr>
+<h2>4. Storage Infrastructure Analysis</h2>
+<h3>4.1 Provider Comparison</h3>
+<table>
+<tr><th>Provider</th><th>Storage</th><th>Egress</th><th>API Calls</th><th>Best For</th></tr>
+<tr><td><strong>Cloudflare R2</strong></td><td>$0.015/GB/mo</td><td>FREE</td><td>$0.36/M Class A, $0.036/M Class B</td><td>Primary (no egress!)</td></tr>
+<tr><td><strong>Backblaze B2</strong></td><td>$0.006/GB/mo</td><td>$0.01/GB</td><td>$0.004/10K Class B</td><td>Backup/Archive</td></tr>
+<tr><td><strong>AWS S3</strong></td><td>$0.023/GB/mo</td><td>$0.09/GB</td><td>$0.005/1K PUT</td><td>Avoid (expensive egress)</td></tr>
+<tr><td><strong>Wasabi</strong></td><td>$0.0069/GB/mo</td><td>FREE</td><td>Included</td><td>Alternative to R2</td></tr>
+</table>
+<h3>4.2 Recommendation: Cloudflare R2 Primary</h3>
+<strong>Why R2:</strong>
+<li><strong>Zero egress fees</strong> - Users downloading their files costs us nothing</li>
+<li><strong>S3-compatible</strong> - Our code works unchanged</li>
+<li><strong>Global edge</strong> - Fast everywhere</li>
+<li><strong>Predictable costs</strong> - Only pay for storage + API calls</li>
+<strong>R2 Cost Model:</strong>
+<pre><code class="language-">Storage:        $0.015/GB/month
+Class A ops:    $0.36/million (PUT, POST, LIST)
+Class B ops:    $0.036/million (GET, HEAD)
+Egress:         FREE
+</code></pre>
+<h3>4.3 Cost Scenarios by User Scale</h3>
+<strong>Assumptions per user (average):</strong>
+<li>500 MB stored assets</li>
+<li>100 uploads/month (Class A)</li>
+<li>500 downloads/month (Class B)</li>
+<table>
+<tr><th>Users</th><th>Storage</th><th>Class A Ops</th><th>Class B Ops</th><th>Monthly R2 Cost</th></tr>
+<tr><td>10</td><td>5 GB</td><td>1,000</td><td>5,000</td><td>$0.08</td></tr>
+<tr><td>100</td><td>50 GB</td><td>10,000</td><td>50,000</td><td>$0.76</td></tr>
+<tr><td>500</td><td>250 GB</td><td>50,000</td><td>250,000</td><td>$3.77</td></tr>
+<tr><td>1,000</td><td>500 GB</td><td>100,000</td><td>500,000</td><td>$7.54</td></tr>
+<tr><td>5,000</td><td>2.5 TB</td><td>500,000</td><td>2.5M</td><td>$37.77</td></tr>
+<tr><td>10,000</td><td>5 TB</td><td>1M</td><td>5M</td><td>$75.54</td></tr>
+</table>
+<strong>R2 Cost per User (at scale):</strong>
+<li>Storage: $0.015 × 0.5 GB = $0.0075/user/mo</li>
+<li>API: ~$0.0001/user/mo</li>
+<li><strong>Total: ~$0.008/user/month</strong> (less than 1 cent!)</li>
+<h3>4.4 Redundant Storage (R2 + B2)</h3>
+<p>For "Redundant" tier users who want backup:</p>
+<strong>Additional B2 Costs:</strong>
+<pre><code class="language-">Storage:        $0.006/GB/month
+Class B ops:    $0.004/10K
+Egress:         $0.01/GB (only if failover needed)
+</code></pre>
+<strong>Redundant tier cost per user:</strong>
+<li>R2: $0.0075/user/mo</li>
+<li>B2: $0.003/user/mo</li>
+<li><strong>Total: ~$0.01/user/month</strong></li>
+<h3>4.5 Heavy User Scenarios</h3>
+<strong>Power User (10 GB stored, 5000 downloads/mo):</strong>
+<table>
+<tr><th>Provider</th><th>Storage</th><th>API</th><th>Egress</th><th>Total</th></tr>
+<tr><td>R2</td><td>$0.15</td><td>$0.18</td><td>$0</td><td>$0.33/mo</td></tr>
+<tr><td>S3</td><td>$0.23</td><td>$0.03</td><td>$45</td><td>$45.26/mo</td></tr>
+</table>
+<strong>R2 saves us $45/month per heavy user</strong> due to zero egress.
+<hr>
+<h2>5. Total Infrastructure Cost Model</h2>
+<h3>5.1 Fixed Costs (Monthly)</h3>
+<table>
+<tr><th>Component</th><th>MVP</th><th>500 Users</th><th>1000 Users</th><th>5000 Users</th></tr>
+<tr><td>Fly.io App</td><td>$6</td><td>$29</td><td>$58 (2x)</td><td>$145 (5x)</td></tr>
+<tr><td>Fly.io PostgreSQL</td><td>$0</td><td>$36</td><td>$72</td><td>$144</td></tr>
+<tr><td>Domain/DNS</td><td>$0</td><td>$0</td><td>$0</td><td>$0</td></tr>
+<tr><td>Cloudflare (free tier)</td><td>$0</td><td>$0</td><td>$0</td><td>$20</td></tr>
+<tr><td>Email (Postmark/SES)</td><td>$0</td><td>$15</td><td>$30</td><td>$100</td></tr>
+<tr><td>Monitoring (free tier)</td><td>$0</td><td>$0</td><td>$0</td><td>$50</td></tr>
+<tr><td><strong>Fixed Total</strong></td><td><strong>$6</strong></td><td><strong>$80</strong></td><td><strong>$160</strong></td><td><strong>$459</strong></td></tr>
+</table>
+<h3>5.2 Variable Costs (Per User)</h3>
+<table>
+<tr><th>Component</th><th>Cost/User/Month</th><th>At 500 Users</th><th>At 1000 Users</th><th>At 5000 Users</th></tr>
+<tr><td>R2 Storage (0.5 GB avg)</td><td>$0.0075</td><td>$3.75</td><td>$7.50</td><td>$37.50</td></tr>
+<tr><td>R2 API Calls</td><td>$0.0001</td><td>$0.05</td><td>$0.10</td><td>$0.50</td></tr>
+<tr><td>B2 Backup (if redundant)</td><td>$0.003</td><td>$1.50</td><td>$3.00</td><td>$15.00</td></tr>
+<tr><td><strong>Variable Total (Standard)</strong></td><td><strong>~$0.008</strong></td><td><strong>$4</strong></td><td><strong>$8</strong></td><td><strong>$38</strong></td></tr>
+<tr><td><strong>Variable Total (Redundant)</strong></td><td><strong>~$0.011</strong></td><td><strong>$6</strong></td><td><strong>$11</strong></td><td><strong>$53</strong></td></tr>
+</table>
+<h3>5.3 Total Cost Summary</h3>
+<table>
+<tr><th>Scale</th><th>Fixed</th><th>Variable (Std)</th><th>Total</th><th>Per User</th></tr>
+<tr><td>MVP (10 users)</td><td>$6</td><td>$0.08</td><td>$6.08</td><td>$0.61</td></tr>
+<tr><td>100 users</td><td>$40</td><td>$0.80</td><td>$40.80</td><td>$0.41</td></tr>
+<tr><td>500 users</td><td>$80</td><td>$4.00</td><td>$84.00</td><td>$0.17</td></tr>
+<tr><td>1,000 users</td><td>$160</td><td>$8.00</td><td>$168.00</td><td>$0.17</td></tr>
+<tr><td>5,000 users</td><td>$459</td><td>$38.00</td><td>$497.00</td><td>$0.10</td></tr>
+<tr><td>10,000 users</td><td>$800</td><td>$76.00</td><td>$876.00</td><td>$0.09</td></tr>
+</table>
+<strong>Key Insight:</strong> At scale, cost per user approaches <strong>$0.10/month</strong> for standard storage.
+<hr>
+<h2>6. Pricing Strategy</h2>
+<h3>6.1 Cost Floor Analysis</h3>
+<strong>Minimum viable price to not lose money:</strong>
+<table>
+<tr><th>Tier</th><th>Our Cost/User</th><th>Minimum Price</th><th>Margin</th></tr>
+<tr><td>Free (P2P only)</td><td>~$0.01</td><td>$0</td><td>Negative</td></tr>
+<tr><td>Standard Storage</td><td>~$0.10</td><td>$0.50</td><td>5x</td></tr>
+<tr><td>Redundant Storage</td><td>~$0.15</td><td>$0.75</td><td>5x</td></tr>
+</table>
+<strong>Reality check:</strong> At $0.10/user cost, even $1/month is 10x margin.
+<h3>6.2 Proposed Pricing Tiers</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         ONELIST PRICING                                      │
+│                                                                              │
+│  FREE                    CLOUD SYNC               WEB ACCESS                 │
+│  $0/month                $3/month + usage         $20/month                  │
+│                                                                              │
+│  • P2P sync only         • E2EE cloud sync        • Everything in Cloud Sync│
+│  • Unlimited local       • Unlimited devices      • Dedicated VPS           │
+│  • Mac &amp; iOS apps        • Unlimited public pages • Your own subdomain      │
+│  • Public pages (10)     • Storage: $0.10/GB      • 20 GB storage included  │
+│  • Forum access          • Assets: $0.02-0.035/GB • All agents included     │
+│                          • Email support          • Priority support        │
+│                                                   • Local search &amp; agents   │
+│                                                                              │
+│  SELF-HOSTED: $0 forever - Run on your own infrastructure (MIT licensed)   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>6.3 Unit Economics by Tier</h3>
+<table>
+<tr><th>Tier</th><th>Price</th><th>Our Cost</th><th>Gross Margin</th><th>Margin %</th></tr>
+<tr><td>Free</td><td>$0</td><td>$0.01</td><td>-$0.01</td><td>-100%</td></tr>
+<tr><td>Cloud Sync (base)</td><td>$3</td><td>$0.10</td><td>$2.90</td><td>97%</td></tr>
+<tr><td>Cloud Sync (typical: 5GB + 20GB assets)</td><td>$4.20</td><td>$0.50</td><td>$3.70</td><td>88%</td></tr>
+<tr><td>Web Access</td><td>$20</td><td>$8<em></td><td>$12.00</td><td>60%</td></tr>
+<tr><td>+10 GB Storage</td><td>$1</td><td>$0.15</td><td>$0.85</td><td>85%</td></tr>
+<tr><td>+10 GB Redundant</td><td>$2</td><td>$0.21</td><td>$1.79</td><td>90%</td></tr>
+</table>
+</em>Web Access cost breakdown:
+<li>Fly.io shared-cpu-1x, 1GB: ~$6/mo</li>
+<li>PostgreSQL (shared/free tier): ~$0-2/mo</li>
+<li>20GB R2 storage: ~$0.30/mo</li>
+<li>Buffer for bandwidth/operations: ~$1-2/mo</li>
+<li><strong>Total: ~$7-10/mo per user</strong></li>
+<strong>Why $20/mo for Web Access (not $15)?</strong>
+<li>At $15/mo with $8 cost = 47% margin (too thin)</li>
+<li>At $20/mo with $8 cost = 60% margin (sustainable)</li>
+<li>Competitors: Notion $10, Roam $15, Evernote $15 (but no dedicated VPS)</li>
+<li>We're offering a dedicated instance with local data + agents - worth the premium</li>
+<strong>Alternative: Web Access Pro at $35/mo</strong>
+<li>Dedicated PostgreSQL (~$15/mo)</li>
+<li>Larger instance (2GB RAM)</li>
+<li>For power users who need more resources</li>
+<strong>OpenClaw Users: Self-Hosted Onelist</strong>
+<li>Users running their own OpenClaw instance already have a VPS</li>
+<li>They can install Onelist on the same machine (self-hosted, $0)</li>
+<li>Full Onelist Web + agents without Web Access subscription</li>
+<li>Recommended: Cloud Sync ($3/mo) for backup and multi-device sync</li>
+<li>This is a key adoption path - OpenClaw users get Onelist "for free" on their existing infra</li>
+<h3>6.4 Revenue Projections</h3>
+<strong>Conservative Mix (60% free, 25% Cloud Sync, 15% Web Access):</strong>
+<table>
+<tr><th>Total Users</th><th>Paying Users</th><th>Avg Revenue</th><th>MRR</th><th>Monthly Cost</th><th>Profit</th></tr>
+<tr><td>100</td><td>40</td><td>$8.75</td><td>$350</td><td>$120</td><td>$230</td></tr>
+<tr><td>500</td><td>200</td><td>$8.75</td><td>$1,750</td><td>$400</td><td>$1,350</td></tr>
+<tr><td>1,000</td><td>400</td><td>$8.75</td><td>$3,500</td><td>$700</td><td>$2,800</td></tr>
+<tr><td>5,000</td><td>2,000</td><td>$8.75</td><td>$17,500</td><td>$2,800</td><td>$14,700</td></tr>
+<tr><td>10,000</td><td>4,000</td><td>$8.75</td><td>$35,000</td><td>$5,200</td><td>$29,800</td></tr>
+</table>
+<em>Avg revenue assumes: 25% at ~$4/mo (Cloud Sync), 15% at $20/mo (Web Access)</em>
+<strong>Break-even: ~15 paying users</strong> (at $8.75/mo average, $80 fixed costs)
+<h3>6.5 Pricing Sensitivity Analysis</h3>
+<strong>What if storage costs double?</strong>
+<table>
+<tr><th>Scenario</th><th>Cost/User</th><th>Impact on Margin</th></tr>
+<tr><td>Current</td><td>$0.10</td><td>96% margin</td></tr>
+<tr><td>2x storage</td><td>$0.20</td><td>92% margin</td></tr>
+<tr><td>5x storage</td><td>$0.50</td><td>90% margin</td></tr>
+<tr><td>10x storage</td><td>$1.00</td><td>80% margin</td></tr>
+</table>
+<strong>Even 10x cost increase keeps us profitable.</strong> Pricing is robust.
+<h3>6.6 Pricing Risks & Mitigations</h3>
+<table>
+<tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
+<tr><td>Heavy users (100+ GB)</td><td>Higher storage costs</td><td>Storage add-on pricing, usage caps</td></tr>
+<tr><td>Excessive API calls</td><td>R2 API costs</td><td>Rate limiting, caching</td></tr>
+<tr><td>Abuse (crypto mining, etc.)</td><td>Compute costs</td><td>Terms of service, monitoring</td></tr>
+<tr><td>Fly.io price increase</td><td>Fixed costs up</td><td>Multi-region redundancy, VPS fallback plan</td></tr>
+<tr><td>Cloudflare R2 price increase</td><td>Storage costs up</td><td>B2 as backup, BYOB option</td></tr>
+</table>
+<hr>
+<h2>7. MVP Feature Scope</h2>
+<h3>7.1 MVP Must-Have (Launch Blockers)</h3>
+<table>
+<tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
+<tr><td>User registration/login</td><td>✅ Done</td><td>Phoenix auth</td></tr>
+<tr><td>Entry CRUD</td><td>✅ Done</td><td>API complete</td></tr>
+<tr><td>Tag CRUD</td><td>✅ Done</td><td>API complete</td></tr>
+<tr><td>Asset upload/download</td><td>🔄 In Progress</td><td>Storage system</td></tr>
+<tr><td>API authentication</td><td>✅ Done</td><td>API keys</td></tr>
+<tr><td>Basic web UI</td><td>🔄 In Progress</td><td>LiveView</td></tr>
+<tr><td>Stripe billing</td><td>⬜ Not Started</td><td>Checkout + webhooks</td></tr>
+<tr><td>Email verification</td><td>✅ Done</td><td></td></tr>
+</table>
+<h3>7.2 MVP Should-Have (High Value, Fast to Build)</h3>
+<table>
+<tr><th>Feature</th><th>Priority</th><th>Effort</th></tr>
+<tr><td>Password reset</td><td>High</td><td>1 day</td></tr>
+<tr><td>Entry search (basic)</td><td>High</td><td>2 days</td></tr>
+<tr><td>Public entry sharing</td><td>High</td><td>2 days</td></tr>
+<tr><td>Usage dashboard</td><td>Medium</td><td>1 day</td></tr>
+<tr><td>Storage usage tracking</td><td>Medium</td><td>1 day</td></tr>
+</table>
+<h3>7.3 Post-MVP (Not Launch Blockers)</h3>
+<table>
+<tr><th>Feature</th><th>Phase</th></tr>
+<tr><td>P2P sync (free tier)</td><td>Phase 2</td></tr>
+<tr><td>BYOB storage</td><td>Phase 2</td></tr>
+<tr><td>River AI agent</td><td>Phase 3</td></tr>
+<tr><td>Mac app</td><td>Phase 3</td></tr>
+<tr><td>iOS app</td><td>Phase 4</td></tr>
+</table>
+<h3>7.4 MVP Timeline Estimate</h3>
+<table>
+<tr><th>Week</th><th>Focus</th><th>Deliverable</th></tr>
+<tr><td>1</td><td>Storage system</td><td>Asset upload working with R2</td></tr>
+<tr><td>2</td><td>Billing</td><td>Stripe integration, tier enforcement</td></tr>
+<tr><td>3</td><td>Web UI</td><td>Basic entry management UI</td></tr>
+<tr><td>4</td><td>Polish</td><td>Testing, docs, deployment</td></tr>
+<tr><td>5</td><td>Soft launch</td><td>Invite-only beta</td></tr>
+<tr><td>6</td><td>Limited launch</td><td>Waitlist opens</td></tr>
+</table>
+<hr>
+<h2>8. Infrastructure Setup Checklist</h2>
+<h3>8.1 Accounts to Create</h3>
+<table>
+<tr><th>Service</th><th>Purpose</th><th>Free Tier?</th><th>Estimated Cost</th></tr>
+<tr><td>Fly.io</td><td>App hosting</td><td>Yes</td><td>$0-30/mo</td></tr>
+<tr><td>Cloudflare</td><td>DNS, R2 storage, CDN</td><td>Yes</td><td>$0-20/mo</td></tr>
+<tr><td>Backblaze B2</td><td>Backup storage</td><td>10 GB free</td><td>$0-5/mo</td></tr>
+<tr><td>Stripe</td><td>Payments</td><td>2.9% + $0.30</td><td>Per transaction</td></tr>
+<tr><td>Postmark/SES</td><td>Transactional email</td><td>Limited free</td><td>$0-15/mo</td></tr>
+<tr><td>Sentry</td><td>Error tracking</td><td>Free tier</td><td>$0</td></tr>
+<tr><td>GitHub Actions</td><td>CI/CD</td><td>Free for public</td><td>$0</td></tr>
+</table>
+<h3>8.2 Cloudflare Setup</h3>
+<pre><code class="language-">1. Create Cloudflare account
+2. Add onelist.com domain
+3. Enable Cloudflare DNS (proxy)
+4. Create R2 bucket: onelist-assets-prod
+5. Create R2 API token (S3 compatible)
+6. Configure CORS for R2 bucket
+7. Enable Cloudflare caching rules
+</code></pre>
+<h3>8.3 Backblaze B2 Setup</h3>
+<pre><code class="language-">1. Create Backblaze account
+2. Create B2 bucket: onelist-backup-prod
+3. Create application key (S3 compatible API)
+4. Note endpoint: s3.{region}.backblazeb2.com
+5. Configure bucket lifecycle (if using for archive)
+</code></pre>
+<h3>8.4 Fly.io Setup</h3>
+<pre><code class="language-">1. Create Fly.io account
+2. Install flyctl CLI
+3. Initialize app: fly launch
+4. Create PostgreSQL: fly postgres create
+5. Attach database: fly postgres attach
+6. Set environment secrets
+7. Deploy: fly deploy
+8. Configure autoscaling
+</code></pre>
+<h3>8.5 Environment Variables</h3>
+<pre><code class="language-bash"># Fly.io secrets
+fly secrets set \
+  DATABASE_URL=&quot;postgres://...&quot; \
+  SECRET_KEY_BASE=&quot;...&quot; \
+  PHX_HOST=&quot;onelist.com&quot; \
+<p># Cloudflare R2
+  R2_ACCOUNT_ID=&quot;...&quot; \
+  R2_ACCESS_KEY_ID=&quot;...&quot; \
+  R2_SECRET_ACCESS_KEY=&quot;...&quot; \
+  R2_BUCKET=&quot;onelist-assets-prod&quot; \
+  R2_ENDPOINT=&quot;https://{account_id}.r2.cloudflarestorage.com&quot; \</p>
+<p># Backblaze B2
+  B2_KEY_ID=&quot;...&quot; \
+  B2_APPLICATION_KEY=&quot;...&quot; \
+  B2_BUCKET=&quot;onelist-backup-prod&quot; \
+  B2_ENDPOINT=&quot;https://s3.us-west-004.backblazeb2.com&quot; \</p>
+<p># Stripe
+  STRIPE_SECRET_KEY=&quot;sk_live_...&quot; \
+  STRIPE_WEBHOOK_SECRET=&quot;whsec_...&quot; \</p>
+<p># Email
+  POSTMARK_API_KEY=&quot;...&quot;
+</code></pre></p>
+<hr>
+<h2>9. Monitoring & Alerts</h2>
+<h3>9.1 Key Metrics to Track</h3>
+<table>
+<tr><th>Metric</th><th>Alert Threshold</th><th>Tool</th></tr>
+<tr><td>App response time</td><td>>500ms avg</td><td>Fly.io metrics</td></tr>
+<tr><td>Error rate</td><td>>1%</td><td>Sentry</td></tr>
+<tr><td>Database connections</td><td>>80% pool</td><td>Fly.io PostgreSQL</td></tr>
+<tr><td>R2 storage usage</td><td>>80% of budget</td><td>Cloudflare dashboard</td></tr>
+<tr><td>Monthly costs</td><td>>120% of projection</td><td>Manual review</td></tr>
+<tr><td>User signups/day</td><td>Track trend</td><td>Custom dashboard</td></tr>
+<tr><td>Paying conversion</td><td><5%</td><td>Custom dashboard</td></tr>
+</table>
+<h3>9.2 Cost Monitoring</h3>
+<strong>Weekly review:</strong>
+1. Fly.io billing dashboard
+2. Cloudflare R2 usage
+3. Backblaze B2 usage
+4. Stripe revenue
+5. Calculate actual cost per user
+<strong>Monthly review:</strong>
+1. Compare projected vs. actual costs
+2. Identify heavy users
+3. Adjust projections
+4. Review pricing if needed
+<hr>
+<h2>10. Risk Analysis</h2>
+<h3>10.1 Technical Risks</h3>
+<table>
+<tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+<tr><td>Fly.io outage</td><td>Low</td><td>High</td><td>Multi-region, status page monitoring</td></tr>
+<tr><td>R2 outage</td><td>Very Low</td><td>High</td><td>B2 failover ready</td></tr>
+<tr><td>Database corruption</td><td>Very Low</td><td>Critical</td><td>Daily backups, point-in-time recovery</td></tr>
+<tr><td>DDoS attack</td><td>Medium</td><td>High</td><td>Cloudflare protection (free tier)</td></tr>
+</table>
+<h3>10.2 Business Risks</h3>
+<table>
+<tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+<tr><td>Low conversion rate</td><td>Medium</td><td>High</td><td>Adjust pricing, improve onboarding</td></tr>
+<tr><td>High churn</td><td>Medium</td><td>Medium</td><td>Improve product, engagement features</td></tr>
+<tr><td>Competitor launches</td><td>Medium</td><td>Medium</td><td>Differentiate (privacy, BYOB, open API)</td></tr>
+<tr><td>Pricing too low</td><td>Low</td><td>Medium</td><td>Generous margins allow adjustment</td></tr>
+<tr><td>Pricing too high</td><td>Low</td><td>Medium</td><td>Start lower, increase with value</td></tr>
+</table>
+<h3>10.3 Cost Risks</h3>
+<table>
+<tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr>
+<tr><td>Storage costs spike</td><td>Low</td><td>Medium</td><td>Per-user caps, BYOB option</td></tr>
+<tr><td>Fly.io raises prices</td><td>Low</td><td>Medium</td><td>VPS migration plan ready</td></tr>
+<tr><td>Heavy user abuse</td><td>Medium</td><td>Low</td><td>Rate limits, ToS enforcement</td></tr>
+<tr><td>Free tier costs</td><td>Medium</td><td>Low</td><td>P2P only, minimal infrastructure</td></tr>
+</table>
+<hr>
+<h2>11. Decision Log</h2>
+<table>
+<tr><th>Date</th><th>Decision</th><th>Rationale</th></tr>
+<tr><td>2026-01-28</td><td>Fly.io for MVP hosting</td><td>Phoenix expertise, fast deployment, usage-based pricing</td></tr>
+<tr><td>2026-01-28</td><td>Cloudflare R2 for primary storage</td><td>Zero egress fees, predictable costs, global edge</td></tr>
+<tr><td>2026-01-28</td><td>Backblaze B2 for redundant tier</td><td>Lowest storage cost, S3-compatible</td></tr>
+<tr><td>2026-01-28</td><td>$0/$3+usage/$20 pricing tiers</td><td>Usage-based Cloud Sync, dedicated VPS for Web Access at sustainable margin</td></tr>
+<tr><td>2026-01-28</td><td>Storage add-ons vs. unlimited</td><td>Prevents abuse, aligns cost with value</td></tr>
+<tr><td>2026-01-28</td><td>6-week MVP timeline</td><td>Balance speed vs. quality</td></tr>
+</table>
+<hr>
+<h2>12. Open Questions</h2>
+<li>[ ] <strong>Q1</strong>: Should we offer annual pricing? (20% discount = $29/yr Cloud Sync base, $192/yr Web Access)</li>
+<li>[ ] <strong>Q2</strong>: Do we need a "Team" tier at launch or post-MVP?</li>
+<li>[ ] <strong>Q3</strong>: Should free tier have any cloud storage? (Currently P2P only)</li>
+<li>[ ] <strong>Q4</strong>: Should we offer Web Access Pro ($35/mo) with dedicated PostgreSQL at launch?</li>
+<li>[ ] <strong>Q5</strong>: Do we grandfather early users if prices change?</li>
+<li>[ ] <strong>Q6</strong>: Should we launch with waitlist or open signup?</li>
+<hr>
+<h2>13. Next Steps</h2>
+<h3>Immediate (This Week)</h3>
+<p>1. [ ] Create Cloudflare account, set up R2 bucket
+2. [ ] Create Backblaze B2 account, set up bucket
+3. [ ] Create Fly.io account, deploy staging environment
+4. [ ] Finalize storage system implementation
+5. [ ] Set up Stripe account and test mode</p>
+<h3>Next Week</h3>
+<p>1. [ ] Implement Stripe billing integration
+2. [ ] Build storage usage tracking
+3. [ ] Create basic web UI for entry management
+4. [ ] Set up monitoring and alerts
+5. [ ] Write deployment documentation</p>
+<h3>Before Launch</h3>
+<p>1. [ ] Load testing (simulate 100 concurrent users)
+2. [ ] Security review (OWASP checklist)
+3. [ ] Legal review (ToS, Privacy Policy)
+4. [ ] Create landing page
+5. [ ] Set up support email/system</p>
+<hr>
+<h2>Appendix A: Detailed R2 Cost Calculator</h2>
+<pre><code class="language-">Monthly R2 Cost = (Storage GB × $0.015) + (Class A ops / 1M × $0.36) + (Class B ops / 1M × $0.036)
+<p>Example: 1000 users, 500 MB avg storage, 100 uploads/mo, 500 downloads/mo</p>
+<p>Storage:  1000 × 0.5 GB × $0.015 = $7.50
+Class A:  1000 × 100 / 1,000,000 × $0.36 = $0.036
+Class B:  1000 × 500 / 1,000,000 × $0.036 = $0.018
+──────────────────────────────────────────────────
+Total: $7.55/month for 1000 users
+Per user: $0.00755/month (less than 1 cent)
+</code></pre></p>
+<h2>Appendix B: Fly.io Pricing Reference</h2>
+<pre><code class="language-">Shared CPU VMs:
+  shared-cpu-1x, 256MB:  ~$1.94/mo
+  shared-cpu-1x, 512MB:  ~$3.88/mo
+  shared-cpu-1x, 1GB:    ~$5.70/mo
+  shared-cpu-1x, 2GB:    ~$11.40/mo
+<p>Dedicated CPU VMs:
+  performance-1x, 2GB:   ~$29/mo
+  performance-2x, 4GB:   ~$58/mo
+  performance-4x, 8GB:   ~$116/mo</p>
+<p>PostgreSQL:
+  1 shared CPU, 1GB RAM, 10GB disk:    Free tier
+  1 shared CPU, 2GB RAM, 20GB disk:    ~$15/mo
+  1 shared CPU, 4GB RAM, 40GB disk:    ~$36/mo
+  2 dedicated CPU, 8GB RAM, 80GB disk: ~$72/mo</p>
+<p>Bandwidth:
+  Outbound: First 100GB free, then $0.02/GB
+  Inbound: Free
+</code></pre></p>
+<h2>Appendix C: Competitor Pricing Reference</h2>
+<table>
+<tr><th>Competitor</th><th>Comparable Tier</th><th>Price</th><th>Storage</th></tr>
+<tr><td>Notion</td><td>Plus</td><td>$10/mo</td><td>Unlimited</td></tr>
+<tr><td>Obsidian Sync</td><td>Sync</td><td>$8/mo</td><td>10 GB</td></tr>
+<tr><td>Roam Research</td><td>Pro</td><td>$15/mo</td><td>Unlimited</td></tr>
+<tr><td>Craft</td><td>Pro</td><td>$5/mo</td><td>Unlimited</td></tr>
+<tr><td>Apple Notes</td><td>iCloud+</td><td>$3/mo</td><td>200 GB (shared)</td></tr>
+<tr><td>Evernote</td><td>Personal</td><td>$15/mo</td><td>20 GB</td></tr>
+</table>
+<strong>Our positioning:</strong>
+<li>Cloud Sync at $3/mo + usage undercuts most competitors for light users</li>
+<li>Web Access at $20/mo is premium but includes dedicated VPS + agents (unique value)</li>
+<li>Self-hosted option differentiates from all competitors</li>
+</ul>
+<hr>
+<em>Last updated: 2026-01-28</em>
+<em>Status: Planning</em>
+<em>Owner: TBD</em>
+  </article>
+</body>
+</html>

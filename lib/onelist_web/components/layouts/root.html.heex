@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" class="[scrollbar-gutter:stable]">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title suffix=" · Onelist">
+      <%= assigns[:page_title] || "Welcome" %>
+    </.live_title>
+    <%= if assigns[:meta_description] do %>
+      <meta name="description" content={assigns[:meta_description]} />
+    <% end %>
+    <%= if assigns[:og_title] do %>
+      <meta property="og:title" content={assigns[:og_title]} />
+    <% end %>
+    <%= if assigns[:og_type] do %>
+      <meta property="og:type" content={assigns[:og_type]} />
+    <% end %>
+    <%= if assigns[:og_url] do %>
+      <meta property="og:url" content={assigns[:og_url]} />
+    <% end %>
+    <%= if assigns[:og_description] do %>
+      <meta property="og:description" content={assigns[:og_description]} />
+    <% end %>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+    </script>
+  </head>
+  <body class="bg-white antialiased">
+    <div class="min-h-screen">
+      <%= @inner_content %>
+    </div>
+  </body>
+</html>

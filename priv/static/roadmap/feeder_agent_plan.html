@@ -1,0 +1,2574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feeder Agent Roadmap - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Feeder Agent Roadmap</h1>
+<h2>Executive Summary</h2>
+<p>The Feeder Agent is Onelist's unified gateway for external content. It handles all data ingestion from outside sources—whether one-time imports or continuous synchronization—converting foreign formats into Onelist entries and orchestrating post-import processing by other agents.</p>
+<h3>Core Principle</h3>
+<blockquote><strong>"One agent to fetch them all"</strong> — Any content entering Onelist from an external source flows through the Feeder Agent.</blockquote>
+<h3>Scope</h3>
+<table>
+<tr><th>Capability</th><th>Description</th></tr>
+<tr><td><strong>One-time Import</strong></td><td>Bulk import from export files (ENEX, ZIP, folders)</td></tr>
+<tr><td><strong>Continuous Sync</strong></td><td>Ongoing synchronization via APIs, webhooks, polling</td></tr>
+<tr><td><strong>Format Conversion</strong></td><td>Transform source formats to Onelist entries</td></tr>
+<tr><td><strong>Agent Orchestration</strong></td><td>Trigger post-import processing chain</td></tr>
+</table>
+<h3>Supported Sources (Current & Planned)</h3>
+<table>
+<tr><th>Source</th><th>One-Time</th><th>Continuous</th><th>Status</th></tr>
+<tr><td><strong>Web Clipper</strong></td><td>URL capture</td><td>Browser extension</td><td><strong>MVP</strong></td></tr>
+<tr><td>RSS Feeds</td><td>—</td><td>Polling</td><td>Planned</td></tr>
+<tr><td>Evernote</td><td>ENEX files</td><td>API + Webhooks</td><td>Planned</td></tr>
+<tr><td>Notion</td><td>Export ZIP</td><td>OAuth + Webhooks</td><td>Planned</td></tr>
+<tr><td>Obsidian</td><td>Vault folder</td><td>REST API polling</td><td>Planned</td></tr>
+<tr><td>Apple Notes</td><td>Export files</td><td>Manual only</td><td>Planned</td></tr>
+<tr><td>Lifelog Audio</td><td>Export files</td><td>API polling</td><td>Planned</td></tr>
+<tr><td>YouTube URLs</td><td>URL metadata</td><td>—</td><td>Planned</td></tr>
+<tr><td>Email (IMAP)</td><td>—</td><td>IMAP polling</td><td>Future</td></tr>
+<tr><td>Instapaper</td><td>—</td><td>API polling</td><td>Future</td></tr>
+<tr><td>Twitter/X Bookmarks</td><td>—</td><td>API polling</td><td>Future</td></tr>
+<tr><td>Browser Bookmarks</td><td>Export files</td><td>Extension sync</td><td>Future</td></tr>
+</table>
+<hr>
+<h2>Table of Contents</h2>
+<p>1. <a href="#architecture">Architecture</a>
+2. <a href="#data-model">Data Model</a>
+3. <a href="#source-adapters">Source Adapters</a>
+4. <a href="#import-pipeline">Import Pipeline</a>
+5. <a href="#continuous-sync">Continuous Sync</a>
+6. <a href="#post-import-agent-chain">Post-Import Agent Chain</a>
+7. <a href="#implementation-phases">Implementation Phases</a>
+8. <a href="#technical-considerations">Technical Considerations</a>
+9. <a href="#user-experience">User Experience</a></p>
+<hr>
+<h2>Architecture</h2>
+<h3>High-Level Design</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                           FEEDER AGENT ARCHITECTURE                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  EXTERNAL SOURCES                    FEEDER AGENT                            │
+│  ────────────────                    ────────────                            │
+│                                                                              │
+│  ┌──────────────┐                   ┌────────────────────────────────────┐  │
+│  │   Webhooks   │──────────────────→│                                    │  │
+│  │  (Evernote,  │                   │         WEBHOOK RECEIVER           │  │
+│  │   Notion)    │                   │                                    │  │
+│  └──────────────┘                   └─────────────────┬──────────────────┘  │
+│                                                       │                      │
+│  ┌──────────────┐                   ┌─────────────────▼──────────────────┐  │
+│  │  OAuth APIs  │──────────────────→│                                    │  │
+│  │  (Notion,    │                   │          SOURCE ADAPTERS           │  │
+│  │   Evernote)  │                   │                                    │  │
+│  └──────────────┘                   │  ┌─────────┐ ┌─────────┐ ┌───────┐ │  │
+│                                     │  │Evernote │ │ Notion  │ │Obsidian│ │  │
+│  ┌──────────────┐                   │  │ Adapter │ │ Adapter │ │Adapter │ │  │
+│  │  REST APIs   │──────────────────→│  └────┬────┘ └────┬────┘ └───┬───┘ │  │
+│  │  (Obsidian,  │                   │       │           │          │     │  │
+│  │   Lifelog)   │                   │  ┌────┴───┐ ┌─────┴────┐ ┌───┴───┐ │  │
+│  └──────────────┘                   │  │  RSS   │ │  Apple   │ │Lifelog│ │  │
+│                                     │  │Adapter │ │  Notes   │ │ Audio │ │  │
+│  ┌──────────────┐                   │  └────┬───┘ └────┬─────┘ └───┬───┘ │  │
+│  │  File Upload │──────────────────→│       └──────────┴───────────┘     │  │
+│  │  (ENEX, ZIP, │                   │                  │                 │  │
+│  │   folders)   │                   └──────────────────┼─────────────────┘  │
+│  └──────────────┘                                      │                    │
+│                                                        ▼                    │
+│                                     ┌────────────────────────────────────┐  │
+│                                     │                                    │  │
+│                                     │        FORMAT CONVERTER            │  │
+│                                     │                                    │  │
+│                                     │  • ENML → Markdown                 │  │
+│                                     │  • Notion Blocks → Markdown        │  │
+│                                     │  • HTML → Markdown                 │  │
+│                                     │  • Obsidian MD → Onelist MD        │  │
+│                                     │  • Link resolution                 │  │
+│                                     │  • Tag normalization               │  │
+│                                     │                                    │  │
+│                                     └─────────────────┬──────────────────┘  │
+│                                                       │                      │
+│                                                       ▼                      │
+│                                     ┌────────────────────────────────────┐  │
+│                                     │                                    │  │
+│                                     │         ENTRY CREATOR              │  │
+│                                     │                                    │  │
+│                                     │  • Creates entries via Core API    │  │
+│                                     │  • Uploads assets                  │  │
+│                                     │  • Applies tags                    │  │
+│                                     │  • Stores source metadata          │  │
+│                                     │  • Handles duplicates              │  │
+│                                     │                                    │  │
+│                                     └─────────────────┬──────────────────┘  │
+│                                                       │                      │
+│                                                       ▼                      │
+│                                     ┌────────────────────────────────────┐  │
+│                                     │                                    │  │
+│                                     │      POST-IMPORT DISPATCHER        │  │
+│                                     │                                    │  │
+│                                     │  Triggers:                         │  │
+│                                     │  • Asset Enrichment Agent          │  │
+│                                     │  • Reader Agent                    │  │
+│                                     │  • Searcher Agent                  │  │
+│                                     │  • Librarian Agent                 │  │
+│                                     │  • Planner Agent                   │  │
+│                                     │  • River Agent (notifications)     │  │
+│                                     │                                    │  │
+│                                     └────────────────────────────────────┘  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Component Responsibilities</h3>
+<table>
+<tr><th>Component</th><th>Responsibility</th></tr>
+<tr><td><strong>Webhook Receiver</strong></td><td>Accepts push notifications from external services</td></tr>
+<tr><td><strong>Source Adapters</strong></td><td>Service-specific API clients and parsers</td></tr>
+<tr><td><strong>Format Converter</strong></td><td>Transforms source formats to Onelist-compatible Markdown</td></tr>
+<tr><td><strong>Entry Creator</strong></td><td>Creates entries, uploads assets, applies tags via Core API</td></tr>
+<tr><td><strong>Post-Import Dispatcher</strong></td><td>Queues work for other agents after import</td></tr>
+</table>
+<h3>Design Principles</h3>
+<p>1. <strong>Adapter Pattern</strong>: Each source has a dedicated adapter implementing a common interface
+2. <strong>Idempotency</strong>: Re-importing the same content doesn't create duplicates
+3. <strong>Incremental Sync</strong>: Only fetch changes since last sync
+4. <strong>Graceful Degradation</strong>: Partial failures don't block entire import
+5. <strong>User Control</strong>: Users configure which sources sync and how often</p>
+<hr>
+<h2>Data Model</h2>
+<h3>External Integrations Table</h3>
+<p>Stores connection credentials and sync state for all external sources:</p>
+<pre><code class="language-sql">CREATE TABLE external_integrations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+<p>-- Source identification
+  source_type VARCHAR(50) NOT NULL,  -- 'evernote', 'notion', 'obsidian', 'rss', etc.
+  source_name VARCHAR(255),          -- User-friendly name (e.g., &quot;Work Evernote&quot;)</p>
+<p>-- Authentication (encrypted at rest)
+  credentials JSONB NOT NULL,        -- Encrypted: {access_token, refresh_token, api_key, etc.}</p>
+<p>-- Sync configuration
+  sync_enabled BOOLEAN DEFAULT true,
+  sync_frequency_minutes INTEGER DEFAULT 60,
+  sync_filter JSONB,                 -- Source-specific filters (notebooks, tags, folders)</p>
+<p>-- Sync state
+  last_sync_at TIMESTAMPTZ,
+  last_sync_status VARCHAR(20),      -- 'success', 'partial', 'failed', 'syncing'
+  last_sync_error TEXT,
+  last_sync_stats JSONB,             -- {entries_created, entries_updated, assets_uploaded, errors}</p>
+<p>-- Source-specific state
+  sync_cursor JSONB,                 -- {update_count, next_cursor, last_modified, etc.}</p>
+<p>-- Metadata
+  metadata JSONB,                    -- {workspace_name, account_email, etc.}
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,</p>
+<p>-- Constraints
+  CONSTRAINT unique_user_source UNIQUE (user_id, source_type, source_name)
+);</p>
+<p>CREATE INDEX idx_external_integrations_user ON external_integrations(user_id);
+CREATE INDEX idx_external_integrations_source ON external_integrations(source_type);
+CREATE INDEX idx_external_integrations_sync ON external_integrations(sync_enabled, last_sync_at);
+</code></pre></p>
+<h3>Import Jobs Table</h3>
+<p>Tracks one-time import jobs (file uploads):</p>
+<pre><code class="language-sql">CREATE TABLE import_jobs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+<p>-- Job identification
+  source_type VARCHAR(50) NOT NULL,  -- 'evernote_enex', 'notion_export', 'obsidian_vault', etc.
+  job_name VARCHAR(255),             -- User-provided or generated name</p>
+<p>-- File info
+  file_path VARCHAR(500),            -- Path to uploaded file (if applicable)
+  file_size_bytes BIGINT,</p>
+<p>-- Job configuration
+  options JSONB,                     -- {skip_duplicates, folder_as_tags, resolve_links, etc.}</p>
+<p>-- Progress tracking
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',  -- pending, processing, completed, failed, cancelled
+  progress_percent INTEGER DEFAULT 0,
+  items_total INTEGER,
+  items_processed INTEGER DEFAULT 0,
+  items_succeeded INTEGER DEFAULT 0,
+  items_failed INTEGER DEFAULT 0,</p>
+<p>-- Results
+  entries_created INTEGER DEFAULT 0,
+  assets_uploaded INTEGER DEFAULT 0,
+  tags_created INTEGER DEFAULT 0,
+  errors JSONB,                      -- [{item, error, recoverable}, ...]</p>
+<p>-- Timestamps
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,</p>
+<p>-- Link to created entries (for rollback if needed)
+  entry_ids UUID[]
+);</p>
+<p>CREATE INDEX idx_import_jobs_user ON import_jobs(user_id);
+CREATE INDEX idx_import_jobs_status ON import_jobs(status);
+</code></pre></p>
+<h3>Source Mapping Table</h3>
+<p>Tracks mapping between source IDs and Onelist entry IDs:</p>
+<pre><code class="language-sql">CREATE TABLE source_entry_mappings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  integration_id UUID REFERENCES external_integrations(id) ON DELETE CASCADE,
+<p>-- Source identification
+  source_type VARCHAR(50) NOT NULL,
+  source_id VARCHAR(255) NOT NULL,   -- GUID, page_id, file path, etc.
+  source_parent_id VARCHAR(255),     -- For hierarchy tracking</p>
+<p>-- Onelist mapping
+  entry_id UUID NOT NULL REFERENCES entries(id) ON DELETE CASCADE,</p>
+<p>-- Sync metadata
+  source_updated_at TIMESTAMPTZ,
+  last_synced_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+  sync_hash VARCHAR(64),             -- Content hash for change detection</p>
+<p>-- Constraints
+  UNIQUE (user_id, source_type, source_id)
+);</p>
+<p>CREATE INDEX idx_source_mappings_entry ON source_entry_mappings(entry_id);
+CREATE INDEX idx_source_mappings_source ON source_entry_mappings(source_type, source_id);
+</code></pre></p>
+<hr>
+<h2>Source Adapters</h2>
+<h3>Adapter Interface</h3>
+<p>All source adapters implement a common interface:</p>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapter do
+  @moduledoc &quot;&quot;&quot;
+  Behaviour for Feeder Agent source adapters.
+  &quot;&quot;&quot;
+<p>@type credentials :: map()
+  @type sync_cursor :: map()
+  @type import_options :: map()
+  @type source_item :: map()
+  @type sync_result :: {:ok, [source_item()], sync_cursor()} | {:error, term()}</p>
+<p>@doc &quot;Validate credentials and test connection&quot;
+  @callback validate_credentials(credentials()) :: :ok | {:error, term()}</p>
+<p>@doc &quot;Fetch items since last sync (for continuous sync)&quot;
+  @callback fetch_changes(credentials(), sync_cursor(), import_options()) :: sync_result()</p>
+<p>@doc &quot;Parse an export file (for one-time import)&quot;
+  @callback parse_export(file_path :: String.t(), import_options()) ::
+    {:ok, Stream.t(source_item())} | {:error, term()}</p>
+<p>@doc &quot;Convert source item to Onelist entry attributes&quot;
+  @callback to_entry(source_item(), user_id :: String.t()) :: map()</p>
+<p>@doc &quot;Extract assets from source item&quot;
+  @callback extract_assets(source_item()) :: [map()]</p>
+<p>@doc &quot;Extract tags from source item&quot;
+  @callback extract_tags(source_item()) :: [String.t()]</p>
+<p>@doc &quot;Get source-specific metadata for entry&quot;
+  @callback source_metadata(source_item()) :: map()
+end
+</code></pre></p>
+<h3>Adapter Implementations</h3>
+<h4>Evernote Adapter</h4>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapters.Evernote do
+  @moduledoc &quot;&quot;&quot;
+  Adapter for Evernote import and sync.
+  Supports ENEX file import and Cloud API sync.
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Feeder.Adapter</p>
+<p># For detailed implementation, see:
+  # roadmap/future_roadmap_evernote_import.md</p>
+<p>@impl true
+  def validate_credentials(%{&quot;oauth_token&quot; =&gt; token}) do
+    case EvernoteClient.get_sync_state(token) do
+      {:ok, _} -&gt; :ok
+      {:error, reason} -&gt; {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def fetch_changes(credentials, cursor, _opts) do
+    token = credentials[&quot;oauth_token&quot;]
+    after_usn = cursor[&quot;update_count&quot;] || 0</p>
+<p>case EvernoteClient.get_filtered_sync_chunk(token, after_usn) do
+      {:ok, chunk} -&gt;
+        items = chunk.notes |&gt; Enum.map(&amp;parse_note/1)
+        new_cursor = %{&quot;update_count&quot; =&gt; chunk.chunk_high_usn}
+        {:ok, items, new_cursor}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def parse_export(file_path, _opts) do
+    {:ok, EnexParser.stream_notes(file_path)}
+  end</p>
+<p>@impl true
+  def to_entry(note, user_id) do
+    %{
+      user_id: user_id,
+      title: note.title,
+      entry_type: &quot;note&quot;,
+      source_type: &quot;evernote_import&quot;,
+      content_created_at: note.created,
+      metadata: source_metadata(note)
+    }
+  end</p>
+<p>@impl true
+  def extract_assets(note) do
+    Enum.map(note.resources || [], fn resource -&gt;
+      %{
+        filename: resource.filename,
+        mime_type: resource.mime,
+        data: resource.data,
+        metadata: %{
+          &quot;evernote_hash&quot; =&gt; resource.hash,
+          &quot;source_url&quot; =&gt; resource.attributes[:source_url]
+        }
+      }
+    end)
+  end</p>
+<p>@impl true
+  def extract_tags(note) do
+    notebook_tag = &quot;evernote:notebook:#{note.notebook}&quot;
+    note_tags = note.tags || []
+    [notebook_tag | note_tags]
+  end</p>
+<p>@impl true
+  def source_metadata(note) do
+    %{
+      &quot;evernote&quot; =&gt; %{
+        &quot;guid&quot; =&gt; note.guid,
+        &quot;notebook_guid&quot; =&gt; note.notebook_guid,
+        &quot;source_url&quot; =&gt; note.attributes[:source_url],
+        &quot;author&quot; =&gt; note.attributes[:author]
+      }
+    }
+  end
+end
+</code></pre></p>
+<h4>Notion Adapter</h4>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapters.Notion do
+  @moduledoc &quot;&quot;&quot;
+  Adapter for Notion import and sync.
+  Supports export ZIP import and OAuth API sync.
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Feeder.Adapter</p>
+<p># For detailed implementation, see:
+  # roadmap/future_roadmap_notion_import.md</p>
+<p>@impl true
+  def validate_credentials(%{&quot;access_token&quot; =&gt; token}) do
+    case NotionClient.get_self(token) do
+      {:ok, _} -&gt; :ok
+      {:error, reason} -&gt; {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def fetch_changes(credentials, cursor, opts) do
+    token = credentials[&quot;access_token&quot;]
+    last_sync = cursor[&quot;last_edited_time&quot;]</p>
+<p>filter = %{
+      &quot;filter&quot; =&gt; %{
+        &quot;timestamp&quot; =&gt; &quot;last_edited_time&quot;,
+        &quot;last_edited_time&quot; =&gt; %{&quot;after&quot; =&gt; last_sync}
+      }
+    }</p>
+<p>case NotionClient.search(token, filter) do
+      {:ok, %{results: pages}} -&gt;
+        items = Enum.map(pages, &amp;fetch_full_page(token, &amp;1))
+        new_cursor = %{&quot;last_edited_time&quot; =&gt; DateTime.utc_now() |&gt; DateTime.to_iso8601()}
+        {:ok, items, new_cursor}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def parse_export(file_path, _opts) do
+    {:ok, NotionExportParser.stream_pages(file_path)}
+  end</p>
+<p>@impl true
+  def to_entry(page, user_id) do
+    %{
+      user_id: user_id,
+      title: extract_title(page),
+      entry_type: &quot;note&quot;,
+      source_type: &quot;notion_import&quot;,
+      content_created_at: page[&quot;created_time&quot;] |&gt; parse_datetime(),
+      metadata: source_metadata(page)
+    }
+  end</p>
+<p>@impl true
+  def extract_assets(page) do
+    # Extract files from file properties and embedded media blocks
+    []  # Implementation extracts from blocks
+  end</p>
+<p>@impl true
+  def extract_tags(page) do
+    # Extract from select/multi-select properties
+    page[&quot;properties&quot;]
+    |&gt; Enum.flat_map(&amp;extract_tag_property/1)
+  end</p>
+<p>@impl true
+  def source_metadata(page) do
+    %{
+      &quot;notion&quot; =&gt; %{
+        &quot;id&quot; =&gt; page[&quot;id&quot;],
+        &quot;url&quot; =&gt; page[&quot;url&quot;],
+        &quot;parent&quot; =&gt; page[&quot;parent&quot;],
+        &quot;icon&quot; =&gt; page[&quot;icon&quot;]
+      }
+    }
+  end
+end
+</code></pre></p>
+<h4>Obsidian Adapter</h4>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapters.Obsidian do
+  @moduledoc &quot;&quot;&quot;
+  Adapter for Obsidian import and sync.
+  Supports vault folder import and Local REST API sync.
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Feeder.Adapter</p>
+<p># For detailed implementation, see:
+  # roadmap/future_roadmap_obsidian_import.md</p>
+<p>@impl true
+  def validate_credentials(%{&quot;endpoint&quot; =&gt; endpoint, &quot;api_key&quot; =&gt; key}) do
+    case ObsidianClient.list_files(endpoint, key) do
+      {:ok, _} -&gt; :ok
+      {:error, reason} -&gt; {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def fetch_changes(credentials, cursor, _opts) do
+    %{&quot;endpoint&quot; =&gt; endpoint, &quot;api_key&quot; =&gt; key} = credentials
+    known_files = cursor[&quot;files&quot;] || %{}</p>
+<p>case ObsidianClient.list_files(endpoint, key) do
+      {:ok, current_files} -&gt;
+        changes = detect_file_changes(known_files, current_files)
+        items = fetch_changed_files(endpoint, key, changes)
+        new_cursor = %{&quot;files&quot; =&gt; build_file_index(current_files)}
+        {:ok, items, new_cursor}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def parse_export(folder_path, _opts) do
+    {:ok, ObsidianVaultParser.stream_notes(folder_path)}
+  end</p>
+<p>@impl true
+  def to_entry(note, user_id) do
+    %{
+      user_id: user_id,
+      title: note.title || note.filename,
+      entry_type: &quot;note&quot;,
+      source_type: &quot;obsidian_import&quot;,
+      content_created_at: note.frontmatter[&quot;date&quot;] |&gt; parse_date(),
+      metadata: source_metadata(note)
+    }
+  end</p>
+<p>@impl true
+  def extract_assets(note) do
+    note.embedded_assets
+    |&gt; Enum.map(fn path -&gt;
+      %{
+        filename: Path.basename(path),
+        source_path: path
+      }
+    end)
+  end</p>
+<p>@impl true
+  def extract_tags(note) do
+    frontmatter_tags = note.frontmatter[&quot;tags&quot;] || []
+    inline_tags = note.inline_tags || []
+    (frontmatter_tags ++ inline_tags) |&gt; Enum.uniq()
+  end</p>
+<p>@impl true
+  def source_metadata(note) do
+    %{
+      &quot;obsidian&quot; =&gt; %{
+        &quot;path&quot; =&gt; note.relative_path,
+        &quot;aliases&quot; =&gt; note.frontmatter[&quot;aliases&quot;],
+        &quot;custom_properties&quot; =&gt; Map.drop(note.frontmatter, ~w(tags aliases date title))
+      }
+    }
+  end
+end
+</code></pre></p>
+<h4>Apple Notes Adapter</h4>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapters.AppleNotes do
+  @moduledoc &quot;&quot;&quot;
+  Adapter for Apple Notes import.
+  Supports third-party export files only (no API available).
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Feeder.Adapter</p>
+<p># For detailed implementation, see:
+  # roadmap/future_roadmap_apple_notes_import.md</p>
+<p>@impl true
+  def validate_credentials(_credentials) do
+    # No credentials needed - file-based import only
+    :ok
+  end</p>
+<p>@impl true
+  def fetch_changes(_credentials, _cursor, _opts) do
+    # Continuous sync not supported for Apple Notes
+    {:error, :not_supported}
+  end</p>
+<p>@impl true
+  def parse_export(folder_path, opts) do
+    format = opts[:format] || detect_format(folder_path)</p>
+<p>case format do
+      :markdown -&gt; {:ok, AppleNotesParser.stream_markdown(folder_path)}
+      :html -&gt; {:ok, AppleNotesParser.stream_html(folder_path)}
+      _ -&gt; {:error, :unknown_format}
+    end
+  end</p>
+<p>@impl true
+  def to_entry(note, user_id) do
+    %{
+      user_id: user_id,
+      title: note.title,
+      entry_type: &quot;note&quot;,
+      source_type: &quot;apple_notes_import&quot;,
+      content_created_at: note.created_at,
+      metadata: source_metadata(note)
+    }
+  end</p>
+<p>@impl true
+  def extract_assets(note) do
+    note.attachments
+    |&gt; Enum.map(fn att -&gt;
+      %{
+        filename: att.filename,
+        source_path: att.path,
+        mime_type: MIME.from_path(att.path)
+      }
+    end)
+  end</p>
+<p>@impl true
+  def extract_tags(note) do
+    folder_tag = if note.folder, do: [&quot;apple-notes:folder:#{note.folder}&quot;], else: []
+    hashtags = note.hashtags || []
+    folder_tag ++ hashtags
+  end</p>
+<p>@impl true
+  def source_metadata(note) do
+    %{
+      &quot;apple_notes&quot; =&gt; %{
+        &quot;folder&quot; =&gt; note.folder,
+        &quot;account&quot; =&gt; note.account,
+        &quot;source_format&quot; =&gt; note.source_format
+      }
+    }
+  end
+end
+</code></pre></p>
+<h4>RSS Adapter</h4>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapters.RSS do
+  @moduledoc &quot;&quot;&quot;
+  Adapter for RSS/Atom feed subscriptions.
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Feeder.Adapter</p>
+<p>@impl true
+  def validate_credentials(%{&quot;feed_url&quot; =&gt; url}) do
+    case RSSClient.fetch_feed(url) do
+      {:ok, _feed} -&gt; :ok
+      {:error, reason} -&gt; {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def fetch_changes(credentials, cursor, _opts) do
+    %{&quot;feed_url&quot; =&gt; url} = credentials
+    last_fetched = cursor[&quot;last_item_date&quot;]</p>
+<p>case RSSClient.fetch_feed(url) do
+      {:ok, feed} -&gt;
+        items = feed.items
+                |&gt; Enum.filter(&amp;newer_than?(&amp;1, last_fetched))
+                |&gt; Enum.map(&amp;parse_item/1)</p>
+<p>new_cursor = %{&quot;last_item_date&quot; =&gt; newest_date(items)}
+        {:ok, items, new_cursor}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def parse_export(_path, _opts) do
+    {:error, :not_supported}
+  end</p>
+<p>@impl true
+  def to_entry(item, user_id) do
+    %{
+      user_id: user_id,
+      title: item.title,
+      entry_type: &quot;article&quot;,
+      source_type: &quot;rss_feed&quot;,
+      content_created_at: item.published_at,
+      metadata: source_metadata(item)
+    }
+  end</p>
+<p>@impl true
+  def extract_assets(item) do
+    # Extract enclosures (podcasts, images)
+    item.enclosures
+    |&gt; Enum.map(fn enc -&gt;
+      %{
+        url: enc.url,
+        mime_type: enc.type,
+        filename: Path.basename(URI.parse(enc.url).path)
+      }
+    end)
+  end</p>
+<p>@impl true
+  def extract_tags(item) do
+    feed_tag = &quot;rss:feed:#{item.feed_title}&quot;
+    categories = item.categories || []
+    [feed_tag | categories]
+  end</p>
+<p>@impl true
+  def source_metadata(item) do
+    %{
+      &quot;rss&quot; =&gt; %{
+        &quot;guid&quot; =&gt; item.guid,
+        &quot;link&quot; =&gt; item.link,
+        &quot;feed_url&quot; =&gt; item.feed_url,
+        &quot;author&quot; =&gt; item.author
+      }
+    }
+  end
+end
+</code></pre></p>
+<h4>Web Clipper Adapter (MVP)</h4>
+<p>The Web Clipper is a core content ingestion path that allows users to save web pages, articles, and URLs to Onelist. It extracts clean, readable content and integrates with the Searcher Agent's similarity check to prevent duplicates.</p>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapters.WebClipper do
+  @moduledoc &quot;&quot;&quot;
+  Adapter for capturing web content (articles, pages, links).
+<p>MVP Features:
+  <ul>
+<li>URL metadata extraction (title, description, image)</li>
+  <li>Article content extraction (Readability-style)</li>
+  <li>YouTube URL handling (metadata + transcript)</li>
+  <li>Pre-save similarity check integration</li>
+  <li>Optional PDF capture (via headless browser)</li></p>
+<p>Entry Flow:
+  1. User submits URL (via API, browser extension, OpenClaw)
+  2. WebClipper extracts content + metadata
+  3. Similarity check runs to detect duplicates
+  4. If unique (or user confirms), entry is created
+  5. Asset Enrichment processes any images/media
+  &quot;&quot;&quot;</p>
+<p>@behaviour Onelist.Feeder.Adapter</p>
+<p>alias Onelist.Searcher.SimilarityCheck</p>
+<p>@youtube_domains [&quot;youtube.com&quot;, &quot;youtu.be&quot;, &quot;www.youtube.com&quot;]</p>
+<p># ============================================
+  # PUBLIC API
+  # ============================================</p>
+<p>@doc &quot;&quot;&quot;
+  Clip a URL and create an entry.</p>
+<p>## Options
+    <em> <code>:check_similarity</code> - Run similarity check before saving (default: true)
+    </em> <code>:similarity_threshold</code> - Threshold for duplicate detection (default: 0.70)
+    <em> <code>:extract_content</code> - Extract article content vs. just metadata (default: true)
+    </em> <code>:capture_pdf</code> - Generate PDF of the page (default: false)
+    <em> <code>:tags</code> - Additional tags to apply
+  &quot;&quot;&quot;
+  def clip_url(user_id, url, opts \\ []) do
+    check_similarity = Keyword.get(opts, :check_similarity, true)</p>
+<p>with {:ok, content} &lt;- extract_content(url),
+         {:ok, :proceed} &lt;- maybe_check_similarity(user_id, content, check_similarity, opts),
+         {:ok, entry_attrs} &lt;- build_entry_attrs(user_id, url, content, opts),
+         {:ok, entry} &lt;- create_entry(entry_attrs, content, opts) do
+      {:ok, entry}
+    else
+      {:ok, {:similar, matches}} -&gt;
+        # Return similarity matches for user decision
+        {:similar, matches}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Extract content from a URL without creating an entry.
+  Used for previews and similarity checks.
+  &quot;&quot;&quot;
+  def extract_content(url) do
+    cond do
+      youtube_url?(url) -&gt; extract_youtube(url)
+      true -&gt; extract_article(url)
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Preview what would be clipped without saving.
+  &quot;&quot;&quot;
+  def preview(url) do
+    with {:ok, content} &lt;- extract_content(url) do
+      {:ok, %{
+        url: url,
+        title: content.title,
+        description: content.description,
+        author: content.author,
+        published_at: content.published_at,
+        site_name: content.site_name,
+        image_url: content.image_url,
+        word_count: content.word_count,
+        content_preview: String.slice(content.text || &quot;&quot;, 0, 500),
+        content_type: content.content_type
+      }}
+    end
+  end</p>
+<p># ============================================
+  # ADAPTER BEHAVIOUR IMPLEMENTATION
+  # ============================================</p>
+<p>@impl true
+  def validate_credentials(_credentials) do
+    # Web clipper doesn't require credentials
+    :ok
+  end</p>
+<p>@impl true
+  def fetch_changes(_credentials, _cursor, _opts) do
+    # Web clipper is on-demand, not continuous sync
+    {:error, :not_supported}
+  end</p>
+<p>@impl true
+  def parse_export(_path, _opts) do
+    # Could support bookmark export files in future
+    {:error, :not_supported}
+  end</p>
+<p>@impl true
+  def to_entry(content, user_id) do
+    entry_type = case content.content_type do
+      :youtube -&gt; &quot;video&quot;
+      :article -&gt; &quot;article&quot;
+      _ -&gt; &quot;bookmark&quot;
+    end</p>
+<p>%{
+      user_id: user_id,
+      title: content.title,
+      entry_type: entry_type,
+      source_type: &quot;web_clip&quot;,
+      content_created_at: content.published_at,
+      metadata: source_metadata(content)
+    }
+  end</p>
+<p>@impl true
+  def extract_assets(content) do
+    assets = []</p>
+<p># Lead image
+    assets = if content.image_url do
+      [%{url: content.image_url, role: &quot;thumbnail&quot;} | assets]
+    else
+      assets
+    end</p>
+<p># YouTube thumbnail
+    assets = if content.content_type == :youtube &amp;&amp; content.thumbnail_url do
+      [%{url: content.thumbnail_url, role: &quot;thumbnail&quot;} | assets]
+    else
+      assets
+    end</p>
+<p>assets
+  end</p>
+<p>@impl true
+  def extract_tags(content) do
+    tags = [&quot;source:web&quot;]</p>
+<p>tags = if content.site_name do
+      [&quot;site:#{normalize_tag(content.site_name)}&quot; | tags]
+    else
+      tags
+    end</p>
+<p>tags = case content.content_type do
+      :youtube -&gt; [&quot;type:video&quot;, &quot;platform:youtube&quot; | tags]
+      :article -&gt; [&quot;type:article&quot; | tags]
+      _ -&gt; tags
+    end</p>
+<p>tags ++ (content.categories || [])
+  end</p>
+<p>@impl true
+  def source_metadata(content) do
+    base = %{
+      &quot;web_clip&quot; =&gt; %{
+        &quot;url&quot; =&gt; content.url,
+        &quot;site_name&quot; =&gt; content.site_name,
+        &quot;author&quot; =&gt; content.author,
+        &quot;published_at&quot; =&gt; content.published_at,
+        &quot;word_count&quot; =&gt; content.word_count,
+        &quot;language&quot; =&gt; content.language
+      }
+    }</p>
+<p>case content.content_type do
+      :youtube -&gt;
+        Map.put(base, &quot;youtube&quot;, %{
+          &quot;video_id&quot; =&gt; content.video_id,
+          &quot;channel&quot; =&gt; content.channel,
+          &quot;channel_id&quot; =&gt; content.channel_id,
+          &quot;duration_seconds&quot; =&gt; content.duration_seconds,
+          &quot;view_count&quot; =&gt; content.view_count,
+          &quot;has_transcript&quot; =&gt; content.transcript != nil
+        })</p>
+<p>_ -&gt;
+        base
+    end
+  end</p>
+<p># ============================================
+  # CONTENT EXTRACTION
+  # ============================================</p>
+<p>defp extract_article(url) do
+    with {:ok, html} &lt;- fetch_html(url),
+         {:ok, metadata} &lt;- extract_metadata(html, url),
+         {:ok, content} &lt;- extract_readable_content(html) do</p>
+<p>{:ok, %{
+        url: url,
+        content_type: :article,
+        title: metadata.title || content.title,
+        description: metadata.description,
+        author: metadata.author,
+        published_at: metadata.published_at,
+        site_name: metadata.site_name,
+        image_url: metadata.image,
+        text: content.text,
+        html: content.html,
+        word_count: count_words(content.text),
+        language: detect_language(content.text),
+        categories: metadata.keywords || []
+      }}
+    end
+  end</p>
+<p>defp extract_youtube(url) do
+    video_id = extract_youtube_id(url)</p>
+<p>with {:ok, metadata} &lt;- fetch_youtube_metadata(video_id),
+         {:ok, transcript} &lt;- fetch_youtube_transcript(video_id) do</p>
+<p>{:ok, %{
+        url: url,
+        content_type: :youtube,
+        video_id: video_id,
+        title: metadata.title,
+        description: metadata.description,
+        channel: metadata.channel_title,
+        channel_id: metadata.channel_id,
+        thumbnail_url: metadata.thumbnail_url,
+        duration_seconds: metadata.duration_seconds,
+        view_count: metadata.view_count,
+        published_at: metadata.published_at,
+        text: transcript,  # Full transcript text for embedding/search
+        word_count: count_words(transcript),
+        language: metadata.language,
+        categories: metadata.tags || []
+      }}
+    else
+      # Fallback: metadata only, no transcript
+      {:error, :transcript_unavailable} -&gt;
+        {:ok, metadata} = fetch_youtube_metadata(video_id)</p>
+<p>{:ok, %{
+          url: url,
+          content_type: :youtube,
+          video_id: video_id,
+          title: metadata.title,
+          description: metadata.description,
+          channel: metadata.channel_title,
+          channel_id: metadata.channel_id,
+          thumbnail_url: metadata.thumbnail_url,
+          duration_seconds: metadata.duration_seconds,
+          view_count: metadata.view_count,
+          published_at: metadata.published_at,
+          text: metadata.description,  # Use description as fallback
+          word_count: count_words(metadata.description),
+          transcript: nil,
+          categories: metadata.tags || []
+        }}</p>
+<p>error -&gt; error
+    end
+  end</p>
+<p># ============================================
+  # HTTP &amp; PARSING
+  # ============================================</p>
+<p>defp fetch_html(url) do
+    headers = [
+      {&quot;User-Agent&quot;, &quot;Mozilla/5.0 (compatible; OnelistBot/1.0; +https://onelist.my)&quot;},
+      {&quot;Accept&quot;, &quot;text/html,application/xhtml+xml&quot;}
+    ]</p>
+<p>case Req.get(url, headers: headers, follow_redirects: true, max_redirects: 5) do
+      {:ok, %{status: 200, body: body}} -&gt;
+        {:ok, body}</p>
+<p>{:ok, %{status: status}} -&gt;
+        {:error, {:http_error, status}}</p>
+<p>{:error, reason} -&gt;
+        {:error, {:fetch_failed, reason}}
+    end
+  end</p>
+<p>defp extract_metadata(html, url) do
+    # Extract Open Graph, Twitter Cards, and standard meta tags
+    {:ok, document} = Floki.parse_document(html)</p>
+<p>metadata = %{
+      title: extract_meta_content(document, [
+        ~s(meta[property=&quot;og:title&quot;]),
+        ~s(meta[name=&quot;twitter:title&quot;]),
+        &quot;title&quot;
+      ]),
+      description: extract_meta_content(document, [
+        ~s(meta[property=&quot;og:description&quot;]),
+        ~s(meta[name=&quot;twitter:description&quot;]),
+        ~s(meta[name=&quot;description&quot;])
+      ]),
+      image: extract_meta_content(document, [
+        ~s(meta[property=&quot;og:image&quot;]),
+        ~s(meta[name=&quot;twitter:image&quot;])
+      ]),
+      author: extract_meta_content(document, [
+        ~s(meta[name=&quot;author&quot;]),
+        ~s(meta[property=&quot;article:author&quot;])
+      ]),
+      site_name: extract_meta_content(document, [
+        ~s(meta[property=&quot;og:site_name&quot;])
+      ]) || extract_domain(url),
+      published_at: extract_meta_content(document, [
+        ~s(meta[property=&quot;article:published_time&quot;]),
+        ~s(meta[name=&quot;date&quot;])
+      ]) |&gt; parse_datetime(),
+      keywords: extract_meta_content(document, [
+        ~s(meta[name=&quot;keywords&quot;])
+      ]) |&gt; parse_keywords()
+    }</p>
+<p>{:ok, metadata}
+  end</p>
+<p>defp extract_readable_content(html) do
+    # Use Readability algorithm to extract main content
+    # This is a simplified implementation - production would use
+    # a library like readability or mozilla/readability port</p>
+<p>{:ok, document} = Floki.parse_document(html)</p>
+<p># Remove script, style, nav, header, footer, aside
+    cleaned = document
+    |&gt; Floki.filter_out(&quot;script&quot;)
+    |&gt; Floki.filter_out(&quot;style&quot;)
+    |&gt; Floki.filter_out(&quot;nav&quot;)
+    |&gt; Floki.filter_out(&quot;header&quot;)
+    |&gt; Floki.filter_out(&quot;footer&quot;)
+    |&gt; Floki.filter_out(&quot;aside&quot;)
+    |&gt; Floki.filter_out(&quot;.sidebar&quot;)
+    |&gt; Floki.filter_out(&quot;.comments&quot;)
+    |&gt; Floki.filter_out(&quot;.advertisement&quot;)</p>
+<p># Find main content area
+    main_content = Floki.find(cleaned, &quot;article, main, .content, .post, .entry-content&quot;)
+    |&gt; List.first()
+    || Floki.find(cleaned, &quot;body&quot;) |&gt; List.first()</p>
+<p>text = if main_content do
+      Floki.text(main_content, sep: &quot;\n\n&quot;)
+      |&gt; String.trim()
+      |&gt; collapse_whitespace()
+    else
+      &quot;&quot;
+    end</p>
+<p>title = Floki.find(document, &quot;h1&quot;)
+    |&gt; List.first()
+    |&gt; case do
+      nil -&gt; nil
+      elem -&gt; Floki.text(elem)
+    end</p>
+<p>{:ok, %{
+      text: text,
+      html: if(main_content, do: Floki.raw_html(main_content), else: nil),
+      title: title
+    }}
+  end</p>
+<p># ============================================
+  # YOUTUBE SPECIFIC
+  # ============================================</p>
+<p>defp youtube_url?(url) do
+    uri = URI.parse(url)
+    uri.host in @youtube_domains
+  end</p>
+<p>defp extract_youtube_id(url) do
+    uri = URI.parse(url)</p>
+<p>cond do
+      # youtu.be/VIDEO_ID
+      uri.host == &quot;youtu.be&quot; -&gt;
+        String.trim_leading(uri.path, &quot;/&quot;)</p>
+<p># youtube.com/watch?v=VIDEO_ID
+      uri.query &amp;&amp; String.contains?(uri.query, &quot;v=&quot;) -&gt;
+        URI.decode_query(uri.query)[&quot;v&quot;]</p>
+<p># youtube.com/embed/VIDEO_ID
+      String.starts_with?(uri.path, &quot;/embed/&quot;) -&gt;
+        String.trim_leading(uri.path, &quot;/embed/&quot;)</p>
+<p>true -&gt;
+        nil
+    end
+  end</p>
+<p>defp fetch_youtube_metadata(video_id) do
+    # Use YouTube Data API v3
+    api_key = Application.get_env(:onelist, :youtube_api_key)
+    url = &quot;https://www.googleapis.com/youtube/v3/videos&quot;</p>
+<p>params = %{
+      id: video_id,
+      part: &quot;snippet,contentDetails,statistics&quot;,
+      key: api_key
+    }</p>
+<p>case Req.get(url, params: params) do
+      {:ok, %{status: 200, body: %{&quot;items&quot; =&gt; [item | _]}}} -&gt;
+        snippet = item[&quot;snippet&quot;]
+        details = item[&quot;contentDetails&quot;]
+        stats = item[&quot;statistics&quot;]</p>
+<p>{:ok, %{
+          title: snippet[&quot;title&quot;],
+          description: snippet[&quot;description&quot;],
+          channel_title: snippet[&quot;channelTitle&quot;],
+          channel_id: snippet[&quot;channelId&quot;],
+          thumbnail_url: get_in(snippet, [&quot;thumbnails&quot;, &quot;high&quot;, &quot;url&quot;]),
+          published_at: snippet[&quot;publishedAt&quot;] |&gt; parse_datetime(),
+          duration_seconds: parse_iso8601_duration(details[&quot;duration&quot;]),
+          view_count: stats[&quot;viewCount&quot;] |&gt; parse_int(),
+          language: snippet[&quot;defaultLanguage&quot;] || snippet[&quot;defaultAudioLanguage&quot;],
+          tags: snippet[&quot;tags&quot;] || []
+        }}</p>
+<p>{:ok, %{status: 200, body: %{&quot;items&quot; =&gt; []}}} -&gt;
+        {:error, :video_not_found}</p>
+<p>{:error, reason} -&gt;
+        {:error, {:youtube_api_error, reason}}
+    end
+  end</p>
+<p>defp fetch_youtube_transcript(video_id) do
+    # YouTube doesn't have an official transcript API
+    # Options:
+    # 1. Use youtube-transcript-api (Python) via port
+    # 2. Use a third-party service
+    # 3. Scrape captions from video page
+    # 4. Use Asset Enrichment to transcribe audio later</p>
+<p># For MVP, try to fetch auto-captions
+    case fetch_youtube_captions(video_id) do
+      {:ok, transcript} -&gt; {:ok, transcript}
+      {:error, _} -&gt; {:error, :transcript_unavailable}
+    end
+  end</p>
+<p>defp fetch_youtube_captions(video_id) do
+    # Attempt to fetch captions via timedtext API
+    # This is a simplified approach - production would be more robust
+    url = &quot;https://www.youtube.com/watch?v=#{video_id}&quot;</p>
+<p>with {:ok, html} &lt;- fetch_html(url),
+         {:ok, caption_url} &lt;- extract_caption_url(html),
+         {:ok, captions} &lt;- fetch_and_parse_captions(caption_url) do
+      {:ok, captions}
+    end
+  end</p>
+<p>defp extract_caption_url(html) do
+    # Extract caption track URL from YouTube page
+    # Look for &quot;captionTracks&quot; in the page source
+    case Regex.run(~r/&quot;captionTracks&quot;:\[.</em>?&quot;baseUrl&quot;:&quot;([^&quot;]+)&quot;/, html) do
+      [_, url] -&gt;
+        {:ok, String.replace(url, &quot;\\u0026&quot;, &quot;&amp;&quot;)}
+      nil -&gt;
+        {:error, :no_captions}
+    end
+  end</p>
+<p>defp fetch_and_parse_captions(url) do
+    case Req.get(url) do
+      {:ok, %{status: 200, body: body}} -&gt;
+        # Parse XML captions
+        {:ok, doc} = Floki.parse_document(body)</p>
+<p>text = Floki.find(doc, &quot;text&quot;)
+        |&gt; Enum.map(&amp;Floki.text/1)
+        |&gt; Enum.join(&quot; &quot;)
+        |&gt; HtmlEntities.decode()</p>
+<p>{:ok, text}</p>
+<p>_ -&gt;
+        {:error, :caption_fetch_failed}
+    end
+  end</p>
+<p># ============================================
+  # SIMILARITY CHECK INTEGRATION
+  # ============================================</p>
+<p>defp maybe_check_similarity(_user_id, _content, false, _opts), do: {:ok, :proceed}</p>
+<p>defp maybe_check_similarity(user_id, content, true, opts) do
+    threshold = Keyword.get(opts, :similarity_threshold, 0.70)
+    text = content.title &lt;&gt; &quot;\n\n&quot; &lt;&gt; (content.text || content.description || &quot;&quot;)</p>
+<p>case SimilarityCheck.check(user_id, text, threshold: threshold) do
+      {:ok, %{recommendation: :create}} -&gt;
+        {:ok, :proceed}</p>
+<p>{:ok, %{recommendation: rec, similar: matches}} when rec in [:review, :duplicate] -&gt;
+        {:ok, {:similar, matches}}</p>
+<p>{:error, reason} -&gt;
+        # Log but don't block on similarity check failure
+        Logger.warn(&quot;Similarity check failed: #{inspect(reason)}&quot;)
+        {:ok, :proceed}
+    end
+  end</p>
+<p># ============================================
+  # ENTRY CREATION
+  # ============================================</p>
+<p>defp build_entry_attrs(user_id, url, content, opts) do
+    base_attrs = to_entry(content, user_id)
+    extra_tags = Keyword.get(opts, :tags, [])</p>
+<p>attrs = Map.merge(base_attrs, %{
+      content: content.text || content.description,
+      tags: extract_tags(content) ++ extra_tags
+    })</p>
+<p>{:ok, attrs}
+  end</p>
+<p>defp create_entry(attrs, content, opts) do
+    assets = extract_assets(content)
+    metadata = source_metadata(content)</p>
+<p># Delegate to Feeder's standard entry creation
+    Onelist.Feeder.EntryCreator.create(
+      attrs,
+      content.text || content.description,
+      attrs.tags,
+      assets,
+      Keyword.put(opts, :metadata, metadata)
+    )
+  end</p>
+<p># ============================================
+  # HELPERS
+  # ============================================</p>
+<p>defp extract_meta_content(document, selectors) do
+    Enum.find_value(selectors, fn selector -&gt;
+      case Floki.find(document, selector) do
+        [] -&gt; nil
+        [elem | _] -&gt;
+          case Floki.attribute(elem, &quot;content&quot;) do
+            [content] -&gt; content
+            _ -&gt; Floki.text(elem) |&gt; String.trim() |&gt; nilify_empty()
+          end
+      end
+    end)
+  end</p>
+<p>defp extract_domain(url) do
+    uri = URI.parse(url)
+    uri.host
+    |&gt; String.replace(~r/^www\./, &quot;&quot;)
+  end</p>
+<p>defp parse_datetime(nil), do: nil
+  defp parse_datetime(str) when is_binary(str) do
+    case DateTime.from_iso8601(str) do
+      {:ok, dt, _} -&gt; dt
+      _ -&gt; nil
+    end
+  end</p>
+<p>defp parse_keywords(nil), do: []
+  defp parse_keywords(str) when is_binary(str) do
+    str
+    |&gt; String.split(&quot;,&quot;)
+    |&gt; Enum.map(&amp;String.trim/1)
+    |&gt; Enum.filter(&amp;(&amp;1 != &quot;&quot;))
+  end</p>
+<p>defp parse_iso8601_duration(nil), do: nil
+  defp parse_iso8601_duration(str) do
+    # Parse PT1H2M3S format
+    case Regex.run(~r/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/, str) do
+      [_, h, m, s] -&gt;
+        hours = parse_int(h) || 0
+        minutes = parse_int(m) || 0
+        seconds = parse_int(s) || 0
+        hours <em> 3600 + minutes </em> 60 + seconds
+      _ -&gt; nil
+    end
+  end</p>
+<p>defp parse_int(nil), do: nil
+  defp parse_int(&quot;&quot;), do: nil
+  defp parse_int(str) when is_binary(str) do
+    case Integer.parse(str) do
+      {n, _} -&gt; n
+      :error -&gt; nil
+    end
+  end</p>
+<p>defp count_words(nil), do: 0
+  defp count_words(text) do
+    text
+    |&gt; String.split(~r/\s+/)
+    |&gt; length()
+  end</p>
+<p>defp detect_language(nil), do: nil
+  defp detect_language(text) when byte_size(text) &lt; 50, do: nil
+  defp detect_language(text) do
+    # Simple heuristic or use a library like lingua
+    # For MVP, return nil and let Asset Enrichment detect
+    nil
+  end</p>
+<p>defp collapse_whitespace(text) do
+    text
+    |&gt; String.replace(~r/\n{3,}/, &quot;\n\n&quot;)
+    |&gt; String.replace(~r/[ \t]+/, &quot; &quot;)
+  end</p>
+<p>defp nilify_empty(&quot;&quot;), do: nil
+  defp nilify_empty(str), do: str</p>
+<p>defp normalize_tag(str) do
+    str
+    |&gt; String.downcase()
+    |&gt; String.replace(~r/[^\w]+/, &quot;-&quot;)
+    |&gt; String.trim(&quot;-&quot;)
+  end
+end
+</code></pre></p>
+<strong>Web Clipper Flow:</strong>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                         WEB CLIPPER FLOW                                     │
+│                                                                              │
+│  USER SUBMITS URL                                                            │
+│  (API, Browser Extension, OpenClaw, Share Sheet)                             │
+│         │                                                                    │
+│         ▼                                                                    │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  1. DETECT CONTENT TYPE                                             │    │
+│  │     ├── YouTube URL? → YouTube adapter (metadata + transcript)      │    │
+│  │     └── Regular URL? → Article adapter (Readability extraction)     │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│         │                                                                    │
+│         ▼                                                                    │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  2. EXTRACT CONTENT                                                 │    │
+│  │     ├── Fetch HTML                                                  │    │
+│  │     ├── Extract metadata (OG, Twitter Cards, meta tags)            │    │
+│  │     ├── Extract readable content (Readability algorithm)           │    │
+│  │     └── YouTube: Fetch API metadata + captions/transcript          │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│         │                                                                    │
+│         ▼                                                                    │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  3. SIMILARITY CHECK (via Searcher Agent)                          │    │
+│  │     ├── Generate embedding for extracted content                   │    │
+│  │     ├── Query existing entries for similarity                      │    │
+│  │     └── Return recommendation: :create, :review, or :duplicate     │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│         │                                                                    │
+│         ├── If :create → Proceed to save                                    │
+│         │                                                                    │
+│         └── If :review or :duplicate → Return matches to user               │
+│                    │                                                         │
+│                    ▼                                                         │
+│            ┌─────────────────────────────────────────────────────────┐      │
+│            │  USER DECISION                                          │      │
+│            │  [Save Anyway] [View Existing] [Link] [Cancel]          │      │
+│            └─────────────────────────────────────────────────────────┘      │
+│                    │                                                         │
+│                    ▼                                                         │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  4. CREATE ENTRY                                                    │    │
+│  │     ├── Save entry with extracted content                          │    │
+│  │     ├── Apply auto-tags (source:web, site:<em>, type:</em>)               │    │
+│  │     └── Download thumbnail/lead image as asset                     │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│         │                                                                    │
+│         ▼                                                                    │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  5. POST-IMPORT PROCESSING                                          │    │
+│  │     ├── Searcher Agent: Generate embeddings                        │    │
+│  │     ├── Asset Enrichment: Process images, generate thumbnail       │    │
+│  │     └── River Agent: Notify, suggest filing                        │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>YouTube URL Handling (Important Note):</strong>
+<p>Onelist does <strong>NOT</strong> download YouTube videos due to:
+<li>Terms of Service concerns</li>
+<li>Storage cost implications</li>
+<li>Maintenance burden (yt-dlp breaks frequently)</li></p>
+<p>Instead, for YouTube URLs:
+1. Store the URL as a reference
+2. Extract metadata via YouTube Data API (title, channel, duration, thumbnail)
+3. Attempt to fetch transcript/captions for searchability
+4. If no transcript available, Asset Enrichment can transcribe audio later (opt-in)</p>
+<p>The user's YouTube content remains on YouTube; Onelist stores the <strong>knowledge</strong> extracted from it.</p>
+<h4>Lifelog Audio Adapter</h4>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapters.LifelogAudio do
+  @moduledoc &quot;&quot;&quot;
+  Adapter for lifelog audio recordings from wearable devices.
+  Supports Plaud and other audio recording pendants/wearables.
+  &quot;&quot;&quot;
+<p>@behaviour Onelist.Feeder.Adapter</p>
+<p>@impl true
+  def validate_credentials(%{&quot;device_type&quot; =&gt; type} = credentials) do
+    client = get_client(type)
+    case client.test_connection(credentials) do
+      {:ok, _} -&gt; :ok
+      {:error, reason} -&gt; {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def fetch_changes(credentials, cursor, _opts) do
+    %{&quot;device_type&quot; =&gt; type} = credentials
+    client = get_client(type)
+    since = cursor[&quot;last_recording_time&quot;]</p>
+<p>case client.get_recordings(credentials, since: since) do
+      {:ok, recordings} -&gt;
+        items = Enum.map(recordings, &amp;parse_recording(&amp;1, type))
+        new_cursor = %{&quot;last_recording_time&quot; =&gt; newest_timestamp(recordings)}
+        {:ok, items, new_cursor}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>@impl true
+  def parse_export(folder_path, opts) do
+    # Support importing exported audio files from devices
+    device_type = opts[:device_type] || detect_device_type(folder_path)
+    {:ok, LifelogAudioParser.stream_recordings(folder_path, device_type)}
+  end</p>
+<p>@impl true
+  def to_entry(recording, user_id) do
+    %{
+      user_id: user_id,
+      title: recording.title || &quot;Recording #{recording.started_at}&quot;,
+      entry_type: &quot;memory&quot;,
+      source_type: &quot;lifelog_audio_import&quot;,
+      content_created_at: recording.started_at,
+      metadata: source_metadata(recording)
+    }
+  end</p>
+<p>@impl true
+  def extract_assets(recording) do
+    [
+      %{
+        url: recording.audio_url,
+        source_path: recording.audio_path,
+        mime_type: recording.mime_type || &quot;audio/mp3&quot;,
+        filename: &quot;recording_#{recording.id}.#{recording.extension || &quot;mp3&quot;}&quot;
+      }
+    ]
+  end</p>
+<p>@impl true
+  def extract_tags(recording) do
+    device_tag = &quot;lifelog:#{recording.device_type}&quot;
+    [device_tag | (recording.tags || [])]
+  end</p>
+<p>@impl true
+  def source_metadata(recording) do
+    %{
+      &quot;lifelog_audio&quot; =&gt; %{
+        &quot;id&quot; =&gt; recording.id,
+        &quot;device_type&quot; =&gt; recording.device_type,
+        &quot;duration_seconds&quot; =&gt; recording.duration,
+        &quot;transcript&quot; =&gt; recording.transcript,
+        &quot;location&quot; =&gt; recording.location
+      }
+    }
+  end</p>
+<p># Device-specific clients
+  defp get_client(&quot;plaud&quot;), do: Onelist.Feeder.Clients.Plaud
+  defp get_client(&quot;generic&quot;), do: Onelist.Feeder.Clients.GenericAudio
+  defp get_client(_), do: Onelist.Feeder.Clients.GenericAudio
+end
+</code></pre></p>
+<strong>Supported Devices</strong>:
+<li><strong>Plaud</strong>: AI-powered recording pendant with cloud sync and transcription</li>
+<li><strong>Generic Audio</strong>: Support for exporting audio files from any device</li>
+<hr>
+<h2>Import Pipeline</h2>
+<h3>One-Time Import Flow</h3>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.ImportPipeline do
+  @moduledoc &quot;&quot;&quot;
+  Orchestrates one-time import jobs.
+  &quot;&quot;&quot;
+<p>alias Onelist.Feeder.{Adapters, FormatConverter, EntryCreator, PostImportDispatcher}</p>
+<p>def run_import(job_id) do
+    job = ImportJobs.get!(job_id)
+    adapter = get_adapter(job.source_type)</p>
+<p>update_job(job, status: &quot;processing&quot;, started_at: DateTime.utc_now())</p>
+<p>try do
+      {:ok, stream} = adapter.parse_export(job.file_path, job.options)</p>
+<p>stream
+      |&gt; Stream.with_index()
+      |&gt; Stream.each(fn {item, index} -&gt;
+        process_item(job, adapter, item, index)
+      end)
+      |&gt; Stream.run()</p>
+<p>finalize_job(job, &quot;completed&quot;)
+    rescue
+      e -&gt;
+        finalize_job(job, &quot;failed&quot;, Exception.message(e))
+    end
+  end</p>
+<p>defp process_item(job, adapter, item, index) do
+    # Convert to entry
+    entry_attrs = adapter.to_entry(item, job.user_id)
+    content = FormatConverter.convert(item.content, item.format)
+    tags = adapter.extract_tags(item)
+    assets = adapter.extract_assets(item)</p>
+<p># Check for duplicates
+    if skip_duplicate?(job, item) do
+      update_progress(job, index, :skipped)
+    else
+      # Create entry
+      case EntryCreator.create(entry_attrs, content, tags, assets) do
+        {:ok, entry} -&gt;
+          # Store mapping
+          create_source_mapping(job, item, entry)</p>
+<p># Queue post-import processing
+          PostImportDispatcher.dispatch(entry, assets)</p>
+<p>update_progress(job, index, :success)</p>
+<p>{:error, reason} -&gt;
+          record_error(job, item, reason)
+          update_progress(job, index, :failed)
+      end
+    end
+  end
+end
+</code></pre></p>
+<h3>Progress Tracking</h3>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.ImportProgress do
+  @moduledoc &quot;&quot;&quot;
+  Real-time progress tracking for import jobs.
+  &quot;&quot;&quot;
+<p>use Phoenix.Channel</p>
+<p>def join(&quot;import:&quot; &lt;&gt; job_id, _params, socket) do
+    if authorized?(socket.assigns.user_id, job_id) do
+      {:ok, assign(socket, :job_id, job_id)}
+    else
+      {:error, %{reason: &quot;unauthorized&quot;}}
+    end
+  end</p>
+<p>def broadcast_progress(job_id, progress) do
+    Phoenix.PubSub.broadcast(
+      Onelist.PubSub,
+      &quot;import:#{job_id}&quot;,
+      {:progress, progress}
+    )
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Continuous Sync</h2>
+<h3>Sync Scheduler</h3>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.SyncScheduler do
+  @moduledoc &quot;&quot;&quot;
+  Schedules and manages continuous sync jobs.
+  &quot;&quot;&quot;
+<p>use Oban.Worker, queue: :sync, max_attempts: 3</p>
+<p>@impl Oban.Worker
+  def perform(%Oban.Job{args: %{&quot;integration_id&quot; =&gt; id}}) do
+    integration = ExternalIntegrations.get!(id)</p>
+<p>if integration.sync_enabled do
+      case run_sync(integration) do
+        {:ok, stats} -&gt;
+          update_sync_state(integration, :success, stats)
+          schedule_next_sync(integration)
+          :ok</p>
+<p>{:error, reason} -&gt;
+          update_sync_state(integration, :failed, %{error: reason})
+          :ok  # Don't retry immediately - wait for next scheduled sync
+      end
+    else
+      :ok
+    end
+  end</p>
+<p>defp run_sync(integration) do
+    adapter = get_adapter(integration.source_type)
+    credentials = decrypt_credentials(integration.credentials)
+    cursor = integration.sync_cursor || %{}</p>
+<p>case adapter.fetch_changes(credentials, cursor, integration.sync_filter) do
+      {:ok, items, new_cursor} -&gt;
+        stats = process_sync_items(integration, adapter, items)
+        ExternalIntegrations.update_cursor(integration, new_cursor)
+        {:ok, stats}</p>
+<p>{:error, reason} -&gt;
+        {:error, reason}
+    end
+  end</p>
+<p>defp schedule_next_sync(integration) do
+    delay = integration.sync_frequency_minutes <em> 60</p>
+<p>%{&quot;integration_id&quot; =&gt; integration.id}
+    |&gt; new(schedule_in: delay)
+    |&gt; Oban.insert()
+  end
+end
+</code></pre></p>
+<h3>Webhook Handler</h3>
+<pre><code class="language-elixir">defmodule OnelistWeb.WebhookController do
+  @moduledoc &quot;&quot;&quot;
+  Handles incoming webhooks from external services.
+  &quot;&quot;&quot;
+<p>use OnelistWeb, :controller</p>
+<p>def evernote(conn, params) do
+    with :ok &lt;- verify_evernote_webhook(conn, params),
+         {:ok, integration} &lt;- find_integration(&quot;evernote&quot;, params[&quot;userId&quot;]) do</p>
+<p># Queue immediate sync for this integration
+      Onelist.Feeder.SyncScheduler.new(%{&quot;integration_id&quot; =&gt; integration.id})
+      |&gt; Oban.insert()</p>
+<p>send_resp(conn, 200, &quot;OK&quot;)
+    else
+      _ -&gt; send_resp(conn, 200, &quot;OK&quot;)  # Always return 200 to webhook sender
+    end
+  end</p>
+<p>def notion(conn, params) do
+    with :ok &lt;- verify_notion_signature(conn),
+         {:ok, integration} &lt;- find_integration(&quot;notion&quot;, params[&quot;data&quot;][&quot;workspace_id&quot;]) do</p>
+<p>case params[&quot;type&quot;] do
+        &quot;page.content_updated&quot; -&gt;
+          queue_page_sync(integration, params[&quot;data&quot;][&quot;page_id&quot;])</p>
+<p>&quot;page.created&quot; -&gt;
+          queue_page_sync(integration, params[&quot;data&quot;][&quot;page_id&quot;])</p>
+<p>_ -&gt;
+          :ignore
+      end</p>
+<p>send_resp(conn, 200, &quot;OK&quot;)
+    else
+      _ -&gt; send_resp(conn, 200, &quot;OK&quot;)
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>Post-Import Agent Chain</h2>
+<h3>Dispatcher</h3>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.PostImportDispatcher do
+  @moduledoc &quot;&quot;&quot;
+  Dispatches post-import work to other agents.
+  &quot;&quot;&quot;
+<p>alias Onelist.Workers.{
+    AssetEnrichmentWorker,
+    ReaderWorker,
+    SearcherWorker,
+    LibrarianWorker,
+    PlannerWorker,
+    RiverNotificationWorker
+  }</p>
+<p>def dispatch(entry, assets, opts \\ []) do
+    # Asset Enrichment - process all imported assets
+    Enum.each(assets, fn asset -&gt;
+      %{entry_id: entry.id, asset_id: asset.id}
+      |&gt; AssetEnrichmentWorker.new()
+      |&gt; Oban.insert()
+    end)</p>
+<p># Searcher - generate embeddings for semantic search
+    %{entry_id: entry.id}
+    |&gt; SearcherWorker.new()
+    |&gt; Oban.insert()</p>
+<p># Conditionally queue other agents based on options/settings
+    if opts[:analyze_content] do
+      %{entry_id: entry.id}
+      |&gt; ReaderWorker.new()
+      |&gt; Oban.insert()
+    end</p>
+<p>if opts[:extract_actions] do
+      %{entry_id: entry.id}
+      |&gt; PlannerWorker.new()
+      |&gt; Oban.insert()
+    end</p>
+<p># Batch notification to River (don't notify per-entry during bulk import)
+    unless opts[:batch_mode] do
+      %{entry_id: entry.id, event: &quot;imported&quot;}
+      |&gt; RiverNotificationWorker.new()
+      |&gt; Oban.insert()
+    end
+  end</p>
+<p>def dispatch_batch_complete(job_id, stats) do
+    # Notify River of bulk import completion
+    %{
+      event: &quot;import_complete&quot;,
+      job_id: job_id,
+      stats: stats
+    }
+    |&gt; RiverNotificationWorker.new()
+    |&gt; Oban.insert()</p>
+<p># Queue Librarian to analyze newly imported tags
+    %{trigger: &quot;import_complete&quot;, job_id: job_id}
+    |&gt; LibrarianWorker.new()
+    |&gt; Oban.insert()
+  end
+end
+</code></pre></p>
+<h3>Agent Integration Points</h3>
+<table>
+<tr><th>Agent</th><th>Trigger</th><th>Purpose</th></tr>
+<tr><td><strong>Asset Enrichment</strong></td><td>Per asset</td><td>Process images, audio, video, PDFs</td></tr>
+<tr><td><strong>Searcher</strong></td><td>Per entry</td><td>Generate embeddings, index content</td></tr>
+<tr><td><strong>Reader</strong></td><td>Optional</td><td>Summarize content, extract takeaways</td></tr>
+<tr><td><strong>Librarian</strong></td><td>Batch complete</td><td>Analyze imported tags, suggest merges</td></tr>
+<tr><td><strong>Planner</strong></td><td>Optional</td><td>Extract action items, create tasks</td></tr>
+<tr><td><strong>River</strong></td><td>Batch complete</td><td>Notify user, suggest organization</td></tr>
+</table>
+<hr>
+<h2>Implementation Phases</h2>
+<h3>Phase 1: Foundation (3-4 weeks)</h3>
+<strong>Scope</strong>:
+<li>Core adapter interface</li>
+<li><code>external_integrations</code> table</li>
+<li><code>import_jobs</code> table</li>
+<li><code>source_entry_mappings</code> table</li>
+<li>Import job progress tracking</li>
+<li>Basic file upload handling</li>
+<strong>Deliverables</strong>:
+<li>Database migrations</li>
+<li><code>Onelist.Feeder.Adapter</code> behaviour</li>
+<li><code>Onelist.Feeder.ImportPipeline</code></li>
+<li><code>Onelist.Feeder.ImportProgress</code> (LiveView channel)</li>
+<li>Import settings UI shell</li>
+<h3>Phase 1.5: Web Clipper (MVP) (1-2 weeks)</h3>
+<strong>Scope</strong> (MVP Priority):
+<li>Web Clipper adapter for URL capture</li>
+<li>Article content extraction (Readability-style)</li>
+<li>Metadata extraction (Open Graph, Twitter Cards)</li>
+<li>YouTube URL handling (metadata + transcript)</li>
+<li>Integration with Searcher's similarity check</li>
+<li>Basic web clip API endpoint</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Feeder.Adapters.WebClipper</code></li>
+<li><code>POST /api/v1/clip</code> endpoint</li>
+<li>Readability-style content extraction</li>
+<li>YouTube metadata + transcript fetching</li>
+<li>Similarity check integration (prevents duplicates)</li>
+<li>Auto-tagging (source:web, site:</em>, type:<em>)</li>
+<strong>Dependencies</strong>:
+<li>Searcher Agent (for similarity check)</li>
+<li>Phase 1 foundation (adapter interface)</li>
+<strong>Why MVP</strong>:
+<li>Core content ingestion path for OpenClaw users</li>
+<li>Enables "send links to save" use case</li>
+<li>Similarity check prevents duplicate content</li>
+<li>YouTube transcript extraction makes videos searchable</li>
+<h3>Phase 2: RSS & Obsidian (2-3 weeks)</h3>
+<strong>Scope</strong>:
+<li>RSS adapter (simplest continuous sync)</li>
+<li>Obsidian vault import (simplest file import)</li>
+<li>Format converter for Markdown</li>
+<li>Basic post-import dispatcher</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Feeder.Adapters.RSS</code></li>
+<li><code>Onelist.Feeder.Adapters.Obsidian</code></li>
+<li><code>Onelist.Feeder.FormatConverter</code></li>
+<li>RSS subscription UI</li>
+<li>Obsidian import UI</li>
+<h3>Phase 3: Apple Notes (1-2 weeks)</h3>
+<strong>Scope</strong>:
+<li>Apple Notes adapter (file import only)</li>
+<li>HTML to Markdown conversion</li>
+<li>Attachment extraction</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Feeder.Adapters.AppleNotes</code></li>
+<li>Enhanced format converter</li>
+<li>Apple Notes import UI with instructions</li>
+<h3>Phase 4: Evernote (3-4 weeks)</h3>
+<strong>Scope</strong>:
+<li>Evernote adapter (ENEX + API)</li>
+<li>ENML to Markdown conversion</li>
+<li>OAuth 1.0a flow</li>
+<li>Webhook receiver</li>
+<li>Sync scheduler</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Feeder.Adapters.Evernote</code></li>
+<li><code>Onelist.Feeder.EnmlConverter</code></li>
+<li>Evernote OAuth flow</li>
+<li>Webhook endpoint</li>
+<li>Evernote connection UI</li>
+<h3>Phase 5: Notion (3-4 weeks)</h3>
+<strong>Scope</strong>:
+<li>Notion adapter (export + API)</li>
+<li>Block to Markdown conversion</li>
+<li>OAuth 2.0 flow</li>
+<li>Webhook receiver</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Feeder.Adapters.Notion</code></li>
+<li><code>Onelist.Feeder.NotionBlockConverter</code></li>
+<li>Notion OAuth flow</li>
+<li>Webhook endpoint</li>
+<li>Notion connection UI</li>
+<h3>Phase 6: Lifelog Audio (2-3 weeks)</h3>
+<strong>Scope</strong>:
+<li>Lifelog audio adapter supporting multiple devices</li>
+<li>Plaud integration (primary)</li>
+<li>Generic audio file import</li>
+<li>Audio asset handling</li>
+<li>Transcript storage and indexing</li>
+<strong>Deliverables</strong>:
+<li><code>Onelist.Feeder.Adapters.LifelogAudio</code></li>
+<li><code>Onelist.Feeder.Clients.Plaud</code></li>
+<li><code>Onelist.Feeder.Clients.GenericAudio</code></li>
+<li>Lifelog audio connection UI</li>
+<li>Audio file import UI</li>
+<h3>Phase 7: Enhanced Features (2-3 weeks)</h3>
+<strong>Scope</strong>:
+<li>Duplicate detection improvements</li>
+<li>Conflict resolution UI</li>
+<li>Bi-directional sync (where supported)</li>
+<li>Sync history and logs</li>
+<li>Bulk operations (re-sync, disconnect)</li>
+<strong>Deliverables</strong>:
+<li>Enhanced duplicate detection</li>
+<li>Conflict resolution workflows</li>
+<li>Sync dashboard</li>
+<li>Audit logs</li>
+<h3>Phase 8: Additional Sources (Ongoing)</h3>
+<strong>Future sources to add</strong>:
+<li>Email (IMAP)</li>
+<li>Instapaper</li>
+<li>Twitter/X Bookmarks</li>
+<li>Browser bookmarks</li>
+<li>Google Keep</li>
+<li>OneNote</li>
+<li>Roam Research</li>
+<li>Bear Notes</li>
+<h3>Phase 9: Cloud Storage Integration (Post-MVP)</h3>
+<strong>Goal</strong>: Connect to cloud storage providers (Google Drive, Dropbox, OneDrive) where files remain in their original location but are treated as first-class Onelist assets with full enrichment.
+<strong>Key Principle</strong>: <strong>No duplicate storage</strong>. Files stay in the user's cloud provider; Onelist maintains references and runs Asset Enrichment as if files were stored locally.
+<strong>Supported Providers</strong>:
+<table>
+<tr><th>Provider</th><th>API</th><th>Auth</th><th>Webhook Support</th></tr>
+<tr><td>Google Drive</td><td>Drive API v3</td><td>OAuth 2.0</td><td>Push notifications</td></tr>
+<tr><td>Dropbox</td><td>Dropbox API v2</td><td>OAuth 2.0</td><td>Webhooks</td></tr>
+<tr><td>OneDrive</td><td>Microsoft Graph</td><td>OAuth 2.0</td><td>Change notifications</td></tr>
+</table>
+<strong>Architecture</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CLOUD STORAGE INTEGRATION                                  │
+│                                                                              │
+│  User's Cloud Storage                    Onelist                             │
+│  ┌─────────────────────┐                ┌─────────────────────────────────┐ │
+│  │  Google Drive       │                │                                 │ │
+│  │  ├── Documents/     │   Reference    │  entries                        │ │
+│  │  │   └── notes.pdf ─┼───────────────►│  ├── title: &quot;notes.pdf&quot;         │ │
+│  │  ├── Photos/        │   (no copy)    │  │   entry_type: cloud_file     │ │
+│  │  │   └── img.jpg ───┼───────────────►│  │   metadata.provider: gdrive  │ │
+│  │  └── ...            │                │  │   metadata.remote_id: abc123 │ │
+│  └─────────────────────┘                │  │   metadata.remote_path: /... │ │
+│                                         │  └── ...                        │ │
+│           │                             │                                 │ │
+│           │ On-demand fetch             │  assets (reference only)        │ │
+│           │ for enrichment              │  ├── storage_type: cloud_ref    │ │
+│           ▼                             │  │   provider: google_drive     │ │
+│  ┌─────────────────────┐                │  │   remote_id: file_id         │ │
+│  │  Asset Enrichment   │◄───────────────┤  │   remote_url: direct_link    │ │
+│  │  Agent              │  Fetch content │  │   cached_until: timestamp    │ │
+│  │                     │  (streaming)   │  └── ...                        │ │
+│  │  • Transcription    │                │                                 │ │
+│  │  • OCR              │                │  Enrichment results stored      │ │
+│  │  • Description      │────────────────►│  normally (transcripts, etc.) │ │
+│  └─────────────────────┘                └─────────────────────────────────┘ │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Data Model</strong>:
+<pre><code class="language-elixir"># Cloud storage connections
+schema &quot;cloud_storage_connections&quot; do
+  belongs_to :user, Onelist.Accounts.User
+<p>field :provider, :string           # &quot;google_drive&quot;, &quot;dropbox&quot;, &quot;onedrive&quot;
+  field :account_id, :string         # Provider's account/user ID
+  field :account_email, :string      # User's email on provider
+  field :access_token, :binary       # Encrypted OAuth token
+  field :refresh_token, :binary      # Encrypted refresh token
+  field :token_expires_at, :utc_datetime
+  field :root_folder_id, :string     # Optional: limit to specific folder
+  field :sync_enabled, :boolean, default: true
+  field :last_sync_at, :utc_datetime
+  field :last_sync_cursor, :string   # Provider-specific change cursor</p>
+<p>timestamps()
+end</p>
+<h1>Asset reference extension (added to existing assets table)</h1>
+<h1>New storage_type: &quot;cloud_ref&quot; (vs &quot;local&quot;, &quot;s3&quot;, etc.)</h1>
+<h1>Additional metadata fields:</h1>
+<h1>  - provider: &quot;google_drive&quot; | &quot;dropbox&quot; | &quot;onedrive&quot;</h1>
+<h1>  - remote_id: provider's file ID</h1>
+<h1>  - remote_path: full path in provider</h1>
+<h1>  - remote_url: direct download URL (may expire)</h1>
+<h1>  - remote_modified_at: provider's last modified timestamp</h1>
+<h1>  - cached_locally_until: if temporarily cached for enrichment</h1>
+</code></pre>
+<strong>Sync Behavior</strong>:
+<table>
+<tr><th>Event</th><th>Action</th></tr>
+<tr><td>Initial connect</td><td>Scan selected folders, create entry + asset references</td></tr>
+<tr><td>File added (webhook)</td><td>Create entry + asset reference, queue enrichment</td></tr>
+<tr><td>File modified (webhook)</td><td>Update metadata, re-queue enrichment if needed</td></tr>
+<tr><td>File deleted (webhook)</td><td>Mark entry as <code>cloud_deleted</code>, user decides action</td></tr>
+<tr><td>File moved (webhook)</td><td>Update <code>remote_path</code> in metadata</td></tr>
+<tr><td>User requests content</td><td>Stream from provider on-demand</td></tr>
+<tr><td>Enrichment triggered</td><td>Fetch file temporarily, process, discard local copy</td></tr>
+</table>
+<strong>Enrichment Flow</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Adapters.CloudStorage.Enricher do
+  @moduledoc &quot;&quot;&quot;
+  Handles Asset Enrichment for cloud-referenced files.
+  Files are fetched on-demand, processed, then discarded.
+  &quot;&quot;&quot;
+<p>def enrich_cloud_asset(asset) do
+    # 1. Fetch file content (streaming where possible)
+    {:ok, stream} = fetch_file_stream(asset)</p>
+<p># 2. For large files, may need temporary local storage
+    temp_path = if requires_temp_file?(asset) do
+      write_temp_file(stream, asset)
+    else
+      nil
+    end</p>
+<p># 3. Run standard Asset Enrichment
+    input = temp_path || stream
+    result = Onelist.AssetEnrichment.process(asset, input)</p>
+<p># 4. Clean up temp file if created
+    if temp_path, do: File.rm(temp_path)</p>
+<p># 5. Enrichment results (transcript, OCR, etc.) stored in Onelist
+    result
+  end</p>
+<p>defp fetch_file_stream(%{metadata: %{&quot;provider&quot; =&gt; &quot;google_drive&quot;}} = asset) do
+    GoogleDrive.download_stream(asset.metadata[&quot;remote_id&quot;])
+  end</p>
+<p>defp fetch_file_stream(%{metadata: %{&quot;provider&quot; =&gt; &quot;dropbox&quot;}} = asset) do
+    Dropbox.download_stream(asset.metadata[&quot;remote_path&quot;])
+  end</p>
+<p>defp fetch_file_stream(%{metadata: %{&quot;provider&quot; =&gt; &quot;onedrive&quot;}} = asset) do
+    OneDrive.download_stream(asset.metadata[&quot;remote_id&quot;])
+  end
+end
+</code></pre></p>
+<strong>User Experience</strong>:
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Cloud Storage                                                        [+ Add]│
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  📁 Google Drive                                        ✅ Connected    │ │
+│  │  ──────────────────────────────────────────────────────────────────── │ │
+│  │  Account: user@gmail.com                                               │ │
+│  │  Syncing: /Documents, /Notes (2 folders)                              │ │
+│  │  Last sync: 3 minutes ago • 847 files indexed                         │ │
+│  │                                                                        │ │
+│  │  ⓘ Files remain in Google Drive. Onelist indexes and enriches them.  │ │
+│  │                                                                        │ │
+│  │  [Manage Folders]  [Sync Now]  [View Files]  [Disconnect]             │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  📦 Dropbox                                             ✅ Connected    │ │
+│  │  ──────────────────────────────────────────────────────────────────── │ │
+│  │  Account: user@example.com                                             │ │
+│  │  Syncing: Entire Dropbox                                              │ │
+│  │  Last sync: 1 hour ago • 2,341 files indexed                          │ │
+│  │                                                                        │ │
+│  │  [Manage Folders]  [Sync Now]  [View Files]  [Disconnect]             │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  Available Providers:                                                        │
+│  [+ Google Drive]  [+ Dropbox]  [+ OneDrive]                                │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Key Benefits</strong>:
+<li><strong>No storage duplication</strong>: User's files stay where they are</li>
+<li><strong>No egress costs</strong>: Only fetch when needed for enrichment</li>
+<li><strong>Full enrichment</strong>: Transcription, OCR, descriptions work identically</li>
+<li><strong>Search integration</strong>: Cloud files searchable alongside local content</li>
+<li><strong>Deletion safety</strong>: User controls what happens when cloud files are deleted</li>
+<strong>Implementation Tasks</strong>:
+<li>[ ] OAuth flows for Google, Dropbox, Microsoft</li>
+<li>[ ] <code>cloud_storage_connections</code> schema and migrations</li>
+<li>[ ] Webhook endpoints for each provider</li>
+<li>[ ] Change detection and sync cursors</li>
+<li>[ ] On-demand file fetching with streaming</li>
+<li>[ ] Temporary file handling for enrichment</li>
+<li>[ ] UI for folder selection and connection management</li>
+<li>[ ] Handling of deleted/moved files</li>
+<li>[ ] Rate limiting per provider API</li>
+<h3>Post-MVP Considerations</h3>
+<strong>Sources under evaluation</strong> (not currently planned):
+<li><strong>Kindle Highlights</strong>: Export file import - requires research into current Kindle export formats and legal considerations for book content</li>
+<li><strong>iCloud Drive</strong>: Similar to other cloud storage, but Apple's API access is limited</li>
+<li><strong>Box</strong>: Enterprise cloud storage - add if user demand warrants</li>
+<li><strong>Amazon S3/GCS buckets</strong>: For power users who want to connect their own object storage</li>
+<hr>
+<h2>Technical Considerations</h2>
+<h3>Rate Limiting</h3>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.RateLimiter do
+  @moduledoc &quot;&quot;&quot;
+  Rate limiting for external API calls.
+  &quot;&quot;&quot;
+<p>@limits %{
+    &quot;evernote&quot; =&gt; {3, :second},      # 3 req/sec
+    &quot;notion&quot; =&gt; {3, :second},        # 3 req/sec average
+    &quot;obsidian&quot; =&gt; {10, :second},     # Local, can be higher
+    &quot;lifelog_audio&quot; =&gt; {10, :second}, # Device APIs
+    &quot;rss&quot; =&gt; {1, :second}            # Be polite to RSS servers
+  }</p>
+<p>def with_rate_limit(source_type, fun) do
+    {limit, period} = Map.get(@limits, source_type, {10, :second})</p>
+<p>Hammer.check_rate(&quot;feeder:#{source_type}&quot;, period_to_ms(period), limit)
+    |&gt; case do
+      {:allow, _} -&gt; fun.()
+      {:deny, _} -&gt;
+        Process.sleep(period_to_ms(period))
+        with_rate_limit(source_type, fun)
+    end
+  end
+end
+</code></pre></p>
+<h3>Error Handling</h3>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.ErrorHandler do
+  @moduledoc &quot;&quot;&quot;
+  Centralized error handling for Feeder Agent.
+  &quot;&quot;&quot;
+<p>def handle_sync_error(integration, error) do
+    case classify_error(error) do
+      :auth_expired -&gt;
+        disable_integration(integration, &quot;Authentication expired&quot;)
+        notify_user(integration.user_id, :auth_expired, integration)</p>
+<p>:rate_limited -&gt;
+        reschedule_sync(integration, delay: :exponential)</p>
+<p>:network_error -&gt;
+        reschedule_sync(integration, delay: :short)</p>
+<p>:permanent -&gt;
+        disable_integration(integration, error)
+        notify_user(integration.user_id, :sync_failed, integration)</p>
+<p>:transient -&gt;
+        # Will retry via Oban
+        :ok
+    end
+  end
+end
+</code></pre></p>
+<h3>Security</h3>
+<strong>Credential Storage</strong>:
+<pre><code class="language-elixir">defmodule Onelist.Feeder.CredentialVault do
+  @moduledoc &quot;&quot;&quot;
+  Secure storage for integration credentials.
+  &quot;&quot;&quot;
+<p>@encryption_key Application.compile_env(:onelist, :credential_encryption_key)</p>
+<p>def encrypt(credentials) when is_map(credentials) do
+    credentials
+    |&gt; Jason.encode!()
+    |&gt; Plug.Crypto.encrypt(@encryption_key, &quot;feeder_credentials&quot;)
+  end</p>
+<p>def decrypt(encrypted) do
+    encrypted
+    |&gt; Plug.Crypto.decrypt(@encryption_key, &quot;feeder_credentials&quot;)
+    |&gt; case do
+      {:ok, json} -&gt; {:ok, Jason.decode!(json)}
+      :error -&gt; {:error, :decryption_failed}
+    end
+  end
+end
+</code></pre></p>
+<h3>Performance</h3>
+<li><strong>Streaming</strong>: Process large exports as streams, not loading all into memory</li>
+<li><strong>Batching</strong>: Batch database operations (insert 50-100 entries at a time)</li>
+<li><strong>Parallel Assets</strong>: Upload assets in parallel with configurable concurrency</li>
+<li><strong>Incremental Sync</strong>: Only fetch changes since last sync</li>
+<li><strong>Background Processing</strong>: All sync work happens in Oban queues</li>
+<hr>
+<h2>User Experience</h2>
+<h3>Integration Settings</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Connected Sources                                                    [+ Add]│
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  📓 Evernote                                           ✅ Connected    │ │
+│  │  ──────────────────────────────────────────────────────────────────── │ │
+│  │  Account: john@example.com                                             │ │
+│  │  Last sync: 5 minutes ago • 1,247 notes synced                        │ │
+│  │  Sync: Every 15 minutes                                               │ │
+│  │                                                                        │ │
+│  │  [Sync Now]  [Settings]  [View History]  [Disconnect]                 │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  📝 Notion                                             ✅ Connected    │ │
+│  │  ──────────────────────────────────────────────────────────────────── │ │
+│  │  Workspace: My Workspace                                               │ │
+│  │  Last sync: 2 hours ago • 89 pages synced                             │ │
+│  │  Sync: Real-time (webhooks)                                           │ │
+│  │                                                                        │ │
+│  │  [Sync Now]  [Manage Access]  [View History]  [Disconnect]            │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  📰 RSS Feeds                                          ✅ Active       │ │
+│  │  ──────────────────────────────────────────────────────────────────── │ │
+│  │  12 feeds • 342 articles imported                                      │ │
+│  │  Last check: 30 minutes ago                                           │ │
+│  │                                                                        │ │
+│  │  [Check Now]  [Manage Feeds]  [View History]                          │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  ─────────────────────────────────────────────────────────────────────────  │
+│                                                                              │
+│  One-Time Imports                                                            │
+│                                                                              │
+│  [📁 Import from File]                                                      │
+│  Upload ENEX, Notion export, Obsidian vault, or Apple Notes export          │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Add Source Flow</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Add Source                                                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Connect a new source to automatically import content into Onelist.         │
+│                                                                              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │             │  │             │  │             │  │             │        │
+│  │  📓         │  │  📝         │  │  💎         │  │  🍎         │        │
+│  │  Evernote   │  │  Notion     │  │  Obsidian   │  │  Apple      │        │
+│  │             │  │             │  │             │  │  Notes      │        │
+│  │  [Connect]  │  │  [Connect]  │  │  [Connect]  │  │  [Import]   │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘        │
+│                                                                              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │             │  │             │  │             │  │             │        │
+│  │  📰         │  │  🎙️         │  │  📧         │  │  📁         │        │
+│  │  RSS Feed   │  │  Lifelog    │  │  Email      │  │  File       │        │
+│  │             │  │  Audio      │  │  (Coming)   │  │  Upload     │        │
+│  │  [Add Feed] │  │  [Connect]  │  │  [Notify]   │  │  [Upload]   │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘        │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Import Progress</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  Importing from Evernote...                                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ████████████████████░░░░░░░░░░░░░░░░░░░░  48%                              │
+│                                                                              │
+│  Notes:        596 / 1,247                                                   │
+│  Attachments:  234 / 512                                                     │
+│  Tags:         45 created                                                    │
+│                                                                              │
+│  Currently processing:                                                       │
+│  &quot;Meeting notes - Q4 Planning Session&quot;                                       │
+│                                                                              │
+│  ⏱️  Elapsed: 2m 34s • Remaining: ~3m                                        │
+│                                                                              │
+│  Errors: 2                                                                   │
+│  • &quot;Corrupted note&quot; - Skipped (invalid content)                             │
+│  • &quot;Large attachment&quot; - Skipped (exceeds 100MB limit)                       │
+│                                                                              │
+│  [Cancel Import]                                                            │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>Web Clipper API (MVP)</h3>
+<p>The Web Clipper provides a simple API for saving URLs to Onelist with automatic content extraction and duplicate detection.</p>
+<strong>Endpoint:</strong> <code>POST /api/v1/clip</code>
+<pre><code class="language-bash"># Basic web clip
+curl -X POST https://api.onelist.my/v1/clip \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;url&quot;: &quot;https://example.com/article/interesting-topic&quot;,
+    &quot;tags&quot;: [&quot;reading-list&quot;, &quot;ai&quot;]
+  }'
+<h1>Response (success):</h1>
+{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;entry_id&quot;: &quot;abc123&quot;,
+    &quot;title&quot;: &quot;Interesting Topic - A Deep Dive&quot;,
+    &quot;entry_type&quot;: &quot;article&quot;,
+    &quot;url&quot;: &quot;https://example.com/article/interesting-topic&quot;,
+    &quot;word_count&quot;: 1523,
+    &quot;tags&quot;: [&quot;source:web&quot;, &quot;site:example-com&quot;, &quot;type:article&quot;, &quot;reading-list&quot;, &quot;ai&quot;]
+  }
+}
+<h1>Response (similar content found):</h1>
+{
+  &quot;success&quot;: false,
+  &quot;code&quot;: &quot;SIMILAR_CONTENT_FOUND&quot;,
+  &quot;data&quot;: {
+    &quot;recommendation&quot;: &quot;review&quot;,
+    &quot;highest_score&quot;: 0.82,
+    &quot;message&quot;: &quot;Found similar content (82% match). Review existing entries before saving.&quot;,
+    &quot;similar&quot;: [
+      {
+        &quot;entry_id&quot;: &quot;xyz789&quot;,
+        &quot;title&quot;: &quot;Interesting Topic Explained&quot;,
+        &quot;similarity_percent&quot;: 82,
+        &quot;created_at&quot;: &quot;2026-01-15T10:30:00Z&quot;
+      }
+    ],
+    &quot;actions&quot;: {
+      &quot;save_anyway&quot;: &quot;/api/v1/clip?force=true&quot;,
+      &quot;view_existing&quot;: &quot;/api/v1/entries/xyz789&quot;
+    }
+  }
+}
+</code></pre>
+<strong>Request Parameters:</strong>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+<tr><td><code>url</code></td><td>string</td><td>Yes</td><td>URL to clip</td></tr>
+<tr><td><code>tags</code></td><td>array</td><td>No</td><td>Additional tags to apply</td></tr>
+<tr><td><code>check_similarity</code></td><td>boolean</td><td>No</td><td>Run duplicate check (default: true)</td></tr>
+<tr><td><code>similarity_threshold</code></td><td>float</td><td>No</td><td>Similarity threshold 0.0-1.0 (default: 0.70)</td></tr>
+<tr><td><code>extract_content</code></td><td>boolean</td><td>No</td><td>Extract article content (default: true)</td></tr>
+<tr><td><code>force</code></td><td>boolean</td><td>No</td><td>Save even if similar content exists (default: false)</td></tr>
+</table>
+<strong>YouTube URL Handling:</strong>
+<pre><code class="language-bash"># YouTube URLs are handled specially
+curl -X POST https://api.onelist.my/v1/clip \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -d '{&quot;url&quot;: &quot;https://www.youtube.com/watch?v=dQw4w9WgXcQ&quot;}'
+<h1>Response:</h1>
+{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;entry_id&quot;: &quot;def456&quot;,
+    &quot;title&quot;: &quot;Video Title Here&quot;,
+    &quot;entry_type&quot;: &quot;video&quot;,
+    &quot;url&quot;: &quot;https://www.youtube.com/watch?v=dQw4w9WgXcQ&quot;,
+    &quot;metadata&quot;: {
+      &quot;channel&quot;: &quot;Channel Name&quot;,
+      &quot;duration_seconds&quot;: 212,
+      &quot;view_count&quot;: 1234567,
+      &quot;has_transcript&quot;: true
+    },
+    &quot;tags&quot;: [&quot;source:web&quot;, &quot;platform:youtube&quot;, &quot;type:video&quot;]
+  }
+}
+</code></pre>
+<strong>Preview Endpoint:</strong> <code>POST /api/v1/clip/preview</code>
+<p>Preview what will be extracted without saving:</p>
+<pre><code class="language-bash">curl -X POST https://api.onelist.my/v1/clip/preview \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -d '{&quot;url&quot;: &quot;https://example.com/article&quot;}'
+<h1>Response:</h1>
+{
+  &quot;success&quot;: true,
+  &quot;data&quot;: {
+    &quot;title&quot;: &quot;Article Title&quot;,
+    &quot;description&quot;: &quot;Article description...&quot;,
+    &quot;author&quot;: &quot;John Doe&quot;,
+    &quot;site_name&quot;: &quot;Example.com&quot;,
+    &quot;image_url&quot;: &quot;https://example.com/og-image.jpg&quot;,
+    &quot;word_count&quot;: 1523,
+    &quot;content_preview&quot;: &quot;First 500 characters of extracted content...&quot;
+  }
+}
+</code></pre>
+<hr>
+<h2>Success Metrics</h2>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Import speed</td><td>>50 entries/second</td></tr>
+<tr><td>Sync latency (webhook)</td><td><60 seconds</td></tr>
+<tr><td>Sync latency (polling)</td><td><sync_frequency</td></tr>
+<tr><td>Format conversion accuracy</td><td>>95%</td></tr>
+<tr><td>Duplicate detection accuracy</td><td>>99%</td></tr>
+<tr><td>API error rate</td><td><1%</td></tr>
+<tr><td>User-reported sync issues</td><td><0.1% of syncs</td></tr>
+</table>
+<hr>
+<h2>Dependencies</h2>
+<h3>External</h3>
+<li>Evernote API key (requires approval)</li>
+<li>Notion public integration (requires setup)</li>
+<li>Obsidian Local REST API plugin (user installs)</li>
+<li>Plaud API access (if available) or export file support</li>
+<h3>Internal</h3>
+<li>Onelist Core API</li>
+<li>Oban job processing</li>
+<li>Phoenix PubSub for progress</li>
+<li>Asset storage backend</li>
+<h3>Libraries</h3>
+<pre><code class="language-elixir"># mix.exs
+defp deps do
+  [
+    # OAuth
+    {:oauther, &quot;~&gt; 1.3&quot;},           # OAuth 1.0a (Evernote)
+    {:oauth2, &quot;~&gt; 2.0&quot;},            # OAuth 2.0 (Notion)
+<p># HTTP
+    {:req, &quot;~&gt; 0.4&quot;},</p>
+<p># XML parsing (ENEX, RSS)
+    {:sweet_xml, &quot;~&gt; 0.7&quot;},
+    {:saxy, &quot;~&gt; 1.5&quot;},              # Streaming XML</p>
+<p># Feed parsing
+    {:feeder_ex, &quot;~&gt; 1.1&quot;},</p>
+<p># Rate limiting
+    {:hammer, &quot;~&gt; 6.1&quot;},</p>
+<p># YAML (Obsidian frontmatter)
+    {:yaml_elixir, &quot;~&gt; 2.9&quot;},</p>
+<p># CSV (Notion exports)
+    {:nimble_csv, &quot;~&gt; 1.2&quot;}
+  ]
+end
+</code></pre></p>
+<hr>
+<h2>References</h2>
+<h3>Detailed Source Roadmaps</h3>
+<li><a href="./future_roadmap_evernote_import.md">Evernote Import Roadmap</a></li>
+<li><a href="./future_roadmap_notion_import.md">Notion Import Roadmap</a></li>
+<li><a href="./future_roadmap_obsidian_import.md">Obsidian Import Roadmap</a></li>
+<li><a href="./future_roadmap_apple_notes_import.md">Apple Notes Import Roadmap</a></li>
+<h3>Web Capture</h3>
+<li><a href="./web_content_capture_plan.md">Web Content Capture Plan</a> - Tiered capture architecture (Hyperbrowser, Browser Use, agent-browser)</li>
+<h3>Related Agents</h3>
+<li><a href="./searcher_agent_plan.md">Searcher Agent</a> - Similarity check for duplicate detection (Web Clipper dependency)</li>
+<li><a href="./river_agent_plan.md">River Agent</a> - User notifications, orchestration</li>
+<li><a href="./asset_enrichment_agent_plan.md">Asset Enrichment Agent</a> - Post-import asset processing</li>
+<li><a href="./future_roadmap.md">Future Roadmap</a> - Original agent definitions</li>
+<h3>External Documentation</h3>
+<li><a href="https://dev.evernote.com/doc/">Evernote Developer Docs</a></li>
+<li><a href="https://developers.notion.com/">Notion API Docs</a></li>
+<li><a href="https://github.com/coddingtonbear/obsidian-local-rest-api">Obsidian Local REST API</a></li>
+<li><a href="https://www.rssboard.org/rss-specification">RSS 2.0 Specification</a></li>
+<hr>
+<h2>AI Agent Best Practices Recommendations</h2>
+<p>Based on analysis of the <a href="./ai_agent_implementation_guide.md">AI Agent Implementation Guide</a> and <a href="./ai_agent_ecosystem_resources_guide.md">AI Agent Ecosystem Resources Guide</a>, the following enhancements should be implemented.</p>
+<h3>Rate Limiting with Telemetry</h3>
+<p>Implement per-source, per-user rate limiting with OpenTelemetry instrumentation for all external API calls.</p>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.RateLimiter do
+  @moduledoc &quot;&quot;&quot;
+  Rate limiting for Feeder external API calls.
+  Tracks per-source, per-user limits with telemetry.
+  &quot;&quot;&quot;
+<p>use GenServer
+  require OpenTelemetry.Tracer, as: Tracer</p>
+<p>@default_limits %{
+    youtube: {100, :per_hour},
+    rss: {1000, :per_hour},
+    web_fetch: {500, :per_hour},
+    evernote_api: {100, :per_hour},
+    notion_api: {100, :per_hour}
+  }</p>
+<p>def check_and_track(user_id, source, operation) do
+    Tracer.with_span &quot;feeder.rate_limit.check&quot; do
+      Tracer.set_attributes([
+        {&quot;feeder.source&quot;, to_string(source)},
+        {&quot;feeder.operation&quot;, operation},
+        {&quot;user.id&quot;, user_id}
+      ])</p>
+<p>case check_limit(user_id, source) do
+        {:ok, remaining} -&gt;
+          :telemetry.execute(
+            [:feeder, :rate_limit, :allowed],
+            %{remaining: remaining},
+            %{source: source, user_id: user_id}
+          )
+          {:ok, remaining}</p>
+<p>{:error, :rate_limited, retry_after} -&gt;
+          :telemetry.execute(
+            [:feeder, :rate_limit, :blocked],
+            %{retry_after: retry_after},
+            %{source: source, user_id: user_id}
+          )
+          {:error, :rate_limited, retry_after}
+      end
+    end
+  end
+end
+</code></pre></p>
+<strong>Implementation Priority:</strong> HIGH
+<strong>Effort:</strong> 2-3 days
+<strong>Impact:</strong> Prevents API bans, enables fair usage tracking
+<h3>Circuit Breaker Pattern</h3>
+<p>Implement circuit breakers for external service calls to handle failures gracefully.</p>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.CircuitBreaker do
+  @moduledoc &quot;&quot;&quot;
+  Circuit breaker for Feeder external services.
+  States: :closed (normal), :open (failing), :half_open (testing)
+  &quot;&quot;&quot;
+<p>use GenServer
+  require Logger</p>
+<p>@failure_threshold 5
+  @reset_timeout_ms 30_000</p>
+<p>defstruct [
+    :service,
+    state: :closed,
+    failure_count: 0,
+    last_failure_at: nil,
+    success_count: 0
+  ]</p>
+<p>def call(service, fun) do
+    case get_state(service) do
+      :open -&gt;
+        Logger.warning(&quot;Circuit open for #{service}, returning fallback&quot;)
+        {:error, :circuit_open}</p>
+<p>:half_open -&gt;
+        try_call_and_update(service, fun, :half_open)</p>
+<p>:closed -&gt;
+        try_call_and_update(service, fun, :closed)
+    end
+  end</p>
+<p>defp try_call_and_update(service, fun, current_state) do
+    case fun.() do
+      {:ok, result} -&gt;
+        record_success(service, current_state)
+        {:ok, result}</p>
+<p>{:error, reason} -&gt;
+        record_failure(service, reason)
+        {:error, reason}
+    end
+  rescue
+    error -&gt;
+      record_failure(service, error)
+      {:error, error}
+  end</p>
+<p>defp record_failure(service, _reason) do
+    GenServer.cast(__MODULE__, {:failure, service})
+  end</p>
+<p>defp record_success(service, previous_state) do
+    GenServer.cast(__MODULE__, {:success, service, previous_state})
+  end
+end
+</code></pre></p>
+<strong>Implementation Priority:</strong> HIGH
+<strong>Effort:</strong> 2-3 days
+<strong>Impact:</strong> Graceful degradation, prevents cascade failures
+<h3>Content Verification</h3>
+<p>Verify captured content matches user expectations before storage.</p>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.ContentVerifier do
+  @moduledoc &quot;&quot;&quot;
+  Verifies captured content quality and completeness.
+  &quot;&quot;&quot;
+<p>@min_content_length 100
+  @max_boilerplate_ratio 0.3</p>
+<p>def verify(captured, opts \\ []) do
+    checks = [
+      {:content_length, &amp;check_content_length/2},
+      {:boilerplate_ratio, &amp;check_boilerplate_ratio/2},
+      {:title_present, &amp;check_title_present/2},
+      {:main_content_extracted, &amp;check_main_content/2}
+    ]</p>
+<p>results = Enum.map(checks, fn {name, check_fn} -&gt;
+      {name, check_fn.(captured, opts)}
+    end)</p>
+<p>failed = Enum.filter(results, fn {_, result} -&gt; result != :ok end)</p>
+<p>if Enum.empty?(failed) do
+      {:ok, :verified}
+    else
+      {:warning, :verification_issues, failed}
+    end
+  end</p>
+<p>defp check_content_length(%{content: content}, _opts) do
+    if String.length(content || &quot;&quot;) &gt;= @min_content_length do
+      :ok
+    else
+      {:issue, :content_too_short, String.length(content || &quot;&quot;)}
+    end
+  end</p>
+<p>defp check_boilerplate_ratio(%{content: content, raw_html: html}, _opts) do
+    content_len = String.length(content || &quot;&quot;)
+    html_len = String.length(html || &quot;&quot;)</p>
+<p>ratio = if html_len &gt; 0, do: content_len / html_len, else: 1.0</p>
+<p>if ratio &gt;= @max_boilerplate_ratio do
+      :ok
+    else
+      {:issue, :high_boilerplate, ratio}
+    end
+  end</p>
+<p>defp check_title_present(%{title: title}, _opts) do
+    if title &amp;&amp; String.length(title) &gt; 0, do: :ok, else: {:issue, :no_title}
+  end</p>
+<p>defp check_main_content(%{content: content}, _opts) do
+    # Check for paragraph-like content (multiple sentences)
+    sentence_count = content
+      |&gt; String.split(~r/[.!?]+/)
+      |&gt; Enum.filter(&amp;(String.length(String.trim(&amp;1)) &gt; 10))
+      |&gt; length()</p>
+<p>if sentence_count &gt;= 2, do: :ok, else: {:issue, :no_main_content}
+  end
+end
+</code></pre></p>
+<strong>Implementation Priority:</strong> MEDIUM
+<strong>Effort:</strong> 2-3 days
+<strong>Impact:</strong> Better content quality, user confidence
+<h3>Webhook Security</h3>
+<p>Implement defense-in-depth for webhook endpoints (RSS callbacks, OAuth flows).</p>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.WebhookSecurity do
+  @moduledoc &quot;&quot;&quot;
+  Security scaffolding for Feeder webhooks.
+  &quot;&quot;&quot;
+<p>@max_payload_size 10 </em> 1024 <em> 1024  # 10MB
+  @allowed_content_types ~w(application/json application/xml text/xml application/rss+xml)</p>
+<p>def validate_request(conn, opts \\ []) do
+    with :ok &lt;- check_content_type(conn),
+         :ok &lt;- check_payload_size(conn),
+         :ok &lt;- verify_signature(conn, opts),
+         :ok &lt;- check_origin(conn, opts) do
+      {:ok, :validated}
+    end
+  end</p>
+<p>defp check_content_type(conn) do
+    content_type = Plug.Conn.get_req_header(conn, &quot;content-type&quot;) |&gt; List.first() || &quot;&quot;
+    base_type = content_type |&gt; String.split(&quot;;&quot;) |&gt; List.first() |&gt; String.trim()</p>
+<p>if base_type in @allowed_content_types do
+      :ok
+    else
+      {:error, :invalid_content_type, base_type}
+    end
+  end</p>
+<p>defp check_payload_size(conn) do
+    content_length = Plug.Conn.get_req_header(conn, &quot;content-length&quot;)
+      |&gt; List.first()
+      |&gt; to_integer()</p>
+<p>if content_length &amp;&amp; content_length &lt;= @max_payload_size do
+      :ok
+    else
+      {:error, :payload_too_large}
+    end
+  end</p>
+<p>defp verify_signature(conn, opts) do
+    if secret = Keyword.get(opts, :webhook_secret) do
+      signature = Plug.Conn.get_req_header(conn, &quot;x-hub-signature-256&quot;) |&gt; List.first()
+      body = conn.assigns[:raw_body] || &quot;&quot;</p>
+<p>expected = &quot;sha256=&quot; &lt;&gt; :crypto.mac(:hmac, :sha256, secret, body) |&gt; Base.encode16(case: :lower)</p>
+<p>if Plug.Crypto.secure_compare(signature || &quot;&quot;, expected) do
+        :ok
+      else
+        {:error, :invalid_signature}
+      end
+    else
+      :ok  # No signature verification configured
+    end
+  end</p>
+<p>defp to_integer(nil), do: nil
+  defp to_integer(str), do: String.to_integer(str)
+end
+</code></pre></p>
+<strong>Implementation Priority:</strong> HIGH
+<strong>Effort:</strong> 1-2 days
+<strong>Impact:</strong> Security hardening, prevents abuse
+<h3>OpenTelemetry Integration</h3>
+<p>Trace all import operations with detailed metrics.</p>
+<pre><code class="language-elixir">defmodule Onelist.Feeder.Telemetry do
+  @moduledoc &quot;&quot;&quot;
+  OpenTelemetry instrumentation for Feeder Agent.
+  &quot;&quot;&quot;
+<p>require OpenTelemetry.Tracer, as: Tracer</p>
+<p>def trace_import(source, user_id, fun) do
+    Tracer.with_span &quot;feeder.import.#{source}&quot; do
+      Tracer.set_attributes([
+        {&quot;feeder.source&quot;, to_string(source)},
+        {&quot;user.id&quot;, user_id},
+        {&quot;gen_ai.system&quot;, &quot;feeder&quot;}
+      ])</p>
+<p>start_time = System.monotonic_time(:millisecond)</p>
+<p>result = fun.()</p>
+<p>duration = System.monotonic_time(:millisecond) - start_time
+      {status, count} = case result do
+        {:ok, entries} -&gt; {&quot;success&quot;, length(entries)}
+        {:error, _} -&gt; {&quot;error&quot;, 0}
+      end</p>
+<p>Tracer.set_attributes([
+        {&quot;feeder.import.duration_ms&quot;, duration},
+        {&quot;feeder.import.status&quot;, status},
+        {&quot;feeder.import.entry_count&quot;, count}
+      ])</p>
+<p>:telemetry.execute(
+        [:feeder, :import, :complete],
+        %{duration_ms: duration, entry_count: count},
+        %{source: source, user_id: user_id, status: status}
+      )</p>
+<p>result
+    end
+  end</p>
+<p>def trace_web_fetch(url, fun) do
+    Tracer.with_span &quot;feeder.web_fetch&quot; do
+      Tracer.set_attributes([
+        {&quot;http.url&quot;, sanitize_url(url)},
+        {&quot;feeder.operation&quot;, &quot;web_fetch&quot;}
+      ])</p>
+<p>result = fun.()</p>
+<p>Tracer.set_attributes([
+        {&quot;http.status_code&quot;, get_status(result)}
+      ])</p>
+<p>result
+    end
+  end</p>
+<p>defp sanitize_url(url) do
+    # Remove query params that might contain sensitive data
+    URI.parse(url) |&gt; Map.put(:query, nil) |&gt; URI.to_string()
+  end
+end
+</code></pre></p>
+<strong>Implementation Priority:</strong> HIGH
+<strong>Effort:</strong> 2-3 days
+<strong>Impact:</strong> Full observability, debugging, cost tracking
+<h3>Implementation Priority Matrix</h3>
+<table>
+<tr><th>Enhancement</th><th>Priority</th><th>Effort</th><th>Impact</th><th>MVP/Post-MVP</th></tr>
+<tr><td>Rate Limiting with Telemetry</td><td>HIGH</td><td>2-3 days</td><td>High</td><td>MVP</td></tr>
+<tr><td>Circuit Breaker Pattern</td><td>HIGH</td><td>2-3 days</td><td>High</td><td>MVP</td></tr>
+<tr><td>Webhook Security</td><td>HIGH</td><td>1-2 days</td><td>High</td><td>MVP</td></tr>
+<tr><td>OpenTelemetry Integration</td><td>HIGH</td><td>2-3 days</td><td>High</td><td>MVP</td></tr>
+<tr><td>Content Verification</td><td>MEDIUM</td><td>2-3 days</td><td>Medium</td><td>MVP</td></tr>
+</table>
+<h3>References</h3>
+<li><a href="./ai_agent_implementation_guide.md">AI Agent Implementation Guide</a></li>
+<li><a href="./ai_agent_ecosystem_resources_guide.md">AI Agent Ecosystem Resources Guide</a></li>
+<li><a href="./unified_agent_modules.md">Unified Agent Modules</a></li>
+</ul>
+<hr>
+</em>Document created: 2026-01-29<em>
+</em>Last updated: 2026-01-30* (Added AI Agent Best Practices Recommendations section)
+  </article>
+</body>
+</html>

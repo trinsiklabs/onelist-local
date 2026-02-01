@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI Planning Session - Resume Prompt - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>UI Planning Session - Resume Prompt</h1>
+<strong>Last Updated:</strong> 2026-01-30
+<strong>Purpose:</strong> Resume context for continuing UI planning work
+<hr>
+<h2>Current Task</h2>
+<p>Building <code>river_ui_plan.md</code> by extracting UI-related details from <code>../river_agent_plan.md</code> (16,992 lines, 38 sections).</p>
+<hr>
+<h2>Established Design Conventions</h2>
+<p>These conventions have been reviewed and approved across all agent UI plans:</p>
+<h3>1. List View as Universal Pattern</h3>
+<ul>
+<li><strong>Always use "list view"</strong> - never "table view" or "data table"</li>
+<li>List view is the primary UI pattern everywhere in Onelist (fits the app name)</li>
+<li>Even chat interfaces use list view under the hood</li>
+<li>Cards view (Pinterest-style) is an alternative toggle, not the default</li>
+<h3>2. Confidence/Quality Display</h3>
+<li>Always use <strong>percentage bars with text</strong>: <code>████████░░ 87%</code></li>
+<li>Color coding:</li>
+  <li>Green: 85-100% (high confidence)</li>
+  <li>Yellow: 60-84% (review suggested)</li>
+  <li>Red: <60% (review recommended)</li>
+<li>Never use dot notation (●●●○) for confidence</li>
+<h3>3. Person Entity Integration</h3>
+<li>Speakers, owners, assignees link to Person entities when known</li>
+<li>Unknown speakers show as "Speaker 1", "Speaker 2", etc.</li>
+<li>Click to identify/link via inline dropdown (not dialog)</li>
+<li>Voiceprints remembered for future recognition</li>
+<h3>4. Inline Editing Pattern</h3>
+<li>Click-to-edit for names, text, assignments</li>
+<li>Inline dropdowns for selection (not modal dialogs)</li>
+<li>Auto-save changes</li>
+<h3>5. Expandable Row Details</h3>
+<li>Quality issues, context, actions shown in expandable rows</li>
+<li>Nested under parent row in list view</li>
+<h3>6. Classification Confidence Thresholds</h3>
+<li>>85%: Auto-file, notify user</li>
+<li>60-85%: Suggest, await confirmation</li>
+<li><60%: Present options, user decides</li>
+</ul>
+<hr>
+<h2>Completed UI Plans</h2>
+<table>
+<tr><th>File</th><th>Status</th><th>Notes</th></tr>
+<tr><td><code>asset_enrichment_ui_plan.md</code></td><td>✅ Complete</td><td>All 12 sections reviewed</td></tr>
+<tr><td><code>shared_agent_ui_components.md</code></td><td>✅ Updated</td><td>Renamed Table→List throughout</td></tr>
+<tr><td><code>feeder_ui_plan.md</code></td><td>✅ Updated</td><td>Renamed Table→List throughout</td></tr>
+<tr><td><code>searcher_ui_plan.md</code></td><td>✅ Exists</td><td>Not reviewed this session</td></tr>
+<tr><td><code>river_ui_plan.md</code></td><td>🔄 In Progress</td><td>Sections 1-3 created</td></tr>
+</table>
+<hr>
+<h2>River UI Plan Status</h2>
+<h3>Created Sections (in river_ui_plan.md)</h3>
+1. ✅ Overview - River responsibilities, GTD foundation
+2. ✅ Chat Interface - Multiple scenarios for list view in chat
+3. ✅ Quick Command Palette - ⌘K fast capture
+<h3>Sections Still Needed</h3>
+4. GTD Bucket Views (Inbox, Next Actions, Waiting For, Someday/Maybe)
+5. Review Workflows (Daily, Weekly)
+6. Briefing Cards (Morning, Project, Person, Domain)
+7. Filing Suggestions (classification UI)
+8. Notification Center
+9. River Settings
+10. Activity Log Items
+11. Empty States
+12. Keyboard Shortcuts
+13. Related Documents
+<h3>Pending Questions (need user input)</h3>
+1. For inline list (2.4) vs embedded list view (2.5) - is this distinction useful, or should we always use list view format?
+2. The project status (2.8) shows a blocking chain visualization - does this format work?
+3. Ready to review mockups in detail, or continue building more sections first?
+<hr>
+<h2>Key Sections in river_agent_plan.md to Extract UI From</h2>
+<table>
+<tr><th>Section</th><th>Line</th><th>UI Content to Extract</th></tr>
+<tr><td>2. Philosophy: GTD</td><td>45</td><td>GTD horizons diagram, bucket types</td></tr>
+<tr><td>3. Architecture</td><td>127</td><td>Domain/Scope/Project hierarchy</td></tr>
+<tr><td>6. Knowledge Navigation</td><td>896</td><td>Briefing types, query responses</td></tr>
+<tr><td>7. Entry Processing</td><td>937</td><td>Inbox sources, classification pipeline</td></tr>
+<tr><td>8. Proactive Intelligence</td><td>1009</td><td>Notification priority, action buttons</td></tr>
+<tr><td>9. Reviews & Coaching</td><td>1178</td><td>Weekly Review phases, coaching mode</td></tr>
+<tr><td>10. Timeline Estimation</td><td>1230</td><td>Critical path visualization</td></tr>
+<tr><td>12. User Interface</td><td>1311</td><td>UI integration points (brief)</td></tr>
+<tr><td>24. Scheduled Jobs</td><td>2394</td><td>Alert delivery, quiet hours</td></tr>
+<tr><td>33. Conversational Capture</td><td>4612</td><td>Chat import UI</td></tr>
+</table>
+<hr>
+<h2>GTD Structure Reference (for UI)</h2>
+<h3>Hierarchy</h3>
+<pre><code class="language-">Domains (Personal, Business, Person)
+  └── Scopes (Health, Finance, Marketing, etc.)
+       └── Projects (outcomes requiring multiple actions)
+            └── Buckets (Tasks, Ideas, Decisions, Notes, etc.)
+</code></pre>
+<h3>GTD Lists (Special Buckets)</h3>
+<table>
+<tr><th>List</th><th>Purpose</th></tr>
+<tr><td>Next Actions</td><td>Concrete, physical next steps</td></tr>
+<tr><td>Waiting For</td><td>Delegated items, awaiting response</td></tr>
+<tr><td>Someday/Maybe</td><td>Items to consider later</td></tr>
+<tr><td>Reference</td><td>Non-actionable information</td></tr>
+<tr><td>@Agenda</td><td>Topics to discuss with specific person</td></tr>
+</table>
+<h3>GTD Contexts (filter tags)</h3>
+<code>@phone</code>, <code>@computer</code>, <code>@office</code>, <code>@home</code>, <code>@errands</code>, <code>@anywhere</code>
+<code>@agenda:PersonName</code>, <code>@waiting</code>, <code>@energy:high</code>, <code>@energy:low</code>
+<hr>
+<h2>How to Resume</h2>
+<p>1. Read this file for context
+2. Read current <code>river_ui_plan.md</code> to see what's been created
+3. Answer the pending questions above
+4. Continue extracting UI details from <code>../river_agent_plan.md</code> sections listed above
+5. Build each section in <code>river_ui_plan.md</code> incrementally
+6. Review each mockup with user before moving to next section</p>
+<hr>
+<h2>Files Reference</h2>
+<pre><code class="language-">roadmap/ui/
+├── ui_plan.md                      # Parent UI plan
+├── asset_enrichment_ui_plan.md     # ✅ Complete
+├── feeder_ui_plan.md               # ✅ Updated (Table→List)
+├── river_ui_plan.md                # 🔄 In Progress
+├── searcher_ui_plan.md             # Exists, not reviewed
+├── shared_agent_ui_components.md   # ✅ Updated (Table→List)
+├── settings_ui_plan.md             # Exists
+└── ui_planning_prompt.md           # This file
+<p>roadmap/
+├── river_agent_plan.md             # Source for River UI (16,992 lines)
+└── asset_enrichment_agent_plan.md  # Source for Asset Enrichment UI
+</code></pre></p>
+<hr>
+<em>Use this document to restore full context when resuming UI planning work.</em>
+  </article>
+</body>
+</html>

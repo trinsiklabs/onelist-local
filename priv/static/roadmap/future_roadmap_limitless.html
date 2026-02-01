@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onelist Feature Plan: Limitless.ai Integration - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Onelist Feature Plan: Limitless.ai Integration</h1>
+<strong>Date:</strong> 2025-05-08
+<strong>Context:</strong> Concord, NC. This feature is planned as a Post-MVP (potentially v2.0) extension for Onelist.
+<h2>1. Goal</h2>
+<p>To allow Onelist users to connect their Limitless.ai account and automatically import audio recordings and associated transcripts captured by their Limitless pendant into their Onelist "augmented memory".</p>
+<h2>2. Implementation Approach</h2>
+<p>This feature will be built on top of the Onelist Core platform and API.</p>
+<em> <strong>User Configuration & Credential Storage:</strong>
+  </em> Users will provide their Limitless.ai API key via the Onelist UI.
+  <em> <strong>Recommendation:</strong> Create a new dedicated table in Onelist Core, <code>external_integrations</code>, to securely store these credentials (encrypted) and manage sync state.
+  </em> <em><code>external_integrations</code> Table Structure (Proposed):</em>
+    <em> <code>id</code> (UUID PK)
+    </em> <code>user_id</code> (UUID, FK -> <code>users.id</code>, Indexed)
+    <em> <code>service_name</code> (String, Not Null, e.g., 'limitless_ai')
+    </em> <code>credentials</code> (Encrypted Binary/Text, Not Null) - Stores the API key securely.
+    <em> <code>last_sync_timestamp</code> (TimestampTZ, Nullable) - Tracks the timestamp of the last successful data fetch for incremental updates.
+    </em> <code>sync_status</code> (String, Nullable, Indexed) - e.g., 'active', 'syncing', 'error', 'disabled'.
+    <em> <code>metadata</code> (JSONB, Nullable) - For any additional service-specific configuration or state needed.
+</em> <strong>Data Fetching (Background Job):</strong>
+  <em> Implement background jobs using Oban within Onelist Core.
+  </em> <strong>Trigger:</strong> Jobs run periodically (e.g., hourly via schedule) or can be manually triggered by the user ("Sync Now"). Potentially triggered by webhooks from Limitless if supported.
+  <em> <strong>Logic:</strong>
+        1. Query <code>external_integrations</code> for active 'limitless_ai' configurations.
+        2. For each configuration, securely retrieve the API key.
+        3. Instantiate a Limitless.ai API client (to be built).
+        4. Query the Limitless API for new recordings/transcripts since <code>last_sync_timestamp</code>.
+        5. Handle API specifics: authentication, pagination, rate limits, error responses.
+        6. Process fetched data (see Storage below).
+        7. Upon successful completion for a user, update their <code>last_sync_timestamp</code> in <code>external_integrations</code>.
+        8. Update <code>sync_status</code> appropriately (e.g., on error).
+</em> <strong>Storing Data in Onelist Schema:</strong>
+  <em> For each new recording/transcript pair fetched:
+    </em> <strong>Create <code>entries</code> Record:</strong>
+      <em> <code>entry_type</code>: <code>'memory'</code> (representing captured, immutable content).
+      </em> <code>source_type</code>: <code>'limitless_import'</code>.
+      <em> <code>title</code>: Derive from Limitless metadata (e.g., "Recording [Timestamp]" or meeting title).
+      </em> <code>content_created_at</code>: Set to the recording's actual start time from Limitless metadata.
+      <em> <code>metadata</code>: Store Limitless-specific identifiers <code>{ "limitless_id": "..." }</code> and potentially other context (e.g., meeting URL).
+      </em> <code>user_id</code>: Link to the Onelist user.
+    <em> <strong>Store Audio File (<code>assets</code> Table):</strong>
+      </em> Download audio data via Limitless API.
+      <em> Create an <code>assets</code> record linked to the new <code>entry_id</code>.
+      </em> Use Onelist's configured file storage backend (<code>storage_path</code>).
+      <em> Set <code>filename</code> (derived) and <code>mime_type</code> (e.g., 'audio/mpeg').
+    </em> <strong>Store Transcript (<code>representations</code> Table):</strong>
+      <em> Create a <code>representations</code> record linked to the new <code>entry_id</code>.
+      </em> <code>type</code>: <code>'transcription_text'</code> or <code>'markdown'</code> if formatted.
+      <em> <code>content</code>: Store the transcript text.
+      </em> <code>metadata</code>: Optionally include <code>{ "source_tool": "limitless_ai" }</code> or <code>{ "derived_from_asset_id": "..." }</code> (linking to the audio asset).
+<em> <strong>User Interface:</strong>
+  </em> Provide sections in user settings to add, manage, and remove Limitless.ai API keys securely.
+  <em> Display sync status and potentially the <code>last_sync_timestamp</code>.
+  </em> Allow manual triggering of a sync.
+<h2>3. Schema Impact & Flexibility</h2>
+<em> <strong>Core Content Schema (<code>entries</code>, <code>representations</code>, <code>assets</code>):</strong> No changes required. The existing flexible schema effectively accommodates the imported data (metadata, audio file, transcript text, original timestamp).
+</em> <strong>New Schema:</strong> Requires the addition of the <code>external_integrations</code> table (or similar mechanism) for securely storing credentials and managing sync state.
+<em> <strong>Extensibility:</strong> This pattern (dedicated integration table + background jobs + mapping to core schema) can be reused for future integrations with other third-party services.
+<h2>4. Key Considerations</h2>
+</em> <strong>Limitless.ai API:</strong> Success depends heavily on the capabilities, stability, rate limits, and data formats provided by the official Limitless.ai API. Needs investigation. Does it support incremental fetching based on timestamps? Does it offer webhooks?
+<em> <strong>Security:</strong> Secure storage (encryption at rest) and handling of user API keys is critical.
+</em> <strong>Error Handling:</strong> Robust error handling needed for API interactions and background job failures.
+<ul>
+<li><strong>Scalability:</strong> Background job processing needs to scale appropriately as the number of users enabling the integration grows.</li>
+</ul>
+<h2>5. Conclusion</h2>
+<p>Integrating with Limitless.ai is a feasible and valuable post-MVP feature that aligns well with the "augmented memory" vision of Onelist. It leverages the existing flexible core data schema effectively. The primary implementation effort involves building the integration management layer (<code>external_integrations</code> table, UI), the Limitless API client, and the Oban background jobs for data synchronization.</p>
+  </article>
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Static Site Desktop Page Updates - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Static Site Desktop Page Updates</h1>
+<strong>Document:</strong> <code>static_site/features/desktop.html</code>
+<strong>Created:</strong> 2026-01-29
+<strong>Purpose:</strong> Align marketing with technical decisions
+<hr>
+<h2>Summary of Required Changes</h2>
+<p>The static site currently describes a "pure Swift/SwiftUI native app" with performance claims that don't match the planned Tauri + Phoenix architecture. These changes bring marketing into alignment with technical reality while maintaining competitive positioning.</p>
+<hr>
+<h2>1. Technology Description Changes</h2>
+<h3>Current (Remove)</h3>
+<pre><code class="language-">&quot;Written entirely in Swift using Apple's modern SwiftUI framework&quot;
+&quot;No Electron. No JavaScript runtime. No Node.js. Just pure, compiled Swift code&quot;
+</code></pre>
+<h3>Replace With</h3>
+<pre><code class="language-">&quot;A native macOS app with deep system integration&quot;
+&quot;Built for macOS with Spotlight search, menu bar access, and global shortcuts&quot;
+&quot;3x lighter than Electron apps - no embedded Chromium browser&quot;
+</code></pre>
+<strong>Rationale:</strong> Honest about architecture while maintaining competitive positioning against Electron.
+<hr>
+<h2>2. Performance Claims Updates</h2>
+<h3>Current → New</h3>
+<table>
+<tr><th>Metric</th><th>Current Claim</th><th>New Claim</th></tr>
+<tr><td>Launch time</td><td>~0.5 seconds</td><td>3-5 seconds (full offline database)</td></tr>
+<tr><td>Memory usage</td><td><80 MB</td><td>~250 MB (includes local PostgreSQL)</td></tr>
+<tr><td>App size</td><td>~25 MB</td><td>~85 MB (3x smaller than Electron)</td></tr>
+<tr><td>CPU idle</td><td>0%</td><td>Minimal background sync</td></tr>
+</table>
+<h3>Suggested Copy</h3>
+<pre><code class="language-">Performance built for real work:
+• ~85 MB app size (3x smaller than Electron apps)
+• ~250 MB memory with full local database
+• Instant offline access - your data never waits for the network
+• Background sync that won't drain your battery
+</code></pre>
+<strong>Framing:</strong> Emphasize the VALUE of having a full local database rather than apologizing for resource usage.
+<hr>
+<h2>3. Feature Changes</h2>
+<h3>Remove from Current Features</h3>
+<table>
+<tr><th>Feature</th><th>Reason</th></tr>
+<tr><td>"Built with Swift/SwiftUI"</td><td>Not accurate for v1</td></tr>
+<tr><td>"No Electron"</td><td>Technically true (Tauri) but misleading</td></tr>
+<tr><td>Audio notes in Quick Capture</td><td>Post-MVP</td></tr>
+<tr><td>Auto-tag based on context</td><td>Post-MVP</td></tr>
+<tr><td>Selective sync</td><td>Not planned</td></tr>
+<tr><td>"Operational transformation" for conflicts</td><td>Using LWW instead</td></tr>
+</table>
+<h3>Keep in Current Features</h3>
+<table>
+<tr><th>Feature</th><th>Notes</th></tr>
+<tr><td>Offline-first architecture</td><td>Accurate</td></tr>
+<tr><td>Local PostgreSQL database</td><td>Accurate</td></tr>
+<tr><td>Quick Capture (global shortcut)</td><td>Update shortcut to <code>⌃⌘N</code></td></tr>
+<tr><td>Menu bar mode</td><td>Accurate</td></tr>
+<tr><td>Spotlight integration</td><td>MVP feature</td></tr>
+<tr><td>Real-time sync status</td><td>Accurate</td></tr>
+<tr><td>E2E encrypted sync</td><td>Accurate</td></tr>
+<tr><td>Conflict resolution</td><td>Update to describe LWW auto-resolve</td></tr>
+</table>
+<h3>Update Shortcuts</h3>
+<table>
+<tr><th>Current</th><th>New</th><th>Feature</th></tr>
+<tr><td><code>⌘⇧N</code></td><td><code>⌃⌘N</code></td><td>Quick Capture</td></tr>
+<tr><td><code>⌘⇧O</code></td><td><code>⌃⌘O</code></td><td>Quick Search</td></tr>
+<tr><td>N/A</td><td><code>⌃⌘V</code></td><td>Clipboard Capture</td></tr>
+<tr><td><code>⌘⇧S</code></td><td>Remove</td><td>Force sync (not implemented)</td></tr>
+</table>
+<hr>
+<h2>4. Add Roadmap Section</h2>
+<p>Add a new section at the bottom of the page before the CTA:</p>
+<pre><code class="language-html">&lt;!-- ==================== ROADMAP ==================== --&gt;
+&lt;section class=&quot;py-20 bg-slate-50 border-t border-gray-100&quot;&gt;
+  &lt;div class=&quot;max-w-7xl mx-auto px-4 sm:px-6 lg:px-8&quot;&gt;
+    &lt;div class=&quot;flex items-center gap-4 mb-8&quot;&gt;
+      &lt;div class=&quot;w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center&quot;&gt;
+        &lt;svg class=&quot;w-7 h-7 text-white&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+          &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01&quot;/&gt;
+        &lt;/svg&gt;
+      &lt;/div&gt;
+      &lt;div&gt;
+        &lt;h2 class=&quot;text-3xl font-bold text-gray-900&quot;&gt;Roadmap&lt;/h2&gt;
+        &lt;p class=&quot;text-gray-600&quot;&gt;What's coming next for Onelist Desktop.&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+<p>&lt;div class=&quot;grid md:grid-cols-2 gap-8&quot;&gt;
+      &lt;!-- Coming Soon --&gt;
+      &lt;div class=&quot;bg-white rounded-xl p-6 border border-indigo-100&quot;&gt;
+        &lt;h3 class=&quot;font-semibold text-gray-900 mb-4 flex items-center gap-2&quot;&gt;
+          &lt;span class=&quot;w-2 h-2 bg-amber-500 rounded-full&quot;&gt;&lt;/span&gt;
+          Coming Soon
+        &lt;/h3&gt;
+        &lt;ul class=&quot;space-y-3 text-gray-600&quot;&gt;
+          &lt;li class=&quot;flex items-start gap-2&quot;&gt;
+            &lt;svg class=&quot;w-5 h-5 text-amber-500 mt-0.5&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+              &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z&quot;/&gt;
+            &lt;/svg&gt;
+            &lt;span&gt;&lt;strong&gt;Share Extension&lt;/strong&gt; - Share to Onelist from Safari and other apps&lt;/span&gt;
+          &lt;/li&gt;
+          &lt;li class=&quot;flex items-start gap-2&quot;&gt;
+            &lt;svg class=&quot;w-5 h-5 text-amber-500 mt-0.5&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+              &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z&quot;/&gt;
+            &lt;/svg&gt;
+            &lt;span&gt;&lt;strong&gt;Audio Notes&lt;/strong&gt; - Record voice memos in Quick Capture&lt;/span&gt;
+          &lt;/li&gt;
+          &lt;li class=&quot;flex items-start gap-2&quot;&gt;
+            &lt;svg class=&quot;w-5 h-5 text-amber-500 mt-0.5&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+              &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z&quot;/&gt;
+            &lt;/svg&gt;
+            &lt;span&gt;&lt;strong&gt;Smart Tags&lt;/strong&gt; - Auto-suggest tags based on capture context&lt;/span&gt;
+          &lt;/li&gt;
+          &lt;li class=&quot;flex items-start gap-2&quot;&gt;
+            &lt;svg class=&quot;w-5 h-5 text-amber-500 mt-0.5&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+              &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z&quot;/&gt;
+            &lt;/svg&gt;
+            &lt;span&gt;&lt;strong&gt;Homebrew&lt;/strong&gt; - Install via &lt;code&gt;brew install --cask onelist&lt;/code&gt;&lt;/span&gt;
+          &lt;/li&gt;
+          &lt;li class=&quot;flex items-start gap-2&quot;&gt;
+            &lt;svg class=&quot;w-5 h-5 text-amber-500 mt-0.5&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+              &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z&quot;/&gt;
+            &lt;/svg&gt;
+            &lt;span&gt;&lt;strong&gt;Conflict UI&lt;/strong&gt; - Review and resolve sync conflicts manually&lt;/span&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;</p>
+<p>&lt;!-- Future Plans --&gt;
+      &lt;div class=&quot;bg-white rounded-xl p-6 border border-purple-100&quot;&gt;
+        &lt;h3 class=&quot;font-semibold text-gray-900 mb-4 flex items-center gap-2&quot;&gt;
+          &lt;span class=&quot;w-2 h-2 bg-purple-500 rounded-full&quot;&gt;&lt;/span&gt;
+          Future Plans
+        &lt;/h3&gt;
+        &lt;ul class=&quot;space-y-3 text-gray-600&quot;&gt;
+          &lt;li class=&quot;flex items-start gap-2&quot;&gt;
+            &lt;svg class=&quot;w-5 h-5 text-purple-500 mt-0.5&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+              &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z&quot;/&gt;
+            &lt;/svg&gt;
+            &lt;span&gt;&lt;strong&gt;v2: Native Shell&lt;/strong&gt; - Swift-based app shell for faster launch and lower memory&lt;/span&gt;
+          &lt;/li&gt;
+          &lt;li class=&quot;flex items-start gap-2&quot;&gt;
+            &lt;svg class=&quot;w-5 h-5 text-purple-500 mt-0.5&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+              &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z&quot;/&gt;
+            &lt;/svg&gt;
+            &lt;span&gt;&lt;strong&gt;Windows &amp; Linux&lt;/strong&gt; - Cross-platform support via same core&lt;/span&gt;
+          &lt;/li&gt;
+          &lt;li class=&quot;flex items-start gap-2&quot;&gt;
+            &lt;svg class=&quot;w-5 h-5 text-purple-500 mt-0.5&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+              &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z&quot;/&gt;
+            &lt;/svg&gt;
+            &lt;span&gt;&lt;strong&gt;macOS Widgets&lt;/strong&gt; - Recent entries on your desktop&lt;/span&gt;
+          &lt;/li&gt;
+          &lt;li class=&quot;flex items-start gap-2&quot;&gt;
+            &lt;svg class=&quot;w-5 h-5 text-purple-500 mt-0.5&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; viewBox=&quot;0 0 24 24&quot;&gt;
+              &lt;path stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; stroke-width=&quot;2&quot; d=&quot;M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z&quot;/&gt;
+            &lt;/svg&gt;
+            &lt;span&gt;&lt;strong&gt;Siri Shortcuts&lt;/strong&gt; - Automate Onelist with Shortcuts app&lt;/span&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+</code></pre></p>
+<hr>
+<h2>5. Section-by-Section Changes</h2>
+<h3>Hero Section</h3>
+<ul>
+<li>Remove "Built with Swift and SwiftUI"</li>
+<li>Change to "A native macOS app built for speed and privacy"</li>
+<li>Keep "No Electron" but add context: "No Electron, no embedded browser"</li>
+<h3>Quick Stats Section</h3>
+<li>Update launch time: "~0.5s" → "Fast launch"</li>
+<li>Update memory: "<80MB" → "Lightweight"</li>
+<li>Keep "60fps" and "100% Offline"</li>
+<h3>Native Performance Section</h3>
+<li><strong>Remove:</strong> "Built with Swift/SwiftUI" feature</li>
+<li><strong>Remove:</strong> "No Electron" detailed explanation</li>
+<li><strong>Keep:</strong> "Instant Launch" but update copy to be less specific about timing</li>
+<li><strong>Keep:</strong> "Smooth Scrolling", "Low Memory Footprint" (update numbers)</li>
+<li><strong>Keep:</strong> "Native macOS Integration"</li>
+<li><strong>Update comparison table</strong> with realistic numbers</li>
+<h3>Offline-First Section</h3>
+<li><strong>Keep:</strong> All content (accurate)</li>
+<li><strong>Update:</strong> Remove "operational transformation" mention in conflict resolution</li>
+<h3>Quick Capture Section</h3>
+<li><strong>Update shortcuts</strong> from <code>⌘⇧N</code> to <code>⌃⌘N</code></li>
+<li><strong>Remove:</strong> Audio notes feature (move to roadmap)</li>
+<li><strong>Remove:</strong> Auto-tag based on context (move to roadmap)</li>
+<li><strong>Keep:</strong> Global hotkey, minimal window, instant save</li>
+<h3>Menu Bar Section</h3>
+<li><strong>Keep:</strong> All content (accurate)</li>
+<li><strong>Add:</strong> "Optional - hide in preferences if you prefer"</li>
+<h3>Spotlight Section</h3>
+<li><strong>Keep:</strong> All content (accurate, MVP feature)</li>
+<h3>Sync Features Section</h3>
+<li><strong>Remove:</strong> Selective sync feature card</li>
+<li><strong>Update:</strong> Conflict UI description to say "auto-resolved" with manual UI coming</li>
+<li><strong>Keep:</strong> Real-time status, background sync, E2E encrypted</li>
+<h3>Editor Section</h3>
+<li><strong>Keep:</strong> Basic description</li>
+<li><strong>Remove:</strong> Any claims about "native" editor</li>
+<li><strong>Update:</strong> Describe as "powerful editor" without specifying native vs web</li>
+<hr>
+<h2>6. Tone/Messaging Guidelines</h2>
+<h3>Do Say</h3>
+<li>"Native macOS app"</li>
+<li>"Deep system integration"</li>
+<li>"3x lighter than Electron"</li>
+<li>"Full offline database"</li>
+<li>"Spotlight search"</li>
+<li>"Works without internet"</li>
+<h3>Don't Say</h3>
+<li>"Built with Swift/SwiftUI" (not accurate for v1)</li>
+<li>"Pure native code" (uses WebView)</li>
+<li>"0.5 second launch" (not achievable with embedded Phoenix)</li>
+<li>"<80MB memory" (unrealistic)</li>
+<li>"Selective sync" (not planned)</li>
+<li>"Operational transformation" (using LWW)</li>
+<hr>
+<h2>7. Implementation Checklist</h2>
+<li>[ ] Update hero section copy</li>
+<li>[ ] Update quick stats numbers</li>
+<li>[ ] Revise Native Performance section</li>
+<li>[ ] Update Quick Capture shortcuts and features</li>
+<li>[ ] Update Menu Bar section (add optional note)</li>
+<li>[ ] Remove selective sync from Sync section</li>
+<li>[ ] Update conflict resolution description</li>
+<li>[ ] Remove audio notes from Quick Capture</li>
+<li>[ ] Remove auto-tag feature</li>
+<li>[ ] Add Roadmap section before CTA</li>
+<li>[ ] Update performance comparison table</li>
+<li>[ ] Review all keyboard shortcuts</li>
+<li>[ ] Test all internal links</li>
+</ul>
+<hr>
+<em>Created: 2026-01-29</em>
+<em>For: static_site/features/desktop.html</em>
+  </article>
+</body>
+</html>

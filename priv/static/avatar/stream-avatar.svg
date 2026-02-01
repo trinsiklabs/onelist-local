@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <!-- Gradient for the water/stream effect -->
+    <linearGradient id="streamGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Animated wave pattern -->
+    <pattern id="waves" x="0" y="0" width="40" height="20" patternUnits="userSpaceOnUse">
+      <path d="M0 10 Q10 0, 20 10 T40 10" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="180" fill="url(#streamGradient)"/>
+  
+  <!-- Wave overlay -->
+  <circle cx="200" cy="200" r="180" fill="url(#waves)" opacity="0.5"/>
+  
+  <!-- Flowing stream paths -->
+  <g filter="url(#glow)">
+    <!-- Main stream -->
+    <path d="M100 280 Q150 200, 200 220 T300 180 T350 120" 
+          stroke="rgba(255,255,255,0.9)" stroke-width="8" fill="none" stroke-linecap="round"/>
+    
+    <!-- Secondary streams -->
+    <path d="M80 320 Q130 260, 180 270 T280 230" 
+          stroke="rgba(255,255,255,0.6)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M120 240 Q170 180, 220 190 T320 140" 
+          stroke="rgba(255,255,255,0.6)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    
+    <!-- Small tributary streams -->
+    <path d="M60 350 Q100 300, 140 310" 
+          stroke="rgba(255,255,255,0.4)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M320 160 Q340 130, 360 100" 
+          stroke="rgba(255,255,255,0.4)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Sparkle/data points -->
+  <g fill="white" opacity="0.8">
+    <circle cx="200" cy="220" r="4"/>
+    <circle cx="280" cy="190" r="3"/>
+    <circle cx="150" cy="260" r="3"/>
+    <circle cx="320" cy="150" r="2"/>
+    <circle cx="120" cy="290" r="2"/>
+  </g>
+</svg>

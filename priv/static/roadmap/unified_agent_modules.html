@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unified Agent Modules - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Unified Agent Modules</h1>
+<strong>Document Version:</strong> 2026-01-30
+<strong>Status:</strong> Planning
+<strong>Purpose:</strong> Shared modules across all Onelist agents
+<hr>
+<h2>1. Overview</h2>
+<p>This document defines shared modules that all Onelist agents (River, Reader, Feeder, Asset Enrichment, Searcher) should use for consistent behavior, observability, and security.</p>
+<h3>1.1 Design Principles</h3>
+<p>1. <strong>Consistency</strong>: All agents share the same patterns for telemetry, security, and model selection
+2. <strong>Observability</strong>: OpenTelemetry integration from day one
+3. <strong>Security</strong>: Defense-in-depth with shared scaffolding
+4. <strong>Cost Control</strong>: Unified budget management and model selection</p>
+<h3>1.2 Module Overview</h3>
+<table>
+<tr><th>Module</th><th>Purpose</th><th>Priority</th></tr>
+<tr><td><code>Onelist.Agents.Telemetry</code></td><td>OpenTelemetry instrumentation</td><td>HIGH</td></tr>
+<tr><td><code>Onelist.Agents.Security</code></td><td>Input validation, prompt scaffolding</td><td>HIGH</td></tr>
+<tr><td><code>Onelist.Agents.ModelFleet</code></td><td>Model selection and routing</td><td>HIGH</td></tr>
+<tr><td><code>Onelist.Agents.CostTracker</code></td><td>Budget management and alerts</td><td>HIGH</td></tr>
+<tr><td><code>Onelist.Agents.RateLimiter</code></td><td>Unified rate limiting</td><td>MEDIUM</td></tr>
+<tr><td><code>Onelist.Agents.CircuitBreaker</code></td><td>External service resilience</td><td>MEDIUM</td></tr>
+</table>
+<hr>
+<h2>2. Unified Telemetry Module</h2>
+<p>All agents MUST use this module for OpenTelemetry instrumentation following the <code>gen_ai.<em></code> semantic conventions.</p>
+<h3>2.1 Core Telemetry Module</h3>
+<pre><code class="language-elixir">defmodule Onelist.Agents.Telemetry do
+  @moduledoc &quot;&quot;&quot;
+  Unified OpenTelemetry instrumentation for all Onelist agents.
+<p>Follows the gen_ai.</em> semantic conventions for AI observability.
+  All agents MUST use this module for consistent tracing.</p>
+<p>## Usage</p>
+<p>Onelist.Agents.Telemetry.trace_agent_operation(:river, :chat, %{user_id: user_id}, fn -&gt;
+        # Your operation here
+      end)</p>
+<p>## Conventions</p>
+<p>Span names follow the pattern: <code>{agent}.{operation}</code>
+  <ul>
+<li><code>river.chat</code>, <code>river.tool.search_entries</code></li>
+  <li><code>reader.extraction</code>, <code>reader.two_layer_retrieval</code></li>
+  <li><code>feeder.import.rss</code>, <code>feeder.web_fetch</code></li>
+  <li><code>asset_enrichment.transcription</code>, <code>asset_enrichment.ocr</code></li>
+  <li><code>searcher.hybrid_search</code>, <code>searcher.embed</code></li>
+  &quot;&quot;&quot;</p>
+<p>require OpenTelemetry.Tracer, as: Tracer
+  require Logger</p>
+<p>@agents ~w(river reader feeder asset_enrichment searcher)a</p>
+<p>@doc &quot;&quot;&quot;
+  Trace an agent operation with standard attributes.</p>
+<p>## Parameters
+  <li><code>agent_name</code>: One of :river, :reader, :feeder, :asset_enrichment, :searcher</li>
+  <li><code>operation</code>: Operation name (e.g., :chat, :extraction, :import)</li>
+  <li><code>metadata</code>: Map with operation-specific metadata</li>
+  <li><code>fun</code>: Function to execute and trace</li></p>
+<p>## Metadata Fields
+  Common fields that should be included when applicable:
+  <li><code>user_id</code>: User performing the operation</li>
+  <li><code>entry_id</code>: Entry being processed</li>
+  <li><code>model</code>: LLM model being used</li>
+  <li><code>query</code>: Search or chat query (sanitized)</li>
+  &quot;&quot;&quot;
+  def trace_agent_operation(agent_name, operation, metadata, fun) when agent_name in @agents do
+    span_name = &quot;#{agent_name}.#{operation}&quot;</p>
+<p>Tracer.with_span span_name do
+      set_common_attributes(agent_name, operation, metadata)</p>
+<p>start_time = System.monotonic_time(:millisecond)</p>
+<p>try do
+        result = fun.()
+        duration = System.monotonic_time(:millisecond) - start_time</p>
+<p>set_result_attributes(result, duration)
+        emit_telemetry_event(agent_name, operation, :success, duration, metadata)</p>
+<p>result
+      rescue
+        error -&gt;
+          duration = System.monotonic_time(:millisecond) - start_time</p>
+<p>Tracer.set_attributes([
+            {&quot;error&quot;, true},
+            {&quot;error.type&quot;, inspect(error.__struct__)},
+            {&quot;error.message&quot;, Exception.message(error)}
+          ])</p>
+<p>emit_telemetry_event(agent_name, operation, :error, duration, metadata)</p>
+<p>reraise error, __STACKTRACE__
+      end
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Trace an LLM call with model-specific attributes.
+  &quot;&quot;&quot;
+  def trace_llm_call(agent_name, model, fun) do
+    Tracer.with_span &quot;#{agent_name}.llm_call&quot; do
+      Tracer.set_attributes([
+        {&quot;gen_ai.system&quot;, to_string(agent_name)},
+        {&quot;gen_ai.request.model&quot;, model},
+        {&quot;gen_ai.operation.name&quot;, &quot;chat&quot;}
+      ])</p>
+<p>start_time = System.monotonic_time(:millisecond)
+      result = fun.()
+      duration = System.monotonic_time(:millisecond) - start_time</p>
+<p>case result do
+        {:ok, response} -&gt;
+          Tracer.set_attributes([
+            {&quot;gen_ai.response.latency_ms&quot;, duration},
+            {&quot;gen_ai.usage.input_tokens&quot;, response[:input_tokens] || 0},
+            {&quot;gen_ai.usage.output_tokens&quot;, response[:output_tokens] || 0}
+          ])</p>
+<p>{:error, _} -&gt;
+          Tracer.set_attributes([
+            {&quot;gen_ai.response.latency_ms&quot;, duration},
+            {&quot;error&quot;, true}
+          ])
+      end</p>
+<p>result
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Trace a tool call within an agent.
+  &quot;&quot;&quot;
+  def trace_tool_call(agent_name, tool_name, params, fun) do
+    Tracer.with_span &quot;#{agent_name}.tool.#{tool_name}&quot; do
+      Tracer.set_attributes([
+        {&quot;gen_ai.tool.name&quot;, tool_name},
+        {&quot;gen_ai.tool.parameters&quot;, sanitize_params(params)}
+      ])</p>
+<p>result = fun.()</p>
+<p>Tracer.set_attributes([
+        {&quot;gen_ai.tool.result&quot;, summarize_result(result)}
+      ])</p>
+<p>result
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Record cost for an operation.
+  &quot;&quot;&quot;
+  def record_cost(agent_name, operation, cost_cents, metadata \\ %{}) do
+    :telemetry.execute(
+      [:agents, agent_name, :cost],
+      %{cost_cents: cost_cents},
+      Map.merge(metadata, %{operation: operation})
+    )</p>
+<p>Tracer.set_attributes([
+      {&quot;gen_ai.usage.cost_cents&quot;, cost_cents}
+    ])
+  end</p>
+<p># Private functions</p>
+<p>defp set_common_attributes(agent_name, operation, metadata) do
+    attrs = [
+      {&quot;gen_ai.system&quot;, to_string(agent_name)},
+      {&quot;gen_ai.operation.name&quot;, to_string(operation)}
+    ]</p>
+<p>attrs = if user_id = metadata[:user_id] do
+      [{&quot;user.id&quot;, user_id} | attrs]
+    else
+      attrs
+    end</p>
+<p>attrs = if entry_id = metadata[:entry_id] do
+      [{&quot;entry.id&quot;, entry_id} | attrs]
+    else
+      attrs
+    end</p>
+<p>attrs = if model = metadata[:model] do
+      [{&quot;gen_ai.request.model&quot;, model} | attrs]
+    else
+      attrs
+    end</p>
+<p>Tracer.set_attributes(attrs)
+  end</p>
+<p>defp set_result_attributes(result, duration) do
+    base_attrs = [{&quot;gen_ai.response.duration_ms&quot;, duration}]</p>
+<p>case result do
+      {:ok, data} when is_map(data) -&gt;
+        count_attrs = data
+        |&gt; Enum.filter(fn {k, v} -&gt; is_integer(v) and String.ends_with?(to_string(k), &quot;_count&quot;) end)
+        |&gt; Enum.map(fn {k, v} -&gt; {&quot;result.#{k}&quot;, v} end)</p>
+<p>Tracer.set_attributes(base_attrs ++ count_attrs)</p>
+<p>{:ok, items} when is_list(items) -&gt;
+        Tracer.set_attributes([{&quot;result.count&quot;, length(items)} | base_attrs])</p>
+<p>{:error, reason} -&gt;
+        Tracer.set_attributes([
+          {&quot;error&quot;, true},
+          {&quot;error.reason&quot;, inspect(reason)}
+        ] ++ base_attrs)</p>
+<p>_ -&gt;
+        Tracer.set_attributes(base_attrs)
+    end
+  end</p>
+<p>defp emit_telemetry_event(agent_name, operation, status, duration, metadata) do
+    :telemetry.execute(
+      [:agents, agent_name, operation, :complete],
+      %{duration_ms: duration},
+      Map.merge(metadata, %{status: status})
+    )
+  end</p>
+<p>defp sanitize_params(params) when is_map(params) do
+    params
+    |&gt; Map.drop([:password, :api_key, :secret, :token])
+    |&gt; Jason.encode!()
+    |&gt; String.slice(0, 500)
+  end
+  defp sanitize_params(params), do: inspect(params) |&gt; String.slice(0, 500)</p>
+<p>defp summarize_result({:ok, _}), do: &quot;success&quot;
+  defp summarize_result({:error, reason}), do: &quot;error: #{inspect(reason)}&quot; |&gt; String.slice(0, 100)
+  defp summarize_result(other), do: inspect(other) |&gt; String.slice(0, 100)
+end
+</code></pre></p>
+<h3>2.2 Telemetry Event Handlers</h3>
+<pre><code class="language-elixir">defmodule Onelist.Agents.TelemetryHandler do
+  @moduledoc &quot;&quot;&quot;
+  Attaches telemetry handlers for agent events.
+  &quot;&quot;&quot;
+<p>require Logger</p>
+<p>def attach do
+    events = [
+      [:agents, :river, :chat, :complete],
+      [:agents, :river, :tool, :complete],
+      [:agents, :reader, :extraction, :complete],
+      [:agents, :reader, :two_layer_retrieval, :complete],
+      [:agents, :feeder, :import, :complete],
+      [:agents, :feeder, :web_fetch, :complete],
+      [:agents, :asset_enrichment, :transcription, :complete],
+      [:agents, :asset_enrichment, :ocr, :complete],
+      [:agents, :searcher, :search, :complete],
+      [:agents, :searcher, :embed, :complete],
+      # Cost events
+      [:agents, :river, :cost],
+      [:agents, :reader, :cost],
+      [:agents, :feeder, :cost],
+      [:agents, :asset_enrichment, :cost],
+      [:agents, :searcher, :cost]
+    ]</p>
+<p>:telemetry.attach_many(
+      &quot;onelist-agents-handler&quot;,
+      events,
+      &amp;handle_event/4,
+      nil
+    )
+  end</p>
+<p>def handle_event([:agents, agent, operation, :complete], measurements, metadata, _config) do
+    Logger.info(&quot;Agent operation completed&quot;,
+      agent: agent,
+      operation: operation,
+      duration_ms: measurements[:duration_ms],
+      status: metadata[:status],
+      user_id: metadata[:user_id]
+    )
+  end</p>
+<p>def handle_event([:agents, agent, :cost], measurements, metadata, _config) do
+    Logger.info(&quot;Agent cost recorded&quot;,
+      agent: agent,
+      operation: metadata[:operation],
+      cost_cents: measurements[:cost_cents],
+      user_id: metadata[:user_id]
+    )
+  end
+end
+</code></pre></p>
+<hr>
+<h2>3. Shared Security Scaffolding</h2>
+<h3>3.1 Input Validation Module</h3>
+<pre><code class="language-elixir">defmodule Onelist.Agents.Security.InputValidator do
+  @moduledoc &quot;&quot;&quot;
+  Input validation for all agent operations.
+<p>Implements defense-in-depth:
+  1. Input length limits
+  2. Dangerous pattern detection
+  3. Content type validation
+  4. Sanitization
+  &quot;&quot;&quot;</p>
+<p>@max_query_length 10_000
+  @max_content_length 100_000
+  @dangerous_patterns [
+    ~r/ignore.<em>previous.</em>instructions/i,
+    ~r/disregard.<em>above/i,
+    ~r/system.</em>prompt/i,
+    ~r/\[\[.<em>\]\]/,  # Template injection
+    ~r/&lt;\|.</em>\|&gt;/,    # Special tokens
+  ]</p>
+<p>@doc &quot;&quot;&quot;
+  Validate user query input.
+  &quot;&quot;&quot;
+  def validate_query(query) when is_binary(query) do
+    with :ok &lt;- check_length(query, @max_query_length),
+         :ok &lt;- check_dangerous_patterns(query),
+         sanitized &lt;- sanitize_input(query) do
+      {:ok, sanitized}
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Validate content for processing.
+  &quot;&quot;&quot;
+  def validate_content(content) when is_binary(content) do
+    with :ok &lt;- check_length(content, @max_content_length),
+         sanitized &lt;- sanitize_input(content) do
+      {:ok, sanitized}
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Validate URL for fetching.
+  &quot;&quot;&quot;
+  def validate_url(url) when is_binary(url) do
+    case URI.parse(url) do
+      %URI{scheme: scheme, host: host} when scheme in [&quot;http&quot;, &quot;https&quot;] and host != nil -&gt;
+        if is_safe_host?(host) do
+          {:ok, url}
+        else
+          {:error, :blocked_host}
+        end</p>
+<p>_ -&gt;
+        {:error, :invalid_url}
+    end
+  end</p>
+<p>defp check_length(input, max) do
+    if String.length(input) &lt;= max do
+      :ok
+    else
+      {:error, :input_too_long}
+    end
+  end</p>
+<p>defp check_dangerous_patterns(input) do
+    if Enum.any?(@dangerous_patterns, &amp;Regex.match?(&amp;1, input)) do
+      {:error, :dangerous_pattern_detected}
+    else
+      :ok
+    end
+  end</p>
+<p>defp sanitize_input(input) do
+    input
+    |&gt; String.trim()
+    |&gt; remove_null_bytes()
+    |&gt; normalize_whitespace()
+  end</p>
+<p>defp remove_null_bytes(str), do: String.replace(str, &quot;\0&quot;, &quot;&quot;)</p>
+<p>defp normalize_whitespace(str), do: String.replace(str, ~r/\s+/, &quot; &quot;)</p>
+<p>defp is_safe_host?(host) do
+    blocked = [&quot;localhost&quot;, &quot;127.0.0.1&quot;, &quot;0.0.0.0&quot;, &quot;169.254.169.254&quot;]
+    not Enum.member?(blocked, host) and not String.ends_with?(host, &quot;.local&quot;)
+  end
+end
+</code></pre></p>
+<h3>3.2 Prompt Scaffolding Module</h3>
+<pre><code class="language-elixir">defmodule Onelist.Agents.Security.PromptScaffold do
+  @moduledoc &quot;&quot;&quot;
+  Secure prompt scaffolding for all agents.
+<p>Implements:
+  1. Clear system/user message boundaries
+  2. Injection-resistant formatting
+  3. Output filtering preparation
+  &quot;&quot;&quot;</p>
+<p>@doc &quot;&quot;&quot;
+  Build a secure system prompt with clear boundaries.
+  &quot;&quot;&quot;
+  def build_system_prompt(agent_name, instructions, context \\ %{}) do
+    &quot;&quot;&quot;
+    &lt;system-instructions&gt;
+    #{instructions}
+    &lt;/system-instructions&gt;</p>
+<p>&lt;agent-context&gt;
+    Agent: #{agent_name}
+    Timestamp: #{DateTime.utc_now() |&gt; DateTime.to_iso8601()}
+    #{format_context(context)}
+    &lt;/agent-context&gt;</p>
+<p>&lt;safety-guidelines&gt;
+    <li>Only use information provided in the context</li>
+    <li>Do not reveal internal system details</li>
+    <li>Do not execute code or access external systems</li>
+    <li>Decline requests that violate user privacy</li>
+    &lt;/safety-guidelines&gt;
+    &quot;&quot;&quot;
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Format user input with clear boundaries.
+  &quot;&quot;&quot;
+  def format_user_input(input) do
+    &quot;&quot;&quot;
+    &lt;user-input&gt;
+    #{input}
+    &lt;/user-input&gt;
+    &quot;&quot;&quot;
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Format context documents with clear boundaries.
+  &quot;&quot;&quot;
+  def format_context_documents(documents) when is_list(documents) do
+    formatted = documents
+    |&gt; Enum.with_index(1)
+    |&gt; Enum.map(fn {doc, idx} -&gt;
+      &quot;&quot;&quot;
+      &lt;document index=&quot;#{idx}&quot;&gt;
+      #{doc.content}
+      &lt;/document&gt;
+      &quot;&quot;&quot;
+    end)
+    |&gt; Enum.join(&quot;\n&quot;)</p>
+<p>&quot;&quot;&quot;
+    &lt;context-documents&gt;
+    #{formatted}
+    &lt;/context-documents&gt;
+    &quot;&quot;&quot;
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Filter output for sensitive information.
+  &quot;&quot;&quot;
+  def filter_output(output) do
+    output
+    |&gt; remove_system_leaks()
+    |&gt; remove_sensitive_patterns()
+  end</p>
+<p>defp format_context(context) when is_map(context) do
+    context
+    |&gt; Enum.map(fn {k, v} -&gt; &quot;#{k}: #{v}&quot; end)
+    |&gt; Enum.join(&quot;\n&quot;)
+  end</p>
+<p>defp remove_system_leaks(output) do
+    patterns = [
+      ~r/&lt;system-instructions&gt;.<em>?&lt;\/system-instructions&gt;/s,
+      ~r/&lt;safety-guidelines&gt;.</em>?&lt;\/safety-guidelines&gt;/s
+    ]</p>
+<p>Enum.reduce(patterns, output, fn pattern, acc -&gt;
+      Regex.replace(pattern, acc, &quot;[FILTERED]&quot;)
+    end)
+  end</p>
+<p>defp remove_sensitive_patterns(output) do
+    # Remove potential credential patterns
+    output
+    |&gt; String.replace(~r/api[_-]?key[=:]\s<em>\S+/i, &quot;api_key=[REDACTED]&quot;)
+    |&gt; String.replace(~r/password[=:]\s</em>\S+/i, &quot;password=[REDACTED]&quot;)
+    |&gt; String.replace(~r/bearer\s+\S+/i, &quot;Bearer [REDACTED]&quot;)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>4. Model Fleet Configuration</h2>
+<h3>4.1 Model Selection Module</h3>
+<pre><code class="language-elixir">defmodule Onelist.Agents.ModelFleet do
+  @moduledoc &quot;&quot;&quot;
+  Model fleet configuration for all agents.
+<p>Implements tiered model selection:
+  <li>Haiku: Fast, cheap, simple tasks</li>
+  <li>Sonnet: Balanced, most tasks</li>
+  <li>Opus: Complex reasoning, important tasks</li></p>
+<p>## Usage</p>
+<p>model = Onelist.Agents.ModelFleet.select_model(:extraction, complexity: :low)
+      # =&gt; &quot;claude-3-haiku-20240307&quot;
+  &quot;&quot;&quot;</p>
+<p>@models %{
+    # Claude models
+    claude_haiku: &quot;claude-3-haiku-20240307&quot;,
+    claude_sonnet: &quot;claude-sonnet-4-20250514&quot;,
+    claude_opus: &quot;claude-opus-4-20250514&quot;,</p>
+<p># OpenAI models
+    gpt4o_mini: &quot;gpt-4o-mini&quot;,
+    gpt4o: &quot;gpt-4o&quot;,</p>
+<p># Embedding models
+    text_embedding_3_small: &quot;text-embedding-3-small&quot;,
+    text_embedding_3_large: &quot;text-embedding-3-large&quot;
+  }</p>
+<p>@task_defaults %{
+    # River tasks
+    chat: :claude_sonnet,
+    intent_classification: :claude_haiku,
+    tool_selection: :claude_haiku,
+    response_generation: :claude_sonnet,</p>
+<p># Reader tasks
+    extraction: :claude_haiku,
+    relationship_detection: :claude_haiku,
+    summary_generation: :claude_haiku,
+    quality_assessment: :gpt4o_mini,</p>
+<p># Feeder tasks
+    content_verification: :gpt4o_mini,
+    metadata_extraction: :gpt4o_mini,</p>
+<p># Asset Enrichment tasks
+    image_description: :gpt4o,
+    ocr_analysis: :gpt4o_mini,
+    action_item_extraction: :gpt4o_mini,</p>
+<p># Searcher tasks
+    query_reformulation: :gpt4o_mini,
+    reranking: :claude_haiku
+  }</p>
+<p>@complexity_overrides %{
+    low: :claude_haiku,
+    medium: :claude_sonnet,
+    high: :claude_opus
+  }</p>
+<p>@doc &quot;&quot;&quot;
+  Select the appropriate model for a task.</p>
+<p>## Options
+  <li><code>:complexity</code> - :low, :medium, :high (overrides default)</li>
+  <li><code>:prefer_cheap</code> - Use cheapest acceptable model</li>
+  <li><code>:require_vision</code> - Task requires vision capability</li>
+  &quot;&quot;&quot;
+  def select_model(task, opts \\ []) do
+    complexity = Keyword.get(opts, :complexity)
+    prefer_cheap = Keyword.get(opts, :prefer_cheap, false)
+    require_vision = Keyword.get(opts, :require_vision, false)</p>
+<p>model_key = cond do
+      complexity -&gt;
+        Map.get(@complexity_overrides, complexity, @task_defaults[task])</p>
+<p>prefer_cheap -&gt;
+        :claude_haiku</p>
+<p>require_vision -&gt;
+        :gpt4o</p>
+<p>true -&gt;
+        Map.get(@task_defaults, task, :claude_sonnet)
+    end</p>
+<p>Map.get(@models, model_key)
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get model information including pricing.
+  &quot;&quot;&quot;
+  def get_model_info(model_name) do
+    pricing = %{
+      &quot;claude-3-haiku-20240307&quot; =&gt; %{input: 0.25, output: 1.25},  # per 1M tokens
+      &quot;claude-sonnet-4-20250514&quot; =&gt; %{input: 3.0, output: 15.0},
+      &quot;claude-opus-4-20250514&quot; =&gt; %{input: 15.0, output: 75.0},
+      &quot;gpt-4o-mini&quot; =&gt; %{input: 0.15, output: 0.60},
+      &quot;gpt-4o&quot; =&gt; %{input: 5.0, output: 15.0}
+    }</p>
+<p>%{
+      name: model_name,
+      pricing: Map.get(pricing, model_name, %{input: 0, output: 0}),
+      provider: get_provider(model_name)
+    }
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Estimate cost for a task.
+  &quot;&quot;&quot;
+  def estimate_cost(model_name, input_tokens, output_tokens) do
+    info = get_model_info(model_name)
+    pricing = info.pricing</p>
+<p>input_cost = input_tokens / 1_000_000 <em> pricing.input
+    output_cost = output_tokens / 1_000_000 </em> pricing.output</p>
+<p>%{
+      input_cost_usd: input_cost,
+      output_cost_usd: output_cost,
+      total_cost_usd: input_cost + output_cost,
+      total_cost_cents: round((input_cost + output_cost) <em> 100)
+    }
+  end</p>
+<p>defp get_provider(model) do
+    cond do
+      String.starts_with?(model, &quot;claude&quot;) -&gt; :anthropic
+      String.starts_with?(model, &quot;gpt&quot;) -&gt; :openai
+      String.starts_with?(model, &quot;text-embedding&quot;) -&gt; :openai
+      true -&gt; :unknown
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>5. Cost Tracking Module</h2>
+<pre><code class="language-elixir">defmodule Onelist.Agents.CostTracker do
+  @moduledoc &quot;&quot;&quot;
+  Unified cost tracking across all agents.
+<p>Tracks:
+  <li>Per-user daily/monthly spend</li>
+  <li>Per-agent cost breakdown</li>
+  <li>Budget alerts and enforcement</li>
+  &quot;&quot;&quot;</p>
+<p>alias Onelist.Repo
+  alias Onelist.Searcher.SearchConfig
+  import Ecto.Query</p>
+<p>@budget_thresholds [0.5, 0.8, 0.95]</p>
+<p>@doc &quot;&quot;&quot;
+  Record cost for an agent operation.
+  &quot;&quot;&quot;
+  def record_cost(user_id, agent, operation, cost_cents, metadata \\ %{}) do
+    # Update user's daily spend
+    update_daily_spend(user_id, cost_cents)</p>
+<p># Record detailed cost entry
+    record_cost_entry(user_id, agent, operation, cost_cents, metadata)</p>
+<p># Check budget and emit alerts
+    check_budget_alerts(user_id)</p>
+<p># Emit telemetry
+    :telemetry.execute(
+      [:agents, agent, :cost],
+      %{cost_cents: cost_cents},
+      %{user_id: user_id, operation: operation}
+    )</p>
+<p>{:ok, cost_cents}
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Check if user has budget for an operation.
+  &quot;&quot;&quot;
+  def check_budget(user_id, estimated_cost_cents) do
+    config = get_user_config(user_id)
+    daily_budget = config.daily_enrichment_budget_cents
+    spent_today = config.spent_enrichment_today_cents || 0</p>
+<p>cond do
+      is_nil(daily_budget) -&gt;
+        {:ok, :unlimited}</p>
+<p>spent_today + estimated_cost_cents &gt; daily_budget -&gt;
+        {:error, :budget_exceeded, %{
+          budget: daily_budget,
+          spent: spent_today,
+          requested: estimated_cost_cents,
+          remaining: max(daily_budget - spent_today, 0)
+        }}</p>
+<p>true -&gt;
+        {:ok, %{
+          remaining: daily_budget - spent_today - estimated_cost_cents,
+          budget: daily_budget
+        }}
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get cost summary for a user.
+  &quot;&quot;&quot;
+  def get_cost_summary(user_id, period \\ :today) do
+    config = get_user_config(user_id)</p>
+<p>%{
+      daily_budget: config.daily_enrichment_budget_cents,
+      spent_today: config.spent_enrichment_today_cents || 0,
+      remaining_today: remaining_budget(config),
+      period: period
+    }
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get cost breakdown by agent.
+  &quot;&quot;&quot;
+  def get_agent_breakdown(user_id, opts \\ []) do
+    days = Keyword.get(opts, :days, 30)
+    since = DateTime.utc_now() |&gt; DateTime.add(-days, :day)</p>
+<p># This would query a cost_entries table
+    # For now, return placeholder
+    %{
+      river: 0,
+      reader: 0,
+      feeder: 0,
+      asset_enrichment: 0,
+      searcher: 0,
+      total: 0,
+      period_days: days
+    }
+  end</p>
+<p>defp update_daily_spend(user_id, cost_cents) do
+    Repo.update_all(
+      from(c in SearchConfig, where: c.user_id == ^user_id),
+      inc: [spent_enrichment_today_cents: cost_cents]
+    )
+  end</p>
+<p>defp record_cost_entry(user_id, agent, operation, cost_cents, metadata) do
+    # Would insert into a cost_entries table
+    # For now, just log
+    require Logger
+    Logger.info(&quot;Cost recorded&quot;,
+      user_id: user_id,
+      agent: agent,
+      operation: operation,
+      cost_cents: cost_cents,
+      metadata: metadata
+    )
+  end</p>
+<p>defp check_budget_alerts(user_id) do
+    config = get_user_config(user_id)
+    budget = config.daily_enrichment_budget_cents
+    spent = config.spent_enrichment_today_cents || 0</p>
+<p>if budget &amp;&amp; budget &gt; 0 do
+      ratio = spent / budget</p>
+<p>Enum.each(@budget_thresholds, fn threshold -&gt;
+        if ratio &gt;= threshold do
+          emit_budget_alert(user_id, threshold, spent, budget)
+        end
+      end)
+    end
+  end</p>
+<p>defp emit_budget_alert(user_id, threshold, spent, budget) do
+    :telemetry.execute(
+      [:agents, :budget, :alert],
+      %{threshold: threshold, spent: spent, budget: budget},
+      %{user_id: user_id}
+    )
+  end</p>
+<p>defp get_user_config(user_id) do
+    Repo.get_by(SearchConfig, user_id: user_id) || %SearchConfig{}
+  end</p>
+<p>defp remaining_budget(%{daily_enrichment_budget_cents: nil}), do: nil
+  defp remaining_budget(config) do
+    budget = config.daily_enrichment_budget_cents || 0
+    spent = config.spent_enrichment_today_cents || 0
+    max(budget - spent, 0)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>6. Unified Rate Limiter</h2>
+<pre><code class="language-elixir">defmodule Onelist.Agents.RateLimiter do
+  @moduledoc &quot;&quot;&quot;
+  Unified rate limiting for all agent operations.
+  &quot;&quot;&quot;
+<p>use GenServer
+  require Logger</p>
+<p>@default_limits %{
+    # Per-user limits (per minute)
+    river_chat: {60, :per_minute},
+    reader_extraction: {100, :per_minute},
+    feeder_import: {50, :per_minute},
+    asset_enrichment: {30, :per_minute},
+    searcher_search: {100, :per_minute},
+    searcher_embed: {200, :per_minute},</p>
+<p># External API limits
+    external_openai: {500, :per_minute},
+    external_anthropic: {100, :per_minute}
+  }</p>
+<p>def start_link(opts \\ []) do
+    name = Keyword.get(opts, :name, __MODULE__)
+    GenServer.start_link(__MODULE__, opts, name: name)
+  end</p>
+<p>@impl true
+  def init(_opts) do
+    {:ok, %{counters: %{}, windows: %{}}}
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Check if operation is within rate limit.
+  &quot;&quot;&quot;
+  def check_limit(user_id, operation) do
+    GenServer.call(__MODULE__, {:check_limit, user_id, operation})
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Execute function if within rate limit.
+  &quot;&quot;&quot;
+  def with_rate_limit(user_id, operation, fun) do
+    case check_limit(user_id, operation) do
+      {:ok, _remaining} -&gt; fun.()
+      {:error, :rate_limited, retry_after} -&gt; {:error, :rate_limited, retry_after}
+    end
+  end</p>
+<p>@impl true
+  def handle_call({:check_limit, user_id, operation}, _from, state) do
+    key = &quot;#{user_id}:#{operation}&quot;
+    {limit, window} = Map.get(@default_limits, operation, {1000, :per_minute})
+    window_ms = window_to_ms(window)
+    now = System.monotonic_time(:millisecond)</p>
+<p># Get or create window
+    window_start = Map.get(state.windows, key, now)
+    count = Map.get(state.counters, key, 0)</p>
+<p>if now - window_start &gt; window_ms do
+      # New window
+      new_state = %{
+        counters: Map.put(state.counters, key, 1),
+        windows: Map.put(state.windows, key, now)
+      }
+      {:reply, {:ok, limit - 1}, new_state}
+    else
+      if count &gt;= limit do
+        retry_after = window_ms - (now - window_start)
+        {:reply, {:error, :rate_limited, div(retry_after, 1000)}, state}
+      else
+        new_state = %{state | counters: Map.put(state.counters, key, count + 1)}
+        {:reply, {:ok, limit - count - 1}, new_state}
+      end
+    end
+  end</p>
+<p>defp window_to_ms(:per_minute), do: 60_000
+  defp window_to_ms(:per_hour), do: 3_600_000
+  defp window_to_ms(:per_day), do: 86_400_000
+end
+</code></pre></p>
+<hr>
+<h2>7. Circuit Breaker Module</h2>
+<pre><code class="language-elixir">defmodule Onelist.Agents.CircuitBreaker do
+  @moduledoc &quot;&quot;&quot;
+  Circuit breaker for external service calls.
+<p>States:
+  <li>:closed - Normal operation</li>
+  <li>:open - Failing, reject all calls</li>
+  <li>:half_open - Testing if service recovered</li>
+  &quot;&quot;&quot;</p>
+<p>use GenServer
+  require Logger</p>
+<p>@failure_threshold 5
+  @reset_timeout_ms 30_000</p>
+<p>defstruct [
+    :service,
+    state: :closed,
+    failure_count: 0,
+    last_failure_at: nil,
+    success_count: 0
+  ]</p>
+<p>def start_link(opts \\ []) do
+    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+  end</p>
+<p>@impl true
+  def init(_opts) do
+    {:ok, %{circuits: %{}}}
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Execute function through circuit breaker.
+  &quot;&quot;&quot;
+  def call(service, fun) do
+    case get_state(service) do
+      :open -&gt;
+        Logger.warning(&quot;Circuit open for #{service}&quot;)
+        {:error, :circuit_open}</p>
+<p>state when state in [:closed, :half_open] -&gt;
+        execute_with_tracking(service, fun, state)
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  Get current circuit state.
+  &quot;&quot;&quot;
+  def get_state(service) do
+    GenServer.call(__MODULE__, {:get_state, service})
+  end</p>
+<p>@impl true
+  def handle_call({:get_state, service}, _from, state) do
+    circuit = Map.get(state.circuits, service, %__MODULE__{service: service})</p>
+<p>circuit_state = cond do
+      circuit.state == :closed -&gt;
+        :closed</p>
+<p>circuit.state == :open -&gt;
+        # Check if reset timeout has passed
+        if System.monotonic_time(:millisecond) - circuit.last_failure_at &gt; @reset_timeout_ms do
+          :half_open
+        else
+          :open
+        end</p>
+<p>true -&gt;
+        circuit.state
+    end</p>
+<p>{:reply, circuit_state, state}
+  end</p>
+<p>@impl true
+  def handle_call({:record_success, service}, _from, state) do
+    circuit = Map.get(state.circuits, service, %__MODULE__{service: service})</p>
+<p>new_circuit = %{circuit |
+      state: :closed,
+      failure_count: 0,
+      success_count: circuit.success_count + 1
+    }</p>
+<p>new_state = %{state | circuits: Map.put(state.circuits, service, new_circuit)}
+    {:reply, :ok, new_state}
+  end</p>
+<p>@impl true
+  def handle_call({:record_failure, service}, _from, state) do
+    circuit = Map.get(state.circuits, service, %__MODULE__{service: service})
+    new_failure_count = circuit.failure_count + 1</p>
+<p>new_circuit = if new_failure_count &gt;= @failure_threshold do
+      Logger.warning(&quot;Circuit opened for #{service} after #{new_failure_count} failures&quot;)
+      %{circuit |
+        state: :open,
+        failure_count: new_failure_count,
+        last_failure_at: System.monotonic_time(:millisecond)
+      }
+    else
+      %{circuit | failure_count: new_failure_count}
+    end</p>
+<p>new_state = %{state | circuits: Map.put(state.circuits, service, new_circuit)}
+    {:reply, :ok, new_state}
+  end</p>
+<p>defp execute_with_tracking(service, fun, current_state) do
+    try do
+      case fun.() do
+        {:ok, result} -&gt;
+          GenServer.call(__MODULE__, {:record_success, service})
+          {:ok, result}</p>
+<p>{:error, reason} -&gt;
+          GenServer.call(__MODULE__, {:record_failure, service})
+          {:error, reason}
+      end
+    rescue
+      error -&gt;
+        GenServer.call(__MODULE__, {:record_failure, service})
+        {:error, error}
+    end
+  end
+end
+</code></pre></p>
+<hr>
+<h2>8. Application Integration</h2>
+<h3>8.1 Application Supervisor</h3>
+<p>Add the unified modules to the application supervisor:</p>
+<pre><code class="language-elixir"># In lib/onelist/application.ex
+<p>def start(_type, _args) do
+  children = [
+    # ... existing children ...</p>
+<p># Unified Agent Modules
+    Onelist.Agents.RateLimiter,
+    Onelist.Agents.CircuitBreaker,</p>
+<p># ... rest of children ...
+  ]</p>
+<p>opts = [strategy: :one_for_one, name: Onelist.Supervisor]</p>
+<p># Attach telemetry handlers
+  Onelist.Agents.TelemetryHandler.attach()</p>
+<p>Supervisor.start_link(children, opts)
+end
+</code></pre></p>
+<h3>8.2 Config</h3>
+<pre><code class="language-elixir"># config/config.exs
+<p>config :onelist, :agents,
+  telemetry_enabled: true,
+  default_model: &quot;claude-3-haiku-20240307&quot;,
+  rate_limiting_enabled: true,
+  circuit_breaker_enabled: true</p>
+<p>config :opentelemetry,
+  resource: [
+    service: [name: &quot;onelist&quot;, namespace: &quot;onelist.my&quot;]
+  ]
+</code></pre></p>
+<hr>
+<h2>9. Implementation Phases</h2>
+<h3>Phase 1: Core Modules (Week 1)</h3>
+<table>
+<tr><th>Task</th><th>Effort</th></tr>
+<tr><td>Telemetry module</td><td>2 days</td></tr>
+<tr><td>Model Fleet configuration</td><td>1 day</td></tr>
+<tr><td>Cost Tracker</td><td>2 days</td></tr>
+</table>
+<h3>Phase 2: Security & Resilience (Week 1-2)</h3>
+<table>
+<tr><th>Task</th><th>Effort</th></tr>
+<tr><td>Input validation</td><td>1 day</td></tr>
+<tr><td>Prompt scaffolding</td><td>1 day</td></tr>
+<tr><td>Rate limiter</td><td>1 day</td></tr>
+<tr><td>Circuit breaker</td><td>1 day</td></tr>
+</table>
+<h3>Phase 3: Integration (Week 2)</h3>
+<table>
+<tr><th>Task</th><th>Effort</th></tr>
+<tr><td>Integrate with River</td><td>1 day</td></tr>
+<tr><td>Integrate with Reader</td><td>1 day</td></tr>
+<tr><td>Integrate with Feeder</td><td>1 day</td></tr>
+<tr><td>Integrate with Asset Enrichment</td><td>1 day</td></tr>
+<tr><td>Integrate with Searcher</td><td>1 day</td></tr>
+</table>
+<hr>
+<h2>10. References</h2>
+<li><a href="./ai_agent_implementation_guide.md">AI Agent Implementation Guide</a></li>
+<li><a href="./ai_agent_ecosystem_resources_guide.md">AI Agent Ecosystem Resources Guide</a></li>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a></li>
+<li><a href="./river_agent_plan.md">River Agent Plan</a></li>
+<li><a href="./reader_agent_plan.md">Reader Agent Plan</a></li>
+<li><a href="./feeder_agent_plan.md">Feeder Agent Plan</a></li>
+<li><a href="./asset_enrichment_agent_plan.md">Asset Enrichment Agent Plan</a></li>
+<li><a href="./searcher_agent_plan.md">Searcher Agent Plan</a></li>
+</ul>
+<hr>
+</em>Document created: 2026-01-30<em>
+</em>Status: Planning*
+  </article>
+</body>
+</html>

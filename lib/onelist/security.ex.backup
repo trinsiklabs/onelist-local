@@ -1,0 +1,384 @@
+defmodule Onelist.Security do
+  @moduledoc """
+  Security utilities for token generation, validation, and other security-related operations.
+  """
+
+  @doc """
+  Generates a cryptographically secure random token.
+
+  ## Examples
+
+      iex> generate_token(32)
+      "kS7-OYcJ0eJ4KGI1asj3wer9YnS3AdyD"
+  """
+  @spec generate_token(integer) :: binary
+  def generate_token(length) do
+    :crypto.strong_rand_bytes(length)
+    |> Base.url_encode64(padding: false)
+    |> binary_part(0, length)
+  end
+
+  @doc """
+  Generates a code verifier for PKCE OAuth flow.
+  Returns a cryptographically random string of 43-128 characters.
+
+  ## Examples
+
+      iex> generate_code_verifier()
+      "kS7-OYcJ0eJ4KGI1asj3wer9YnS3AdyD-8fKlbDeP7h_S0jIasWE89fPa1jDc032"
+
+  """
+  @spec generate_code_verifier() :: binary
+  def generate_code_verifier do
+    :crypto.strong_rand_bytes(64)
+    |> Base.url_encode64(padding: false)
+    |> binary_part(0, 64)
+  end
+
+  @doc """
+  Creates a code challenge from a code verifier using the S256 method (SHA256).
+  
+  ## Examples
+
+      iex> create_code_challenge("kS7-OYcJ0eJ4KGI1asj3wer9YnS3AdyD-8fKlbDeP7h_S0jIasWE89fPa1jDc032")
+      "HL9XK2S_ajeLvCjvKhH1GVfHm0KKnRk-hEYGYmSBeJ8"
+
+  """
+  @spec create_code_challenge(binary) :: binary
+  def create_code_challenge(verifier) when is_binary(verifier) do
+    :crypto.hash(:sha256, verifier)
+    |> Base.url_encode64(padding: false)
+    |> String.replace("+", "-")
+    |> String.replace("/", "_")
+    |> String.replace("=", "")
+  end
+
+  @doc """
+  Encrypts OAuth token data for secure storage.
+  Uses AES-256-GCM for authenticated encryption with associated data (AEAD).
+  
+  ## Examples
+
+      iex> encrypt_token(%{"access_token" => "xyz", "refresh_token" => "abc"})
+      "encrypted_token_data"
+  """
+  @spec encrypt_token(map() | binary()) :: binary()
+  def encrypt_token(token_data) when is_map(token_data) do
+    encrypt_token(Jason.encode!(token_data))
+  end
+  
+  def encrypt_token(token_data) when is_binary(token_data) do
+    # Get encryption key from application config
+    secret = get_encryption_key()
+    
+    # Generate a random IV (Initialization Vector)
+    iv = :crypto.strong_rand_bytes(16)
+    
+    # Generate a random authentication tag (AAD)
+    aad = :crypto.strong_rand_bytes(16)
+    
+    # Encrypt the token data
+    {cipher_text, tag} = :crypto.crypto_one_time_aead(
+      :aes_256_gcm,
+      secret,
+      iv,
+      token_data,
+      aad,
+      true
+    )
+    
+    # Combine IV, AAD, tag, and cipher text for storage
+    iv <> aad <> tag <> cipher_text
+    |> Base.encode64()
+  end
+  
+  @doc """
+  Decrypts previously encrypted OAuth token data.
+  
+  ## Examples
+
+      iex> decrypt_token("encrypted_token_data")
+      {:ok, %{"access_token" => "xyz", "refresh_token" => "abc"}}
+      
+      iex> decrypt_token("invalid_data")
+      {:error, :invalid}
+  """
+  @spec decrypt_token(binary()) :: {:ok, map()} | {:error, atom()}
+  def decrypt_token(encrypted_data) when is_binary(encrypted_data) do
+    try do
+      # Decode the base64 encoded data
+      decoded =
+        case Base.decode64(encrypted_data) do
+          {:ok, data} -> data
+          :error -> raise "Invalid base64 encoding"
+        end
+      
+      # Extract the components
+      <<iv::binary-16, aad::binary-16, tag::binary-16, cipher_text::binary>> = decoded
+      
+      # Get encryption key from application config
+      secret = get_encryption_key()
+      
+      # Decrypt the token data
+      case :crypto.crypto_one_time_aead(
+        :aes_256_gcm,
+        secret,
+        iv,
+        cipher_text,
+        aad,
+        tag,
+        false
+      ) do
+        plain_text when is_binary(plain_text) ->
+          case Jason.decode(plain_text) do
+            {:ok, token_map} -> {:ok, token_map}
+            {:error, _} -> {:error, :invalid_json}
+          end
+        
+        :error ->
+          {:error, :decryption_failed}
+      end
+    rescue
+      _ -> {:error, :invalid}
+    end
+  end
+  
+  defp get_encryption_key do
+    # Get encryption key from config, or derive from secret_key_base
+    key = Application.get_env(:onelist, Onelist.Security)[:encryption_key] ||
+          Application.get_env(:onelist, :secret_key_base)
+    
+    # Ensure the key is 32 bytes (256 bits) for AES-256
+    :crypto.hash(:sha256, key)
+  end
+
+  @doc """
+  Hashes a token using SHA256 for secure storage.
+
+  ## Examples
+
+      iex> hash_token("some-token")
+      "5d41402abc4b2a76b9719d911017c592"
+  """
+  @spec hash_token(binary) :: binary
+  def hash_token(token) when is_binary(token) do
+    :crypto.hash(:sha256, token)
+    |> Base.encode16(case: :lower)
+  end
+
+  @doc """
+  Compares two values in constant time to prevent timing attacks.
+
+  ## Examples
+
+      iex> secure_compare("abc123", "abc123")
+      true
+
+      iex> secure_compare("abc123", "def456")
+      false
+  """
+  @spec secure_compare(binary, binary) :: boolean
+  def secure_compare(left, right) when is_binary(left) and is_binary(right) do
+    if byte_size(left) == byte_size(right) do
+      Plug.Crypto.secure_compare(left, right)
+    else
+      # If they're different lengths, still do the comparison but it will return false
+      # Use secure_compare to prevent giving away which value is longer based on timing
+      Plug.Crypto.secure_compare(left, String.slice(right, 0, byte_size(left)))
+    end
+  end
+  def secure_compare(_, _), do: false
+
+  @doc """
+  Anonymizes an IP address for privacy.
+  
+  For IPv4, the last octet is replaced with zeroes.
+  For IPv6, the last 80 bits (last 5 segments) are replaced with zeroes.
+
+  ## Examples
+
+      iex> anonymize_ip("192.168.1.123")
+      "192.168.1.0"
+
+      iex> anonymize_ip("2001:0db8:85a3:0000:0000:8a2e:0370:7334")
+      "2001:0db8:85a3:0000:0000:0000:0000:0000"
+  """
+  @spec anonymize_ip(binary) :: binary
+  def anonymize_ip(ip) when is_binary(ip) do
+    cond do
+      # IPv4 address
+      String.match?(ip, ~r/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) ->
+        parts = String.split(ip, ".")
+        length = length(parts)
+        
+        if length == 4 do
+          # Replace the last octet with 0
+          Enum.take(parts, 3) ++ ["0"] |> Enum.join(".")
+        else
+          # Invalid IPv4 format, return as is
+          ip
+        end
+      
+      # IPv6 address (simplified regex check)
+      String.match?(ip, ~r/^[0-9a-fA-F:]+$/) && String.contains?(ip, ":") ->
+        case :inet.parse_address(to_charlist(ip)) do
+          {:ok, _} ->
+            # Replace the last 5 segments with zeroes
+            parts = String.split(ip, ":")
+            
+            # Make sure we handle the :: shorthand notation
+            expanded_parts = if Enum.member?(parts, "") do
+              # Handle shorthand notation by expanding it
+              idx = Enum.find_index(parts, &(&1 == ""))
+              prefix = Enum.take(parts, idx)
+              suffix = Enum.drop(parts, idx + 1)
+              missing_count = 8 - length(prefix) - length(suffix)
+              prefix ++ List.duplicate("0", missing_count) ++ suffix
+            else
+              parts
+            end
+            
+            # Take the first 3 segments and append 5 zeroes
+            sanitized = Enum.take(expanded_parts, 3) ++ List.duplicate("0", 5)
+            Enum.join(sanitized, ":")
+          
+          _ ->
+            # Failed to parse, return as is
+            ip
+        end
+      
+      # Not recognized as IP address
+      true ->
+        "0.0.0.0"
+    end
+  end
+  def anonymize_ip(_), do: "0.0.0.0"
+
+  @doc """
+  Extracts basic device information from a user agent string.
+
+  ## Examples
+
+      iex> extract_device_info("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+      "Windows 10 / Chrome"
+
+      iex> extract_device_info("Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1")
+      "iPhone / Safari"
+  """
+  @spec extract_device_info(binary) :: binary
+  def extract_device_info(user_agent) when is_binary(user_agent) do
+    cond do
+      String.contains?(user_agent, "iPhone") ->
+        "iPhone / " <> extract_browser(user_agent)
+      
+      String.contains?(user_agent, "iPad") ->
+        "iPad / " <> extract_browser(user_agent)
+      
+      String.contains?(user_agent, "Android") ->
+        "Android / " <> extract_browser(user_agent)
+      
+      String.contains?(user_agent, "Windows NT 10") ->
+        "Windows 10 / " <> extract_browser(user_agent)
+      
+      String.contains?(user_agent, "Windows NT 6.3") ->
+        "Windows 8.1 / " <> extract_browser(user_agent)
+      
+      String.contains?(user_agent, "Windows NT 6.2") ->
+        "Windows 8 / " <> extract_browser(user_agent)
+      
+      String.contains?(user_agent, "Windows NT 6.1") ->
+        "Windows 7 / " <> extract_browser(user_agent)
+      
+      String.contains?(user_agent, "Mac OS X") ->
+        "Mac / " <> extract_browser(user_agent)
+      
+      String.contains?(user_agent, "Linux") ->
+        "Linux / " <> extract_browser(user_agent)
+      
+      true ->
+        "Unknown / " <> extract_browser(user_agent)
+    end
+  end
+  def extract_device_info(_), do: "Unknown device"
+
+  @doc """
+  Extracts browser information from a user agent string.
+
+  ## Examples
+
+      iex> extract_browser("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+      "Chrome"
+
+      iex> extract_browser("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.59 Safari/537.36")
+      "Edge"
+  """
+  @spec extract_browser(binary) :: binary
+  def extract_browser(user_agent) when is_binary(user_agent) do
+    cond do
+      String.contains?(user_agent, "Firefox/") ->
+        "Firefox"
+      
+      String.contains?(user_agent, "Edg/") || String.contains?(user_agent, "Edge/") ->
+        "Edge"
+      
+      String.contains?(user_agent, "Chrome/") && !String.contains?(user_agent, "Chromium") ->
+        "Chrome"
+      
+      String.contains?(user_agent, "Chromium/") ->
+        "Chromium"
+      
+      String.contains?(user_agent, "Safari/") && !String.contains?(user_agent, "Chrome") &&
+          !String.contains?(user_agent, "Chromium") ->
+        "Safari"
+      
+      String.contains?(user_agent, "OPR/") || String.contains?(user_agent, "Opera/") ->
+        "Opera"
+
+      String.contains?(user_agent, "MSIE") || String.contains?(user_agent, "Trident/") ->
+        "Internet Explorer"
+
+      true ->
+        "Unknown Browser"
+    end
+  end
+  def extract_browser(_), do: "Unknown Browser"
+
+  @doc """
+  Encrypts a payload for secure storage or transmission.
+
+  ## Examples
+
+      iex> encrypt_data(%{user_id: 123, role: "admin"})
+      "encrypted_string"
+  """
+  @spec encrypt_data(any) :: binary
+  def encrypt_data(data) do
+    secret = Application.get_env(:onelist, Onelist.Security, [])[:encryption_key] ||
+             Application.get_env(:onelist, :secret_key_base)
+    
+    # Use Phoenix's build-in encryption
+    Phoenix.Token.encrypt(OnelistWeb.Endpoint, secret, data)
+  end
+
+  @doc """
+  Decrypts a payload that was encrypted with encrypt_data/1.
+
+  ## Examples
+
+      iex> decrypt_data("encrypted_string")
+      {:ok, %{user_id: 123, role: "admin"}}
+
+      iex> decrypt_data("invalid_data")
+      {:error, :invalid}
+  """
+  @spec decrypt_data(binary) :: {:ok, any} | {:error, :invalid}
+  def decrypt_data(encrypted) do
+    secret = Application.get_env(:onelist, Onelist.Security, [])[:encryption_key] ||
+             Application.get_env(:onelist, :secret_key_base)
+    
+    case Phoenix.Token.decrypt(OnelistWeb.Endpoint, secret, encrypted) do
+      {:ok, data} -> {:ok, data}
+      {:error, _reason} -> {:error, :invalid}
+    end
+  end
+end 

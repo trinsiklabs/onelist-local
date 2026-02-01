@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tag System Implementation Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Tag System Implementation Plan</h1>
+<strong>Document Version:</strong> 2026-01-29
+<strong>Status:</strong> Active - MVP Component
+<strong>Priority:</strong> HIGH
+<strong>Decisions Finalized:</strong> 2026-01-29
+<hr>
+<h2>1. Overview</h2>
+<p>This document details the tag system implementation for Onelist, covering MVP features and post-MVP enhancements.</p>
+<strong>Key Principle:</strong> Start simple with enhanced tags for MVP, evolve to full Core Taxonomy system post-MVP.
+<hr>
+<h2>2. MVP Tag System</h2>
+<h3>2.1 Schema</h3>
+<pre><code class="language-sql">-- tags table (enhanced from original)
+CREATE TABLE tags (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id),
+  name VARCHAR(255) NOT NULL,
+  color VARCHAR(7) NULL,  -- hex color e.g., &quot;#FF5733&quot;
+  inserted_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL,
+<p>UNIQUE(user_id, name)
+);</p>
+<p>CREATE INDEX tags_user_id_idx ON tags(user_id);
+CREATE INDEX tags_name_pattern_idx ON tags(name text_pattern_ops);  -- For prefix queries</p>
+<p>-- entry_tags join table (unchanged)
+CREATE TABLE entry_tags (
+  entry_id UUID NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+  tag_id UUID NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+  inserted_at TIMESTAMPTZ NOT NULL,</p>
+<p>PRIMARY KEY (entry_id, tag_id)
+);</p>
+<p>CREATE INDEX entry_tags_tag_id_idx ON entry_tags(tag_id);</p>
+<p>-- saved_views table (new)
+CREATE TABLE saved_views (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id),
+  name VARCHAR(255) NOT NULL,
+  filter_config JSONB NOT NULL,  -- stores tag IDs, operators, etc.
+  inserted_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL,</p>
+<p>UNIQUE(user_id, name)
+);
+</code></pre></p>
+<h3>2.2 MVP Features</h3>
+<table>
+<tr><th>Feature</th><th>Description</th><th>Status</th></tr>
+<tr><td><strong>Basic CRUD</strong></td><td>Create, read, update, delete tags</td><td>✅ Existing</td></tr>
+<tr><td><strong>Color field</strong></td><td>Assign hex color to tags</td><td>NEW</td></tr>
+<tr><td><strong>Hierarchical convention</strong></td><td>Colon syntax (<code>project:onelist:web</code>)</td><td>NEW</td></tr>
+<tr><td><strong>Prefix filtering</strong></td><td>Filter by <code>project:</code> shows all children</td><td>NEW</td></tr>
+<tr><td><strong>Autocomplete</strong></td><td>Suggest existing tags as user types</td><td>NEW</td></tr>
+<tr><td><strong>Bulk rename</strong></td><td>Rename tag across all entries</td><td>NEW</td></tr>
+<tr><td><strong>Bulk merge</strong></td><td>Merge two tags into one</td><td>NEW</td></tr>
+<tr><td><strong>Bulk delete</strong></td><td>Delete tag and remove from all entries</td><td>NEW</td></tr>
+<tr><td><strong>AND filtering</strong></td><td>Multiple tags = all must match</td><td>NEW</td></tr>
+<tr><td><strong>OR filtering</strong></td><td>Any of selected tags match</td><td>NEW</td></tr>
+<tr><td><strong>Minus operator</strong></td><td>Exclude entries with tag</td><td>NEW</td></tr>
+<tr><td><strong>Saved views</strong></td><td>Save complex filters as named views</td><td>NEW</td></tr>
+</table>
+<h3>2.3 Hierarchical Tags (Colon Syntax)</h3>
+<strong>Convention:</strong> Tags can use colons to indicate hierarchy: <code>project:onelist:web</code>
+<strong>Query-time parsing:</strong> No schema changes for hierarchy. Prefix filtering uses SQL:
+<pre><code class="language-elixir"># Filter by parent tag (finds all children)
+def list_entries_by_tag_prefix(user_id, prefix) do
+  from(e in Entry,
+    join: et in EntryTag, on: et.entry_id == e.id,
+    join: t in Tag, on: t.id == et.tag_id,
+    where: t.user_id == ^user_id,
+    where: t.name == ^prefix or like(t.name, ^&quot;#{prefix}:%&quot;),
+    distinct: true
+  )
+end
+</code></pre>
+<strong>App-layer cascade for rename:</strong>
+<pre><code class="language-elixir">def rename_tag_with_children(tag, new_name) do
+  old_prefix = tag.name
+  new_prefix = new_name
+<p># Rename the tag itself
+  update_tag(tag, %{name: new_name})</p>
+<p># Rename all children
+  from(t in Tag,
+    where: t.user_id == ^tag.user_id,
+    where: like(t.name, ^&quot;#{old_prefix}:%&quot;)
+  )
+  |&gt; Repo.update_all(set: [
+    name: fragment(&quot;replace(name, ?, ?)&quot;, ^&quot;#{old_prefix}:&quot;, ^&quot;#{new_prefix}:&quot;)
+  ])
+end
+</code></pre></p>
+<strong>Validation:</strong> Warn (don't block) if creating <code>a:b:c</code> without <code>a:b</code> existing.
+<h3>2.4 Tag Colors</h3>
+<pre><code class="language-elixir"># Tag schema
+schema &quot;tags&quot; do
+  field :name, :string
+  field :color, :string  # e.g., &quot;#FF5733&quot;
+  belongs_to :user, User
+<p>timestamps()
+end</p>
+<p>def changeset(tag, attrs) do
+  tag
+  |&gt; cast(attrs, [:name, :color])
+  |&gt; validate_required([:name])
+  |&gt; validate_format(:color, ~r/^#[0-9A-Fa-f]{6}$/, message: &quot;must be hex color&quot;)
+  |&gt; unique_constraint([:user_id, :name])
+end
+</code></pre></p>
+<strong>Default colors:</strong> System can assign from a palette if user doesn't specify.
+<h3>2.5 Autocomplete Suggestions</h3>
+<pre><code class="language-elixir">def suggest_tags(user_id, query, limit \\ 10) do
+  from(t in Tag,
+    where: t.user_id == ^user_id,
+    where: ilike(t.name, ^&quot;#{query}%&quot;),
+    order_by: [asc: t.name],
+    limit: ^limit,
+    select: %{id: t.id, name: t.name, color: t.color}
+  )
+  |&gt; Repo.all()
+end
+</code></pre>
+<h3>2.6 Bulk Operations</h3>
+<strong>Rename:</strong>
+<pre><code class="language-elixir">def rename_tag(tag, new_name) do
+  # Check for conflicts
+  case get_tag_by_name(tag.user_id, new_name) do
+    nil -&gt;
+      update_tag(tag, %{name: new_name})
+    existing -&gt;
+      {:error, :name_taken, existing}
+  end
+end
+</code></pre>
+<strong>Merge:</strong>
+<pre><code class="language-elixir">def merge_tags(source_tag, target_tag) do
+  Repo.transaction(fn -&gt;
+    # Move all entry associations to target
+    from(et in EntryTag,
+      where: et.tag_id == ^source_tag.id
+    )
+    |&gt; Repo.update_all(set: [tag_id: target_tag.id])
+<p># Handle duplicate associations (entry had both tags)
+    # ON CONFLICT DO NOTHING handles this if we have unique constraint</p>
+<p># Delete source tag
+    Repo.delete(source_tag)
+  end)
+end
+</code></pre></p>
+<strong>Delete:</strong>
+<pre><code class="language-elixir">def delete_tag(tag) do
+  # entry_tags has ON DELETE CASCADE, so just delete the tag
+  Repo.delete(tag)
+end
+</code></pre>
+<h3>2.7 Advanced Filtering</h3>
+<strong>Filter configuration structure:</strong>
+<pre><code class="language-elixir">%{
+  &quot;mode&quot; =&gt; &quot;advanced&quot;,  # or &quot;simple&quot;
+  &quot;conditions&quot; =&gt; [
+    %{&quot;type&quot; =&gt; &quot;include&quot;, &quot;operator&quot; =&gt; &quot;and&quot;, &quot;tag_ids&quot; =&gt; [&quot;uuid1&quot;, &quot;uuid2&quot;]},
+    %{&quot;type&quot; =&gt; &quot;include&quot;, &quot;operator&quot; =&gt; &quot;or&quot;, &quot;tag_ids&quot; =&gt; [&quot;uuid3&quot;, &quot;uuid4&quot;]},
+    %{&quot;type&quot; =&gt; &quot;exclude&quot;, &quot;tag_ids&quot; =&gt; [&quot;uuid5&quot;]}
+  ]
+}
+</code></pre>
+<strong>Query builder:</strong>
+<pre><code class="language-elixir">def filter_entries(user_id, filter_config) do
+  base_query = from(e in Entry, where: e.user_id == ^user_id)
+<p>filter_config[&quot;conditions&quot;]
+  |&gt; Enum.reduce(base_query, fn condition, query -&gt;
+    apply_condition(query, condition)
+  end)
+end</p>
+<p>defp apply_condition(query, %{&quot;type&quot; =&gt; &quot;include&quot;, &quot;operator&quot; =&gt; &quot;and&quot;, &quot;tag_ids&quot; =&gt; tag_ids}) do
+  # Entry must have ALL of these tags
+  Enum.reduce(tag_ids, query, fn tag_id, q -&gt;
+    from(e in q,
+      where: exists(
+        from(et in EntryTag,
+          where: et.entry_id == e.id and et.tag_id == ^tag_id
+        )
+      )
+    )
+  end)
+end</p>
+<p>defp apply_condition(query, %{&quot;type&quot; =&gt; &quot;include&quot;, &quot;operator&quot; =&gt; &quot;or&quot;, &quot;tag_ids&quot; =&gt; tag_ids}) do
+  # Entry must have ANY of these tags
+  from(e in query,
+    where: exists(
+      from(et in EntryTag,
+        where: et.entry_id == e.id and et.tag_id in ^tag_ids
+      )
+    )
+  )
+end</p>
+<p>defp apply_condition(query, %{&quot;type&quot; =&gt; &quot;exclude&quot;, &quot;tag_ids&quot; =&gt; tag_ids}) do
+  # Entry must NOT have any of these tags
+  from(e in query,
+    where: not exists(
+      from(et in EntryTag,
+        where: et.entry_id == e.id and et.tag_id in ^tag_ids
+      )
+    )
+  )
+end
+</code></pre></p>
+<h3>2.8 Saved Views</h3>
+<pre><code class="language-elixir">schema &quot;saved_views&quot; do
+  field :name, :string
+  field :filter_config, :map
+  belongs_to :user, User
+<p>timestamps()
+end</p>
+<p>def create_saved_view(user, attrs) do
+  %SavedView{}
+  |&gt; SavedView.changeset(attrs)
+  |&gt; Ecto.Changeset.put_assoc(:user, user)
+  |&gt; Repo.insert()
+end</p>
+<p>def list_saved_views(user_id) do
+  from(sv in SavedView,
+    where: sv.user_id == ^user_id,
+    order_by: [asc: sv.name]
+  )
+  |&gt; Repo.all()
+end
+</code></pre></p>
+<hr>
+<h2>3. Post-MVP: Enhanced Suggestions</h2>
+<h3>3.1 Heuristic Suggestions</h3>
+<p>Suggest tags based on:
+<ul>
+<li>Recently used tags</li>
+<li>Co-occurrence patterns (tags often used together)</li>
+<li>Entry type patterns (certain tags common for notes vs memories)</li></p>
+<pre><code class="language-elixir">def smart_suggest_tags(user_id, entry, limit \\ 5) do
+  # Get recent tags
+  recent = get_recent_tags(user_id, 10)
+<p># Get co-occurring tags based on other tags on this entry
+  cooccurring = get_cooccurring_tags(user_id, entry.tag_ids)</p>
+<p># Combine and dedupe
+  (recent ++ cooccurring)
+  |&gt; Enum.uniq_by(&amp; &amp;1.id)
+  |&gt; Enum.take(limit)
+end
+</code></pre></p>
+<h3>3.2 AI Agent Suggestions (Reader Agent)</h3>
+<p>The Reader agent analyzes entry content and suggests relevant tags:</p>
+<pre><code class="language-elixir"># Called by Reader agent after processing entry
+def suggest_tags_from_content(entry) do
+  # Extract topics/entities from content
+  # Match against existing tags
+  # Return suggestions with confidence scores
+end
+</code></pre>
+<hr>
+<h2>4. Post-MVP: Full Hierarchy Schema</h2>
+<p>When query-time parsing becomes a bottleneck, migrate to full hierarchy:</p>
+<pre><code class="language-sql">-- Enhanced tags table with parent reference
+ALTER TABLE tags ADD COLUMN parent_id UUID REFERENCES tags(id);
+CREATE INDEX tags_parent_id_idx ON tags(parent_id);
+<p>-- Or use PostgreSQL ltree extension for efficient tree queries
+CREATE EXTENSION IF NOT EXISTS ltree;
+ALTER TABLE tags ADD COLUMN path ltree;
+CREATE INDEX tags_path_gist_idx ON tags USING GIST (path);
+</code></pre></p>
+<strong>Migration:</strong> Convert colon-separated names to parent_id relationships.
+<hr>
+<h2>5. Post-MVP: Core Taxonomy System</h2>
+<p>See <a href="./future_roadmap_core_taxonomy.md">Core Taxonomy Roadmap</a> for full specification.</p>
+<strong>Summary:</strong>
+<li>Replace <code>tags</code> with <code>taxonomies</code> → <code>terms</code> → <code>entry_applied_terms</code></li>
+<li>System taxonomies: Topics (current tags), Consumption Status, Marks</li>
+<li>Enables AI agents to apply structured metadata</li>
+<strong>Migration path:</strong>
+1. Create taxonomy tables
+2. Migrate existing tags → terms in "Topics" taxonomy
+3. Migrate entry_tags → entry_applied_terms
+4. Update all queries and APIs
+<hr>
+<h2>6. API Endpoints</h2>
+<h3>MVP Endpoints</h3>
+<table>
+<tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+<tr><td>GET</td><td><code>/api/v1/tags</code></td><td>List user's tags</td></tr>
+<tr><td>POST</td><td><code>/api/v1/tags</code></td><td>Create tag</td></tr>
+<tr><td>GET</td><td><code>/api/v1/tags/:id</code></td><td>Get tag details</td></tr>
+<tr><td>PATCH</td><td><code>/api/v1/tags/:id</code></td><td>Update tag (name, color)</td></tr>
+<tr><td>DELETE</td><td><code>/api/v1/tags/:id</code></td><td>Delete tag</td></tr>
+<tr><td>POST</td><td><code>/api/v1/tags/:id/rename</code></td><td>Rename with cascade</td></tr>
+<tr><td>POST</td><td><code>/api/v1/tags/merge</code></td><td>Merge two tags</td></tr>
+<tr><td>GET</td><td><code>/api/v1/tags/suggest</code></td><td>Autocomplete suggestions</td></tr>
+<tr><td>GET</td><td><code>/api/v1/entries?tags=...</code></td><td>Filter entries by tags</td></tr>
+<tr><td>GET</td><td><code>/api/v1/saved-views</code></td><td>List saved views</td></tr>
+<tr><td>POST</td><td><code>/api/v1/saved-views</code></td><td>Create saved view</td></tr>
+<tr><td>DELETE</td><td><code>/api/v1/saved-views/:id</code></td><td>Delete saved view</td></tr>
+</table>
+<h3>Query Parameters for Filtering</h3>
+<pre><code class="language-"># AND - all tags required
+GET /api/v1/entries?tags[and]=uuid1,uuid2
+<h1>OR - any tag matches</h1>
+GET /api/v1/entries?tags[or]=uuid1,uuid2
+<h1>Exclude</h1>
+GET /api/v1/entries?tags[not]=uuid3
+<h1>Combined</h1>
+GET /api/v1/entries?tags[and]=uuid1&amp;tags[or]=uuid2,uuid3&amp;tags[not]=uuid4
+<h1>By prefix (hierarchical)</h1>
+GET /api/v1/entries?tag_prefix=project:onelist
+</code></pre>
+<hr>
+<h2>7. UI Components</h2>
+<h3>Tag Input Component</h3>
+<li>Autocomplete dropdown as user types</li>
+<li>Show tag color as chip background</li>
+<li>Click to add, x to remove</li>
+<li>Keyboard navigation (Tab to accept, Enter to add)</li>
+<h3>Tag Manager Page</h3>
+<li>List all tags with entry counts</li>
+<li>Color picker for each tag</li>
+<li>Rename inline or via modal</li>
+<li>Merge via drag-and-drop or selection</li>
+<li>Delete with confirmation</li>
+<li>Show hierarchy as indented tree</li>
+<h3>Filter Builder</h3>
+<li>Visual query builder</li>
+<li>Add conditions (AND/OR/NOT)</li>
+<li>Select tags from dropdown</li>
+<li>Preview result count</li>
+<li>Save as view</li>
+<h3>Saved Views Sidebar</h3>
+<li>List saved views</li>
+<li>Click to apply filter</li>
+<li>Edit/delete views</li>
+<hr>
+<h2>8. Implementation Timeline</h2>
+<table>
+<tr><th>Phase</th><th>Features</th><th>Effort</th></tr>
+<tr><td>1</td><td>Add color field, migration</td><td>1 day</td></tr>
+<tr><td>2</td><td>Hierarchical prefix filtering</td><td>2-3 days</td></tr>
+<tr><td>3</td><td>Bulk operations (rename, merge, delete)</td><td>3-5 days</td></tr>
+<tr><td>4</td><td>Autocomplete suggestions</td><td>2-3 days</td></tr>
+<tr><td>5</td><td>Advanced filtering (AND/OR/minus)</td><td>3-5 days</td></tr>
+<tr><td>6</td><td>Saved views</td><td>3-5 days</td></tr>
+<tr><td><strong>Total MVP</strong></td><td></td><td><strong>~2-3 weeks</strong></td></tr>
+</table>
+<hr>
+<h2>9. Decisions Log</h2>
+<table>
+<tr><th>#</th><th>Topic</th><th>Decision</th><th>Date</th></tr>
+<tr><td>1</td><td>Hierarchical tags</td><td>Query-time parsing (MVP), full schema (post-MVP)</td><td>2026-01-29</td></tr>
+<tr><td>2</td><td>Tag colors</td><td>Add <code>color</code> field to tags table</td><td>2026-01-29</td></tr>
+<tr><td>3</td><td>Smart suggestions</td><td>Autocomplete (MVP), heuristics + AI (post-MVP)</td><td>2026-01-29</td></tr>
+<tr><td>4</td><td>Bulk operations</td><td>Full rename/merge/delete with cascade</td><td>2026-01-29</td></tr>
+<tr><td>5</td><td>Advanced filtering</td><td>AND, OR, minus, saved views</td><td>2026-01-29</td></tr>
+<tr><td>6</td><td>Core Taxonomy</td><td>Simple tags (MVP), taxonomy system (post-MVP)</td><td>2026-01-29</td></tr>
+</table>
+<hr>
+<h2>10. Related Documents</h2>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a></li>
+<li><a href="./project_plan.md">Project Plan</a> - Original tag schema</li>
+<li><a href="./future_roadmap_core_taxonomy.md">Core Taxonomy Roadmap</a> - Post-MVP taxonomy system</li>
+</ul>
+<hr>
+<em>Last updated: 2026-01-29</em>
+<em>Status: Active - MVP Component</em>
+  </article>
+</body>
+</html>

@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Extension Development Plan - Onelist Roadmap</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-bg: #141414;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --code-bg: #1a1a1a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 2rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent-hover); }
+    
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+    h4 { font-size: 1.1rem; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-hover); }
+    
+    code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    pre {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.5rem; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--card-bg); }
+    
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+    
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+    
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="/roadmap/" class="back-link">← Back to Roadmap Index</a>
+  
+  <article>
+    <h1>Browser Extension Development Plan</h1>
+<strong>Document Version:</strong> 2026-01-29
+<strong>Status:</strong> Active - MVP Component
+<strong>Priority:</strong> HIGH - Core UX for Web Saving
+<hr>
+<h2>1. Executive Summary</h2>
+<p>The Onelist Browser Extension is the primary interface for rapid web content capture. It enables users to save pages, articles, and tabs to Onelist with one click, integrating with the Web Clipper API and Searcher Agent's similarity detection.</p>
+<h3>1.1 Core Value Proposition</h3>
+<blockquote>"Browser integration that allows you to easily save stuff, save tabs, have them stay organized"</blockquote>
+<table>
+<tr><th>Capability</th><th>Description</th></tr>
+<tr><td><strong>One-click save</strong></td><td>Save current page instantly</td></tr>
+<tr><td><strong>Similarity detection</strong></td><td>Warn if content already saved</td></tr>
+<tr><td><strong>Tab session management</strong></td><td>Save/restore groups of tabs</td></tr>
+<tr><td><strong>Research context</strong></td><td>Auto-detect research sessions</td></tr>
+<tr><td><strong>Visual indicators</strong></td><td>See what's already in Onelist</td></tr>
+</table>
+<h3>1.2 Why MVP Priority</h3>
+<ul>
+<li>Primary content ingestion path for web users</li>
+<li>Enables "send links to save" use case from user feedback</li>
+<li>Complements Web Clipper API (provides the UI)</li>
+<li>Differentiator: Most note apps lack smart browser integration</li>
+<hr>
+<h2>2. Architecture</h2>
+<h3>2.1 System Context</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│                      BROWSER EXTENSION ARCHITECTURE                          │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                         BROWSER                                        │ │
+│  │                                                                        │ │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                 │ │
+│  │  │   Popup UI   │  │Content Script│  │  Background  │                 │ │
+│  │  │              │  │              │  │   Worker     │                 │ │
+│  │  │ • Save button│  │ • Page data  │  │              │                 │ │
+│  │  │ • Tag input  │  │ • Selection  │  │ • API calls  │                 │ │
+│  │  │ • Status     │  │ • Highlights │  │ • Auth       │                 │ │
+│  │  │ • Settings   │  │              │  │ • Storage    │                 │ │
+│  │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘                 │ │
+│  │         │                 │                  │                         │ │
+│  │         └─────────────────┴──────────────────┘                         │ │
+│  │                           │                                            │ │
+│  └───────────────────────────┼────────────────────────────────────────────┘ │
+│                              │                                              │
+│                              ▼                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │                      ONELIST API                                       │ │
+│  │                                                                        │ │
+│  │  POST /api/v1/clip              → Web Clipper (save page)             │ │
+│  │  POST /api/v1/clip/preview      → Preview before save                 │ │
+│  │  POST /api/v1/search/similarity_check → Duplicate detection           │ │
+│  │  POST /api/v1/tab-sessions      → Save/restore tab groups             │ │
+│  │  GET  /api/v1/entries/by-url    → Check if URL already saved          │ │
+│  │                                                                        │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>2.2 Component Responsibilities</h3>
+<table>
+<tr><th>Component</th><th>Responsibility</th></tr>
+<tr><td><strong>Popup UI</strong></td><td>User interface for saving, tagging, settings</td></tr>
+<tr><td><strong>Content Script</strong></td><td>Injected into pages; extracts data, shows indicators</td></tr>
+<tr><td><strong>Background Worker</strong></td><td>Service worker; handles API calls, auth, state</td></tr>
+<tr><td><strong>Storage</strong></td><td>Sync storage for settings, local storage for cache</td></tr>
+</table>
+<hr>
+<h2>3. Features</h2>
+<h3>3.1 MVP Features</h3>
+<h4>3.1.1 One-Click Save</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  POPUP UI - Save Flow                                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  🔖 Save to Onelist                                          [×]      │ │
+│  ├────────────────────────────────────────────────────────────────────────┤ │
+│  │                                                                        │ │
+│  │  Title: Understanding Thyroid Function                                 │ │
+│  │  ─────────────────────────────────────────────────────────────────── │ │
+│  │                                                                        │ │
+│  │  URL: healthline.com/health/thyroid-function                          │ │
+│  │                                                                        │ │
+│  │  Tags: [health] [research] [+]                                        │ │
+│  │                                                                        │ │
+│  │  ┌──────────────────────────────────────────────────────────────────┐ │ │
+│  │  │  ⚠️  Similar content found (78% match)                           │ │ │
+│  │  │  &quot;Thyroid Health Basics&quot; - saved 2 days ago                      │ │ │
+│  │  │  [View Existing] [Save Anyway]                                   │ │ │
+│  │  └──────────────────────────────────────────────────────────────────┘ │ │
+│  │                                                                        │ │
+│  │  [ ] Save selection only (142 words selected)                         │ │
+│  │                                                                        │ │
+│  │  [Save to Onelist]                                    [Cancel]        │ │
+│  │                                                                        │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Features:</strong>
+<li>Auto-extract page title and metadata</li>
+<li>Quick tag assignment (recent tags, suggested tags)</li>
+<li>Similarity check before save (via Searcher Agent)</li>
+<li>Option to save text selection only</li>
+<li>Keyboard shortcut: <code>Cmd+Shift+O</code> (Mac) / <code>Ctrl+Shift+O</code> (Windows)</li>
+<h4>3.1.2 Context Menu Integration</h4>
+<pre><code class="language-">Right-click menu options:
+├── &quot;Save page to Onelist&quot;
+├── &quot;Save link to Onelist&quot; (on links)
+├── &quot;Save selection to Onelist&quot; (when text selected)
+├── &quot;Save image to Onelist&quot; (on images)
+└── &quot;Save all tabs to Onelist&quot;
+</code></pre>
+<h4>3.1.3 Already-Saved Indicator</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  CONTENT SCRIPT - Page Indicators                                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  When visiting a page already in Onelist:                                   │
+│                                                                              │
+│  • Extension icon shows green checkmark badge                               │
+│  • Popup shows &quot;Already saved&quot; with entry details                           │
+│  • Option to view in Onelist or update tags                                 │
+│                                                                              │
+│  On any page with links:                                                    │
+│                                                                              │
+│  • Links to saved content can be highlighted (opt-in setting)              │
+│  • Hover tooltip: &quot;Saved to Onelist: [title]&quot;                              │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>3.1.4 Tab Session Management</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  POPUP UI - Tab Sessions                                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  📑 Tab Sessions                                             [×]      │ │
+│  ├────────────────────────────────────────────────────────────────────────┤ │
+│  │                                                                        │ │
+│  │  Current Window: 12 tabs                                               │ │
+│  │                                                                        │ │
+│  │  Session Name: [Thyroid Research____________]                         │ │
+│  │                                                                        │ │
+│  │  Tabs to save:                                                        │ │
+│  │  ☑ Understanding Thyroid Function - healthline.com                    │ │
+│  │  ☑ Hypothyroidism Symptoms - mayoclinic.org                          │ │
+│  │  ☑ TSH Test Results - webmd.com                                      │ │
+│  │  ☐ Gmail (excluded - not content)                                     │ │
+│  │  ☑ Thyroid Diet Tips - medicalnewstoday.com                          │ │
+│  │                                                                        │ │
+│  │  [Save 4 tabs as session]                                             │ │
+│  │                                                                        │ │
+│  │  ─────────────────────────────────────────────────────────────────── │ │
+│  │                                                                        │ │
+│  │  Saved Sessions:                                                       │ │
+│  │  • Thyroid Research (4 tabs) - Today           [Restore] [Delete]    │ │
+│  │  • React Hooks Deep Dive (7 tabs) - 3 days ago [Restore] [Delete]    │ │
+│  │  • Tax Planning 2026 (3 tabs) - 1 week ago     [Restore] [Delete]    │ │
+│  │                                                                        │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<strong>Tab Session Storage:</strong>
+<li>Creates Entry Group in Onelist with <code>entry_type='tab_session'</code></li>
+<li>Each tab saved as individual entry, linked to session</li>
+<li>Session metadata: creation time, tab count, window info</li>
+<li>Restore: Opens all tabs in new window</li>
+<h3>3.2 Post-MVP Features</h3>
+<h4>3.2.1 Research Context Detection</h4>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  RESEARCH CONTEXT DETECTION                                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Extension tracks browsing patterns (opt-in) to detect research sessions:   │
+│                                                                              │
+│  Detection Signals:                                                          │
+│  ├── Multiple saves with similar topics (via embeddings)                    │
+│  ├── Time clustering (5 saves about &quot;thyroid&quot; in 3 days)                   │
+│  ├── Domain patterns (medical sites, tech blogs, etc.)                     │
+│  └── Search query patterns (if user opts in)                               │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────────┐ │
+│  │  💡 Research Session Detected                                          │ │
+│  ├────────────────────────────────────────────────────────────────────────┤ │
+│  │                                                                        │ │
+│  │  You've been researching &quot;Thyroid Health&quot; for 3 days                  │ │
+│  │                                                                        │ │
+│  │  7 related articles saved:                                            │ │
+│  │  • Understanding Thyroid Function                                     │ │
+│  │  • Hypothyroidism Symptoms                                            │ │
+│  │  • TSH Test Results Explained                                         │ │
+│  │  • ... and 4 more                                                     │ │
+│  │                                                                        │ │
+│  │  [Create Research Folder]  [Dismiss]  [Don't show for this topic]    │ │
+│  │                                                                        │ │
+│  └────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│  When user accepts:                                                          │
+│  • Creates Entry Group: &quot;Research: Thyroid Health&quot;                          │
+│  • Links all related entries                                                │
+│  • Adds tag: &quot;research:thyroid-health&quot;                                      │
+│  • River Agent notified for follow-up suggestions                           │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h4>3.2.2 Smart Exclude Rules</h4>
+<pre><code class="language-">Auto-exclude from saving (configurable):
+├── Email providers (gmail.com, outlook.com, etc.)
+├── Social media feeds (twitter.com/home, facebook.com)
+├── Banking/financial sites
+├── Authentication pages
+├── Shopping carts
+└── User-defined patterns
+</code></pre>
+<h4>3.2.3 Offline Queue</h4>
+<pre><code class="language-">When offline:
+├── Saves queued locally
+├── Badge shows pending count
+├── Auto-sync when back online
+└── Conflict resolution if page changed
+</code></pre>
+<h4>3.2.4 Quick Capture Modes</h4>
+<pre><code class="language-">Capture Modes (user preference):
+├── Full Page (default) - Extracts article content
+├── URL Only - Just bookmark, no content extraction
+├── Screenshot - Captures visible viewport as image
+├── PDF - Generates PDF of page (via print)
+└── Selection - Only selected text
+</code></pre>
+<hr>
+<h2>4. Technical Implementation</h2>
+<h3>4.1 Manifest V3 Structure</h3>
+<pre><code class="language-json">{
+  &quot;manifest_version&quot;: 3,
+  &quot;name&quot;: &quot;Onelist&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;description&quot;: &quot;Save and organize web content to your Onelist&quot;,
+<p>&quot;permissions&quot;: [
+    &quot;activeTab&quot;,
+    &quot;storage&quot;,
+    &quot;contextMenus&quot;,
+    &quot;tabs&quot;
+  ],</p>
+<p>&quot;optional_permissions&quot;: [
+    &quot;history&quot;,
+    &quot;bookmarks&quot;
+  ],</p>
+<p>&quot;host_permissions&quot;: [
+    &quot;https://api.onelist.my/<em>&quot;,
+    &quot;https://</em>.onelist.my/<em>&quot;
+  ],</p>
+<p>&quot;background&quot;: {
+    &quot;service_worker&quot;: &quot;background.js&quot;,
+    &quot;type&quot;: &quot;module&quot;
+  },</p>
+<p>&quot;action&quot;: {
+    &quot;default_popup&quot;: &quot;popup.html&quot;,
+    &quot;default_icon&quot;: {
+      &quot;16&quot;: &quot;icons/icon-16.png&quot;,
+      &quot;32&quot;: &quot;icons/icon-32.png&quot;,
+      &quot;48&quot;: &quot;icons/icon-48.png&quot;,
+      &quot;128&quot;: &quot;icons/icon-128.png&quot;
+    }
+  },</p>
+<p>&quot;content_scripts&quot;: [
+    {
+      &quot;matches&quot;: [&quot;&lt;all_urls&gt;&quot;],
+      &quot;js&quot;: [&quot;content.js&quot;],
+      &quot;css&quot;: [&quot;content.css&quot;],
+      &quot;run_at&quot;: &quot;document_idle&quot;
+    }
+  ],</p>
+<p>&quot;commands&quot;: {
+    &quot;save-page&quot;: {
+      &quot;suggested_key&quot;: {
+        &quot;default&quot;: &quot;Ctrl+Shift+O&quot;,
+        &quot;mac&quot;: &quot;Command+Shift+O&quot;
+      },
+      &quot;description&quot;: &quot;Save current page to Onelist&quot;
+    },
+    &quot;save-selection&quot;: {
+      &quot;suggested_key&quot;: {
+        &quot;default&quot;: &quot;Ctrl+Shift+S&quot;,
+        &quot;mac&quot;: &quot;Command+Shift+S&quot;
+      },
+      &quot;description&quot;: &quot;Save selected text to Onelist&quot;
+    }
+  },</p>
+<p>&quot;icons&quot;: {
+    &quot;16&quot;: &quot;icons/icon-16.png&quot;,
+    &quot;32&quot;: &quot;icons/icon-32.png&quot;,
+    &quot;48&quot;: &quot;icons/icon-48.png&quot;,
+    &quot;128&quot;: &quot;icons/icon-128.png&quot;
+  }
+}
+</code></pre></p>
+<h3>4.2 Background Worker</h3>
+<pre><code class="language-typescript">// background.ts - Service Worker
+<p>import { OnelistAPI } from './api';
+import { StorageManager } from './storage';
+import { TabSessionManager } from './tabs';</p>
+<p>// Initialize
+const api = new OnelistAPI();
+const storage = new StorageManager();
+const tabSessions = new TabSessionManager();</p>
+<p>// Context menu setup
+chrome.runtime.onInstalled.addListener(() =&gt; {
+  chrome.contextMenus.create({
+    id: 'save-page',
+    title: 'Save page to Onelist',
+    contexts: ['page']
+  });</p>
+<p>chrome.contextMenus.create({
+    id: 'save-link',
+    title: 'Save link to Onelist',
+    contexts: ['link']
+  });</p>
+<p>chrome.contextMenus.create({
+    id: 'save-selection',
+    title: 'Save selection to Onelist',
+    contexts: ['selection']
+  });</p>
+<p>chrome.contextMenus.create({
+    id: 'save-image',
+    title: 'Save image to Onelist',
+    contexts: ['image']
+  });</p>
+<p>chrome.contextMenus.create({
+    id: 'save-all-tabs',
+    title: 'Save all tabs to Onelist',
+    contexts: ['page']
+  });
+});</p>
+<p>// Context menu handler
+chrome.contextMenus.onClicked.addListener(async (info, tab) =&gt; {
+  switch (info.menuItemId) {
+    case 'save-page':
+      await savePage(tab);
+      break;
+    case 'save-link':
+      await saveLink(info.linkUrl, tab);
+      break;
+    case 'save-selection':
+      await saveSelection(info.selectionText, tab);
+      break;
+    case 'save-image':
+      await saveImage(info.srcUrl, tab);
+      break;
+    case 'save-all-tabs':
+      await saveAllTabs();
+      break;
+  }
+});</p>
+<p>// Keyboard shortcut handler
+chrome.commands.onCommand.addListener(async (command) =&gt; {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });</p>
+<p>switch (command) {
+    case 'save-page':
+      await savePage(tab);
+      break;
+    case 'save-selection':
+      const selection = await getSelection(tab);
+      if (selection) {
+        await saveSelection(selection, tab);
+      }
+      break;
+  }
+});</p>
+<p>// Check if URL is already saved (for badge indicator)
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) =&gt; {
+  if (changeInfo.status === 'complete' &amp;&amp; tab.url) {
+    const isSaved = await api.checkUrlSaved(tab.url);
+    updateBadge(tabId, isSaved);
+  }
+});</p>
+<p>// Core save function
+async function savePage(tab: chrome.tabs.Tab): Promise&lt;SaveResult&gt; {
+  try {
+    // Show saving indicator
+    updateBadge(tab.id, 'saving');</p>
+<p>// Check similarity first
+    const preview = await api.previewClip(tab.url);
+    const similarity = await api.checkSimilarity(preview.content);</p>
+<p>if (similarity.recommendation === 'duplicate') {
+      // Notify popup to show similarity warning
+      chrome.runtime.sendMessage({
+        type: 'SIMILARITY_WARNING',
+        data: similarity
+      });
+      return { status: 'needs_review', similarity };
+    }</p>
+<p>// Save to Onelist
+    const result = await api.clip({
+      url: tab.url,
+      title: tab.title,
+      tags: await storage.getRecentTags()
+    });</p>
+<p>updateBadge(tab.id, 'saved');
+    showNotification('Saved to Onelist', tab.title);</p>
+<p>return { status: 'saved', entry: result };</p>
+<p>} catch (error) {
+    updateBadge(tab.id, 'error');
+    throw error;
+  }
+}</p>
+<p>// Badge management
+function updateBadge(tabId: number, status: 'saved' | 'saving' | 'error' | boolean) {
+  const config = {
+    saved: { text: '✓', color: '#22c55e' },
+    saving: { text: '...', color: '#f59e0b' },
+    error: { text: '!', color: '#ef4444' },
+    true: { text: '✓', color: '#22c55e' },  // Already saved
+    false: { text: '', color: '#6b7280' }   // Not saved
+  };</p>
+<p>const { text, color } = config[status] || config.false;</p>
+<p>chrome.action.setBadgeText({ text, tabId });
+  chrome.action.setBadgeBackgroundColor({ color, tabId });
+}
+</code></pre></p>
+<h3>4.3 Popup UI (Svelte)</h3>
+<pre><code class="language-svelte">&lt;!-- popup/App.svelte --&gt;
+&lt;script lang=&quot;ts&quot;&gt;
+  import { onMount } from 'svelte';
+  import { api } from '../lib/api';
+  import { storage } from '../lib/storage';
+<p>let pageInfo = { title: '', url: '', description: '' };
+  let tags: string[] = [];
+  let suggestedTags: string[] = [];
+  let recentTags: string[] = [];
+  let similarity: SimilarityResult | null = null;
+  let saveStatus: 'idle' | 'checking' | 'saving' | 'saved' | 'error' = 'idle';
+  let alreadySaved: Entry | null = null;</p>
+<p>onMount(async () =&gt; {
+    // Get current tab info
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });</p>
+<p>// Check if already saved
+    alreadySaved = await api.getEntryByUrl(tab.url);</p>
+<p>if (!alreadySaved) {
+      // Get preview and check similarity
+      saveStatus = 'checking';
+      const preview = await api.previewClip(tab.url);
+      pageInfo = preview;
+      suggestedTags = preview.suggestedTags || [];</p>
+<p>similarity = await api.checkSimilarity(preview.text);
+      saveStatus = 'idle';
+    }</p>
+<p>// Load recent tags
+    recentTags = await storage.getRecentTags();
+  });</p>
+<p>async function save() {
+    saveStatus = 'saving';</p>
+<p>try {
+      const result = await api.clip({
+        url: pageInfo.url,
+        title: pageInfo.title,
+        tags,
+        force: similarity?.recommendation === 'duplicate'
+      });</p>
+<p>saveStatus = 'saved';
+      alreadySaved = result;</p>
+<p>// Update recent tags
+      await storage.addRecentTags(tags);</p>
+<p>} catch (error) {
+      saveStatus = 'error';
+      console.error('Save failed:', error);
+    }
+  }</p>
+<p>function addTag(tag: string) {
+    if (!tags.includes(tag)) {
+      tags = [...tags, tag];
+    }
+  }</p>
+<p>function removeTag(tag: string) {
+    tags = tags.filter(t =&gt; t !== tag);
+  }
+&lt;/script&gt;</p>
+<p>&lt;div class=&quot;popup&quot;&gt;
+  &lt;header&gt;
+    &lt;img src=&quot;/icons/icon-32.png&quot; alt=&quot;Onelist&quot; /&gt;
+    &lt;h1&gt;Save to Onelist&lt;/h1&gt;
+  &lt;/header&gt;</p>
+<p>{#if alreadySaved}
+    &lt;div class=&quot;already-saved&quot;&gt;
+      &lt;div class=&quot;status&quot;&gt;✓ Already saved&lt;/div&gt;
+      &lt;div class=&quot;entry-title&quot;&gt;{alreadySaved.title}&lt;/div&gt;
+      &lt;div class=&quot;entry-date&quot;&gt;Saved {formatDate(alreadySaved.inserted_at)}&lt;/div&gt;
+      &lt;div class=&quot;actions&quot;&gt;
+        &lt;button on:click={() =&gt; openInOnelist(alreadySaved.id)}&gt;
+          View in Onelist
+        &lt;/button&gt;
+        &lt;button on:click={() =&gt; alreadySaved = null}&gt;
+          Save Again
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  {:else}
+    &lt;main&gt;
+      &lt;div class=&quot;field&quot;&gt;
+        &lt;label&gt;Title&lt;/label&gt;
+        &lt;input bind:value={pageInfo.title} /&gt;
+      &lt;/div&gt;</p>
+<p>&lt;div class=&quot;field&quot;&gt;
+        &lt;label&gt;URL&lt;/label&gt;
+        &lt;div class=&quot;url&quot;&gt;{pageInfo.url}&lt;/div&gt;
+      &lt;/div&gt;</p>
+<p>&lt;div class=&quot;field&quot;&gt;
+        &lt;label&gt;Tags&lt;/label&gt;
+        &lt;div class=&quot;tags&quot;&gt;
+          {#each tags as tag}
+            &lt;span class=&quot;tag&quot;&gt;
+              {tag}
+              &lt;button on:click={() =&gt; removeTag(tag)}&gt;×&lt;/button&gt;
+            &lt;/span&gt;
+          {/each}
+          &lt;input
+            placeholder=&quot;Add tag...&quot;
+            on:keydown={(e) =&gt; {
+              if (e.key === 'Enter' &amp;&amp; e.target.value) {
+                addTag(e.target.value);
+                e.target.value = '';
+              }
+            }}
+          /&gt;
+        &lt;/div&gt;</p>
+<p>{#if suggestedTags.length &gt; 0}
+          &lt;div class=&quot;suggested&quot;&gt;
+            Suggested:
+            {#each suggestedTags as tag}
+              &lt;button class=&quot;tag-suggestion&quot; on:click={() =&gt; addTag(tag)}&gt;
+                +{tag}
+              &lt;/button&gt;
+            {/each}
+          &lt;/div&gt;
+        {/if}</p>
+<p>{#if recentTags.length &gt; 0}
+          &lt;div class=&quot;recent&quot;&gt;
+            Recent:
+            {#each recentTags.slice(0, 5) as tag}
+              &lt;button class=&quot;tag-suggestion&quot; on:click={() =&gt; addTag(tag)}&gt;
+                {tag}
+              &lt;/button&gt;
+            {/each}
+          &lt;/div&gt;
+        {/if}
+      &lt;/div&gt;</p>
+<p>{#if similarity?.recommendation !== 'create'}
+        &lt;div class=&quot;similarity-warning&quot; class:duplicate={similarity?.recommendation === 'duplicate'}&gt;
+          &lt;div class=&quot;warning-icon&quot;&gt;⚠️&lt;/div&gt;
+          &lt;div class=&quot;warning-content&quot;&gt;
+            &lt;strong&gt;
+              {similarity?.recommendation === 'duplicate' ? 'Likely duplicate' : 'Similar content found'}
+            &lt;/strong&gt;
+            &lt;p&gt;{similarity?.message}&lt;/p&gt;
+            {#each similarity?.similar.slice(0, 2) as match}
+              &lt;div class=&quot;match&quot;&gt;
+                &lt;span class=&quot;match-title&quot;&gt;{match.title}&lt;/span&gt;
+                &lt;span class=&quot;match-score&quot;&gt;{match.similarity_percent}% match&lt;/span&gt;
+              &lt;/div&gt;
+            {/each}
+          &lt;/div&gt;
+          &lt;button on:click={() =&gt; openInOnelist(similarity.similar[0].entry_id)}&gt;
+            View Existing
+          &lt;/button&gt;
+        &lt;/div&gt;
+      {/if}
+    &lt;/main&gt;</p>
+<p>&lt;footer&gt;
+      &lt;button
+        class=&quot;primary&quot;
+        on:click={save}
+        disabled={saveStatus === 'saving' || saveStatus === 'checking'}
+      &gt;
+        {#if saveStatus === 'checking'}
+          Checking...
+        {:else if saveStatus === 'saving'}
+          Saving...
+        {:else if similarity?.recommendation === 'duplicate'}
+          Save Anyway
+        {:else}
+          Save to Onelist
+        {/if}
+      &lt;/button&gt;
+      &lt;button on:click={() =&gt; window.close()}&gt;Cancel&lt;/button&gt;
+    &lt;/footer&gt;
+  {/if}
+&lt;/div&gt;</p>
+<p>&lt;style&gt;
+  .popup {
+    width: 360px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }</p>
+<p>header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }</p>
+<p>header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }</p>
+<p>main {
+    padding: 16px;
+  }</p>
+<p>.field {
+    margin-bottom: 16px;
+  }</p>
+<p>.field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 4px;
+  }</p>
+<p>.field input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+  }</p>
+<p>.url {
+    font-size: 12px;
+    color: #6b7280;
+    word-break: break-all;
+  }</p>
+<p>.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    min-height: 36px;
+  }</p>
+<p>.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    font-size: 12px;
+  }</p>
+<p>.tag button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+    color: #6b7280;
+  }</p>
+<p>.suggested, .recent {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #6b7280;
+  }</p>
+<p>.tag-suggestion {
+    border: none;
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-left: 4px;
+  }</p>
+<p>.tag-suggestion:hover {
+    background: #e5e7eb;
+  }</p>
+<p>.similarity-warning {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #fef3c7;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }</p>
+<p>.similarity-warning.duplicate {
+    background: #fee2e2;
+  }</p>
+<p>.warning-content {
+    flex: 1;
+  }</p>
+<p>.warning-content strong {
+    font-size: 13px;
+  }</p>
+<p>.warning-content p {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 4px 0;
+  }</p>
+<p>.match {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 4px 0;
+  }</p>
+<p>.match-score {
+    color: #f59e0b;
+  }</p>
+<p>footer {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid #e5e7eb;
+  }</p>
+<p>footer button {
+    flex: 1;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+  }</p>
+<p>footer button.primary {
+    background: #3b82f6;
+    color: white;
+    border: none;
+  }</p>
+<p>footer button.primary:disabled {
+    background: #93c5fd;
+    cursor: not-allowed;
+  }</p>
+<p>footer button:not(.primary) {
+    background: white;
+    border: 1px solid #d1d5db;
+  }</p>
+<p>.already-saved {
+    padding: 24px 16px;
+    text-align: center;
+  }</p>
+<p>.already-saved .status {
+    color: #22c55e;
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }</p>
+<p>.already-saved .entry-title {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }</p>
+<p>.already-saved .entry-date {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 16px;
+  }</p>
+<p>.already-saved .actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+&lt;/style&gt;
+</code></pre></p>
+<h3>4.4 Content Script</h3>
+<pre><code class="language-typescript">// content.ts - Injected into pages
+<p>interface PageData {
+  url: string;
+  title: string;
+  description: string;
+  content: string;
+  selection: string | null;
+  images: string[];
+}</p>
+<p>// Extract page data for saving
+function extractPageData(): PageData {
+  // Get meta description
+  const metaDesc = document.querySelector('meta[name=&quot;description&quot;]')?.getAttribute('content') ||
+                   document.querySelector('meta[property=&quot;og:description&quot;]')?.getAttribute('content') ||
+                   '';</p>
+<p>// Get selected text if any
+  const selection = window.getSelection()?.toString() || null;</p>
+<p>// Get main content (simplified - Web Clipper does full extraction)
+  const article = document.querySelector('article') || document.querySelector('main') || document.body;
+  const content = article.innerText.slice(0, 5000); // First 5000 chars for preview</p>
+<p>// Get images
+  const images = Array.from(document.querySelectorAll('img'))
+    .map(img =&gt; img.src)
+    .filter(src =&gt; src.startsWith('http'))
+    .slice(0, 10);</p>
+<p>return {
+    url: window.location.href,
+    title: document.title,
+    description: metaDesc,
+    content,
+    selection,
+    images
+  };
+}</p>
+<p>// Listen for messages from background/popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) =&gt; {
+  switch (message.type) {
+    case 'GET_PAGE_DATA':
+      sendResponse(extractPageData());
+      break;</p>
+<p>case 'GET_SELECTION':
+      sendResponse(window.getSelection()?.toString() || null);
+      break;</p>
+<p>case 'HIGHLIGHT_SAVED_LINKS':
+      highlightSavedLinks(message.savedUrls);
+      break;
+  }</p>
+<p>return true; // Keep channel open for async response
+});</p>
+<p>// Highlight links that are already saved (opt-in feature)
+function highlightSavedLinks(savedUrls: Set&lt;string&gt;) {
+  document.querySelectorAll('a[href]').forEach(link =&gt; {
+    const href = (link as HTMLAnchorElement).href;
+    if (savedUrls.has(href)) {
+      link.classList.add('onelist-saved-link');
+      link.setAttribute('data-onelist-saved', 'true');
+    }
+  });
+}</p>
+<p>// Inject styles for saved link highlighting
+const style = document.createElement('style');
+style.textContent = <code>
+  .onelist-saved-link {
+    position: relative;
+  }</p>
+<p>.onelist-saved-link::after {
+    content: '✓';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #22c55e;
+    color: white;
+    font-size: 10px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</code>;
+document.head.appendChild(style);
+</code></pre></p>
+<h3>4.5 API Client</h3>
+<pre><code class="language-typescript">// lib/api.ts
+<p>const API_BASE = 'https://api.onelist.my/v1';</p>
+<p>export class OnelistAPI {
+  private token: string | null = null;</p>
+<p>constructor() {
+    this.loadToken();
+  }</p>
+<p>private async loadToken() {
+    const { authToken } = await chrome.storage.sync.get('authToken');
+    this.token = authToken;
+  }</p>
+<p>private async request&lt;T&gt;(path: string, options: RequestInit = {}): Promise&lt;T&gt; {
+    if (!this.token) {
+      throw new Error('Not authenticated');
+    }</p>
+<p>const response = await fetch(<code>${API_BASE}${path}</code>, {
+      ...options,
+      headers: {
+        'Authorization': <code>Bearer ${this.token}</code>,
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });</p>
+<p>if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'API request failed');
+    }</p>
+<p>return response.json();
+  }</p>
+<p>// Check if URL is already saved
+  async checkUrlSaved(url: string): Promise&lt;boolean&gt; {
+    try {
+      const result = await this.request&lt;{ exists: boolean }&gt;(<code>/entries/by-url?url=${encodeURIComponent(url)}</code>);
+      return result.exists;
+    } catch {
+      return false;
+    }
+  }</p>
+<p>// Get entry by URL
+  async getEntryByUrl(url: string): Promise&lt;Entry | null&gt; {
+    try {
+      const result = await this.request&lt;{ entry: Entry | null }&gt;(<code>/entries/by-url?url=${encodeURIComponent(url)}</code>);
+      return result.entry;
+    } catch {
+      return null;
+    }
+  }</p>
+<p>// Preview clip (without saving)
+  async previewClip(url: string): Promise&lt;ClipPreview&gt; {
+    return this.request&lt;{ data: ClipPreview }&gt;('/clip/preview', {
+      method: 'POST',
+      body: JSON.stringify({ url }),
+    }).then(r =&gt; r.data);
+  }</p>
+<p>// Check similarity
+  async checkSimilarity(text: string, threshold = 0.7): Promise&lt;SimilarityResult&gt; {
+    return this.request&lt;{ data: SimilarityResult }&gt;('/search/similarity_check', {
+      method: 'POST',
+      body: JSON.stringify({ text, threshold }),
+    }).then(r =&gt; r.data);
+  }</p>
+<p>// Save clip
+  async clip(options: ClipOptions): Promise&lt;Entry&gt; {
+    return this.request&lt;{ data: Entry }&gt;('/clip', {
+      method: 'POST',
+      body: JSON.stringify(options),
+    }).then(r =&gt; r.data);
+  }</p>
+<p>// Save tab session
+  async saveTabSession(session: TabSession): Promise&lt;EntryGroup&gt; {
+    return this.request&lt;{ data: EntryGroup }&gt;('/tab-sessions', {
+      method: 'POST',
+      body: JSON.stringify(session),
+    }).then(r =&gt; r.data);
+  }</p>
+<p>// Get saved tab sessions
+  async getTabSessions(): Promise&lt;EntryGroup[]&gt; {
+    return this.request&lt;{ data: EntryGroup[] }&gt;('/tab-sessions')
+      .then(r =&gt; r.data);
+  }</p>
+<p>// Restore tab session (returns URLs to open)
+  async restoreTabSession(sessionId: string): Promise&lt;string[]&gt; {
+    return this.request&lt;{ data: { urls: string[] } }&gt;(<code>/tab-sessions/${sessionId}/restore</code>)
+      .then(r =&gt; r.data.urls);
+  }
+}</p>
+<p>// Types
+interface ClipOptions {
+  url: string;
+  title?: string;
+  tags?: string[];
+  force?: boolean;
+  selectionOnly?: string;
+}</p>
+<p>interface ClipPreview {
+  url: string;
+  title: string;
+  description: string;
+  author: string | null;
+  site_name: string;
+  image_url: string | null;
+  word_count: number;
+  content_preview: string;
+  suggestedTags?: string[];
+}</p>
+<p>interface SimilarityResult {
+  similar: Array&lt;{
+    entry_id: string;
+    title: string;
+    similarity_percent: number;
+    created_at: string;
+  }&gt;;
+  recommendation: 'create' | 'review' | 'duplicate';
+  highest_score: number;
+  message: string;
+}</p>
+<p>interface Entry {
+  id: string;
+  title: string;
+  entry_type: string;
+  inserted_at: string;
+}</p>
+<p>interface TabSession {
+  name: string;
+  tabs: Array&lt;{
+    url: string;
+    title: string;
+  }&gt;;
+}</p>
+<p>interface EntryGroup {
+  id: string;
+  name: string;
+  entry_count: number;
+  created_at: string;
+}
+</code></pre></p>
+<hr>
+<h2>5. API Endpoints (Backend)</h2>
+<h3>5.1 New Endpoints Needed</h3>
+<pre><code class="language-elixir"># Router additions for browser extension support
+<p>scope &quot;/api/v1&quot;, OnelistWeb.API.V1 do
+  pipe_through [:api, :authenticated]</p>
+<p># Existing (from Web Clipper)
+  post &quot;/clip&quot;, ClipController, :create
+  post &quot;/clip/preview&quot;, ClipController, :preview
+  post &quot;/search/similarity_check&quot;, SimilarityCheckController, :check</p>
+<p># New for browser extension
+  get &quot;/entries/by-url&quot;, EntryController, :by_url</p>
+<p># Tab sessions
+  resources &quot;/tab-sessions&quot;, TabSessionController, only: [:index, :create, :delete]
+  post &quot;/tab-sessions/:id/restore&quot;, TabSessionController, :restore
+end
+</code></pre></p>
+<h3>5.2 Entry by URL Endpoint</h3>
+<pre><code class="language-elixir">defmodule OnelistWeb.API.V1.EntryController do
+  # ... existing code ...
+<p>@doc &quot;&quot;&quot;
+  GET /api/v1/entries/by-url?url=...
+  Check if a URL is already saved, return entry if exists.
+  &quot;&quot;&quot;
+  def by_url(conn, %{&quot;url&quot; =&gt; url}) do
+    user_id = conn.assigns.current_user.id</p>
+<p>case Entries.get_entry_by_source_url(user_id, url) do
+      nil -&gt;
+        json(conn, %{exists: false, entry: nil})</p>
+<p>entry -&gt;
+        json(conn, %{
+          exists: true,
+          entry: %{
+            id: entry.id,
+            title: entry.title,
+            entry_type: entry.entry_type,
+            inserted_at: entry.inserted_at,
+            tags: Enum.map(entry.tags, &amp; &amp;1.name)
+          }
+        })
+    end
+  end
+end
+</code></pre></p>
+<h3>5.3 Tab Session Endpoints</h3>
+<pre><code class="language-elixir">defmodule OnelistWeb.API.V1.TabSessionController do
+  use OnelistWeb, :controller
+<p>alias Onelist.{Entries, EntryGroups}
+  alias Onelist.Feeder.Adapters.WebClipper</p>
+<p>@doc &quot;&quot;&quot;
+  GET /api/v1/tab-sessions
+  List saved tab sessions.
+  &quot;&quot;&quot;
+  def index(conn, _params) do
+    user_id = conn.assigns.current_user.id</p>
+<p>sessions = EntryGroups.list_by_type(user_id, &quot;tab_session&quot;)</p>
+<p>json(conn, %{
+      success: true,
+      data: Enum.map(sessions, &amp;format_session/1)
+    })
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  POST /api/v1/tab-sessions
+  Save a tab session as an entry group.
+  &quot;&quot;&quot;
+  def create(conn, %{&quot;name&quot; =&gt; name, &quot;tabs&quot; =&gt; tabs}) do
+    user_id = conn.assigns.current_user.id</p>
+<p># Create entries for each tab (or find existing)
+    entries = Enum.map(tabs, fn tab -&gt;
+      case Entries.get_entry_by_source_url(user_id, tab[&quot;url&quot;]) do
+        nil -&gt;
+          # Create new entry via Web Clipper
+          {:ok, entry} = WebClipper.clip_url(user_id, tab[&quot;url&quot;],
+            check_similarity: false,
+            tags: [&quot;tab-session:#{slugify(name)}&quot;]
+          )
+          entry</p>
+<p>existing -&gt;
+          existing
+      end
+    end)</p>
+<p># Create entry group
+    {:ok, group} = EntryGroups.create(%{
+      user_id: user_id,
+      name: name,
+      group_type: &quot;tab_session&quot;,
+      metadata: %{
+        &quot;tab_count&quot; =&gt; length(tabs),
+        &quot;created_from&quot; =&gt; &quot;browser_extension&quot;
+      }
+    })</p>
+<p># Link entries to group
+    Enum.each(entries, fn entry -&gt;
+      EntryGroups.add_entry(group.id, entry.id)
+    end)</p>
+<p>json(conn, %{
+      success: true,
+      data: format_session(group)
+    })
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  POST /api/v1/tab-sessions/:id/restore
+  Get URLs to restore a tab session.
+  &quot;&quot;&quot;
+  def restore(conn, %{&quot;id&quot; =&gt; session_id}) do
+    user_id = conn.assigns.current_user.id</p>
+<p>with {:ok, group} &lt;- EntryGroups.get(session_id, user_id),
+         entries &lt;- EntryGroups.get_entries(group.id) do</p>
+<p>urls = entries
+      |&gt; Enum.map(fn entry -&gt;
+        get_in(entry.metadata, [&quot;web_clip&quot;, &quot;url&quot;]) ||
+        get_in(entry.metadata, [&quot;source_url&quot;])
+      end)
+      |&gt; Enum.filter(&amp; &amp;1)</p>
+<p>json(conn, %{
+        success: true,
+        data: %{
+          session_name: group.name,
+          urls: urls
+        }
+      })
+    else
+      {:error, :not_found} -&gt;
+        conn
+        |&gt; put_status(:not_found)
+        |&gt; json(%{success: false, error: &quot;Tab session not found&quot;})
+    end
+  end</p>
+<p>@doc &quot;&quot;&quot;
+  DELETE /api/v1/tab-sessions/:id
+  Delete a tab session (group only, not entries).
+  &quot;&quot;&quot;
+  def delete(conn, %{&quot;id&quot; =&gt; session_id}) do
+    user_id = conn.assigns.current_user.id</p>
+<p>case EntryGroups.delete(session_id, user_id) do
+      {:ok, _} -&gt;
+        json(conn, %{success: true})</p>
+<p>{:error, reason} -&gt;
+        conn
+        |&gt; put_status(:unprocessable_entity)
+        |&gt; json(%{success: false, error: inspect(reason)})
+    end
+  end</p>
+<p>defp format_session(group) do
+    %{
+      id: group.id,
+      name: group.name,
+      entry_count: group.metadata[&quot;tab_count&quot;] || 0,
+      created_at: group.inserted_at
+    }
+  end</p>
+<p>defp slugify(name) do
+    name
+    |&gt; String.downcase()
+    |&gt; String.replace(~r/[^\w\s-]/, &quot;&quot;)
+    |&gt; String.replace(~r/\s+/, &quot;-&quot;)
+    |&gt; String.slice(0, 50)
+  end
+end
+</code></pre></p>
+<hr>
+<h2>6. Authentication</h2>
+<h3>6.1 OAuth Flow</h3>
+<pre><code class="language-">┌─────────────────────────────────────────────────────────────────────────────┐
+│  EXTENSION AUTHENTICATION FLOW                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  1. User clicks &quot;Sign in&quot; in extension popup                                │
+│                                                                              │
+│  2. Extension opens: https://onelist.my/auth/extension?redirect=ext://...   │
+│                                                                              │
+│  3. User authenticates on onelist.my (existing session or login)            │
+│                                                                              │
+│  4. Server generates short-lived auth code                                   │
+│                                                                              │
+│  5. Redirects to: ext://callback?code=...                                   │
+│                                                                              │
+│  6. Extension exchanges code for API token                                   │
+│                                                                              │
+│  7. Token stored in chrome.storage.sync                                      │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h3>6.2 Token Management</h3>
+<pre><code class="language-typescript">// lib/auth.ts
+<p>export class AuthManager {
+  private static TOKEN_KEY = 'authToken';
+  private static USER_KEY = 'currentUser';</p>
+<p>// Check if authenticated
+  static async isAuthenticated(): Promise&lt;boolean&gt; {
+    const { authToken } = await chrome.storage.sync.get(this.TOKEN_KEY);
+    return !!authToken;
+  }</p>
+<p>// Get current token
+  static async getToken(): Promise&lt;string | null&gt; {
+    const { authToken } = await chrome.storage.sync.get(this.TOKEN_KEY);
+    return authToken || null;
+  }</p>
+<p>// Store token after OAuth
+  static async setToken(token: string, user: User): Promise&lt;void&gt; {
+    await chrome.storage.sync.set({
+      [this.TOKEN_KEY]: token,
+      [this.USER_KEY]: user,
+    });
+  }</p>
+<p>// Clear auth (logout)
+  static async logout(): Promise&lt;void&gt; {
+    await chrome.storage.sync.remove([this.TOKEN_KEY, this.USER_KEY]);
+  }</p>
+<p>// Initiate OAuth flow
+  static async login(): Promise&lt;void&gt; {
+    const redirectUrl = chrome.identity.getRedirectURL('callback');
+    const authUrl = <code>https://onelist.my/auth/extension?redirect=${encodeURIComponent(redirectUrl)}</code>;</p>
+<p>return new Promise((resolve, reject) =&gt; {
+      chrome.identity.launchWebAuthFlow(
+        { url: authUrl, interactive: true },
+        async (callbackUrl) =&gt; {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+            return;
+          }</p>
+<p>if (!callbackUrl) {
+            reject(new Error('No callback URL'));
+            return;
+          }</p>
+<p>// Extract code from callback
+          const url = new URL(callbackUrl);
+          const code = url.searchParams.get('code');</p>
+<p>if (!code) {
+            reject(new Error('No auth code'));
+            return;
+          }</p>
+<p>// Exchange code for token
+          try {
+            const response = await fetch('https://api.onelist.my/v1/auth/token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code, grant_type: 'extension' }),
+            });</p>
+<p>const { token, user } = await response.json();
+            await this.setToken(token, user);
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }
+      );
+    });
+  }
+}
+</code></pre></p>
+<hr>
+<h2>7. Implementation Phases</h2>
+<h3>Phase 1: MVP (2 weeks)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Project setup</td><td>Manifest V3, build system (Vite + Svelte)</td></tr>
+<tr><td>Authentication</td><td>OAuth flow, token storage</td></tr>
+<tr><td>Basic popup</td><td>Save page UI, tag input</td></tr>
+<tr><td>Context menus</td><td>Right-click save options</td></tr>
+<tr><td>Keyboard shortcuts</td><td>Cmd+Shift+O to save</td></tr>
+<tr><td>Badge indicators</td><td>Show saved/not-saved status</td></tr>
+<tr><td>API integration</td><td>Connect to Web Clipper API</td></tr>
+<tr><td>Similarity warnings</td><td>Show duplicate detection</td></tr>
+</table>
+<h3>Phase 2: Tab Sessions (1 week)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Tab session UI</td><td>Save/restore interface</td></tr>
+<tr><td>Backend endpoints</td><td>Tab session CRUD</td></tr>
+<tr><td>Entry group integration</td><td>Store sessions as groups</td></tr>
+<tr><td>Restore functionality</td><td>Open tabs from saved session</td></tr>
+</table>
+<h3>Phase 3: Polish (1 week)</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Settings page</td><td>Preferences, exclude rules</td></tr>
+<tr><td>Offline queue</td><td>Queue saves when offline</td></tr>
+<tr><td>Error handling</td><td>Graceful failures, retry</td></tr>
+<tr><td>Chrome Web Store</td><td>Listing, screenshots, description</td></tr>
+</table>
+<h3>Phase 4: Post-MVP</h3>
+<table>
+<tr><th>Task</th><th>Deliverable</th></tr>
+<tr><td>Research context detection</td><td>Auto-detect research sessions</td></tr>
+<tr><td>Link highlighting</td><td>Show saved links on pages</td></tr>
+<tr><td>Firefox port</td><td>Firefox Add-ons</td></tr>
+<tr><td>Safari port</td><td>Safari Web Extensions</td></tr>
+</table>
+<hr>
+<h2>8. Platform Support</h2>
+<h3>8.1 Browser Compatibility</h3>
+<table>
+<tr><th>Browser</th><th>Version</th><th>Priority</th><th>Status</th></tr>
+<tr><td>Chrome</td><td>88+</td><td>MVP</td><td>Planned</td></tr>
+<tr><td>Edge</td><td>88+</td><td>MVP</td><td>Planned (shares Chrome codebase)</td></tr>
+<tr><td>Firefox</td><td>109+</td><td>Post-MVP</td><td>Planned</td></tr>
+<tr><td>Safari</td><td>16.4+</td><td>Future</td><td>If demand</td></tr>
+<tr><td>Brave</td><td>All</td><td>MVP</td><td>Planned (Chrome-compatible)</td></tr>
+<tr><td>Arc</td><td>All</td><td>MVP</td><td>Planned (Chrome-compatible)</td></tr>
+</table>
+<h3>8.2 Build Configuration</h3>
+<pre><code class="language-javascript">// vite.config.ts
+import { defineConfig } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { crx } from '@crxjs/vite-plugin';
+import manifest from './manifest.json';
+<p>export default defineConfig({
+  plugins: [
+    svelte(),
+    crx({ manifest }),
+  ],
+  build: {
+    rollupOptions: {
+      input: {
+        popup: 'src/popup/index.html',
+        options: 'src/options/index.html',
+      },
+    },
+  },
+});
+</code></pre></p>
+<hr>
+<h2>9. Privacy & Security</h2>
+<h3>9.1 Data Collection</h3>
+<table>
+<tr><th>Data</th><th>Collected</th><th>Purpose</th><th>Storage</th></tr>
+<tr><td>Page URLs</td><td>Only when saving</td><td>Create entries</td><td>Onelist server</td></tr>
+<tr><td>Page content</td><td>Only when saving</td><td>Extract article</td><td>Onelist server</td></tr>
+<tr><td>Browsing history</td><td>Opt-in only</td><td>Research detection</td><td>Local only</td></tr>
+<tr><td>Auth token</td><td>Yes</td><td>API authentication</td><td>chrome.storage.sync</td></tr>
+</table>
+<h3>9.2 Permissions Justification</h3>
+<table>
+<tr><th>Permission</th><th>Why Needed</th></tr>
+<tr><td><code>activeTab</code></td><td>Access current tab URL/content when user clicks save</td></tr>
+<tr><td><code>storage</code></td><td>Store auth token and preferences</td></tr>
+<tr><td><code>contextMenus</code></td><td>Right-click menu options</td></tr>
+<tr><td><code>tabs</code></td><td>Tab session management</td></tr>
+<tr><td><code>history</code> (optional)</td><td>Research context detection (opt-in)</td></tr>
+</table>
+<h3>9.3 Security Measures</h3>
+<li>API token stored in <code>chrome.storage.sync</code> (encrypted by browser)</li>
+<li>No sensitive data in <code>chrome.storage.local</code></li>
+<li>HTTPS-only API communication</li>
+<li>Token refresh mechanism</li>
+<li>Clear data on logout</li>
+<hr>
+<h2>10. Success Metrics</h2>
+<table>
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>Install → first save</td><td>< 2 minutes</td></tr>
+<tr><td>Save action latency</td><td>< 2 seconds</td></tr>
+<tr><td>Daily active users</td><td>Track</td></tr>
+<tr><td>Saves per user per day</td><td>Track</td></tr>
+<tr><td>Tab sessions created</td><td>Track</td></tr>
+<tr><td>Uninstall rate</td><td>< 10% in first week</td></tr>
+</table>
+<hr>
+<h2>11. Dependencies</h2>
+<li><strong>Web Clipper API</strong> (Feeder Agent) - Content extraction</li>
+<li><strong>Similarity Check API</strong> (Searcher Agent) - Duplicate detection</li>
+<li><strong>Entry Groups</strong> - Tab session storage</li>
+<li><strong>OAuth/Auth system</strong> - User authentication</li>
+<hr>
+<h2>12. Related Documents</h2>
+<li><a href="./feeder_agent_plan.md">Feeder Agent Plan</a> - Web Clipper adapter</li>
+<li><a href="./searcher_agent_plan.md">Searcher Agent Plan</a> - Similarity check</li>
+<li><a href="./mvp_launch_plan.md">MVP Launch Plan</a> - Overall launch strategy</li>
+</ul>
+<hr>
+</em>Document created: 2026-01-29<em>
+</em>Last updated: 2026-01-29*
+  </article>
+</body>
+</html>
