@@ -310,6 +310,12 @@ defmodule OnelistWeb.Router do
     
     # River briefings
     get "/river/briefing", RiverController, :briefing
+
+    # Sprint management
+    get "/sprints", SprintController, :index
+    get "/sprints/:id", SprintController, :show
+    get "/sprints/:sprint_id/items", SprintController, :items
+    get "/sprints/:sprint_id/blocked", SprintController, :blocked
   end
 
   # Admin routes

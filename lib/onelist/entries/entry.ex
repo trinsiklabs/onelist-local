@@ -12,7 +12,7 @@ defmodule Onelist.Entries.Entry do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @entry_types ~w(note memory photo video task decision chat_log conversation config job)
+  @entry_types ~w(note memory photo video task decision chat_log conversation config job sprint project phase proposal deliverable milestone)
   @source_types ~w(manual web_clip api openclaw river_session)
 
   schema "entries" do

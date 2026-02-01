@@ -17,7 +17,7 @@ defmodule Onelist.Entries.EntryLink do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @link_types ~w(has_reply reply_to comment_on derived_from cites related_to has_extracted_item)
+  @link_types ~w(has_reply reply_to comment_on derived_from cites related_to has_extracted_item contains contained_by blocks blocked_by delivers)
 
   schema "entry_links" do
     field :link_type, :string
@@ -60,6 +60,12 @@ defmodule Onelist.Entries.EntryLink do
   - `derived_from` - Copy/derivative tracking (New sources, Original targets)
   - `cites` - Reference tracking (Citing sources, Cited targets)
   - `related_to` - General relationship (Bidirectional)
+  - `has_extracted_item` - Entry → extracted item (Parent sources, Item targets)
+  - `contains` - Container → contained item (Sprint/Project sources, Task/Item targets)
+  - `contained_by` - Inverse of contains (Item sources, Container targets)
+  - `blocks` - Blocking item → blocked item (Blocker sources, Blocked targets)
+  - `blocked_by` - Inverse of blocks (Blocked sources, Blocker targets)
+  - `delivers` - Deliverable → parent goal (Deliverable sources, Goal targets)
   """
   def link_types, do: @link_types
 
@@ -86,5 +92,9 @@ defmodule Onelist.Entries.EntryLink do
   def inverse_type("has_reply"), do: "reply_to"
   def inverse_type("reply_to"), do: "has_reply"
   def inverse_type("related_to"), do: "related_to"
+  def inverse_type("contains"), do: "contained_by"
+  def inverse_type("contained_by"), do: "contains"
+  def inverse_type("blocks"), do: "blocked_by"
+  def inverse_type("blocked_by"), do: "blocks"
   def inverse_type(_), do: nil
 end
