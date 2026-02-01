@@ -68,7 +68,7 @@ EOF
 ### 1.4 Application Setup
 
 ```bash
-cd onelist.com
+cd onelist-local
 
 # Copy environment template
 cp .env.example .env
@@ -318,7 +318,7 @@ server {
 ### 3.2 Initial Setup
 
 ```bash
-cd onelist.com
+cd onelist-local
 
 # Login to Fly.io
 fly auth login

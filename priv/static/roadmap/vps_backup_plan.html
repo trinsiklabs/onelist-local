@@ -123,7 +123,7 @@
 <h3>Tier 2: Important (Application & Config)</h3>
 <table>
 <tr><th>Data</th><th>Location</th><th>Size Est.</th><th>Frequency</th></tr>
-<tr><td>Onelist app code</td><td><code>~/onelist.com/</code></td><td>~100MB</td><td>Daily</td></tr>
+<tr><td>Onelist app code</td><td><code>~/onelist-local/</code></td><td>~100MB</td><td>Daily</td></tr>
 <tr><td>Nginx config</td><td><code>/etc/nginx/</code></td><td>~50KB</td><td>Weekly</td></tr>
 <tr><td>Systemd services</td><td><code>/etc/systemd/system/onelist.service</code></td><td>~2KB</td><td>Weekly</td></tr>
 <tr><td>SSL certificates</td><td><code>/etc/letsencrypt/</code></td><td>~100KB</td><td>Weekly</td></tr>
@@ -188,9 +188,9 @@ tar -czf &quot;$BACKUP_DIR/openclaw_$TIMESTAMP.tar.gz&quot; \
 <h1>App code (less frequent)</h1>
 if [ &quot;$(date +%H)&quot; == &quot;03&quot; ]; then
     tar -czf &quot;$BACKUP_DIR/onelist_app_$TIMESTAMP.tar.gz&quot; \
-        ~/onelist.com/lib \
-        ~/onelist.com/priv \
-        ~/onelist.com/config \
+        ~/onelist-local/lib \
+        ~/onelist-local/priv \
+        ~/onelist-local/config \
         --exclude='_build' \
         --exclude='deps' \
         --exclude='node_modules'
