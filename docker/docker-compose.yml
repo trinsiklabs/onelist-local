@@ -6,8 +6,6 @@
 #   -f docker-compose.agents.yml     → All agents (River, etc.)
 #   -f docker-compose.web.yml        → Web UI
 
-version: '3.8'
-
 services:
   # ===========================================
   # PostgreSQL with pgvector

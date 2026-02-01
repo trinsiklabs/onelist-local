@@ -4,15 +4,13 @@
 # Usage:
 #   curl -fsSL https://get.onelist.my/local | bash
 #   # or manually:
-#   docker-compose -f docker-compose.local.yml up -d
+#   docker compose -f docker-compose.local.yml up -d
 #
 # This sets up:
 #   - Onelist (Phoenix app with River agent)
 #   - PostgreSQL with pgvector
 #   - OpenClaw (AI agent runtime)
 #   - Auto-configured memory integration
-
-version: '3.8'
 
 services:
   # ===========================================

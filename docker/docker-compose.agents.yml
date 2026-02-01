@@ -11,8 +11,6 @@
 # Note: Most users should use --with-openclaw instead.
 # This is for advanced setups that want all agent capabilities.
 
-version: '3.8'
-
 services:
   # ===========================================
   # Update onelist to enable all agents
