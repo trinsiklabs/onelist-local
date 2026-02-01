@@ -66,6 +66,12 @@ docker-compose exec web mix test
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## Extensions
+
+The `extensions/` directory contains OpenClaw plugins that integrate with Onelist:
+
+* **onelist-memory** - Streams chat messages to Onelist for persistent memory extraction. Auto-injects recovered context on session start. See [extensions/onelist-memory/README.md](extensions/onelist-memory/README.md)
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

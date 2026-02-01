@@ -1,0 +1,56 @@
+{
+  "id": "onelist-memory",
+  "name": "Onelist Memory Sync",
+  "version": "0.2.1",
+  "description": "Streams chat messages to Onelist for persistent memory extraction. Auto-injects recovered context on session start.",
+  "author": "Stream",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "apiUrl": {
+        "type": "string",
+        "description": "Onelist API base URL"
+      },
+      "apiKey": {
+        "type": "string",
+        "description": "Onelist API key"
+      },
+      "sessionId": {
+        "type": "string",
+        "description": "Session identifier for grouping messages"
+      },
+      "enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable/disable the entire plugin"
+      },
+      "autoInjectEnabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Auto-inject recovered context on session start"
+      },
+      "autoInjectMessageCount": {
+        "type": "number",
+        "default": 50,
+        "description": "Number of recent messages to inject"
+      },
+      "autoInjectHoursBack": {
+        "type": "number",
+        "default": 24,
+        "description": "How many hours back to look for messages"
+      },
+      "autoInjectMinMessages": {
+        "type": "number",
+        "default": 5,
+        "description": "Minimum messages required to trigger injection"
+      }
+    },
+    "required": []
+  },
+  "uiHints": {
+    "apiKey": { "label": "Onelist API Key", "sensitive": true },
+    "apiUrl": { "label": "Onelist API URL", "placeholder": "http://localhost:4000" },
+    "autoInjectEnabled": { "label": "Auto-inject Recovery", "hint": "Automatically inject recent context on session start" },
+    "autoInjectMessageCount": { "label": "Message Count", "hint": "How many messages to inject (default: 50)" }
+  }
+}
