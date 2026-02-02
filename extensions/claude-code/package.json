@@ -7,7 +7,9 @@
     "context-hook": "node scripts/context-hook.js",
     "capture-hook": "node scripts/capture-hook.js",
     "summary-hook": "node scripts/summary-hook.js",
-    "search": "node scripts/search.js"
+    "search": "node scripts/search.js",
+    "test": "node --test tests/*.test.js",
+    "test:verbose": "node --test --test-reporter=spec tests/*.test.js"
   },
   "keywords": [
     "claude",

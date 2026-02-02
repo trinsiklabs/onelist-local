@@ -1,0 +1,30 @@
+{
+  "name": "@onelist/openclaw-memory-plugin",
+  "version": "1.0.0",
+  "description": "Bidirectional memory sync between OpenClaw and Onelist",
+  "main": "index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "openclaw",
+    "onelist",
+    "memory",
+    "plugin",
+    "context"
+  ],
+  "author": "Trinsik Labs",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
