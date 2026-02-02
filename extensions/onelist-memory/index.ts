@@ -194,10 +194,27 @@ const HARD_LIMITS = {
 };
 
 // =============================================================================
+// PATHS - Respect user's OpenClaw installation location
+// =============================================================================
+
+// Get OpenClaw home directory from environment or fall back to ~/.openclaw
+function getOpenClawHome(): string {
+  // OPENCLAW_HOME is the standard env var (used by OCTO)
+  if (process.env.OPENCLAW_HOME) {
+    return process.env.OPENCLAW_HOME;
+  }
+  // Fall back to ~/.openclaw
+  const home = process.env.HOME || process.env.USERPROFILE || '/root';
+  return path.join(home, '.openclaw');
+}
+
+const OPENCLAW_HOME = getOpenClawHome();
+
+// =============================================================================
 // PERSISTENT STATE (simplified for v1.0)
 // =============================================================================
 
-const STATE_FILE_PATH = '/root/.openclaw/onelist-memory-state.json';
+const STATE_FILE_PATH = path.join(OPENCLAW_HOME, 'onelist-memory-state.json');
 const STATE_VERSION = 3; // v1.0 schema
 
 interface SessionInjectionData {
@@ -776,14 +793,33 @@ const MESSAGE_BLOCKLIST_PATTERNS = [
 ];
 
 function findSessionsDirectory(logger: Logger): string | null {
-  const candidates = [
-    '/root/.openclaw/agents/main/sessions',
-    path.join(process.env.HOME || '', '.openclaw', 'agents', 'main', 'sessions'),
-  ].filter(Boolean);
+  // Primary: Use OPENCLAW_HOME (respects user's installation location)
+  const primaryDir = path.join(OPENCLAW_HOME, 'agents', 'main', 'sessions');
 
-  for (const dir of candidates) {
+  try {
+    if (fs.existsSync(primaryDir) && fs.statSync(primaryDir).isDirectory()) {
+      return primaryDir;
+    }
+  } catch {
+    // Continue to fallback
+  }
+
+  // Fallback: Try common alternative locations (for edge cases)
+  const fallbackCandidates = [
+    // XDG config directory (Linux)
+    process.env.XDG_CONFIG_HOME
+      ? path.join(process.env.XDG_CONFIG_HOME, 'openclaw', 'agents', 'main', 'sessions')
+      : null,
+    // Windows AppData
+    process.env.APPDATA
+      ? path.join(process.env.APPDATA, 'openclaw', 'agents', 'main', 'sessions')
+      : null,
+  ].filter((dir): dir is string => dir !== null);
+
+  for (const dir of fallbackCandidates) {
     try {
       if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
+        logger.info(`Using fallback sessions directory: ${dir}`);
         return dir;
       }
     } catch {
@@ -791,6 +827,7 @@ function findSessionsDirectory(logger: Logger): string | null {
     }
   }
 
+  logger.warn(`Sessions directory not found. Expected: ${primaryDir}`);
   return null;
 }
 
@@ -1055,7 +1092,7 @@ function formatFallbackContext(
 // MAIN PLUGIN REGISTRATION
 // =============================================================================
 
-console.log('[onelist-memory] Plugin file loaded (v1.0.0 - query-based retrieval)');
+console.log(`[onelist-memory] Plugin file loaded (v1.0.0 - query-based retrieval) | OPENCLAW_HOME=${OPENCLAW_HOME}`);
 
 // =============================================================================
 // MAIN SESSION FILTERING (kept from v0.5.4)
