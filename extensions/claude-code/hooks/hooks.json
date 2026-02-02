@@ -1,0 +1,20 @@
+{
+  "hooks": [
+    {
+      "event": "session_start",
+      "script": "npm run context-hook",
+      "timeout": 5000
+    },
+    {
+      "event": "post_tool_use",
+      "script": "npm run capture-hook",
+      "timeout": 2000,
+      "tools": ["Edit", "Write", "Bash", "Task"]
+    },
+    {
+      "event": "stop",
+      "script": "npm run summary-hook",
+      "timeout": 10000
+    }
+  ]
+}

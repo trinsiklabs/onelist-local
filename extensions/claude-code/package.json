@@ -1,0 +1,25 @@
+{
+  "name": "@onelist/claude-plugin",
+  "version": "0.1.0",
+  "description": "Onelist memory integration for Claude Code CLI",
+  "main": "scripts/context-hook.js",
+  "scripts": {
+    "context-hook": "node scripts/context-hook.js",
+    "capture-hook": "node scripts/capture-hook.js",
+    "summary-hook": "node scripts/summary-hook.js",
+    "search": "node scripts/search.js"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "onelist",
+    "memory",
+    "plugin"
+  ],
+  "author": "Trinsik Labs",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {}
+}
