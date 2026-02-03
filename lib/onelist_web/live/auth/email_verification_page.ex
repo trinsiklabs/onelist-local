@@ -7,6 +7,7 @@ defmodule OnelistWeb.Auth.EmailVerificationPage do
 
   def handle_params(%{"token" => token}, _url, socket) do
     accounts = Application.get_env(:onelist, :accounts, Onelist.Accounts)
+
     case accounts.verify_email(token) do
       {:ok, _user} ->
         {:noreply,
@@ -25,7 +26,7 @@ defmodule OnelistWeb.Auth.EmailVerificationPage do
          socket
          |> put_flash(:error, "Verification link has expired. Please request a new one.")
          |> redirect(to: ~p"/verify-email")}
-         
+
       {:error, _} ->
         # Handle any other errors (including server errors) with a generic message
         {:noreply,
@@ -42,11 +43,8 @@ defmodule OnelistWeb.Auth.EmailVerificationPage do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-sm" data-test-id="email-verification-page">
-      <.live_component
-        module={OnelistWeb.Auth.EmailVerificationComponent}
-        id="email-verification"
-      />
+      <.live_component module={OnelistWeb.Auth.EmailVerificationComponent} id="email-verification" />
     </div>
     """
   end
-end 
+end

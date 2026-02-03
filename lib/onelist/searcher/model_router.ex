@@ -122,7 +122,7 @@ defmodule Onelist.Searcher.ModelRouter do
         0.0
 
       %{input: input_rate, output: output_rate} ->
-        (input_tokens / 1000 * input_rate) + (output_tokens / 1000 * output_rate)
+        input_tokens / 1000 * input_rate + output_tokens / 1000 * output_rate
     end
   end
 
@@ -148,10 +148,12 @@ defmodule Onelist.Searcher.ModelRouter do
         Map.get(context, :content_length, 0) <= 5000
 
       :verification ->
-        true  # Always use cheaper model
+        # Always use cheaper model
+        true
 
       :embedding ->
-        true  # Only one embedding model
+        # Only one embedding model
+        true
 
       _ ->
         true
@@ -211,7 +213,8 @@ defmodule Onelist.Searcher.ModelRouter do
   """
   def calculate_savings(operation, contexts) when is_list(contexts) do
     models = models_for_operation(operation)
-    premium_model = List.first(models)  # Assume first is premium
+    # Assume first is premium
+    premium_model = List.first(models)
     default_tokens = %{input: 500, output: 100}
 
     premium_cost =
@@ -229,11 +232,12 @@ defmodule Onelist.Searcher.ModelRouter do
       end)
       |> Enum.sum()
 
-    savings_percent = if premium_cost > 0 do
-      (premium_cost - routed_cost) / premium_cost * 100
-    else
-      0.0
-    end
+    savings_percent =
+      if premium_cost > 0 do
+        (premium_cost - routed_cost) / premium_cost * 100
+      else
+        0.0
+      end
 
     %{
       premium_cost: premium_cost,

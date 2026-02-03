@@ -85,13 +85,14 @@ defmodule Onelist.Searcher.TwoLayerSearch do
       {:ok, results} ->
         duration_ms = System.monotonic_time(:millisecond) - start_time
 
-        {:ok, %{
-          results: results,
-          total: length(results),
-          query: query,
-          search_mode: search_mode,
-          duration_ms: duration_ms
-        }}
+        {:ok,
+         %{
+           results: results,
+           total: length(results),
+           query: query,
+           search_mode: search_mode,
+           duration_ms: duration_ms
+         }}
 
       error ->
         error
@@ -137,12 +138,13 @@ defmodule Onelist.Searcher.TwoLayerSearch do
       results = Search.do_semantic_search(user_id, query_vector, filters, limit, offset)
 
       # Enrich with full entry data
-      enriched = Enum.map(results, fn result ->
-        Map.merge(result, %{
-          search_layer: :chunk,
-          source_type: :embedding
-        })
-      end)
+      enriched =
+        Enum.map(results, fn result ->
+          Map.merge(result, %{
+            search_layer: :chunk,
+            source_type: :embedding
+          })
+        end)
 
       {:ok, enriched}
     end
@@ -167,14 +169,14 @@ defmodule Onelist.Searcher.TwoLayerSearch do
 
     with {:ok, memory_results} <- atomic_search(user_id, query, memory_opts),
          {:ok, chunk_results} <- chunk_search(user_id, query, chunk_opts) do
-
       # Normalize and combine
-      combined = combine_memory_chunk_results(
-        memory_results,
-        chunk_results,
-        memory_weight,
-        chunk_weight
-      )
+      combined =
+        combine_memory_chunk_results(
+          memory_results,
+          chunk_results,
+          memory_weight,
+          chunk_weight
+        )
 
       # Deduplicate by entry if requested
       final =
@@ -220,11 +222,12 @@ defmodule Onelist.Searcher.TwoLayerSearch do
           valid_until: m.valid_until,
           entities: m.entities,
           metadata: m.metadata,
-          score: fragment(
-            "1 - (? <=> ?)",
-            m.embedding,
-            ^Pgvector.new(query_vector)
-          )
+          score:
+            fragment(
+              "1 - (? <=> ?)",
+              m.embedding,
+              ^Pgvector.new(query_vector)
+            )
         },
         order_by: [asc: fragment("? <=> ?", m.embedding, ^Pgvector.new(query_vector))],
         limit: ^limit
@@ -260,17 +263,20 @@ defmodule Onelist.Searcher.TwoLayerSearch do
 
   defp maybe_filter_memory_types(query, nil), do: query
   defp maybe_filter_memory_types(query, []), do: query
+
   defp maybe_filter_memory_types(query, types) when is_list(types) do
     where(query, [m], m.memory_type in ^types)
   end
 
   defp maybe_filter_min_confidence(query, nil), do: query
+
   defp maybe_filter_min_confidence(query, min) do
     where(query, [m], m.confidence >= ^Decimal.new(to_string(min)))
   end
 
   defp maybe_filter_entry_ids(query, nil), do: query
   defp maybe_filter_entry_ids(query, []), do: query
+
   defp maybe_filter_entry_ids(query, entry_ids) when is_list(entry_ids) do
     where(query, [m], m.entry_id in ^entry_ids)
   end
@@ -321,7 +327,9 @@ defmodule Onelist.Searcher.TwoLayerSearch do
       from(r in Representation,
         where: r.entry_id in ^entry_ids,
         where: r.type in ["markdown", "plaintext", "html"],
-        order_by: [asc: fragment("CASE type WHEN 'markdown' THEN 1 WHEN 'plaintext' THEN 2 ELSE 3 END")],
+        order_by: [
+          asc: fragment("CASE type WHEN 'markdown' THEN 1 WHEN 'plaintext' THEN 2 ELSE 3 END")
+        ],
         distinct: r.entry_id
       )
       |> Repo.all()
@@ -329,10 +337,11 @@ defmodule Onelist.Searcher.TwoLayerSearch do
 
     # Combine into context map
     Map.new(entry_ids, fn entry_id ->
-      {entry_id, %{
-        entry: Map.get(entries, entry_id),
-        primary_representation: Map.get(representations, entry_id)
-      }}
+      {entry_id,
+       %{
+         entry: Map.get(entries, entry_id),
+         primary_representation: Map.get(representations, entry_id)
+       }}
     end)
   end
 
@@ -347,7 +356,9 @@ defmodule Onelist.Searcher.TwoLayerSearch do
     else
       # Fall back to representation content
       case entry_context[:primary_representation] do
-        nil -> nil
+        nil ->
+          nil
+
         rep ->
           %{
             text: rep.content,
@@ -401,7 +412,7 @@ defmodule Onelist.Searcher.TwoLayerSearch do
       memory_score = if memory_result, do: memory_result.score, else: 0.0
       chunk_score = if chunk_result, do: chunk_result.score, else: 0.0
 
-      combined_score = (memory_score * memory_weight) + (chunk_score * chunk_weight)
+      combined_score = memory_score * memory_weight + chunk_score * chunk_weight
 
       # Use memory result as base if available (richer data), else chunk
       base = memory_result || chunk_result

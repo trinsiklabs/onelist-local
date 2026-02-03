@@ -118,7 +118,9 @@ defmodule Onelist.Storage.Backends.GCS do
   @impl true
   def delete(path) do
     config = get_config()
-    url = "#{@base_url}/storage/v1/b/#{config.bucket}/o/#{URI.encode(path, &URI.char_unreserved?/1)}"
+
+    url =
+      "#{@base_url}/storage/v1/b/#{config.bucket}/o/#{URI.encode(path, &URI.char_unreserved?/1)}"
 
     headers = [
       {"Authorization", "Bearer #{get_access_token(config)}"}
@@ -190,7 +192,9 @@ defmodule Onelist.Storage.Backends.GCS do
   @impl true
   def head(path) do
     config = get_config()
-    url = "#{@base_url}/storage/v1/b/#{config.bucket}/o/#{URI.encode(path, &URI.char_unreserved?/1)}"
+
+    url =
+      "#{@base_url}/storage/v1/b/#{config.bucket}/o/#{URI.encode(path, &URI.char_unreserved?/1)}"
 
     headers = [
       {"Authorization", "Bearer #{get_access_token(config)}"}

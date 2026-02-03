@@ -1,10 +1,10 @@
 defmodule Onelist.Livelog.AuditLog do
   @moduledoc """
   Audit trail for redaction decisions.
-  
+
   Every message processed through the Livelog system gets an audit entry,
   even if blocked. This enables compliance verification and pattern tuning.
-  
+
   IMPORTANT: For blocked messages, we store only hashes - NEVER the original content.
   """
   use Ecto.Schema
@@ -18,8 +18,10 @@ defmodule Onelist.Livelog.AuditLog do
 
     field :original_content_hash, :string
     field :redacted_content_hash, :string
-    field :action, :string  # "redacted", "blocked", "allowed"
-    field :layer, :integer  # Which layer made the decision (1-5)
+    # "redacted", "blocked", "allowed"
+    field :action, :string
+    # Which layer made the decision (1-5)
+    field :layer, :integer
     field :patterns_fired, {:array, :string}, default: []
     field :processing_time_us, :integer
 

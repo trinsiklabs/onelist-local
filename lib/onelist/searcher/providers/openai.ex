@@ -13,7 +13,8 @@ defmodule Onelist.Searcher.Providers.OpenAI do
   @default_model "text-embedding-3-small"
   @default_dimensions 1536
   @model_version "2024-01"
-  @batch_size 100  # OpenAI allows up to 2048 inputs per request, but we use smaller batches
+  # OpenAI allows up to 2048 inputs per request, but we use smaller batches
+  @batch_size 100
   @api_url "https://api.openai.com/v1/embeddings"
 
   @impl true
@@ -76,7 +77,10 @@ defmodule Onelist.Searcher.Providers.OpenAI do
     case Req.post(@api_url, json: body, headers: headers, receive_timeout: 60_000) do
       {:ok, %Req.Response{status: 200, body: response}} ->
         duration = System.monotonic_time(:millisecond) - start_time
-        Logger.debug("OpenAI embedding request completed in #{duration}ms for #{length(texts)} texts")
+
+        Logger.debug(
+          "OpenAI embedding request completed in #{duration}ms for #{length(texts)} texts"
+        )
 
         vectors =
           response["data"]

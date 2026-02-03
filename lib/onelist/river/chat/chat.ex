@@ -66,7 +66,7 @@ defmodule Onelist.River.Chat do
 
     # Get GTD state
     gtd_state = GTD.get_gtd_state(user_id)
-    
+
     # Build response
     response = %{
       message: response_text,
@@ -82,16 +82,25 @@ defmodule Onelist.River.Chat do
     # Add action-specific data and citations
     response =
       case action_data do
-        %{task: task} -> Map.put(response, :task, task)
-        %{tasks: tasks} -> Map.put(response, :tasks, tasks)
-        %{briefing: briefing} -> Map.put(response, :briefing, briefing)
-        %{search_results: results} -> 
+        %{task: task} ->
+          Map.put(response, :task, task)
+
+        %{tasks: tasks} ->
+          Map.put(response, :tasks, tasks)
+
+        %{briefing: briefing} ->
+          Map.put(response, :briefing, briefing)
+
+        %{search_results: results} ->
           response
           |> Map.put(:search_results, results)
           |> Map.put(:citations, format_citations(results))
+
         %{citations: citations} ->
           Map.put(response, :citations, citations)
-        _ -> response
+
+        _ ->
+          response
       end
 
     {:ok, response}
@@ -110,6 +119,7 @@ defmodule Onelist.River.Chat do
       }
     end)
   end
+
   defp format_citations(_), do: []
 
   # ============================================
@@ -190,21 +200,21 @@ defmodule Onelist.River.Chat do
 
   defp execute_intent(user_id, :query, message, _entities) do
     alias Onelist.Searcher
-    
+
     # Search using hybrid search (semantic + keyword)
     case Searcher.search(user_id, message, limit: 10, search_type: :hybrid) do
       {:ok, %{results: results}} when is_list(results) and length(results) > 0 ->
         response = ResponseGenerator.query_results(message, results)
         {:query_executed, %{search_results: results}, response}
-        
+
       {:ok, %{results: []}} ->
         response = ResponseGenerator.no_results(message)
         {:query_executed, %{search_results: []}, response}
-        
+
       {:ok, _} ->
         response = ResponseGenerator.no_results(message)
         {:query_executed, %{search_results: []}, response}
-        
+
       {:error, reason} ->
         Logger.error("Search failed: #{inspect(reason)}")
         response = "I had trouble searching your entries. Please try again."
@@ -236,14 +246,14 @@ defmodule Onelist.River.Chat do
     # General chat - use Agent for rich LLM response with memory context
     alias Onelist.River.Agent
     alias Onelist.Accounts
-    
+
     try do
       user = Accounts.get_user!(user_id)
-      
+
       case Agent.chat(user, message, []) do
         {:ok, agent_response} ->
           {:chat, %{citations: agent_response.citations}, agent_response.message}
-          
+
         {:error, _reason} ->
           # Fallback to simple response if Agent fails
           response = ResponseGenerator.chat_response()
@@ -262,15 +272,23 @@ defmodule Onelist.River.Chat do
 
   defp extract_task_title(message) do
     message
-    |> String.replace(~r/^(add\s+task[:\s]?|create\s+(a\s+)?task[:\s]?|remind\s+me\s+to\s+|i\s+need\s+to\s+|todo[:\s]?|don'?t\s+forget\s+to\s+)/i, "")
-    |> String.replace(~r/@\w+/, "")  # Remove contexts
-    |> String.replace(~r/\s+by\s+.+$/, "")  # Remove "by <date>"
+    |> String.replace(
+      ~r/^(add\s+task[:\s]?|create\s+(a\s+)?task[:\s]?|remind\s+me\s+to\s+|i\s+need\s+to\s+|todo[:\s]?|don'?t\s+forget\s+to\s+)/i,
+      ""
+    )
+    # Remove contexts
+    |> String.replace(~r/@\w+/, "")
+    # Remove "by <date>"
+    |> String.replace(~r/\s+by\s+.+$/, "")
     |> String.trim()
   end
 
   defp extract_task_reference(message) do
     message
-    |> String.replace(~r/^(done\s+with\s+|finished\s+(with\s+)?|completed?\s+|mark\s+|set\s+)/i, "")
+    |> String.replace(
+      ~r/^(done\s+with\s+|finished\s+(with\s+)?|completed?\s+|mark\s+|set\s+)/i,
+      ""
+    )
     |> String.replace(~r/\s+(done|complete|as\s+done|as\s+complete)$/i, "")
     |> String.trim()
   end

@@ -131,7 +131,8 @@ defmodule Onelist.MixProject do
       {:ueberauth, "~> 0.10.0"},
       {:ueberauth_github, "~> 0.8.0"},
       {:ueberauth_google, "~> 0.10.0"},
-      {:joken, "~> 2.5"},  # For Apple JWT verification
+      # For Apple JWT verification
+      {:joken, "~> 2.5"},
       # {:x509, "~> 0.9.2"},  # For Apple certificate validation - disabled until OTP 28.0.2+ available
       # Password hashing
       {:argon2_elixir, "~> 3.0"},

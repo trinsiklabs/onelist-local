@@ -22,6 +22,7 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
   @impl true
   def convert(nil, _opts), do: {:error, :nil_content}
   def convert("", _opts), do: {:ok, ""}
+
   def convert(content, opts) when is_binary(content) do
     try do
       markdown =
@@ -35,6 +36,7 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
       e -> {:error, {:conversion_failed, Exception.message(e)}}
     end
   end
+
   def convert(_, _opts), do: {:error, :invalid_content_type}
 
   @impl true
@@ -49,6 +51,7 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
         []
     end
   end
+
   def extract_embedded_assets(_), do: []
 
   # ============================================
@@ -89,31 +92,64 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
   defp convert_node({tag, attrs, children}, opts) do
     case String.downcase(to_string(tag)) do
       # Headings
-      "h1" -> ["\n\n# ", convert_node(children, opts), "\n\n"]
-      "h2" -> ["\n\n## ", convert_node(children, opts), "\n\n"]
-      "h3" -> ["\n\n### ", convert_node(children, opts), "\n\n"]
-      "h4" -> ["\n\n#### ", convert_node(children, opts), "\n\n"]
-      "h5" -> ["\n\n##### ", convert_node(children, opts), "\n\n"]
-      "h6" -> ["\n\n###### ", convert_node(children, opts), "\n\n"]
+      "h1" ->
+        ["\n\n# ", convert_node(children, opts), "\n\n"]
+
+      "h2" ->
+        ["\n\n## ", convert_node(children, opts), "\n\n"]
+
+      "h3" ->
+        ["\n\n### ", convert_node(children, opts), "\n\n"]
+
+      "h4" ->
+        ["\n\n#### ", convert_node(children, opts), "\n\n"]
+
+      "h5" ->
+        ["\n\n##### ", convert_node(children, opts), "\n\n"]
+
+      "h6" ->
+        ["\n\n###### ", convert_node(children, opts), "\n\n"]
 
       # Paragraphs and divs
-      "p" -> ["\n\n", convert_node(children, opts), "\n\n"]
-      "div" -> ["\n", convert_node(children, opts), "\n"]
-      "br" -> ["\n"]
+      "p" ->
+        ["\n\n", convert_node(children, opts), "\n\n"]
+
+      "div" ->
+        ["\n", convert_node(children, opts), "\n"]
+
+      "br" ->
+        ["\n"]
 
       # Text formatting
-      "strong" -> ["**", convert_node(children, opts), "**"]
-      "b" -> ["**", convert_node(children, opts), "**"]
-      "em" -> ["*", convert_node(children, opts), "*"]
-      "i" -> ["*", convert_node(children, opts), "*"]
-      "s" -> ["~~", convert_node(children, opts), "~~"]
-      "del" -> ["~~", convert_node(children, opts), "~~"]
-      "strike" -> ["~~", convert_node(children, opts), "~~"]
-      "u" -> convert_node(children, opts)  # No markdown equivalent
+      "strong" ->
+        ["**", convert_node(children, opts), "**"]
+
+      "b" ->
+        ["**", convert_node(children, opts), "**"]
+
+      "em" ->
+        ["*", convert_node(children, opts), "*"]
+
+      "i" ->
+        ["*", convert_node(children, opts), "*"]
+
+      "s" ->
+        ["~~", convert_node(children, opts), "~~"]
+
+      "del" ->
+        ["~~", convert_node(children, opts), "~~"]
+
+      "strike" ->
+        ["~~", convert_node(children, opts), "~~"]
+
+      # No markdown equivalent
+      "u" ->
+        convert_node(children, opts)
 
       # Code
       "code" ->
         content = Floki.text({tag, attrs, children})
+
         if String.contains?(content, "\n") do
           ["\n```\n", content, "\n```\n"]
         else
@@ -128,6 +164,7 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
       "a" ->
         href = get_attr(attrs, "href")
         text = convert_node(children, opts) |> flatten_to_string()
+
         if href do
           ["[", text, "](", href, ")"]
         else
@@ -137,6 +174,7 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
       "img" ->
         src = get_attr(attrs, "src")
         alt = get_attr(attrs, "alt") || ""
+
         if src do
           ["![", alt, "](", src, ")"]
         else
@@ -144,9 +182,14 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
         end
 
       # Lists
-      "ul" -> ["\n", convert_list_items(children, "-", opts), "\n"]
-      "ol" -> ["\n", convert_ordered_list(children, opts), "\n"]
-      "li" -> convert_node(children, opts)
+      "ul" ->
+        ["\n", convert_list_items(children, "-", opts), "\n"]
+
+      "ol" ->
+        ["\n", convert_ordered_list(children, opts), "\n"]
+
+      "li" ->
+        convert_node(children, opts)
 
       # Blockquote
       "blockquote" ->
@@ -156,29 +199,54 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
           |> String.split("\n")
           |> Enum.map(&("> " <> &1))
           |> Enum.join("\n")
+
         ["\n", content, "\n"]
 
       # Horizontal rule
-      "hr" -> ["\n\n---\n\n"]
+      "hr" ->
+        ["\n\n---\n\n"]
 
       # Tables (simplified)
-      "table" -> convert_table({tag, attrs, children}, opts)
-      "tr" -> convert_node(children, opts)
-      "th" -> [" ", convert_node(children, opts), " |"]
-      "td" -> [" ", convert_node(children, opts), " |"]
+      "table" ->
+        convert_table({tag, attrs, children}, opts)
+
+      "tr" ->
+        convert_node(children, opts)
+
+      "th" ->
+        [" ", convert_node(children, opts), " |"]
+
+      "td" ->
+        [" ", convert_node(children, opts), " |"]
 
       # Skip these elements entirely
-      "script" -> []
-      "style" -> []
-      "head" -> []
-      "meta" -> []
-      "link" -> []
-      "nav" -> []
-      "footer" -> []
-      "aside" -> []
+      "script" ->
+        []
+
+      "style" ->
+        []
+
+      "head" ->
+        []
+
+      "meta" ->
+        []
+
+      "link" ->
+        []
+
+      "nav" ->
+        []
+
+      "footer" ->
+        []
+
+      "aside" ->
+        []
 
       # Default: just process children
-      _ -> convert_node(children, opts)
+      _ ->
+        convert_node(children, opts)
     end
   end
 
@@ -209,14 +277,18 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
       |> find_elements("tr")
       |> Enum.map(fn row ->
         cells = find_elements(elem(row, 2), ~w(th td))
-        "|" <> Enum.map_join(cells, "", fn cell ->
-          content = convert_node(cell, opts) |> flatten_to_string() |> String.trim()
-          " #{content} |"
-        end)
+
+        "|" <>
+          Enum.map_join(cells, "", fn cell ->
+            content = convert_node(cell, opts) |> flatten_to_string() |> String.trim()
+            " #{content} |"
+          end)
       end)
 
     case rows do
-      [] -> []
+      [] ->
+        []
+
       [header | rest] ->
         # Count columns from header
         col_count = String.split(header, "|") |> length() |> Kernel.-(2)
@@ -230,6 +302,7 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
     |> Enum.filter(&is_tuple/1)
     |> Enum.filter(fn {tag, _, _} -> String.downcase(to_string(tag)) in tags end)
   end
+
   defp find_elements(nodes, tag), do: find_elements(nodes, [tag])
 
   defp extract_code_content({_, _, children}) do
@@ -251,6 +324,7 @@ defmodule Onelist.Feeder.Converters.HTMLConverter do
   defp flatten_to_string(list) when is_list(list) do
     list |> List.flatten() |> Enum.join("")
   end
+
   defp flatten_to_string(str) when is_binary(str), do: str
 
   defp clean_whitespace(text) do

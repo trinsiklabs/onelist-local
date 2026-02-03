@@ -23,17 +23,17 @@ defmodule OnelistWeb.Auth.PasswordResetComponent do
 
   def handle_event("submit", %{"password_reset" => params}, socket) do
     error = validate_email(params["email"])
-    
+
     if error do
       {:noreply, assign(socket, error: error)}
     else
       # Set loading state
       socket = assign(socket, loading: true, error: nil)
-      
+
       # Process the password reset request asynchronously
       %{"email" => email} = params
       Task.start(fn -> process_reset_request(email, self()) end)
-      
+
       {:noreply, socket}
     end
   end
@@ -52,40 +52,73 @@ defmodule OnelistWeb.Auth.PasswordResetComponent do
     # Store connection info in process dictionary for tracking
     ip_address = Process.get(:current_ip_address, "unknown")
     user_agent = Process.get(:current_user_agent, "unknown")
-    
+
     # Get the user by email
-    result = case Accounts.get_user_by_email(email) do
-      nil ->
-        # If user doesn't exist, still log the attempt
-        Accounts.track_login_attempt(email, nil, ip_address, user_agent, false, "reset_request_unknown_user")
-        :user_not_found
-        
-      user ->
-        # Check if rate limited
-        case Accounts.rate_limited?(email, ip_address) do
-          {:ok, false} ->
-            # Generate reset token and send email
-            case Accounts.generate_reset_token(user) do
-              {:ok, _user, _token} ->
-                # In a real implementation, we would send an email here
-                # For now, just log the attempt
-                Accounts.track_login_attempt(email, user, ip_address, user_agent, true, "reset_token_generated")
-                # TODO: Send email with token: OnelistWeb.Emails.reset_password(user, token) |> Onelist.Mailer.deliver_later()
-                :ok
-                
-              error ->
-                # Log failure
-                Accounts.track_login_attempt(email, user, ip_address, user_agent, false, "reset_token_generation_failed")
-                error
-            end
-            
-          {:error, :rate_limited, _timeout} ->
-            # Log rate limited attempt
-            Accounts.track_login_attempt(email, user, ip_address, user_agent, false, "rate_limited")
-            :rate_limited
-        end
-    end
-    
+    result =
+      case Accounts.get_user_by_email(email) do
+        nil ->
+          # If user doesn't exist, still log the attempt
+          Accounts.track_login_attempt(
+            email,
+            nil,
+            ip_address,
+            user_agent,
+            false,
+            "reset_request_unknown_user"
+          )
+
+          :user_not_found
+
+        user ->
+          # Check if rate limited
+          case Accounts.rate_limited?(email, ip_address) do
+            {:ok, false} ->
+              # Generate reset token and send email
+              case Accounts.generate_reset_token(user) do
+                {:ok, _user, _token} ->
+                  # In a real implementation, we would send an email here
+                  # For now, just log the attempt
+                  Accounts.track_login_attempt(
+                    email,
+                    user,
+                    ip_address,
+                    user_agent,
+                    true,
+                    "reset_token_generated"
+                  )
+
+                  # TODO: Send email with token: OnelistWeb.Emails.reset_password(user, token) |> Onelist.Mailer.deliver_later()
+                  :ok
+
+                error ->
+                  # Log failure
+                  Accounts.track_login_attempt(
+                    email,
+                    user,
+                    ip_address,
+                    user_agent,
+                    false,
+                    "reset_token_generation_failed"
+                  )
+
+                  error
+              end
+
+            {:error, :rate_limited, _timeout} ->
+              # Log rate limited attempt
+              Accounts.track_login_attempt(
+                email,
+                user,
+                ip_address,
+                user_agent,
+                false,
+                "rate_limited"
+              )
+
+              :rate_limited
+          end
+      end
+
     # Send result back to component
     send(pid, {:reset_processed, result})
   end
@@ -93,12 +126,14 @@ defmodule OnelistWeb.Auth.PasswordResetComponent do
   defp validate_email("") do
     "can't be blank"
   end
+
   defp validate_email(email) when is_binary(email) do
     case Regex.run(~r/^[^\s]+@[^\s]+$/, email) do
       nil -> "must have the @ sign and no spaces"
       _ -> nil
     end
   end
+
   defp validate_email(_) do
     "can't be blank"
   end
@@ -114,7 +149,7 @@ defmodule OnelistWeb.Auth.PasswordResetComponent do
       >
         <div data-test-id="password-reset-container">
           <%= if @success do %>
-            <div 
+            <div
               class="rounded-md bg-green-50 p-4 mb-4"
               data-test-id="success-message"
               role="alert"
@@ -122,8 +157,17 @@ defmodule OnelistWeb.Auth.PasswordResetComponent do
             >
               <div class="flex">
                 <div class="flex-shrink-0">
-                  <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  <svg
+                    class="h-5 w-5 text-green-400"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div class="ml-3">
@@ -164,9 +208,15 @@ defmodule OnelistWeb.Auth.PasswordResetComponent do
                   aria-describedby={if @error, do: "email-error"}
                 />
               </div>
-              
+
               <%= if @error do %>
-                <div class="mt-2 text-sm text-red-600" role="alert" id="email-error" aria-live="polite" data-test-id="email-error-message">
+                <div
+                  class="mt-2 text-sm text-red-600"
+                  role="alert"
+                  id="email-error"
+                  aria-live="polite"
+                  data-test-id="email-error-message"
+                >
                   <%= @error %>
                 </div>
               <% end %>
@@ -183,9 +233,27 @@ defmodule OnelistWeb.Auth.PasswordResetComponent do
               >
                 <%= if @loading do %>
                   <div data-test-id="loading-indicator">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      >
+                      </circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      >
+                      </path>
                     </svg>
                     Sending...
                   </div>
@@ -198,18 +266,18 @@ defmodule OnelistWeb.Auth.PasswordResetComponent do
 
           <div class="mt-6">
             <p class="text-center text-sm text-gray-600">
-              <a href={~p"/login"} data-test-id="back-to-login" class="font-medium text-indigo-600 hover:text-indigo-500">
+              <a
+                href={~p"/login"}
+                data-test-id="back-to-login"
+                class="font-medium text-indigo-600 hover:text-indigo-500"
+              >
                 Back to login
               </a>
             </p>
           </div>
 
           <%= if @loading do %>
-            <div
-              data-test-id="loading-announcement"
-              class="sr-only"
-              aria-live="polite"
-            >
+            <div data-test-id="loading-announcement" class="sr-only" aria-live="polite">
               Loading...
             </div>
           <% end %>
@@ -218,4 +286,4 @@ defmodule OnelistWeb.Auth.PasswordResetComponent do
     </div>
     """
   end
-end 
+end

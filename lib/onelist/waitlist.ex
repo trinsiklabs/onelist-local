@@ -1,7 +1,7 @@
 defmodule Onelist.Waitlist do
   @moduledoc """
   The Waitlist context for managing Headwaters early access signups.
-  
+
   Headwaters are the first 100 users — where the river begins.
   """
 
@@ -60,16 +60,17 @@ defmodule Onelist.Waitlist do
 
   @doc """
   Creates a new waitlist signup.
-  
+
   Returns {:ok, signup} or {:error, changeset} or {:error, :waitlist_full}
   """
   def create_signup(attrs) do
     if spots_available?() do
       # Get next queue number atomically
       next_number = get_next_queue_number()
-      
+
       # Normalize to string keys and add generated fields
       email = attrs[:email] || attrs["email"] || ""
+
       attrs = %{
         "email" => String.downcase(email),
         "name" => attrs[:name] || attrs["name"],
@@ -78,17 +79,18 @@ defmodule Onelist.Waitlist do
         "queue_number" => next_number,
         "status_token" => generate_token()
       }
-      
-      result = 
+
+      result =
         %Signup{}
         |> Signup.changeset(attrs)
         |> Repo.insert()
-      
+
       case result do
         {:ok, signup} ->
           # Broadcast the new signup count
           broadcast_signup_update()
           {:ok, signup}
+
         error ->
           error
       end
@@ -107,15 +109,16 @@ defmodule Onelist.Waitlist do
   defp broadcast_signup_update do
     # Get the most recent signup for the live feed
     recent = List.first(list_recent_signups(1))
-    
+
     Phoenix.PubSub.broadcast(
       Onelist.PubSub,
       "waitlist:updates",
-      {:waitlist_updated, %{
-        remaining: remaining_spots(), 
-        total: count_signups(),
-        new_signup: recent
-      }}
+      {:waitlist_updated,
+       %{
+         remaining: remaining_spots(),
+         total: count_signups(),
+         new_signup: recent
+       }}
     )
   end
 
@@ -134,11 +137,11 @@ defmodule Onelist.Waitlist do
     total = count_signups()
     activated_count = count_by_status("activated")
     invited_count = count_by_status("invited")
-    
+
     # How many people are ahead in the queue
     ahead_in_queue = signup.queue_number - 1 - activated_count - invited_count
     ahead_in_queue = max(ahead_in_queue, 0)
-    
+
     %{
       queue_number: signup.queue_number,
       total_signups: total,
@@ -158,16 +161,17 @@ defmodule Onelist.Waitlist do
   Returns signups in reverse chronological order (newest first).
   """
   def list_recent_signups(limit \\ 5) do
-    query = from s in Signup,
-      order_by: [desc: s.inserted_at],
-      limit: ^limit,
-      select: %{
-        name: s.name,
-        reason: s.reason,
-        queue_number: s.queue_number,
-        inserted_at: s.inserted_at
-      }
-    
+    query =
+      from s in Signup,
+        order_by: [desc: s.inserted_at],
+        limit: ^limit,
+        select: %{
+          name: s.name,
+          reason: s.reason,
+          queue_number: s.queue_number,
+          inserted_at: s.inserted_at
+        }
+
     Repo.all(query)
   end
 
@@ -177,15 +181,16 @@ defmodule Onelist.Waitlist do
   def list_signups(opts \\ []) do
     limit = Keyword.get(opts, :limit, 100)
     status = Keyword.get(opts, :status)
-    
+
     query = from s in Signup, order_by: [asc: s.queue_number], limit: ^limit
-    
-    query = if status do
-      from s in query, where: s.status == ^status
-    else
-      query
-    end
-    
+
+    query =
+      if status do
+        from s in query, where: s.status == ^status
+      else
+        query
+      end
+
     Repo.all(query)
   end
 
@@ -211,11 +216,12 @@ defmodule Onelist.Waitlist do
   Gets the next signup to invite (lowest queue number that's still waiting).
   """
   def next_to_invite do
-    query = from s in Signup,
-      where: s.status == "waiting",
-      order_by: [asc: s.queue_number],
-      limit: 1
-    
+    query =
+      from s in Signup,
+        where: s.status == "waiting",
+        order_by: [asc: s.queue_number],
+        limit: 1
+
     Repo.one(query)
   end
 
@@ -241,9 +247,9 @@ defmodule Onelist.Waitlist do
     # Rough estimate: assume we activate ~5 users per week initially
     # This should be configurable/dynamic later
     users_per_week = 5
-    
+
     weeks = ceil(ahead_in_queue / users_per_week)
-    
+
     cond do
       ahead_in_queue == 0 -> "You're next!"
       weeks <= 1 -> "Less than a week"

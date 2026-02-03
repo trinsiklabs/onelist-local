@@ -60,36 +60,37 @@ defmodule Onelist.WebCapture.Tiers.Tier1SimpleFetch do
          {:ok, document} <- parse_html(response.body),
          {:ok, metadata} <- Metadata.extract(document, response.final_url),
          {:ok, content} <- Readability.extract(document) do
-
-      markdown = if extract_markdown do
-        case Markdown.from_html(content.html) do
-          {:ok, md} -> md
-          {:error, _} -> nil
+      markdown =
+        if extract_markdown do
+          case Markdown.from_html(content.html) do
+            {:ok, md} -> md
+            {:error, _} -> nil
+          end
+        else
+          nil
         end
-      else
-        nil
-      end
 
-      {:ok, %{
-        url: url,
-        final_url: response.final_url,
-        title: metadata.title || content.title,
-        description: metadata.description,
-        author: metadata.author,
-        published_at: metadata.published_at,
-        site_name: metadata.site_name,
-        image_url: metadata.image,
-        content: content.text,
-        html: content.html,
-        markdown: markdown,
-        word_count: count_words(content.text),
-        language: detect_language(content.text),
-        metadata: %{
-          og: metadata.og,
-          twitter: metadata.twitter,
-          canonical_url: metadata.canonical_url
-        }
-      }}
+      {:ok,
+       %{
+         url: url,
+         final_url: response.final_url,
+         title: metadata.title || content.title,
+         description: metadata.description,
+         author: metadata.author,
+         published_at: metadata.published_at,
+         site_name: metadata.site_name,
+         image_url: metadata.image,
+         content: content.text,
+         html: content.html,
+         markdown: markdown,
+         word_count: count_words(content.text),
+         language: detect_language(content.text),
+         metadata: %{
+           og: metadata.og,
+           twitter: metadata.twitter,
+           canonical_url: metadata.canonical_url
+         }
+       }}
     end
   end
 
@@ -199,10 +200,11 @@ defmodule Onelist.WebCapture.Tiers.Tier1SimpleFetch do
 
   defp requires_javascript?(document) do
     # Check for common JS-required patterns
-    noscript_warning = Floki.find(document, "noscript")
-    |> Floki.text()
-    |> String.downcase()
-    |> String.contains?("javascript")
+    noscript_warning =
+      Floki.find(document, "noscript")
+      |> Floki.text()
+      |> String.downcase()
+      |> String.contains?("javascript")
 
     # Check if body is mostly empty but has scripts
     body_text = Floki.find(document, "body") |> Floki.text() |> String.trim()
@@ -218,6 +220,7 @@ defmodule Onelist.WebCapture.Tiers.Tier1SimpleFetch do
 
   defp count_words(nil), do: 0
   defp count_words(""), do: 0
+
   defp count_words(text) do
     text
     |> String.split(~r/\s+/, trim: true)
@@ -226,6 +229,7 @@ defmodule Onelist.WebCapture.Tiers.Tier1SimpleFetch do
 
   defp detect_language(nil), do: nil
   defp detect_language(text) when byte_size(text) < 100, do: nil
+
   defp detect_language(_text) do
     # Simple heuristic - could be enhanced with a proper library
     # For now, return nil and let downstream processing detect

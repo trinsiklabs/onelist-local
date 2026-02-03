@@ -2,11 +2,11 @@ defmodule OnelistWeb.WorkspaceController do
   use OnelistWeb, :controller
 
   @workspace_root "/root/.openclaw/workspace"
-  
+
   # Path normalization helper (must be before first use)
   defp normalize_path(path) when is_list(path), do: Path.join(path)
   defp normalize_path(path) when is_binary(path), do: path
-  
+
   # Allowed directories/files to expose (security: don't expose everything)
   @allowed_paths [
     "resilience",
@@ -30,7 +30,7 @@ defmodule OnelistWeb.WorkspaceController do
   def index(conn, _params) do
     files = list_workspace_files()
     html = render_index(files)
-    
+
     conn
     |> put_resp_content_type("text/html")
     |> send_resp(200, html)
@@ -38,24 +38,24 @@ defmodule OnelistWeb.WorkspaceController do
 
   def show(conn, %{"path" => path_parts}) do
     path = normalize_path(path_parts)
-    
+
     if allowed_path?(path) do
       full_path = Path.join(@workspace_root, path)
-      
+
       cond do
         File.dir?(full_path) ->
           files = list_directory(path)
           html = render_directory(path, files)
           conn |> put_resp_content_type("text/html") |> send_resp(200, html)
-          
+
         File.exists?(full_path) && String.ends_with?(path, ".md") ->
           content = File.read!(full_path)
           html = render_markdown(path, content)
           conn |> put_resp_content_type("text/html") |> send_resp(200, html)
-          
+
         File.exists?(full_path) ->
           send_file(conn, 200, full_path)
-          
+
         true ->
           conn |> put_resp_content_type("text/html") |> send_resp(404, render_404(path))
       end
@@ -66,14 +66,17 @@ defmodule OnelistWeb.WorkspaceController do
 
   def raw(conn, %{"path" => path_parts}) do
     path = normalize_path(path_parts)
-    
+
     if allowed_path?(path) do
       full_path = Path.join(@workspace_root, path)
-      
+
       if File.exists?(full_path) && !File.dir?(full_path) do
         conn
         |> put_resp_content_type("text/plain; charset=utf-8")
-        |> put_resp_header("content-disposition", "attachment; filename=\"#{Path.basename(path)}\"")
+        |> put_resp_header(
+          "content-disposition",
+          "attachment; filename=\"#{Path.basename(path)}\""
+        )
         |> send_file(200, full_path)
       else
         conn |> send_resp(404, "Not found")
@@ -94,11 +97,14 @@ defmodule OnelistWeb.WorkspaceController do
     @allowed_paths
     |> Enum.map(fn path ->
       full_path = Path.join(@workspace_root, path)
+
       cond do
         File.dir?(full_path) ->
           {:dir, path, count_files(full_path)}
+
         File.exists?(full_path) ->
           {:file, path, File.stat!(full_path).size}
+
         true ->
           nil
       end
@@ -108,13 +114,13 @@ defmodule OnelistWeb.WorkspaceController do
 
   defp list_directory(dir_path) do
     full_path = Path.join(@workspace_root, dir_path)
-    
+
     if File.dir?(full_path) do
       File.ls!(full_path)
       |> Enum.map(fn name ->
         item_path = Path.join(full_path, name)
         rel_path = Path.join(dir_path, name)
-        
+
         if File.dir?(item_path) do
           {:dir, name, rel_path}
         else
@@ -138,25 +144,28 @@ defmodule OnelistWeb.WorkspaceController do
   end
 
   defp render_index(files) do
-    file_items = Enum.map(files, fn
-      {:dir, path, count} ->
-        """
-        <a href="/workspace/#{path}" class="item dir">
-          <span class="icon">📁</span>
-          <span class="name">#{path}/</span>
-          <span class="meta">#{count} items</span>
-        </a>
-        """
-      {:file, path, size} ->
-        """
-        <a href="/workspace/#{path}" class="item file">
-          <span class="icon">📄</span>
-          <span class="name">#{path}</span>
-          <span class="meta">#{format_size(size)}</span>
-          <a href="/workspace/raw/#{path}" class="download" title="Download">⬇</a>
-        </a>
-        """
-    end) |> Enum.join("\n")
+    file_items =
+      Enum.map(files, fn
+        {:dir, path, count} ->
+          """
+          <a href="/workspace/#{path}" class="item dir">
+            <span class="icon">📁</span>
+            <span class="name">#{path}/</span>
+            <span class="meta">#{count} items</span>
+          </a>
+          """
+
+        {:file, path, size} ->
+          """
+          <a href="/workspace/#{path}" class="item file">
+            <span class="icon">📄</span>
+            <span class="name">#{path}</span>
+            <span class="meta">#{format_size(size)}</span>
+            <a href="/workspace/raw/#{path}" class="download" title="Download">⬇</a>
+          </a>
+          """
+      end)
+      |> Enum.join("\n")
 
     base_html("Stream Workspace", """
     <h1>🌊 Stream Workspace</h1>
@@ -168,25 +177,29 @@ defmodule OnelistWeb.WorkspaceController do
   end
 
   defp render_directory(path, files) do
-    file_items = Enum.map(files, fn
-      {:dir, name, rel_path} ->
-        """
-        <a href="/workspace/#{rel_path}" class="item dir">
-          <span class="icon">📁</span>
-          <span class="name">#{name}/</span>
-        </a>
-        """
-      {:file, name, rel_path, size} ->
-        icon = if String.ends_with?(name, ".md"), do: "📝", else: "📄"
-        """
-        <a href="/workspace/#{rel_path}" class="item file">
-          <span class="icon">#{icon}</span>
-          <span class="name">#{name}</span>
-          <span class="meta">#{format_size(size)}</span>
-          <a href="/workspace/raw/#{rel_path}" class="download" title="Download">⬇</a>
-        </a>
-        """
-    end) |> Enum.join("\n")
+    file_items =
+      Enum.map(files, fn
+        {:dir, name, rel_path} ->
+          """
+          <a href="/workspace/#{rel_path}" class="item dir">
+            <span class="icon">📁</span>
+            <span class="name">#{name}/</span>
+          </a>
+          """
+
+        {:file, name, rel_path, size} ->
+          icon = if String.ends_with?(name, ".md"), do: "📝", else: "📄"
+
+          """
+          <a href="/workspace/#{rel_path}" class="item file">
+            <span class="icon">#{icon}</span>
+            <span class="name">#{name}</span>
+            <span class="meta">#{format_size(size)}</span>
+            <a href="/workspace/raw/#{rel_path}" class="download" title="Download">⬇</a>
+          </a>
+          """
+      end)
+      |> Enum.join("\n")
 
     breadcrumbs = render_breadcrumbs(path)
 
@@ -201,18 +214,19 @@ defmodule OnelistWeb.WorkspaceController do
 
   defp render_markdown(path, content) do
     # Simple markdown rendering (basic conversion)
-    html_content = content
-    |> String.replace(~r/^### (.+)$/m, "<h3>\\1</h3>")
-    |> String.replace(~r/^## (.+)$/m, "<h2>\\1</h2>")
-    |> String.replace(~r/^# (.+)$/m, "<h1>\\1</h1>")
-    |> String.replace(~r/\*\*(.+?)\*\*/, "<strong>\\1</strong>")
-    |> String.replace(~r/\*(.+?)\*/, "<em>\\1</em>")
-    |> String.replace(~r/`([^`]+)`/, "<code>\\1</code>")
-    |> String.replace(~r/^- (.+)$/m, "<li>\\1</li>")
-    |> String.replace(~r/^(\d+)\. (.+)$/m, "<li>\\2</li>")
-    |> String.replace(~r/```(\w*)\n([\s\S]*?)```/m, "<pre><code>\\2</code></pre>")
-    |> String.replace(~r/\n\n/, "</p><p>")
-    |> then(fn s -> "<p>#{s}</p>" end)
+    html_content =
+      content
+      |> String.replace(~r/^### (.+)$/m, "<h3>\\1</h3>")
+      |> String.replace(~r/^## (.+)$/m, "<h2>\\1</h2>")
+      |> String.replace(~r/^# (.+)$/m, "<h1>\\1</h1>")
+      |> String.replace(~r/\*\*(.+?)\*\*/, "<strong>\\1</strong>")
+      |> String.replace(~r/\*(.+?)\*/, "<em>\\1</em>")
+      |> String.replace(~r/`([^`]+)`/, "<code>\\1</code>")
+      |> String.replace(~r/^- (.+)$/m, "<li>\\1</li>")
+      |> String.replace(~r/^(\d+)\. (.+)$/m, "<li>\\2</li>")
+      |> String.replace(~r/```(\w*)\n([\s\S]*?)```/m, "<pre><code>\\2</code></pre>")
+      |> String.replace(~r/\n\n/, "</p><p>")
+      |> then(fn s -> "<p>#{s}</p>" end)
 
     breadcrumbs = render_breadcrumbs(path)
 
@@ -228,20 +242,23 @@ defmodule OnelistWeb.WorkspaceController do
   end
 
   defp render_breadcrumbs(path) when is_list(path), do: render_breadcrumbs(Path.join(path))
+
   defp render_breadcrumbs(path) when is_binary(path) do
     parts = String.split(path, "/")
-    
-    crumbs = parts
-    |> Enum.with_index()
-    |> Enum.map(fn {part, idx} ->
-      href = "/workspace/" <> (Enum.take(parts, idx + 1) |> Enum.join("/"))
-      if idx == length(parts) - 1 do
-        "<span>#{part}</span>"
-      else
-        "<a href=\"#{href}\">#{part}</a>"
-      end
-    end)
-    |> Enum.join(" / ")
+
+    crumbs =
+      parts
+      |> Enum.with_index()
+      |> Enum.map(fn {part, idx} ->
+        href = "/workspace/" <> (Enum.take(parts, idx + 1) |> Enum.join("/"))
+
+        if idx == length(parts) - 1 do
+          "<span>#{part}</span>"
+        else
+          "<a href=\"#{href}\">#{part}</a>"
+        end
+      end)
+      |> Enum.join(" / ")
 
     """
     <nav class="breadcrumbs">

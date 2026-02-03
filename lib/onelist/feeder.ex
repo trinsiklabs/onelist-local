@@ -232,10 +232,11 @@ defmodule Onelist.Feeder do
   def list_import_jobs(user_id, opts \\ []) do
     limit = Keyword.get(opts, :limit, 50)
 
-    query = from j in ImportJob,
-      where: j.user_id == ^user_id,
-      order_by: [desc: j.inserted_at],
-      limit: ^limit
+    query =
+      from j in ImportJob,
+        where: j.user_id == ^user_id,
+        order_by: [desc: j.inserted_at],
+        limit: ^limit
 
     query =
       case Keyword.get(opts, :status) do
@@ -395,11 +396,17 @@ defmodule Onelist.Feeder do
   def schedule_due_syncs do
     now = DateTime.utc_now()
 
-    query = from i in ExternalIntegration,
-      where: i.sync_enabled == true,
-      where: is_nil(i.last_sync_at) or
-             fragment("? + (? || ' minutes')::interval < ?",
-               i.last_sync_at, i.sync_frequency_minutes, ^now)
+    query =
+      from i in ExternalIntegration,
+        where: i.sync_enabled == true,
+        where:
+          is_nil(i.last_sync_at) or
+            fragment(
+              "? + (? || ' minutes')::interval < ?",
+              i.last_sync_at,
+              i.sync_frequency_minutes,
+              ^now
+            )
 
     Repo.all(query)
     |> Enum.each(fn integration ->

@@ -1,7 +1,7 @@
 defmodule OnelistWeb.Plugs.TrustedMemoryGuard do
   @moduledoc """
   Plug that guards API endpoints for trusted memory accounts.
-  
+
   Blocks PUT, PATCH, and DELETE requests on entry resources
   for users with trusted_memory_mode enabled.
   """
@@ -18,6 +18,7 @@ defmodule OnelistWeb.Plugs.TrustedMemoryGuard do
     if should_block?(user, method, conn.path_info) do
       # Log the attempt
       entry_id = extract_entry_id(conn.path_info)
+
       if entry_id && user do
         TrustedMemory.log_operation(
           user.id,
@@ -34,12 +35,16 @@ defmodule OnelistWeb.Plugs.TrustedMemoryGuard do
 
       conn
       |> put_resp_content_type("application/json")
-      |> send_resp(403, Jason.encode!(%{
-        error: "immutable_memory",
-        message: "This account uses trusted memory. Entries cannot be modified or deleted.",
-        code: "TRUSTED_MEMORY_IMMUTABLE",
-        suggestion: "Create a new entry instead, or contact your administrator for rollback options."
-      }))
+      |> send_resp(
+        403,
+        Jason.encode!(%{
+          error: "immutable_memory",
+          message: "This account uses trusted memory. Entries cannot be modified or deleted.",
+          code: "TRUSTED_MEMORY_IMMUTABLE",
+          suggestion:
+            "Create a new entry instead, or contact your administrator for rollback options."
+        })
+      )
       |> halt()
     else
       conn
@@ -47,6 +52,7 @@ defmodule OnelistWeb.Plugs.TrustedMemoryGuard do
   end
 
   defp should_block?(nil, _method, _path), do: false
+
   defp should_block?(user, method, path) do
     TrustedMemory.enabled?(user) &&
       method in ["PUT", "PATCH", "DELETE"] &&

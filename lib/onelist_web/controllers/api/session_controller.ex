@@ -1,6 +1,6 @@
 defmodule OnelistWeb.Api.SessionController do
   use OnelistWeb, :controller
-  
+
   @doc """
   Handles session ping requests to extend session lifetime.
   """
@@ -10,4 +10,4 @@ defmodule OnelistWeb.Api.SessionController do
     # will refresh the session's last_active_at timestamp
     json(conn, %{success: true})
   end
-end 
+end

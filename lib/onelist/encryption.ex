@@ -80,7 +80,8 @@ defmodule Onelist.Encryption do
   - `{:error, :decryption_failed}` - If decryption or authentication failed
   """
   @spec decrypt(binary(), binary()) :: {:ok, binary()} | {:error, term()}
-  def decrypt(encrypted, key) when byte_size(key) == 32 and byte_size(encrypted) > @iv_length + @tag_length do
+  def decrypt(encrypted, key)
+      when byte_size(key) == 32 and byte_size(encrypted) > @iv_length + @tag_length do
     try do
       # Extract iv, ciphertext, and tag
       <<iv::binary-size(@iv_length), rest::binary>> = encrypted

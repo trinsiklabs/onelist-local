@@ -154,6 +154,7 @@ defmodule OnelistWeb.Api.V1.SearchController do
   defp parse_float(nil, default), do: default
   defp parse_float(val, _) when is_float(val), do: val
   defp parse_float(val, _) when is_integer(val), do: val * 1.0
+
   defp parse_float(val, default) when is_binary(val) do
     case Float.parse(val) do
       {f, _} -> f
@@ -163,6 +164,7 @@ defmodule OnelistWeb.Api.V1.SearchController do
 
   defp parse_int(nil, default), do: default
   defp parse_int(val, _) when is_integer(val), do: val
+
   defp parse_int(val, default) when is_binary(val) do
     case Integer.parse(val) do
       {i, _} -> i

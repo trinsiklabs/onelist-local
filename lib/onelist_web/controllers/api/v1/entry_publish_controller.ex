@@ -75,16 +75,24 @@ defmodule OnelistWeb.Api.V1.EntryPublishController do
   defp ensure_username(%{username: nil}) do
     {:error, :unprocessable_entity, "You must set a username before publishing entries"}
   end
+
   defp ensure_username(%{username: username}) when is_binary(username) do
     {:ok, username}
   end
 
   defp ensure_has_content(entry) do
     case Entries.get_primary_representation(entry) do
-      nil -> {:error, :unprocessable_entity, "Entry must have content before publishing"}
-      %{content: nil} -> {:error, :unprocessable_entity, "Entry must have content before publishing"}
-      %{content: ""} -> {:error, :unprocessable_entity, "Entry must have content before publishing"}
-      _ -> {:ok, entry}
+      nil ->
+        {:error, :unprocessable_entity, "Entry must have content before publishing"}
+
+      %{content: nil} ->
+        {:error, :unprocessable_entity, "Entry must have content before publishing"}
+
+      %{content: ""} ->
+        {:error, :unprocessable_entity, "Entry must have content before publishing"}
+
+      _ ->
+        {:ok, entry}
     end
   end
 

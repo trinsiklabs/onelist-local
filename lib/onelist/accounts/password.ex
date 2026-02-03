@@ -20,18 +20,23 @@ defmodule Onelist.Accounts.Password do
     case @hash_algorithm do
       :argon2 ->
         # Use Argon2 with recommended settings
-        Argon2.hash_pwd_salt(password, [
+        Argon2.hash_pwd_salt(password,
           # Recommended settings for interactive login
-          t_cost: 2,       # Time cost
-          m_cost: 16       # Memory factor
-        ])
+          # Time cost
+          t_cost: 2,
+          # Memory factor
+          m_cost: 16
+        )
+
       :bcrypt ->
         # Fallback to Bcrypt if Argon2 not available
         Bcrypt.hash_pwd_salt(password)
+
       :test ->
         # Use simplified test hasher
         test_hasher = Application.get_env(:onelist, :test_password_hasher)
         apply(test_hasher, :hash_password, [password])
+
       _ ->
         # Safeguard against misconfiguration
         raise "Unsupported password hashing algorithm: #{inspect(@hash_algorithm)}"
@@ -52,16 +57,20 @@ defmodule Onelist.Accounts.Password do
       false
   """
   @spec verify_password(binary(), binary()) :: boolean()
-  def verify_password(stored_hash, password) when is_binary(stored_hash) and is_binary(password) do
+  def verify_password(stored_hash, password)
+      when is_binary(stored_hash) and is_binary(password) do
     case @hash_algorithm do
       :argon2 ->
         Argon2.verify_pass(password, stored_hash)
+
       :bcrypt ->
         Bcrypt.verify_pass(password, stored_hash)
+
       :test ->
         # Use simplified test hasher
         test_hasher = Application.get_env(:onelist, :test_password_hasher)
         apply(test_hasher, :verify_password, [stored_hash, password])
+
       _ ->
         # Safeguard against misconfiguration
         raise "Unsupported password hashing algorithm: #{inspect(@hash_algorithm)}"
@@ -84,22 +93,28 @@ defmodule Onelist.Accounts.Password do
     cond do
       String.length(password) < 10 ->
         {:error, "password must be at least 10 characters"}
+
       String.length(password) > 80 ->
         {:error, "password must be at most 80 characters"}
+
       not contains_uppercase?(password) ->
         {:error, "password must contain at least one uppercase character"}
+
       not contains_lowercase?(password) ->
         {:error, "password must contain at least one lowercase character"}
+
       not contains_digit?(password) ->
         {:error, "password must contain at least one digit"}
+
       true ->
         :ok
     end
   end
+
   def valid_password?(_), do: {:error, "password must be a string"}
 
   # Helper functions for password validation
   defp contains_uppercase?(string), do: Regex.match?(~r/[A-Z]/, string)
   defp contains_lowercase?(string), do: Regex.match?(~r/[a-z]/, string)
   defp contains_digit?(string), do: Regex.match?(~r/[0-9]/, string)
-end 
+end

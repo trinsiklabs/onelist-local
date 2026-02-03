@@ -1,7 +1,7 @@
 defmodule OnelistWeb.LivelogLive do
   @moduledoc """
   LiveView page for public Livelog display.
-  
+
   Shows real-time Stream conversations with automatic redaction.
   Accessible at /livelog without authentication.
   """
@@ -87,7 +87,8 @@ defmodule OnelistWeb.LivelogLive do
             <div class="flex items-center gap-3">
               <div class="relative">
                 <span class="text-2xl">🔴</span>
-                <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse">
+                </span>
               </div>
               <div>
                 <h1 class="text-xl font-bold text-white">Livelog</h1>
@@ -103,20 +104,20 @@ defmodule OnelistWeb.LivelogLive do
           </div>
         </div>
       </header>
-
       <!-- Disclaimer -->
       <div class="bg-gray-900 border-b border-gray-800">
         <div class="max-w-4xl mx-auto px-4 py-3">
           <p class="text-sm text-gray-400">
-            Real-time log of conversations between 
-            <a href="https://x.com/splntrb" target="_blank" class="text-blue-400 hover:underline">@splntrb</a>
-            and their AI assistant Stream. 
+            Real-time log of conversations between
+            <a href="https://x.com/splntrb" target="_blank" class="text-blue-400 hover:underline">
+              @splntrb
+            </a>
+            and their AI assistant Stream.
             Sensitive information is automatically redacted.
             <span class="text-gray-500">Privacy-first transparency.</span>
           </p>
         </div>
       </div>
-
       <!-- Messages -->
       <main class="max-w-4xl mx-auto px-4 py-6">
         <div class="space-y-4" id="messages-list" phx-update="stream">
@@ -151,7 +152,6 @@ defmodule OnelistWeb.LivelogLive do
           </div>
         <% end %>
       </main>
-
       <!-- Footer -->
       <footer class="border-t border-gray-800 mt-12">
         <div class="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
@@ -177,16 +177,18 @@ defmodule OnelistWeb.LivelogLive do
 
   defp message_card(assigns) do
     ~H"""
-    <div
-      class={"p-4 rounded-lg border #{role_styles(@message.role)}"}
-      id={"message-#{@message.id}"}
-    >
+    <div class={"p-4 rounded-lg border #{role_styles(@message.role)}"} id={"message-#{@message.id}"}>
       <div class="flex items-start justify-between gap-4">
         <div class="flex items-center gap-2">
           <span class="text-lg"><%= role_emoji(@message.role) %></span>
-          <span class={"font-medium #{role_name_color(@message.role)}"}><%= role_display(@message.role) %></span>
+          <span class={"font-medium #{role_name_color(@message.role)}"}>
+            <%= role_display(@message.role) %>
+          </span>
           <%= if @message.redaction_applied do %>
-            <span class="text-xs px-1.5 py-0.5 bg-yellow-900/50 text-yellow-400 rounded" title="Some content was redacted for privacy">
+            <span
+              class="text-xs px-1.5 py-0.5 bg-yellow-900/50 text-yellow-400 rounded"
+              title="Some content was redacted for privacy"
+            >
               🔒 Redacted
             </span>
           <% end %>

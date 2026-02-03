@@ -1,8 +1,10 @@
 # Onelist Memory Sync Plugin
 
-**v1.0.0 - Query-Based Retrieval Edition**
+**v1.1.0 - Invisible Compaction Recovery Edition**
 
-Bidirectional memory sync between OpenClaw and Onelist. Retrieves relevant memories from Onelist Search API on session start, and streams conversation logs to Onelist for memory extraction.
+Bidirectional memory sync between OpenClaw and Onelist. Retrieves relevant memories from Onelist Search API on session start and after compaction, and streams conversation logs to Onelist for memory extraction.
+
+**The bot never notices compaction.** When OpenClaw compacts the context window, this plugin automatically restores relevant memories so the conversation continues seamlessly.
 
 ## Architecture
 
@@ -89,7 +91,42 @@ The injected context looks like:
 *Context retrieved from Onelist memory. Continue the conversation naturally.*
 ```
 
-### 2. Fallback Recovery
+### 2. Invisible Compaction Recovery (NEW in v1.1.0)
+
+When OpenClaw compacts the context window (summarizing old messages to free space), the bot loses important context. This plugin **automatically restores relevant memories** via the `after_compaction` hook.
+
+**How it works:**
+
+1. OpenClaw fires `after_compaction` hook when compaction completes
+2. Plugin queries Onelist Search API for relevant memories (same as session start)
+3. Falls back to local session files if Onelist unavailable
+4. Injects recovered context immediately after compaction
+5. **Bot continues seamlessly** without noticing the context loss
+
+**Key features:**
+
+- **Bypasses rate limits** - Compaction recovery is critical and not subject to injection limits
+- **Distinct header** - Uses `## 🔄 Post-Compaction Context Recovery` to distinguish from regular injection
+- **Stats tracking** - Compaction recoveries tracked separately in `totalCompactionRecoveries`
+
+The injected context looks like:
+
+```markdown
+## 🔄 Post-Compaction Context Recovery
+
+**Recovered:** 2026-01-15T10:30:00Z
+**Reason:** Context window compacted - restoring relevant memories
+
+---
+
+**1.** Previous conversation context *(relevance: 95%)*
+
+**2.** Project requirements *(relevance: 89%)*
+
+...
+```
+
+### 3. Fallback Recovery
 
 If smart retrieval fails (no API credentials, network issues, circuit breaker open), the plugin falls back to **local session file recovery**:
 
@@ -99,7 +136,7 @@ If smart retrieval fails (no API credentials, network issues, circuit breaker op
 
 This ensures continuity even when Onelist is unavailable.
 
-### 3. Livelog Sync
+### 4. Livelog Sync
 
 Streams conversation to Onelist for persistent memory extraction:
 
@@ -109,7 +146,7 @@ Streams conversation to Onelist for persistent memory extraction:
 4. **Reaction Sync** - POSTs Telegram reactions to `/api/v1/chat-stream/reaction`
 5. **Telegram Metadata** - Extracts user info, message IDs, reply chains
 
-### 4. Safety Systems
+### 5. Safety Systems
 
 - **Circuit Breaker** - Backs off on consecutive API failures (exponential backoff up to 1 hour)
 - **Injection Limits** - Max 5 injections per session, 30s cooldown between injections
@@ -311,7 +348,8 @@ Plugin state is stored at `~/.openclaw/onelist-memory-state.json`:
     "totalBlocked": 5,
     "totalSearches": 100,
     "totalSearchHits": 85,
-    "totalFallbacks": 15
+    "totalFallbacks": 15,
+    "totalCompactionRecoveries": 3
   }
 }
 ```
@@ -379,7 +417,7 @@ Reset by restarting OpenClaw or waiting for backoff to expire.
 The plugin logs health stats hourly:
 
 ```
-[onelist-memory] === HEALTH: v1.0.0 | Sessions: 3 | Injections: 42 | Searches: 100 | Hits: 85 | Fallbacks: 15 ===
+[onelist-memory] === HEALTH: v1.1.0 | Sessions: 3 | Injections: 42 | Searches: 100 | Hits: 85 | Fallbacks: 15 | CompactionRecoveries: 3 ===
 ```
 
 ## Development
@@ -400,6 +438,14 @@ openclaw plugins install ./extensions/onelist-memory
 ```
 
 ## Changelog
+
+### v1.1.0
+
+- **NEW: Invisible Compaction Recovery** - `after_compaction` hook restores memories after context window compaction
+- **NEW: Compaction Bypasses Rate Limits** - Critical recovery not subject to injection limits
+- **NEW: Stats Tracking** - `totalCompactionRecoveries` tracked separately
+- Bot never notices compaction - memories restored automatically and seamlessly
+- All v1.0.0 functionality preserved
 
 ### v1.0.0
 

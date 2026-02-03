@@ -11,10 +11,7 @@ defmodule OnelistWeb.Auth.RegistrationPage do
 
   def render(assigns) do
     ~H"""
-    <.live_component
-      module={RegistrationComponent}
-      id="registration"
-    />
+    <.live_component module={RegistrationComponent} id="registration" />
     """
   end
-end 
+end

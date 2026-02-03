@@ -150,8 +150,7 @@ if config_env() == :prod do
 
   # Local storage configuration
   if local_path = System.get_env("STORAGE_LOCAL_PATH") do
-    config :onelist, Onelist.Storage.Backends.Local,
-      root_path: local_path
+    config :onelist, Onelist.Storage.Backends.Local, root_path: local_path
   end
 
   # S3/S3-compatible storage configuration

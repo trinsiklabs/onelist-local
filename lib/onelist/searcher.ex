@@ -39,7 +39,9 @@ defmodule Onelist.Searcher do
   """
   def enqueue_batch_embedding(entry_ids, opts \\ []) when is_list(entry_ids) do
     %{entry_ids: entry_ids}
-    |> Onelist.Searcher.Workers.BatchEmbedWorker.new(Keyword.merge([queue: :embeddings_batch], opts))
+    |> Onelist.Searcher.Workers.BatchEmbedWorker.new(
+      Keyword.merge([queue: :embeddings_batch], opts)
+    )
     |> Oban.insert()
   end
 
@@ -241,10 +243,18 @@ defmodule Onelist.Searcher do
         Onelist.Searcher.HybridSearch.search(user_id, query, opts)
 
       "atomic" ->
-        Onelist.Searcher.TwoLayerSearch.search(user_id, query, Keyword.put(opts, :search_mode, :atomic))
+        Onelist.Searcher.TwoLayerSearch.search(
+          user_id,
+          query,
+          Keyword.put(opts, :search_mode, :atomic)
+        )
 
       "memory_hybrid" ->
-        Onelist.Searcher.TwoLayerSearch.search(user_id, query, Keyword.put(opts, :search_mode, :hybrid))
+        Onelist.Searcher.TwoLayerSearch.search(
+          user_id,
+          query,
+          Keyword.put(opts, :search_mode, :hybrid)
+        )
 
       # Support atom versions
       :semantic ->
@@ -257,10 +267,18 @@ defmodule Onelist.Searcher do
         Onelist.Searcher.HybridSearch.search(user_id, query, opts)
 
       :atomic ->
-        Onelist.Searcher.TwoLayerSearch.search(user_id, query, Keyword.put(opts, :search_mode, :atomic))
+        Onelist.Searcher.TwoLayerSearch.search(
+          user_id,
+          query,
+          Keyword.put(opts, :search_mode, :atomic)
+        )
 
       :memory_hybrid ->
-        Onelist.Searcher.TwoLayerSearch.search(user_id, query, Keyword.put(opts, :search_mode, :hybrid))
+        Onelist.Searcher.TwoLayerSearch.search(
+          user_id,
+          query,
+          Keyword.put(opts, :search_mode, :hybrid)
+        )
 
       _ ->
         {:error, {:invalid_search_type, search_type}}
@@ -280,7 +298,11 @@ defmodule Onelist.Searcher do
     * `:filters` - Map with memory_types, min_confidence, etc.
   """
   def memory_search(user_id, query, opts \\ []) do
-    Onelist.Searcher.TwoLayerSearch.search(user_id, query, Keyword.put(opts, :search_mode, :atomic))
+    Onelist.Searcher.TwoLayerSearch.search(
+      user_id,
+      query,
+      Keyword.put(opts, :search_mode, :atomic)
+    )
   end
 
   @doc """
@@ -301,7 +323,10 @@ defmodule Onelist.Searcher do
       embeddings ->
         # Use the first chunk's embedding for similarity
         embedding = hd(embeddings)
-        Onelist.Searcher.Search.find_similar(embedding.vector, limit, exclude: [entry_id | exclude])
+
+        Onelist.Searcher.Search.find_similar(embedding.vector, limit,
+          exclude: [entry_id | exclude]
+        )
     end
   end
 
@@ -330,8 +355,11 @@ defmodule Onelist.Searcher do
   """
   def auto_embed_on_create?(user_id) do
     case get_search_config(user_id) do
-      {:ok, config} -> config.auto_embed_on_create
-      _ -> Application.get_env(:onelist, :searcher, []) |> Keyword.get(:auto_embed_on_create, true)
+      {:ok, config} ->
+        config.auto_embed_on_create
+
+      _ ->
+        Application.get_env(:onelist, :searcher, []) |> Keyword.get(:auto_embed_on_create, true)
     end
   end
 
@@ -340,8 +368,11 @@ defmodule Onelist.Searcher do
   """
   def auto_embed_on_update?(user_id) do
     case get_search_config(user_id) do
-      {:ok, config} -> config.auto_embed_on_update
-      _ -> Application.get_env(:onelist, :searcher, []) |> Keyword.get(:auto_embed_on_update, true)
+      {:ok, config} ->
+        config.auto_embed_on_update
+
+      _ ->
+        Application.get_env(:onelist, :searcher, []) |> Keyword.get(:auto_embed_on_update, true)
     end
   end
 end

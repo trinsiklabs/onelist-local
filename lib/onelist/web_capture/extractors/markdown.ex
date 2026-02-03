@@ -171,45 +171,48 @@ defmodule Onelist.WebCapture.Extractors.Markdown do
 
   # Unordered list
   defp convert_node({"ul", _, children}) do
-    items = children
-    |> Enum.filter(fn
-      {"li", _, _} -> true
-      _ -> false
-    end)
-    |> Enum.map(fn {"li", _, content} ->
-      text = convert_inline(content) |> String.trim()
-      "- #{text}"
-    end)
-    |> Enum.join("\n")
+    items =
+      children
+      |> Enum.filter(fn
+        {"li", _, _} -> true
+        _ -> false
+      end)
+      |> Enum.map(fn {"li", _, content} ->
+        text = convert_inline(content) |> String.trim()
+        "- #{text}"
+      end)
+      |> Enum.join("\n")
 
     "\n#{items}\n\n"
   end
 
   # Ordered list
   defp convert_node({"ol", _, children}) do
-    items = children
-    |> Enum.filter(fn
-      {"li", _, _} -> true
-      _ -> false
-    end)
-    |> Enum.with_index(1)
-    |> Enum.map(fn {{"li", _, content}, idx} ->
-      text = convert_inline(content) |> String.trim()
-      "#{idx}. #{text}"
-    end)
-    |> Enum.join("\n")
+    items =
+      children
+      |> Enum.filter(fn
+        {"li", _, _} -> true
+        _ -> false
+      end)
+      |> Enum.with_index(1)
+      |> Enum.map(fn {{"li", _, content}, idx} ->
+        text = convert_inline(content) |> String.trim()
+        "#{idx}. #{text}"
+      end)
+      |> Enum.join("\n")
 
     "\n#{items}\n\n"
   end
 
   # Blockquote
   defp convert_node({"blockquote", _, children}) do
-    content = convert_tree(children)
-    |> String.split("\n")
-    |> Enum.map(fn line ->
-      if String.trim(line) == "", do: ">", else: "> #{line}"
-    end)
-    |> Enum.join("\n")
+    content =
+      convert_tree(children)
+      |> String.split("\n")
+      |> Enum.map(fn line ->
+        if String.trim(line) == "", do: ">", else: "> #{line}"
+      end)
+      |> Enum.join("\n")
 
     "\n#{content}\n\n"
   end
@@ -219,18 +222,21 @@ defmodule Onelist.WebCapture.Extractors.Markdown do
     rows = find_table_rows(children)
 
     case rows do
-      [] -> ""
+      [] ->
+        ""
+
       [header | body] ->
         header_cells = extract_cells(header)
         header_row = "| #{Enum.join(header_cells, " | ")} |"
         separator = "| #{header_cells |> Enum.map(fn _ -> "---" end) |> Enum.join(" | ")} |"
 
-        body_rows = body
-        |> Enum.map(fn row ->
-          cells = extract_cells(row)
-          "| #{Enum.join(cells, " | ")} |"
-        end)
-        |> Enum.join("\n")
+        body_rows =
+          body
+          |> Enum.map(fn row ->
+            cells = extract_cells(row)
+            "| #{Enum.join(cells, " | ")} |"
+          end)
+          |> Enum.join("\n")
 
         "\n#{header_row}\n#{separator}\n#{body_rows}\n\n"
     end
@@ -246,15 +252,17 @@ defmodule Onelist.WebCapture.Extractors.Markdown do
 
   # Figure with figcaption
   defp convert_node({"figure", _, children}) do
-    img = Enum.find_value(children, fn
-      {"img", _, _} = node -> convert_node(node)
-      _ -> nil
-    end)
+    img =
+      Enum.find_value(children, fn
+        {"img", _, _} = node -> convert_node(node)
+        _ -> nil
+      end)
 
-    caption = Enum.find_value(children, fn
-      {"figcaption", _, content} -> convert_inline(content)
-      _ -> nil
-    end)
+    caption =
+      Enum.find_value(children, fn
+        {"figcaption", _, content} -> convert_inline(content)
+        _ -> nil
+      end)
 
     if img do
       if caption do
@@ -292,6 +300,7 @@ defmodule Onelist.WebCapture.Extractors.Markdown do
   defp convert_inline_node({"em", _, children}), do: "*#{convert_inline(children)}*"
   defp convert_inline_node({"i", _, children}), do: "*#{convert_inline(children)}*"
   defp convert_inline_node({"code", _, children}), do: "`#{get_text(children)}`"
+
   defp convert_inline_node({"a", attrs, children}) do
     href = get_attr(attrs, "href") || ""
     title = get_attr(attrs, "title")
@@ -303,6 +312,7 @@ defmodule Onelist.WebCapture.Extractors.Markdown do
       "[#{text}](#{href})"
     end
   end
+
   defp convert_inline_node({"br", _, _}), do: "  \n"
   defp convert_inline_node({"span", _, children}), do: convert_inline(children)
   defp convert_inline_node({_tag, _, children}), do: convert_inline(children)
@@ -341,24 +351,29 @@ defmodule Onelist.WebCapture.Extractors.Markdown do
     case children do
       [{"code", attrs, _}] ->
         class = get_attr(attrs, "class") || ""
+
         case Regex.run(~r/language-(\w+)/, class) do
           [_, lang] -> lang
           _ -> ""
         end
-      _ -> ""
+
+      _ ->
+        ""
     end
   end
 
   defp find_table_rows(children) do
-    tbody = Enum.find_value(children, fn
-      {"tbody", _, rows} -> rows
-      _ -> nil
-    end)
+    tbody =
+      Enum.find_value(children, fn
+        {"tbody", _, rows} -> rows
+        _ -> nil
+      end)
 
-    thead = Enum.find_value(children, fn
-      {"thead", _, rows} -> rows
-      _ -> nil
-    end)
+    thead =
+      Enum.find_value(children, fn
+        {"thead", _, rows} -> rows
+        _ -> nil
+      end)
 
     all_rows = (thead || []) ++ (tbody || children)
 

@@ -2,23 +2,23 @@ defmodule Onelist.Sessions do
   @moduledoc """
   The Sessions context for session management.
   """
-  
+
   alias Onelist.Repo
   alias Onelist.Sessions.Session
   alias Onelist.Accounts.User
   alias Onelist.Security
   import Ecto.Query
-  
+
   # Configuration is accessed at runtime for flexibility
   @session_expiry_key :token_expiry_seconds
   @token_length_key :token_length
   @inactivity_timeout_key :inactivity_timeout_seconds
-  
+
   @doc """
   Creates a new session for a user.
-  
+
   ## Examples
-  
+
       iex> create_session(user, %{user_agent: "Mozilla...", ip_address: "127.0.0.1"})
       {:ok, %{session: %Session{}, token: "token..."}}
       
@@ -26,27 +26,32 @@ defmodule Onelist.Sessions do
       {:error, :invalid_user}
   """
   def create_session(user, attrs \\ %{})
-  
+
   def create_session(%User{} = user, attrs) do
     # Generate a secure random token
     token_length = get_config(@token_length_key, 32)
     token = Security.generate_token(token_length)
-    
+
     # Create a token hash for storage (don't store the raw token)
     token_hash = Security.hash_token(token)
-    
+
     # Prepare IP address for storage (anonymized)
-    ip_address = Map.get(attrs, "ip_address", nil)
-    |> Security.anonymize_ip()
-    
+    ip_address =
+      Map.get(attrs, "ip_address", nil)
+      |> Security.anonymize_ip()
+
     # Extract device name from user agent
     user_agent = Map.get(attrs, "user_agent", nil)
-    device_name = if user_agent, do: Security.extract_device_info(user_agent), else: "Unknown Device"
-    
+
+    device_name =
+      if user_agent, do: Security.extract_device_info(user_agent), else: "Unknown Device"
+
     # Calculate token expiration (default 30 days)
     expiry_seconds = get_config(@session_expiry_key, 60 * 60 * 24 * 30)
-    expires_at = DateTime.add(DateTime.utc_now(), expiry_seconds, :second) |> DateTime.truncate(:second)
-    
+
+    expires_at =
+      DateTime.add(DateTime.utc_now(), expiry_seconds, :second) |> DateTime.truncate(:second)
+
     # Build session attributes
     session_attrs = %{
       user_id: user.id,
@@ -58,25 +63,39 @@ defmodule Onelist.Sessions do
       expires_at: expires_at,
       last_active_at: DateTime.utc_now() |> DateTime.truncate(:second)
     }
-    
+
     # Create the session
     case %Session{}
-    |> Ecto.Changeset.cast(session_attrs, [:user_id, :token_hash, :ip_address, :user_agent, :device_name, :context, :expires_at, :last_active_at])
-    |> Ecto.Changeset.validate_required([:user_id, :token_hash, :expires_at, :last_active_at])
-    |> Repo.insert() do
+         |> Ecto.Changeset.cast(session_attrs, [
+           :user_id,
+           :token_hash,
+           :ip_address,
+           :user_agent,
+           :device_name,
+           :context,
+           :expires_at,
+           :last_active_at
+         ])
+         |> Ecto.Changeset.validate_required([
+           :user_id,
+           :token_hash,
+           :expires_at,
+           :last_active_at
+         ])
+         |> Repo.insert() do
       {:ok, session} ->
         # Return both the session record and the raw token
         {:ok, %{session: session, token: token}}
-      
+
       {:error, changeset} ->
         {:error, changeset}
     end
   end
-  
+
   def create_session(nil, _attrs) do
     {:error, :invalid_user}
   end
-  
+
   @doc """
   Gets a session by token and validates it.
   Returns {:ok, session} if valid, or an error otherwise.
@@ -101,10 +120,11 @@ defmodule Onelist.Sessions do
     token_hash = Security.hash_token(token)
 
     # Query for the session with the token hash
-    session_query = from s in Session,
-      where: s.token_hash == ^token_hash,
-      where: is_nil(s.revoked_at),
-      preload: [:user]
+    session_query =
+      from s in Session,
+        where: s.token_hash == ^token_hash,
+        where: is_nil(s.revoked_at),
+        preload: [:user]
 
     case Repo.one(session_query) do
       nil ->
@@ -135,13 +155,14 @@ defmodule Onelist.Sessions do
         end
     end
   end
-  
+
   def get_session_by_token(_), do: {:error, :invalid_token}
 
   # Checks if a session has been inactive for longer than the configured timeout.
   # Default inactivity timeout is 24 hours (86400 seconds).
   # This provides an additional security layer beyond session expiry.
   defp session_inactive?(%Session{last_active_at: nil}, _now), do: false
+
   defp session_inactive?(%Session{last_active_at: last_active_at}, now) do
     # Default: 24 hours of inactivity triggers session invalidation
     inactivity_timeout = get_config(@inactivity_timeout_key, 60 * 60 * 24)
@@ -157,12 +178,14 @@ defmodule Onelist.Sessions do
   defp maybe_update_last_active(%Session{} = session) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
     last_active = session.last_active_at
-    
+
     # Only update if last active time was more than 15 minutes ago
     if last_active && DateTime.diff(now, last_active, :second) > 15 * 60 do
-      {:ok, updated_session} = session
+      {:ok, updated_session} =
+        session
         |> Ecto.Changeset.change(last_active_at: now)
         |> Repo.update()
+
       updated_session
     else
       session
@@ -173,19 +196,19 @@ defmodule Onelist.Sessions do
   # Returns true if the session is beyond 50% of its lifetime.
   defp refresh_needed?(%Session{} = session) do
     now = DateTime.utc_now()
-    
+
     # Convert NaiveDateTime to DateTime with UTC timezone
-    created_at_naive = session.inserted_at 
+    created_at_naive = session.inserted_at
     # Convert to DateTime using :os.system_time - seconds since epoch
     created_at_secs = NaiveDateTime.diff(created_at_naive, ~N[1970-01-01 00:00:00], :second)
     created_at = DateTime.from_unix!(created_at_secs, :second)
-    
+
     expires_at = session.expires_at
-    
+
     # Calculate total lifetime and elapsed time
     total_lifetime = DateTime.diff(expires_at, created_at, :second)
     elapsed_time = DateTime.diff(now, created_at, :second)
-    
+
     # Refresh if more than 50% of the lifetime has elapsed
     elapsed_time > total_lifetime * 0.5
   end
@@ -194,16 +217,19 @@ defmodule Onelist.Sessions do
   defp refresh_session(%Session{} = session) do
     # Calculate new expiration time
     expiry_seconds = get_config(@session_expiry_key, 60 * 60 * 24 * 30)
-    new_expires_at = DateTime.add(DateTime.utc_now(), expiry_seconds, :second) |> DateTime.truncate(:second)
-    
+
+    new_expires_at =
+      DateTime.add(DateTime.utc_now(), expiry_seconds, :second) |> DateTime.truncate(:second)
+
     # Update the session
-    {:ok, updated_session} = session
+    {:ok, updated_session} =
+      session
       |> Ecto.Changeset.change(expires_at: new_expires_at)
       |> Repo.update()
-    
+
     {:ok, updated_session}
   end
-  
+
   @doc """
   Returns the configured inactivity timeout in seconds.
   Default is 24 hours (86400 seconds).
@@ -233,32 +259,33 @@ defmodule Onelist.Sessions do
 
   # Updates the user's login information.
   defp update_user_login_info(%User{} = user, attrs) do
-    ip_address = Map.get(attrs, "ip_address", nil)
-    |> Security.anonymize_ip()
-    
+    ip_address =
+      Map.get(attrs, "ip_address", nil)
+      |> Security.anonymize_ip()
+
     user
     |> Ecto.Changeset.change(
-      last_login_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second), 
+      last_login_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
       last_login_ip: ip_address
     )
     |> Repo.update()
   end
-  
+
   @doc """
   Revokes all active sessions for a user.
-  
+
   ## Examples
-  
+
       iex> revoke_all_sessions(user)
       {3, nil}
   """
   def revoke_all_sessions(%User{} = user) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
-    
+
     from(s in Session, where: s.user_id == ^user.id and is_nil(s.revoked_at))
     |> Repo.update_all(set: [revoked_at: now])
   end
-  
+
   @doc """
   Lists all active sessions for a user.
   Excludes expired sessions and sessions that have been inactive too long.
@@ -282,7 +309,7 @@ defmodule Onelist.Sessions do
     )
     |> Repo.all()
   end
-  
+
   @doc """
   Cleans up expired and inactive sessions.
 
@@ -301,23 +328,26 @@ defmodule Onelist.Sessions do
 
     # First select session IDs to delete, limited by batch size
     # Delete sessions that are either expired OR have been inactive too long
-    session_ids = from(s in Session,
-      where: s.expires_at < ^now or
-             (not is_nil(s.last_active_at) and s.last_active_at < ^inactivity_cutoff),
-      select: s.id,
-      limit: ^batch_size)
-    |> Repo.all()
+    session_ids =
+      from(s in Session,
+        where:
+          s.expires_at < ^now or
+            (not is_nil(s.last_active_at) and s.last_active_at < ^inactivity_cutoff),
+        select: s.id,
+        limit: ^batch_size
+      )
+      |> Repo.all()
 
     # Then delete the selected sessions
     from(s in Session, where: s.id in ^session_ids)
     |> Repo.delete_all()
   end
-  
+
   @doc """
   Resets a user's password and revokes all their active sessions.
-  
+
   ## Examples
-  
+
       iex> reset_password_and_revoke_sessions(user, "valid_token", %{password: "new_password"})
       {:ok, %{user: %User{}, revoked_sessions: 2}}
       
@@ -354,12 +384,12 @@ defmodule Onelist.Sessions do
         |> Repo.transaction()
     end
   end
-  
+
   @doc """
   Creates a session and updates user login information in a single transaction.
-  
+
   ## Examples
-  
+
       iex> create_session_with_login_tracking(user, %{ip_address: "192.168.1.1"})
       {:ok, %{session: %Session{}, token: "token", user: %User{}}}
   """
@@ -375,15 +405,15 @@ defmodule Onelist.Sessions do
     |> case do
       {:ok, %{session_result: %{session: session, token: token}, user: updated_user}} ->
         {:ok, %{session: session, token: token, user: updated_user}}
-        
+
       {:error, _operation, reason, _changes} ->
         {:error, reason}
     end
   end
-  
+
   # Gets configuration value, first trying application config, then falling back to default.
   defp get_config(key, default) do
     Application.get_env(:onelist, __MODULE__, [])
     |> Keyword.get(key, default)
   end
-end 
+end

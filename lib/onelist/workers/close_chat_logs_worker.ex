@@ -1,10 +1,10 @@
 defmodule Onelist.Workers.CloseChatLogsWorker do
   @moduledoc """
   Periodically closes inactive chat log sessions.
-  
+
   A session is considered inactive if no messages have been received
   for a configurable period (default: 1 hour).
-  
+
   When a session is closed:
   1. Status is set to "closed"
   2. Final memory extraction is triggered
@@ -22,9 +22,9 @@ defmodule Onelist.Workers.CloseChatLogsWorker do
   @impl Oban.Worker
   def perform(%Oban.Job{}) do
     threshold = DateTime.utc_now() |> DateTime.add(-@inactive_threshold_minutes, :minute)
-    
+
     # Find active sessions with no recent messages
-    inactive_sessions = 
+    inactive_sessions =
       Entry
       |> where([e], e.entry_type == "chat_log")
       |> where([e], fragment("metadata->>'status' = ?", "active"))
@@ -34,14 +34,16 @@ defmodule Onelist.Workers.CloseChatLogsWorker do
     # Close each inactive session
     Enum.each(inactive_sessions, fn entry ->
       # Update status to closed
-      {:ok, _} = Onelist.Entries.update_entry(entry, %{
-        metadata: Map.merge(entry.metadata || %{}, %{
-          "status" => "closed",
-          "closed_at" => DateTime.utc_now() |> DateTime.to_iso8601(),
-          "close_reason" => "inactive"
+      {:ok, _} =
+        Onelist.Entries.update_entry(entry, %{
+          metadata:
+            Map.merge(entry.metadata || %{}, %{
+              "status" => "closed",
+              "closed_at" => DateTime.utc_now() |> DateTime.to_iso8601(),
+              "close_reason" => "inactive"
+            })
         })
-      })
-      
+
       # Queue memory extraction
       %{entry_id: entry.id, mode: "final"}
       |> ProcessEntryWorker.new()

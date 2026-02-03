@@ -46,7 +46,7 @@ defmodule Onelist.Entries do
   def create_entry(%User{} = user, attrs, opts \\ []) do
     # Add trusted memory hash chain if enabled for this user
     attrs = maybe_add_trusted_memory_fields(user, attrs)
-    
+
     result =
       %Entry{user_id: user.id}
       |> Entry.changeset(attrs)
@@ -58,7 +58,7 @@ defmodule Onelist.Entries do
         if TrustedMemory.enabled?(user) do
           TrustedMemory.log_operation(user.id, entry.id, "create", "success")
         end
-        
+
         unless Keyword.get(opts, :skip_auto_processing, false) do
           trigger_auto_processing_on_create(entry)
         end
@@ -79,6 +79,7 @@ defmodule Onelist.Entries do
           # API requests use string keys, so we need to normalize
           normalized_attrs = normalize_keys_to_match(trusted_attrs, attrs)
           Map.merge(attrs, normalized_attrs)
+
         _ ->
           attrs
       end
@@ -90,10 +91,11 @@ defmodule Onelist.Entries do
   # Normalize keys to match the target map's key type
   defp normalize_keys_to_match(source, target) do
     # Check if target uses string keys by looking at first key
-    uses_string_keys = case Map.keys(target) |> List.first() do
-      key when is_binary(key) -> true
-      _ -> false
-    end
+    uses_string_keys =
+      case Map.keys(target) |> List.first() do
+        key when is_binary(key) -> true
+        _ -> false
+      end
 
     if uses_string_keys do
       for {k, v} <- source, into: %{} do
@@ -177,11 +179,11 @@ defmodule Onelist.Entries do
   def update_entry(%Entry{} = entry, attrs, opts \\ []) do
     # Check trusted memory guard
     user = Repo.get(User, entry.user_id)
-    
+
     case TrustedMemory.guard_update(user, entry.id) do
       {:error, :trusted_memory_immutable} ->
         {:error, :trusted_memory_immutable}
-      
+
       :ok ->
         result =
           entry
@@ -215,11 +217,11 @@ defmodule Onelist.Entries do
   def delete_entry(%Entry{} = entry) do
     # Check trusted memory guard
     user = Repo.get(User, entry.user_id)
-    
+
     case TrustedMemory.guard_delete(user, entry.id) do
       {:error, :trusted_memory_immutable} ->
         {:error, :trusted_memory_immutable}
-      
+
       :ok ->
         Repo.delete(entry)
     end
@@ -263,16 +265,19 @@ defmodule Onelist.Entries do
   end
 
   defp filter_by_entry_type(query, nil), do: query
+
   defp filter_by_entry_type(query, entry_type) do
     where(query, [e], e.entry_type == ^entry_type)
   end
 
   defp filter_by_source_type(query, nil), do: query
+
   defp filter_by_source_type(query, source_type) do
     where(query, [e], e.source_type == ^source_type)
   end
 
   defp filter_by_public(query, nil), do: query
+
   defp filter_by_public(query, public) do
     where(query, [e], e.public == ^public)
   end
@@ -367,11 +372,12 @@ defmodule Onelist.Entries do
   """
   def get_primary_representation(%Entry{} = entry) do
     # First try to get markdown representation
-    markdown = Repo.one(
-      from r in Representation,
-      where: r.entry_id == ^entry.id and r.type == "markdown",
-      limit: 1
-    )
+    markdown =
+      Repo.one(
+        from r in Representation,
+          where: r.entry_id == ^entry.id and r.type == "markdown",
+          limit: 1
+      )
 
     if markdown do
       markdown
@@ -379,9 +385,9 @@ defmodule Onelist.Entries do
       # Otherwise get the first representation
       Repo.one(
         from r in Representation,
-        where: r.entry_id == ^entry.id,
-        order_by: r.inserted_at,
-        limit: 1
+          where: r.entry_id == ^entry.id,
+          order_by: r.inserted_at,
+          limit: 1
       )
     end
   end
@@ -427,7 +433,9 @@ defmodule Onelist.Entries do
   Lists assets for a specific representation.
   """
   def list_representation_assets(%Representation{} = representation) do
-    Repo.all(from a in Asset, where: a.representation_id == ^representation.id, order_by: a.inserted_at)
+    Repo.all(
+      from a in Asset, where: a.representation_id == ^representation.id, order_by: a.inserted_at
+    )
   end
 
   @doc """
@@ -454,8 +462,8 @@ defmodule Onelist.Entries do
   def get_entry_with_representations(id) when is_binary(id) do
     Repo.one(
       from e in Entry,
-      where: e.id == ^id,
-      preload: [:representations]
+        where: e.id == ^id,
+        preload: [:representations]
     )
   end
 
@@ -465,8 +473,8 @@ defmodule Onelist.Entries do
   def get_entry_with_all(id) when is_binary(id) do
     Repo.one(
       from e in Entry,
-      where: e.id == ^id,
-      preload: [:representations, :assets]
+        where: e.id == ^id,
+        preload: [:representations, :assets]
     )
   end
 
@@ -544,7 +552,12 @@ defmodule Onelist.Entries do
     |> Repo.insert()
   end
 
-  defp create_diff_version(%Representation{} = representation, %User{} = user, diff_text, diff_size) do
+  defp create_diff_version(
+         %Representation{} = representation,
+         %User{} = user,
+         diff_text,
+         diff_size
+       ) do
     attrs = %{
       representation_id: representation.id,
       user_id: user.id,
@@ -651,7 +664,8 @@ defmodule Onelist.Entries do
         diffs_after =
           versions
           |> Enum.drop_while(&(&1.id != snapshot.id))
-          |> Enum.drop(1)  # Drop the snapshot itself
+          # Drop the snapshot itself
+          |> Enum.drop(1)
           |> Enum.filter(&(&1.version_type == "diff"))
 
         {snapshot, diffs_after}
@@ -794,6 +808,7 @@ defmodule Onelist.Entries do
   end
 
   defp filter_by_link_type(query, nil), do: query
+
   defp filter_by_link_type(query, link_type) do
     where(query, [l], l.link_type == ^link_type)
   end
@@ -843,6 +858,7 @@ defmodule Onelist.Entries do
   end
 
   defp filter_linked_by_type(query, nil), do: query
+
   defp filter_linked_by_type(query, link_type) do
     where(query, [_e, l], l.link_type == ^link_type)
   end
@@ -959,7 +975,11 @@ defmodule Onelist.Entries do
       iex> update_representation_with_version(representation, user, %{content: "new content"})
       {:ok, %Representation{}}
   """
-  def update_representation_with_version(%Representation{} = representation, %User{} = user, attrs) do
+  def update_representation_with_version(
+        %Representation{} = representation,
+        %User{} = user,
+        attrs
+      ) do
     old_content = representation.content
     new_content = attrs[:content] || attrs["content"]
 
@@ -1015,22 +1035,23 @@ defmodule Onelist.Entries do
         # Find or create the html_public representation
         existing_html_public = Enum.find(entry.representations, &(&1.type == "html_public"))
 
-        result = if existing_html_public do
-          # Update existing html_public representation
-          existing_html_public
-          |> Representation.changeset(%{content: html_content, encrypted: false})
-          |> Repo.update()
-        else
-          # Create new html_public representation
-          %Representation{}
-          |> Representation.changeset(%{
-            type: "html_public",
-            content: html_content,
-            encrypted: false,
-            entry_id: entry.id
-          })
-          |> Repo.insert()
-        end
+        result =
+          if existing_html_public do
+            # Update existing html_public representation
+            existing_html_public
+            |> Representation.changeset(%{content: html_content, encrypted: false})
+            |> Repo.update()
+          else
+            # Create new html_public representation
+            %Representation{}
+            |> Representation.changeset(%{
+              type: "html_public",
+              content: html_content,
+              encrypted: false,
+              entry_id: entry.id
+            })
+            |> Repo.insert()
+          end
 
         case result do
           {:ok, _rep} ->
@@ -1047,17 +1068,18 @@ defmodule Onelist.Entries do
   # In production, you'd use a proper library like Earmark with sanitization
   defp generate_html_from_markdown(markdown) when is_binary(markdown) do
     # Basic conversion - in production use Earmark + HtmlSanitizeEx
-    html = markdown
-    |> String.replace(~r/^### (.+)$/m, "<h3>\\1</h3>")
-    |> String.replace(~r/^## (.+)$/m, "<h2>\\1</h2>")
-    |> String.replace(~r/^# (.+)$/m, "<h1>\\1</h1>")
-    |> String.replace(~r/\*\*(.+?)\*\*/, "<strong>\\1</strong>")
-    |> String.replace(~r/\*(.+?)\*/, "<em>\\1</em>")
-    |> String.replace(~r/\n\n/, "</p><p>")
-    # Basic sanitization - remove script tags
-    |> String.replace(~r/<script[^>]*>.*?<\/script>/is, "")
-    |> String.replace(~r/<script[^>]*>/i, "")
-    |> String.replace(~r/<\/script>/i, "")
+    html =
+      markdown
+      |> String.replace(~r/^### (.+)$/m, "<h3>\\1</h3>")
+      |> String.replace(~r/^## (.+)$/m, "<h2>\\1</h2>")
+      |> String.replace(~r/^# (.+)$/m, "<h1>\\1</h1>")
+      |> String.replace(~r/\*\*(.+?)\*\*/, "<strong>\\1</strong>")
+      |> String.replace(~r/\*(.+?)\*/, "<em>\\1</em>")
+      |> String.replace(~r/\n\n/, "</p><p>")
+      # Basic sanitization - remove script tags
+      |> String.replace(~r/<script[^>]*>.*?<\/script>/is, "")
+      |> String.replace(~r/<script[^>]*>/i, "")
+      |> String.replace(~r/<\/script>/i, "")
 
     # Wrap in article tag
     ~s(<article class="prose prose-lg mx-auto"><p>#{html}</p></article>)
@@ -1146,12 +1168,13 @@ defmodule Onelist.Entries do
       nil
   """
   def get_public_entry(username, public_id) when is_binary(username) and is_binary(public_id) do
-    query = from e in Entry,
-      join: u in assoc(e, :user),
-      where: fragment("lower(?)", u.username) == ^String.downcase(username),
-      where: e.public_id == ^public_id,
-      where: e.public == true,
-      preload: [:representations, :user]
+    query =
+      from e in Entry,
+        join: u in assoc(e, :user),
+        where: fragment("lower(?)", u.username) == ^String.downcase(username),
+        where: e.public_id == ^public_id,
+        where: e.public == true,
+        preload: [:representations, :user]
 
     Repo.one(query)
   end
@@ -1224,24 +1247,27 @@ defmodule Onelist.Entries do
   def get_publish_preview(%Entry{} = entry) do
     entry = Repo.preload(entry, [:user, :assets])
 
-    url_preview = case entry.user.username do
-      nil -> "/#{entry.public_id}"
-      username -> "/#{username}/#{entry.public_id}"
-    end
+    url_preview =
+      case entry.user.username do
+        nil -> "/#{entry.public_id}"
+        username -> "/#{username}/#{entry.public_id}"
+      end
 
-    assets = Enum.map(entry.assets, fn asset ->
-      %{
-        filename: asset.filename,
-        size: asset.file_size,
-        mime_type: asset.mime_type
-      }
-    end)
+    assets =
+      Enum.map(entry.assets, fn asset ->
+        %{
+          filename: asset.filename,
+          size: asset.file_size,
+          mime_type: asset.mime_type
+        }
+      end)
 
-    {:ok, %{
-      public_url_preview: url_preview,
-      assets: assets,
-      asset_count: length(assets)
-    }}
+    {:ok,
+     %{
+       public_url_preview: url_preview,
+       assets: assets,
+       asset_count: length(assets)
+     }}
   end
 
   # ============================================
@@ -1281,7 +1307,9 @@ defmodule Onelist.Entries do
           :ok
 
         {:error, reason} ->
-          Logger.warning("Failed to enqueue Reader processing for entry #{entry.id}: #{inspect(reason)}")
+          Logger.warning(
+            "Failed to enqueue Reader processing for entry #{entry.id}: #{inspect(reason)}"
+          )
       end
     end
 
@@ -1293,7 +1321,9 @@ defmodule Onelist.Entries do
           :ok
 
         {:error, reason} ->
-          Logger.warning("Failed to enqueue Searcher embedding for entry #{entry.id}: #{inspect(reason)}")
+          Logger.warning(
+            "Failed to enqueue Searcher embedding for entry #{entry.id}: #{inspect(reason)}"
+          )
       end
     end
 
@@ -1327,7 +1357,9 @@ defmodule Onelist.Entries do
           :ok
 
         {:error, reason} ->
-          Logger.warning("Failed to enqueue Reader processing for entry #{entry.id}: #{inspect(reason)}")
+          Logger.warning(
+            "Failed to enqueue Reader processing for entry #{entry.id}: #{inspect(reason)}"
+          )
       end
     end
 
@@ -1339,7 +1371,9 @@ defmodule Onelist.Entries do
           :ok
 
         {:error, reason} ->
-          Logger.warning("Failed to enqueue Searcher embedding for entry #{entry.id}: #{inspect(reason)}")
+          Logger.warning(
+            "Failed to enqueue Searcher embedding for entry #{entry.id}: #{inspect(reason)}"
+          )
       end
     end
 

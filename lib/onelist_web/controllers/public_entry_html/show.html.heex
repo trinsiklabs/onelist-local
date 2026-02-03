@@ -21,8 +21,18 @@
         <ul class="space-y-2">
           <%= for asset <- @assets do %>
             <li class="flex items-center text-sm text-gray-600">
-              <svg class="h-5 w-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              <svg
+                class="h-5 w-5 mr-2 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                />
               </svg>
               <span><%= asset.filename %></span>
             </li>
@@ -33,7 +43,8 @@
 
     <footer class="mt-12 pt-6 border-t border-gray-200">
       <p class="text-sm text-gray-500">
-        Published on <a href="https://onelist.my" class="text-indigo-600 hover:text-indigo-800">Onelist</a>
+        Published on
+        <a href="https://onelist.my" class="text-indigo-600 hover:text-indigo-800">Onelist</a>
       </p>
     </footer>
   </article>

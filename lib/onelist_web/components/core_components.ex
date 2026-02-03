@@ -323,8 +323,7 @@ defmodule OnelistWeb.CoreComponents do
           checked={@checked}
           class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
           {@rest}
-        />
-        {@label}
+        /> {@label}
       </label>
       <.error :for={_msg <- @errors}>{_msg}</.error>
     </div>
@@ -566,8 +565,7 @@ defmodule OnelistWeb.CoreComponents do
         navigate={@navigate}
         class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
       >
-        <.icon name="hero-arrow-left-solid" class="h-3 w-3" />
-        {render_slot(@inner_block)}
+        <.icon name="hero-arrow-left-solid" class="h-3 w-3" /> {render_slot(@inner_block)}
       </.link>
     </div>
     """

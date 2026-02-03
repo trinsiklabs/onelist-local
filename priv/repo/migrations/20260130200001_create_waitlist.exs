@@ -6,27 +6,28 @@ defmodule Onelist.Repo.Migrations.CreateWaitlist do
       add :id, :binary_id, primary_key: true
       add :email, :string, null: false
       add :name, :string
-      
+
       # Queue position (assigned on signup)
       add :queue_number, :integer, null: false
-      
+
       # Status tracking
-      add :status, :string, null: false, default: "waiting"  # waiting, invited, activated, declined
-      
+      # waiting, invited, activated, declined
+      add :status, :string, null: false, default: "waiting"
+
       # Unique token for status page access
       add :status_token, :string, null: false
-      
+
       # Activation tracking
       add :invited_at, :utc_datetime
       add :activated_at, :utc_datetime
       add :user_id, references(:users, type: :binary_id, on_delete: :nilify_all)
-      
+
       # Optional: how they heard about us
       add :referral_source, :string
-      
+
       # Optional: why they want early access
       add :reason, :text
-      
+
       timestamps()
     end
 

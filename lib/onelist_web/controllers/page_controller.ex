@@ -27,7 +27,7 @@ defmodule OnelistWeb.PageController do
 
   defp serve_roadmap_file(conn, filename) do
     path = Application.app_dir(:onelist, "priv/static/roadmap/#{filename}")
-    
+
     case File.read(path) do
       {:ok, content} ->
         conn

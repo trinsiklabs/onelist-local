@@ -6,14 +6,13 @@ defmodule OnelistWeb.App.SearchLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, 
-      socket
-      |> assign(:page_title, "Search")
-      |> assign(:current_path, "/app/search")
-      |> assign(:query, "")
-      |> assign(:results, [])
-      |> assign(:searching, false)
-    }
+    {:ok,
+     socket
+     |> assign(:page_title, "Search")
+     |> assign(:current_path, "/app/search")
+     |> assign(:query, "")
+     |> assign(:results, [])
+     |> assign(:searching, false)}
   end
 
   @impl true
@@ -28,16 +27,15 @@ defmodule OnelistWeb.App.SearchLive do
           Semantic search across your entries and memories
         </p>
       </div>
-      
       <!-- Search Input -->
       <div class="card" style="margin-bottom: var(--space-6);">
         <form phx-submit="search" style="display: flex; gap: var(--space-3);">
-          <input 
-            type="text" 
+          <input
+            type="text"
             name="query"
             value={@query}
-            class="search-input" 
-            placeholder="Search for anything... (uses AI-powered semantic search)" 
+            class="search-input"
+            placeholder="Search for anything... (uses AI-powered semantic search)"
             style="flex: 1; padding: var(--space-3) var(--space-4);"
             autofocus
           />
@@ -46,7 +44,6 @@ defmodule OnelistWeb.App.SearchLive do
           </button>
         </form>
       </div>
-      
       <!-- Results -->
       <%= if @query != "" do %>
         <%= if Enum.empty?(@results) do %>
@@ -88,7 +85,11 @@ defmodule OnelistWeb.App.SearchLive do
 
   defp search_result(assigns) do
     ~H"""
-    <a href={~p"/app/library/#{@result.id}"} class="card card-hover" style="display: block; text-decoration: none;">
+    <a
+      href={~p"/app/library/#{@result.id}"}
+      class="card card-hover"
+      style="display: block; text-decoration: none;"
+    >
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-2);">
         <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); color: var(--color-text);">
           <%= @result.title || "Untitled" %>
@@ -111,12 +112,11 @@ defmodule OnelistWeb.App.SearchLive do
     else
       # TODO: Use Searcher agent for semantic search
       results = []
-      
-      {:noreply, 
-        socket
-        |> assign(:query, query)
-        |> assign(:results, results)
-      }
+
+      {:noreply,
+       socket
+       |> assign(:query, query)
+       |> assign(:results, results)}
     end
   end
 end

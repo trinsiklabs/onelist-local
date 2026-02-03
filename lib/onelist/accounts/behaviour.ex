@@ -14,4 +14,4 @@ defmodule Onelist.Accounts.Behaviour do
 
   @callback verify_email(token :: binary()) ::
               {:ok, map()} | {:error, :expired_token | :invalid_token}
-end 
+end

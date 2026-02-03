@@ -38,17 +38,19 @@ defmodule Onelist.ApiKeys do
     prefix = extract_prefix(raw_key)
 
     # Ensure all keys are strings for the changeset (Ecto prefers string keys)
-    api_key_attrs = attrs
-    |> Enum.into(%{}, fn
-      {k, v} when is_atom(k) -> {Atom.to_string(k), v}
-      {k, v} -> {k, v}
-    end)
-    |> Map.put("key_hash", key_hash)
-    |> Map.put("prefix", prefix)
+    api_key_attrs =
+      attrs
+      |> Enum.into(%{}, fn
+        {k, v} when is_atom(k) -> {Atom.to_string(k), v}
+        {k, v} -> {k, v}
+      end)
+      |> Map.put("key_hash", key_hash)
+      |> Map.put("prefix", prefix)
 
-    result = %ApiKey{user_id: user.id}
-    |> ApiKey.changeset(api_key_attrs)
-    |> Repo.insert()
+    result =
+      %ApiKey{user_id: user.id}
+      |> ApiKey.changeset(api_key_attrs)
+      |> Repo.insert()
 
     case result do
       {:ok, api_key} -> {:ok, %{api_key: api_key, raw_key: raw_key}}
@@ -87,12 +89,14 @@ defmodule Onelist.ApiKeys do
   def get_api_key_by_key(raw_key) when is_binary(raw_key) do
     key_hash = hash_key(raw_key)
 
-    api_key = Repo.one(
-      from k in ApiKey,
-      where: k.key_hash == ^key_hash
-        and is_nil(k.revoked_at)
-        and (is_nil(k.expires_at) or k.expires_at > ^DateTime.utc_now())
-    )
+    api_key =
+      Repo.one(
+        from k in ApiKey,
+          where:
+            k.key_hash == ^key_hash and
+              is_nil(k.revoked_at) and
+              (is_nil(k.expires_at) or k.expires_at > ^DateTime.utc_now())
+      )
 
     api_key
   end
@@ -115,15 +119,17 @@ defmodule Onelist.ApiKeys do
   def list_user_api_keys(%User{} = user, opts \\ []) do
     include_revoked = Keyword.get(opts, :include_revoked, false)
 
-    query = from k in ApiKey,
-      where: k.user_id == ^user.id,
-      order_by: [desc: k.inserted_at]
+    query =
+      from k in ApiKey,
+        where: k.user_id == ^user.id,
+        order_by: [desc: k.inserted_at]
 
-    query = if include_revoked do
-      query
-    else
-      where(query, [k], is_nil(k.revoked_at))
-    end
+    query =
+      if include_revoked do
+        query
+      else
+        where(query, [k], is_nil(k.revoked_at))
+      end
 
     Repo.all(query)
   end

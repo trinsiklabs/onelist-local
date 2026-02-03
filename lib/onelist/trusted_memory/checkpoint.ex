@@ -1,11 +1,11 @@
 defmodule Onelist.TrustedMemory.Checkpoint do
   @moduledoc """
   Schema for memory checkpoints used in trusted memory rollback system.
-  
+
   Checkpoints allow "rolling back" an AI's memory to a previous point
   without actually deleting any entries. Entries after the checkpoint's
   `after_sequence` are simply filtered out of queries.
-  
+
   Key constraints:
   - Only humans can create rollback checkpoints (AI cannot roll back its own memory)
   - Checkpoints are never deleted, only deactivated

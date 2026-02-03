@@ -17,6 +17,9 @@ defmodule Onelist.Repo.Migrations.CreateSocialAccounts do
     end
 
     create index(:social_accounts, [:user_id])
-    create unique_index(:social_accounts, [:provider, :provider_id], name: :unique_provider_account)
+
+    create unique_index(:social_accounts, [:provider, :provider_id],
+             name: :unique_provider_account
+           )
   end
 end

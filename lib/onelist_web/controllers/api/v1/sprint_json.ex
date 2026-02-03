@@ -39,16 +39,17 @@ defmodule OnelistWeb.Api.V1.SprintJSON do
   Renders blocked items in a sprint.
   """
   def blocked(%{blocked_items: items, count: count, include_blocker: include_blocker}) do
-    blocked_data = if include_blocker do
-      Enum.map(items, fn %{entry: entry, blocked_by: blockers} ->
-        %{
-          entry: entry_data(entry),
-          blocked_by: Enum.map(blockers, &entry_data/1)
-        }
-      end)
-    else
-      Enum.map(items, &entry_data/1)
-    end
+    blocked_data =
+      if include_blocker do
+        Enum.map(items, fn %{entry: entry, blocked_by: blockers} ->
+          %{
+            entry: entry_data(entry),
+            blocked_by: Enum.map(blockers, &entry_data/1)
+          }
+        end)
+      else
+        Enum.map(items, &entry_data/1)
+      end
 
     %{
       blocked_items: blocked_data,

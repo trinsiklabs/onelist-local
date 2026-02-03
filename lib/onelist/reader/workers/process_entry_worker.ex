@@ -42,6 +42,7 @@ defmodule Onelist.Reader.Workers.ProcessEntryWorker do
   alias Onelist.Reader.Memory
   alias Onelist.Reader.Extractors.AtomicMemory
   alias Onelist.Reader.Generators.TagSuggester
+  alias Onelist.TrustedMemory
 
   import Ecto.Query
 
@@ -63,11 +64,15 @@ defmodule Onelist.Reader.Workers.ProcessEntryWorker do
            {:ok, text} <- extract_readable_text(entry),
            {:ok, config} <- Reader.get_reader_config(entry.user_id),
            {:ok, memory_result} <- maybe_extract_memories(entry, text, config, skip_memories),
-           {:ok, relationship_result} <- maybe_detect_relationships(entry, config, skip_relationships or skip_memories),
+           {:ok, relationship_result} <-
+             maybe_detect_relationships(entry, config, skip_relationships or skip_memories),
            {:ok, tag_result} <- maybe_suggest_tags(entry, text, config, skip_tags),
            {:ok, summary_result} <- maybe_generate_summary(entry, text, config, skip_summary) do
         duration = System.monotonic_time(:millisecond) - start_time
-        total_cost = (memory_result[:cost_cents] || 0) + (relationship_result[:cost_cents] || 0) + (tag_result[:cost_cents] || 0) + (summary_result[:cost_cents] || 0)
+
+        total_cost =
+          (memory_result[:cost_cents] || 0) + (relationship_result[:cost_cents] || 0) +
+            (tag_result[:cost_cents] || 0) + (summary_result[:cost_cents] || 0)
 
         Logger.info(
           "Successfully processed entry #{entry_id}: " <>
@@ -155,7 +160,8 @@ defmodule Onelist.Reader.Workers.ProcessEntryWorker do
       provider: "anthropic",
       model: "claude-3-haiku-20240307",
       operation: "memory_extraction",
-      input_tokens: 0,  # AtomicMemory aggregates, individual tokens not tracked yet
+      # AtomicMemory aggregates, individual tokens not tracked yet
+      input_tokens: 0,
       output_tokens: 0,
       cost_cents: Decimal.new(to_string(result.total_cost_cents || 0)),
       user_id: entry.user_id,
@@ -165,12 +171,14 @@ defmodule Onelist.Reader.Workers.ProcessEntryWorker do
 
     # Log any chunk errors but continue with successful memories
     if Enum.any?(result.errors || []) do
-      Logger.warning("Some chunks failed during memory extraction for entry #{entry.id}: #{inspect(result.errors)}")
+      Logger.warning(
+        "Some chunks failed during memory extraction for entry #{entry.id}: #{inspect(result.errors)}"
+      )
     end
 
     memories =
       result.memories
-      |> Enum.filter(fn mem -> 
+      |> Enum.filter(fn mem ->
         # Filter out memories without content (handle both atom and string keys)
         content = mem[:content] || mem["content"]
         is_binary(content) && String.trim(content) != ""
@@ -190,23 +198,55 @@ defmodule Onelist.Reader.Workers.ProcessEntryWorker do
         }
       end)
 
-    # Delete existing memories for this entry (re-processing)
+    # Mark existing memories as not current (preserve chain integrity)
+    # Instead of deleting, we set is_current: false so the chain remains intact
     Memory
     |> where([m], m.entry_id == ^entry.id)
-    |> Repo.delete_all()
+    |> where([m], m.is_current == true)
+    |> Repo.update_all(set: [is_current: false, updated_at: DateTime.utc_now()])
+
+    # Chain memories if TrustedMemory is enabled for this user
+    chained_memories =
+      if TrustedMemory.enabled?(entry.user) do
+        case TrustedMemory.chain_memories_r1(entry.user, memories, entry) do
+          {:ok, chained} ->
+            Logger.debug("Chained #{length(chained)} memories for entry #{entry.id}")
+            chained
+
+          {:error, reason} ->
+            Logger.warning("Failed to chain memories for entry #{entry.id}: #{inspect(reason)}")
+            # Fall back to unchained memories
+            memories
+        end
+      else
+        # User doesn't have trusted memory enabled, use unchained memories
+        memories
+      end
 
     # Insert new memories
     now = DateTime.utc_now()
 
     memory_records =
-      Enum.map(memories, fn mem ->
+      Enum.map(chained_memories, fn mem ->
         mem
         |> Map.put(:id, Ecto.UUID.generate())
         |> Map.put(:inserted_at, now)
         |> Map.put(:updated_at, now)
+        |> Map.put(:is_current, true)
       end)
 
     {count, _} = Repo.insert_all(Memory, memory_records)
+
+    # Log chain operation for audit
+    if TrustedMemory.enabled?(entry.user) and count > 0 do
+      TrustedMemory.log_operation(
+        entry.user_id,
+        entry.id,
+        "memory_chain_append",
+        "success",
+        %{count: count, agent: "reader"}
+      )
+    end
 
     # Queue embedding generation for memories
     if count > 0 do
@@ -264,7 +304,10 @@ defmodule Onelist.Reader.Workers.ProcessEntryWorker do
         find_and_classify_relationships(new_memory, user_id, embedding)
 
       {:error, reason} ->
-        Logger.warning("Failed to generate embedding for relationship detection: #{inspect(reason)}")
+        Logger.warning(
+          "Failed to generate embedding for relationship detection: #{inspect(reason)}"
+        )
+
         %{supersedes: 0, refines: 0, cost_cents: 0}
     end
   end
@@ -295,7 +338,8 @@ defmodule Onelist.Reader.Workers.ProcessEntryWorker do
     top_similar = Enum.take(similar_memories, 3)
 
     {supersedes_count, refines_count, total_cost} =
-      Enum.reduce(top_similar, {0, 0, 0}, fn %{memory: old_memory, similarity: _sim}, {sup, ref, cost} ->
+      Enum.reduce(top_similar, {0, 0, 0}, fn %{memory: old_memory, similarity: _sim},
+                                             {sup, ref, cost} ->
         case llm_provider().classify_relationship(new_memory.content, old_memory.content) do
           {:ok, result} ->
             case result.relationship do
@@ -445,12 +489,14 @@ defmodule Onelist.Reader.Workers.ProcessEntryWorker do
   defp parse_confidence(nil), do: Decimal.new("0.5")
   defp parse_confidence(""), do: Decimal.new("0.5")
   defp parse_confidence(val) when is_number(val), do: Decimal.new(to_string(val))
+
   defp parse_confidence(val) when is_binary(val) do
     case Decimal.parse(val) do
       {decimal, ""} -> decimal
       _ -> Decimal.new("0.5")
     end
   end
+
   defp parse_confidence(_), do: Decimal.new("0.5")
 
   defp handle_result(:ok, _entry_id), do: :ok

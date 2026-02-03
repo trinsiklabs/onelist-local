@@ -2,12 +2,12 @@ defmodule Onelist.Accounts.User do
   @moduledoc """
   User schema and validation for authentication.
   """
-  
+
   use Ecto.Schema
   import Ecto.Changeset
   alias Onelist.Accounts.Password
   alias Onelist.Accounts.SocialAccount
-  
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "users" do
@@ -20,32 +20,34 @@ defmodule Onelist.Accounts.User do
     field :email_verification_token, :string
     field :name, :string
     field :verified_at, :utc_datetime
-    
+
     # Fields for managing failed login attempts and account locking
     field :failed_attempts, :integer, default: 0
     field :locked_at, :naive_datetime
-    
+
     # Fields for tracking login information
     field :last_login_at, :naive_datetime
     field :last_login_ip, :string
-    
+
     # Fields for password reset functionality
     field :reset_token_hash, :string, redact: true
     field :reset_token_created_at, :naive_datetime
-    
+
     # Fields for security and compliance
     field :require_password_change, :boolean, default: false
     field :data_consent_given_at, :naive_datetime
 
     # Public profile fields
     field :username, :string
-    
+
     # Waitlist tracking (preserved from signup)
     field :waitlist_number, :integer
-    field :waitlist_tier, :string  # "headwaters", "tributaries", "public"
+    # "headwaters", "tributaries", "public"
+    field :waitlist_tier, :string
 
     # Trusted Memory (for AI accounts)
-    field :account_type, :string, default: "human"  # "human" or "ai"
+    # "human" or "ai"
+    field :account_type, :string, default: "human"
     field :trusted_memory_mode, :boolean, default: false
     field :trusted_memory_enabled_at, :utc_datetime_usec
     field :last_weekly_review, :utc_datetime_usec
@@ -53,15 +55,15 @@ defmodule Onelist.Accounts.User do
 
     has_many :sessions, Onelist.Accounts.Session
     has_many :social_accounts, SocialAccount
-    
+
     timestamps()
   end
-  
+
   @doc """
   Registration changeset for user creation.
-  
+
   ## Examples
-  
+
       iex> registration_changeset(%User{}, %{email: "user@example.com", password: "Password123"})
       #Ecto.Changeset<valid?=true, ...>
       
@@ -101,7 +103,7 @@ defmodule Onelist.Accounts.User do
     |> cast(attrs, [:failed_attempts, :locked_at])
     |> validate_required([:failed_attempts])
   end
-  
+
   @doc """
   Changeset for resetting a password.
   """
@@ -114,9 +116,12 @@ defmodule Onelist.Accounts.User do
     |> put_change(:reset_token_created_at, nil)
     |> put_change(:failed_attempts, 0)
     |> put_change(:locked_at, nil)
-    |> put_change(:password_changed_at, NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second))
+    |> put_change(
+      :password_changed_at,
+      NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    )
   end
-  
+
   @doc """
   Changeset for tracking login activity.
   """
@@ -125,7 +130,7 @@ defmodule Onelist.Accounts.User do
     |> cast(attrs, [:last_login_at, :last_login_ip])
     |> validate_required([:last_login_at, :last_login_ip])
   end
-  
+
   @doc """
   Changeset for setting or updating the reset token.
   """
@@ -134,7 +139,7 @@ defmodule Onelist.Accounts.User do
     |> cast(attrs, [:reset_token_hash, :reset_token_created_at])
     |> validate_required([:reset_token_hash, :reset_token_created_at])
   end
-  
+
   @doc """
   Changeset for email verification.
   """
@@ -159,11 +164,16 @@ defmodule Onelist.Accounts.User do
     |> validate_required([:username])
     |> validate_length(:username, min: 3, max: 30)
     |> validate_format(:username, ~r/^[a-zA-Z0-9][a-zA-Z0-9_-]*[a-zA-Z0-9]$|^[a-zA-Z0-9]{1,2}$/,
-        message: "must start and end with a letter or number, can contain underscores and hyphens")
+      message: "must start and end with a letter or number, can contain underscores and hyphens"
+    )
     |> validate_format(:username, ~r/^[a-zA-Z0-9_-]+$/,
-        message: "can only contain letters, numbers, underscores, and hyphens")
+      message: "can only contain letters, numbers, underscores, and hyphens"
+    )
     |> unsafe_validate_unique(:username, Onelist.Repo, message: "has already been taken")
-    |> unique_constraint(:username, name: :users_username_unique_idx, message: "has already been taken")
+    |> unique_constraint(:username,
+      name: :users_username_unique_idx,
+      message: "has already been taken"
+    )
   end
 
   # Validate email format and uniqueness
@@ -175,33 +185,39 @@ defmodule Onelist.Accounts.User do
     |> unsafe_validate_unique(:email, Onelist.Repo)
     |> unique_constraint(:email)
   end
-  
+
   # Validate password complexity
   defp validate_password(changeset) do
     changeset
     |> validate_required([:password])
     |> validate_length(:password, min: 10, max: 80)
-    |> validate_format(:password, ~r/[a-z]/, message: "must have at least one lowercase character")
-    |> validate_format(:password, ~r/[A-Z]/, message: "must have at least one uppercase character")
+    |> validate_format(:password, ~r/[a-z]/,
+      message: "must have at least one lowercase character"
+    )
+    |> validate_format(:password, ~r/[A-Z]/,
+      message: "must have at least one uppercase character"
+    )
     |> validate_format(:password, ~r/[0-9]/, message: "must have at least one digit")
   end
-  
+
   # Hash the password and store it
   defp put_password_hash(changeset) do
     case changeset do
       %Ecto.Changeset{valid?: true, changes: %{password: password}} ->
         put_change(changeset, :hashed_password, Password.hash_password(password))
+
       _ ->
         changeset
     end
   end
-  
+
   @doc """
   Checks if a password is valid for this user.
   """
   def valid_password?(%__MODULE__{hashed_password: hashed_password}, password) do
     Password.verify_password(hashed_password, password)
   end
+
   def valid_password?(_, _), do: false
 
   @doc """

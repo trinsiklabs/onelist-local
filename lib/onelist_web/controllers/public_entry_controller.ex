@@ -60,17 +60,18 @@ defmodule OnelistWeb.PublicEntryController do
 
   defp simple_markdown_to_html(markdown) when is_binary(markdown) do
     # Simple markdown to HTML conversion for fallback
-    html = markdown
-    |> String.replace(~r/^### (.+)$/m, "<h3>\\1</h3>")
-    |> String.replace(~r/^## (.+)$/m, "<h2>\\1</h2>")
-    |> String.replace(~r/^# (.+)$/m, "<h1>\\1</h1>")
-    |> String.replace(~r/\*\*(.+?)\*\*/, "<strong>\\1</strong>")
-    |> String.replace(~r/\*(.+?)\*/, "<em>\\1</em>")
-    |> String.replace(~r/\n\n/, "</p><p>")
-    # Sanitize script tags
-    |> String.replace(~r/<script[^>]*>.*?<\/script>/is, "")
-    |> String.replace(~r/<script[^>]*>/i, "")
-    |> String.replace(~r/<\/script>/i, "")
+    html =
+      markdown
+      |> String.replace(~r/^### (.+)$/m, "<h3>\\1</h3>")
+      |> String.replace(~r/^## (.+)$/m, "<h2>\\1</h2>")
+      |> String.replace(~r/^# (.+)$/m, "<h1>\\1</h1>")
+      |> String.replace(~r/\*\*(.+?)\*\*/, "<strong>\\1</strong>")
+      |> String.replace(~r/\*(.+?)\*/, "<em>\\1</em>")
+      |> String.replace(~r/\n\n/, "</p><p>")
+      # Sanitize script tags
+      |> String.replace(~r/<script[^>]*>.*?<\/script>/is, "")
+      |> String.replace(~r/<script[^>]*>/i, "")
+      |> String.replace(~r/<\/script>/i, "")
 
     ~s(<article class="prose prose-lg mx-auto"><p>#{html}</p></article>)
   end
@@ -78,10 +79,11 @@ defmodule OnelistWeb.PublicEntryController do
   defp get_description(entry) do
     entry = Onelist.Repo.preload(entry, :representations)
 
-    content = case Entries.get_primary_representation(entry) do
-      nil -> ""
-      rep -> rep.content || ""
-    end
+    content =
+      case Entries.get_primary_representation(entry) do
+        nil -> ""
+        rep -> rep.content || ""
+      end
 
     # Strip markdown formatting and get first 160 chars
     content

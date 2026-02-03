@@ -11,36 +11,36 @@ defmodule Onelist.Reader.Behaviours.LLMProviderBehaviour do
   """
 
   @type memory_result :: %{
-    memories: list(map()),
-    model: String.t(),
-    input_tokens: integer() | nil,
-    output_tokens: integer() | nil,
-    cost_cents: number()
-  }
+          memories: list(map()),
+          model: String.t(),
+          input_tokens: integer() | nil,
+          output_tokens: integer() | nil,
+          cost_cents: number()
+        }
 
   @type tag_result :: %{
-    suggestions: list(map()),
-    model: String.t(),
-    input_tokens: integer() | nil,
-    output_tokens: integer() | nil,
-    cost_cents: number()
-  }
+          suggestions: list(map()),
+          model: String.t(),
+          input_tokens: integer() | nil,
+          output_tokens: integer() | nil,
+          cost_cents: number()
+        }
 
   @type summary_result :: %{
-    summary: String.t(),
-    model: String.t(),
-    input_tokens: integer() | nil,
-    output_tokens: integer() | nil,
-    cost_cents: number()
-  }
+          summary: String.t(),
+          model: String.t(),
+          input_tokens: integer() | nil,
+          output_tokens: integer() | nil,
+          cost_cents: number()
+        }
 
   @type relationship_result :: %{
-    relationship: String.t(),
-    model: String.t(),
-    input_tokens: integer() | nil,
-    output_tokens: integer() | nil,
-    cost_cents: number()
-  }
+          relationship: String.t(),
+          model: String.t(),
+          input_tokens: integer() | nil,
+          output_tokens: integer() | nil,
+          cost_cents: number()
+        }
 
   @type llm_error ::
           {:api_error, integer(), term()}

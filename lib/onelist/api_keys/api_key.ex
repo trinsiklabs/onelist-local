@@ -62,6 +62,7 @@ defmodule Onelist.ApiKeys.ApiKey do
   Checks if the API key is expired.
   """
   def expired?(%__MODULE__{expires_at: nil}), do: false
+
   def expired?(%__MODULE__{expires_at: expires_at}) do
     DateTime.compare(DateTime.utc_now(), expires_at) == :gt
   end

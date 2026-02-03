@@ -176,17 +176,18 @@ defmodule Onelist.River.Chat.ResponseGenerator do
   """
   def query_results(query, results) when is_list(results) do
     count = length(results)
-    
-    header = "I found #{count} relevant #{if count == 1, do: "entry", else: "entries"} for \"#{truncate(query, 50)}\":\n"
-    
+
+    header =
+      "I found #{count} relevant #{if count == 1, do: "entry", else: "entries"} for \"#{truncate(query, 50)}\":\n"
+
     result_lines =
       results
       |> Enum.with_index(1)
       |> Enum.map(fn {result, i} -> format_search_result(result, i) end)
       |> Enum.join("\n\n")
-    
+
     footer = "\n\nWould you like me to tell you more about any of these?"
-    
+
     header <> "\n" <> result_lines <> footer
   end
 
@@ -195,20 +196,22 @@ defmodule Onelist.River.Chat.ResponseGenerator do
     content = result[:content] || result[:summary] || ""
     date = format_result_date(result[:inserted_at])
     public_id = result[:public_id] || result[:id]
-    
+
     # Truncate content for preview
     preview = truncate(content, 150)
-    
+
     ref = if public_id, do: " [ref:#{public_id}]", else: ""
-    
+
     "[#{index}] **#{title}** (#{date})#{ref}\n#{preview}"
   end
 
   defp format_result_date(nil), do: "unknown date"
   defp format_result_date(datetime) when is_binary(datetime), do: datetime
+
   defp format_result_date(%DateTime{} = datetime) do
     Calendar.strftime(datetime, "%b %d, %Y")
   end
+
   defp format_result_date(%NaiveDateTime{} = datetime) do
     Calendar.strftime(datetime, "%b %d, %Y")
   end
@@ -236,6 +239,7 @@ defmodule Onelist.River.Chat.ResponseGenerator do
       text
     end
   end
+
   defp truncate(_, _), do: ""
 
   @doc """

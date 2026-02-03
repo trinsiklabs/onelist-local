@@ -29,4 +29,4 @@ defmodule OnelistWeb.Auth.EmailVerificationComponent do
     </div>
     """
   end
-end 
+end

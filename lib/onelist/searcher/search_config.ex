@@ -126,11 +126,25 @@ defmodule Onelist.Searcher.SearchConfig do
   """
   def default_enrichment_settings(asset_type) do
     case asset_type do
-      "image" -> %{"enabled" => true, "ocr" => true, "description" => true, "max_dimension" => 4096}
-      "audio" -> %{"enabled" => true, "transcribe" => true, "extract_actions" => true, "max_duration_minutes" => 120}
-      "video" -> %{"enabled" => true, "extract_audio" => true, "max_duration_minutes" => 60}
-      "document" -> %{"enabled" => true, "ocr" => true}
-      _ -> %{"enabled" => false}
+      "image" ->
+        %{"enabled" => true, "ocr" => true, "description" => true, "max_dimension" => 4096}
+
+      "audio" ->
+        %{
+          "enabled" => true,
+          "transcribe" => true,
+          "extract_actions" => true,
+          "max_duration_minutes" => 120
+        }
+
+      "video" ->
+        %{"enabled" => true, "extract_audio" => true, "max_duration_minutes" => 60}
+
+      "document" ->
+        %{"enabled" => true, "ocr" => true}
+
+      _ ->
+        %{"enabled" => false}
     end
   end
 

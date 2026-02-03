@@ -144,8 +144,7 @@ config :onelist, Onelist.Storage,
   enable_tiered_sync: false,
   max_local_asset_size: 1_000_000
 
-config :onelist, Onelist.Storage.Backends.Local,
-  root_path: "priv/static/uploads"
+config :onelist, Onelist.Storage.Backends.Local, root_path: "priv/static/uploads"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

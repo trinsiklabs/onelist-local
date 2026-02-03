@@ -29,7 +29,9 @@ defmodule Onelist.Workers.StorageMirrorWorker do
   require Logger
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"action" => "sync", "asset_id" => asset_id, "mirror_id" => mirror_id}}) do
+  def perform(%Oban.Job{
+        args: %{"action" => "sync", "asset_id" => asset_id, "mirror_id" => mirror_id}
+      }) do
     with {:ok, asset} <- get_asset(asset_id),
          {:ok, mirror} <- get_mirror(mirror_id) do
       case Mirror.sync_to_backend(asset, mirror) do
@@ -45,7 +47,10 @@ defmodule Onelist.Workers.StorageMirrorWorker do
             {:error, reason}
           else
             # Max retries reached, mark as permanently failed
-            Logger.error("Mirror sync permanently failed for asset #{asset_id} to #{mirror.backend}")
+            Logger.error(
+              "Mirror sync permanently failed for asset #{asset_id} to #{mirror.backend}"
+            )
+
             :ok
           end
       end

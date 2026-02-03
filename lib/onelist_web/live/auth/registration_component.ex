@@ -11,7 +11,7 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
     # Extract connection info during mount (only time it's available)
     user_agent = get_connect_info_safely(socket, :user_agent) || "unknown"
     client_ip = extract_client_ip(socket)
-    
+
     {:ok,
      assign(socket,
        loading: false,
@@ -54,7 +54,10 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
             # Redirect to email verification page
             {:noreply,
              socket
-             |> put_flash(:info, "Registration successful! Please check your email to verify your account.")
+             |> put_flash(
+               :info,
+               "Registration successful! Please check your email to verify your account."
+             )
              |> redirect(to: ~p"/verify-email")}
 
           {:error, %Ecto.Changeset{} = changeset} ->
@@ -66,16 +69,17 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
             # Log failed registration without revealing sensitive data
             Privacy.log_privacy_action(:registration_failed, %{reason: reason})
 
-            errors = case reason do
-              :email_taken ->
-                Map.put(%{}, :email, "email already registered")
+            errors =
+              case reason do
+                :email_taken ->
+                  Map.put(%{}, :email, "email already registered")
 
-              :invalid_password ->
-                Map.put(%{}, :password, "doesn't meet security requirements")
+                :invalid_password ->
+                  Map.put(%{}, :password, "doesn't meet security requirements")
 
-              _ ->
-                Map.put(%{}, :base, "An error occurred. Please try again.")
-            end
+                _ ->
+                  Map.put(%{}, :base, "An error occurred. Please try again.")
+              end
 
             {:noreply, assign(socket, loading: false, errors: errors, form_data: params)}
         end
@@ -95,9 +99,10 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
 
   defp extract_client_ip(socket) do
     case get_connect_info_safely(socket, :peer_data) do
-      %{address: address} when is_tuple(address) -> 
+      %{address: address} when is_tuple(address) ->
         address |> Tuple.to_list() |> Enum.join(".")
-      _ -> 
+
+      _ ->
         "unknown"
     end
   end
@@ -158,19 +163,20 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
         else
           # Check for more complex password requirements
           password = params["password"] || ""
+
           cond do
             # Check for uppercase
             !String.match?(password, ~r/[A-Z]/) ->
               Map.put(errors, :password, "must include at least one uppercase letter")
-              
+
             # Check for number
             !String.match?(password, ~r/[0-9]/) ->
               Map.put(errors, :password, "must include at least one number")
-              
+
             # Check for special character
             !String.match?(password, ~r/[^a-zA-Z0-9]/) ->
               Map.put(errors, :password, "must include at least one special character")
-              
+
             true ->
               errors
           end
@@ -197,11 +203,11 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
         page_title="Create your account"
         page_description="Start organizing your notes today"
       >
-        <form 
-          id="registration-form" 
+        <form
+          id="registration-form"
           data-test-id="registration-form"
-          phx-submit="submit" 
-          phx-change="validate" 
+          phx-submit="submit"
+          phx-change="validate"
           phx-target={@myself}
         >
           <div class="space-y-6">
@@ -209,8 +215,17 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
               <div class="rounded-md bg-red-50 p-4" role="alert" data-test-id="form-error">
                 <div class="flex">
                   <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+                    <svg
+                      class="h-5 w-5 text-red-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                        clip-rule="evenodd"
+                      />
                     </svg>
                   </div>
                   <div class="ml-3">
@@ -296,7 +311,9 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
                   aria-label="Confirm password"
                   value={@form_data["password_confirmation"]}
                   aria-invalid={@errors[:password_confirmation] != nil}
-                  aria-describedby={if @errors[:password_confirmation], do: "password-confirmation-error"}
+                  aria-describedby={
+                    if @errors[:password_confirmation], do: "password-confirmation-error"
+                  }
                 />
               </div>
               <%= if @errors[:password_confirmation] do %>
@@ -315,9 +332,27 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
                 aria-live="polite"
               >
                 <%= if @loading do %>
-                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    >
+                    </circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    >
+                    </path>
                   </svg>
                   Creating account...
                 <% else %>
@@ -326,19 +361,24 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
               </button>
             </div>
 
-            <.live_component
-              module={SocialLoginButtonsComponent}
-              id="social-login-buttons"
-            />
+            <.live_component module={SocialLoginButtonsComponent} id="social-login-buttons" />
 
             <div class="mt-6">
               <p class="text-center text-sm text-gray-600">
                 By signing up, you agree to our
-                <a href="/terms" data-test-id="terms-link" class="font-medium text-indigo-600 hover:text-indigo-500">
+                <a
+                  href="/terms"
+                  data-test-id="terms-link"
+                  class="font-medium text-indigo-600 hover:text-indigo-500"
+                >
                   Terms
                 </a>
                 and
-                <a href="/privacy" data-test-id="privacy-link" class="font-medium text-indigo-600 hover:text-indigo-500">
+                <a
+                  href="/privacy"
+                  data-test-id="privacy-link"
+                  class="font-medium text-indigo-600 hover:text-indigo-500"
+                >
                   Privacy Policy
                 </a>
               </p>
@@ -349,4 +389,4 @@ defmodule OnelistWeb.Auth.RegistrationComponent do
     </div>
     """
   end
-end 
+end

@@ -44,7 +44,7 @@ defmodule Onelist.Accounts do
     # Store IP and user agent in current process dictionary for tracking
     ip_address = Process.get(:current_ip_address)
     user_agent = Process.get(:current_user_agent)
-    
+
     # Check if rate limited before attempting login
     with {:ok, false} <- rate_limited?(email, ip_address) do
       user = get_user_by_email(email)
@@ -58,10 +58,10 @@ defmodule Onelist.Accounts do
           if is_nil(user.locked_at) do
             # Reset failed attempts on successful login
             {:ok, _} = reset_failed_attempts(user)
-            
+
             # Add successful login tracking
             track_login_attempt(email, user, ip_address, user_agent, true)
-            
+
             {:ok, user}
           else
             {:error, :account_locked}
@@ -98,18 +98,19 @@ defmodule Onelist.Accounts do
   """
   def update_failed_attempts(%User{} = user) do
     max_attempts = Application.get_env(:onelist, Onelist.Accounts)[:max_failed_attempts] || 5
-    
+
     # Check if we need to lock the account
-    attrs = if user.failed_attempts + 1 >= max_attempts do
-      # Lock the account
-      %{
-        failed_attempts: user.failed_attempts + 1,
-        locked_at: NaiveDateTime.utc_now()
-      }
-    else
-      %{failed_attempts: user.failed_attempts + 1}
-    end
-    
+    attrs =
+      if user.failed_attempts + 1 >= max_attempts do
+        # Lock the account
+        %{
+          failed_attempts: user.failed_attempts + 1,
+          locked_at: NaiveDateTime.utc_now()
+        }
+      else
+        %{failed_attempts: user.failed_attempts + 1}
+      end
+
     user
     |> User.failed_attempts_changeset(attrs)
     |> Repo.update()
@@ -163,7 +164,7 @@ defmodule Onelist.Accounts do
       successful: successful,
       reason: reason
     }
-    
+
     %LoginAttempt{}
     |> LoginAttempt.changeset(attrs)
     |> Repo.insert()
@@ -182,31 +183,42 @@ defmodule Onelist.Accounts do
   """
   def rate_limited?(email, ip_address) do
     # Settings
-    max_attempts_per_interval = Application.get_env(:onelist, Onelist.Accounts)[:max_attempts_per_interval] || 5
-    interval_seconds = Application.get_env(:onelist, Onelist.Accounts)[:rate_limit_interval_seconds] || 300
-    
+    max_attempts_per_interval =
+      Application.get_env(:onelist, Onelist.Accounts)[:max_attempts_per_interval] || 5
+
+    interval_seconds =
+      Application.get_env(:onelist, Onelist.Accounts)[:rate_limit_interval_seconds] || 300
+
     # Get anonymous version of IP
     anonymized_ip = Security.anonymize_ip(ip_address || "")
-    
+
     # Time threshold
     threshold = DateTime.add(DateTime.utc_now(), -interval_seconds, :second)
-    
+
     # Count attempts by IP (more important)
-    ip_attempts = Repo.one(from a in LoginAttempt,
-      where: a.ip_address == ^anonymized_ip and a.inserted_at > ^threshold,
-      select: count(a.id))
-      
+    ip_attempts =
+      Repo.one(
+        from a in LoginAttempt,
+          where: a.ip_address == ^anonymized_ip and a.inserted_at > ^threshold,
+          select: count(a.id)
+      )
+
     # Count attempts by email
-    email_attempts = Repo.one(from a in LoginAttempt,
-      where: a.email == ^email and a.inserted_at > ^threshold,
-      select: count(a.id))
-    
+    email_attempts =
+      Repo.one(
+        from a in LoginAttempt,
+          where: a.email == ^email and a.inserted_at > ^threshold,
+          select: count(a.id)
+      )
+
     # Check if rate limited
     cond do
       ip_attempts >= max_attempts_per_interval ->
         {:error, :rate_limited, interval_seconds}
+
       email_attempts >= max_attempts_per_interval ->
         {:error, :rate_limited, interval_seconds}
+
       true ->
         {:ok, false}
     end
@@ -214,9 +226,9 @@ defmodule Onelist.Accounts do
 
   @doc """
   Creates a user. Alias of register_user/1.
-  
+
   ## Examples
-  
+
       iex> create_user(%{email: "user@example.com", password: "Password123"})
       {:ok, %User{}}
       
@@ -227,9 +239,9 @@ defmodule Onelist.Accounts do
 
   @doc """
   Registers a user.
-  
+
   ## Examples
-  
+
       iex> register_user(%{email: "user@example.com", password: "Password123"})
       {:ok, %User{}}
       
@@ -238,30 +250,35 @@ defmodule Onelist.Accounts do
   """
   def register_user(attrs) do
     email = attrs[:email] || attrs["email"] || ""
-    
+
     # Check for waitlist signup and get their number
-    waitlist_attrs = case Onelist.Waitlist.get_signup_by_email(email) do
-      %Onelist.Waitlist.Signup{queue_number: number} ->
-        %{
-          waitlist_number: number,
-          waitlist_tier: User.tier_for_number(number)
-        }
-      nil ->
-        %{}
-    end
-    
-    result = %User{}
-    |> User.registration_changeset(attrs)
-    |> Ecto.Changeset.change(waitlist_attrs)
-    |> Repo.insert()
-    
+    waitlist_attrs =
+      case Onelist.Waitlist.get_signup_by_email(email) do
+        %Onelist.Waitlist.Signup{queue_number: number} ->
+          %{
+            waitlist_number: number,
+            waitlist_tier: User.tier_for_number(number)
+          }
+
+        nil ->
+          %{}
+      end
+
+    result =
+      %User{}
+      |> User.registration_changeset(attrs)
+      |> Ecto.Changeset.change(waitlist_attrs)
+      |> Repo.insert()
+
     # If successful and they were on waitlist, mark as activated
     case result do
       {:ok, user} when map_size(waitlist_attrs) > 0 ->
         if signup = Onelist.Waitlist.get_signup_by_email(email) do
           Onelist.Waitlist.activate_signup(signup, user.id)
         end
+
         {:ok, user}
+
       other ->
         other
     end
@@ -269,9 +286,9 @@ defmodule Onelist.Accounts do
 
   @doc """
   Gets a user by their reset password token.
-  
+
   ## Examples
-  
+
       iex> get_user_by_reset_token("valid_token")
       {:ok, %User{}}
       
@@ -283,20 +300,20 @@ defmodule Onelist.Accounts do
   """
   def get_user_by_reset_token(%{token: token, user_id: user_id, expires_at: expires_at}) do
     # This is for backward compatibility with the existing implementation using token fixtures
-    
+
     # Handle hardcoded test tokens from fixtures first
     case token do
       "valid_reset_token" ->
         # For valid token fixtures, get the user and return success
         user = Repo.get(User, user_id)
         if user, do: {:ok, user}, else: {:error, :not_found}
-        
+
       "expired_token" ->
         {:error, :expired}
-        
+
       "invalid_token" ->
         {:error, :not_found}
-        
+
       _ ->
         # For other tokens, check expiration first
         if expires_at && DateTime.compare(DateTime.utc_now(), expires_at) == :gt do
@@ -304,7 +321,7 @@ defmodule Onelist.Accounts do
         else
           # Get user by ID and validate token
           user = Repo.get(User, user_id)
-          
+
           if user do
             validate_reset_token(token, user)
           else
@@ -320,26 +337,27 @@ defmodule Onelist.Accounts do
       "valid_reset_token" ->
         # In tests, we use valid_reset_token as a placeholder for a valid token
         # This is a special case to support tests without database lookups
-        {:ok, %User{
-          id: Ecto.UUID.generate(),
-          email: "test@example.com",
-          inserted_at: DateTime.utc_now(),
-          updated_at: DateTime.utc_now()
-        }}
+        {:ok,
+         %User{
+           id: Ecto.UUID.generate(),
+           email: "test@example.com",
+           inserted_at: DateTime.utc_now(),
+           updated_at: DateTime.utc_now()
+         }}
 
       "expired_token" ->
         {:error, :expired_token}
-        
+
       "invalid_token" ->
         {:error, :not_found}
-        
+
       _ ->
         # Hash the token
         token_hash = Security.hash_token(token)
-        
+
         # Look up user by token hash
         user = Repo.get_by(User, reset_token_hash: token_hash)
-        
+
         if user do
           validate_reset_token(token, user)
         else
@@ -359,6 +377,7 @@ defmodule Onelist.Accounts do
       # For tokens stored in the database, verify the hash
       if user.reset_token_hash do
         token_hash = Security.hash_token(token)
+
         if Security.secure_compare(token_hash, user.reset_token_hash) do
           {:ok, user}
         else
@@ -372,24 +391,27 @@ defmodule Onelist.Accounts do
   end
 
   # Checks if a reset token is expired (older than 24 hours).
-  defp is_expired_reset_token?(%User{reset_token_created_at: created_at}) when not is_nil(created_at) do
+  defp is_expired_reset_token?(%User{reset_token_created_at: created_at})
+       when not is_nil(created_at) do
     # Expiration time (24 hours)
-    expiry_seconds = Application.get_env(:onelist, Onelist.Accounts)[:reset_token_expiry_seconds] || 24 * 60 * 60
-    
+    expiry_seconds =
+      Application.get_env(:onelist, Onelist.Accounts)[:reset_token_expiry_seconds] || 24 * 60 * 60
+
     # Calculate expiration
     now = NaiveDateTime.utc_now()
     expires_at = NaiveDateTime.add(created_at, expiry_seconds)
-    
+
     NaiveDateTime.compare(now, expires_at) == :gt
   end
-  
-  defp is_expired_reset_token?(_), do: true  # No created_at timestamp means expired
+
+  # No created_at timestamp means expired
+  defp is_expired_reset_token?(_), do: true
 
   @doc """
   Generates a password reset token for a user.
-  
+
   ## Examples
-  
+
       iex> generate_reset_token(user)
       {:ok, %User{}, "reset_token"}
   """
@@ -397,29 +419,30 @@ defmodule Onelist.Accounts do
     # Generate a secure token
     token = Security.generate_token(32)
     token_hash = Security.hash_token(token)
-    
+
     # Set expiration (24 hours)
     created_at = NaiveDateTime.utc_now()
-    
+
     # Update user with token hash and created_at timestamp
-    {:ok, updated_user} = user
-    |> User.reset_token_changeset(%{
-      reset_token_hash: token_hash,
-      reset_token_created_at: created_at
-    })
-    |> Repo.update()
-    
+    {:ok, updated_user} =
+      user
+      |> User.reset_token_changeset(%{
+        reset_token_hash: token_hash,
+        reset_token_created_at: created_at
+      })
+      |> Repo.update()
+
     # For security, revoke all existing sessions
     Sessions.revoke_all_sessions(user)
-    
+
     {:ok, updated_user, token}
   end
 
   @doc """
   Resets a user's password using a valid token.
-  
+
   ## Examples
-  
+
       iex> reset_password(user, "valid_token", %{password: "NewPassword123"})
       {:ok, %User{}}
       
@@ -434,8 +457,8 @@ defmodule Onelist.Accounts do
         user
         |> User.reset_password_changeset(attrs)
         |> Repo.update()
-      
-      error -> 
+
+      error ->
         error
     end
   end
@@ -446,25 +469,26 @@ defmodule Onelist.Accounts do
       "valid_reset_token" ->
         # For valid token fixtures, get the user and set the password
         user = Repo.get(User, user_id)
+
         if user do
           reset_password(user, token, %{password: password})
         else
           {:error, :not_found}
         end
-        
+
       "expired_token" ->
         {:error, :expired}
-        
+
       "invalid_token" ->
         {:error, :not_found}
-        
+
       _ ->
         # For other tokens, check expiration first
         if expires_at && DateTime.compare(DateTime.utc_now(), expires_at) == :gt do
           {:error, :expired}
         else
           user = Repo.get(User, user_id)
-          
+
           if user do
             reset_password(user, token, %{password: password})
           else
@@ -480,24 +504,25 @@ defmodule Onelist.Accounts do
       "valid_reset_token" ->
         # In tests, we use valid_reset_token as a placeholder for a valid token
         # Return a success response with a dummy user
-        {:ok, %User{
-          id: Ecto.UUID.generate(),
-          email: "test@example.com",
-          inserted_at: DateTime.utc_now(),
-          updated_at: DateTime.utc_now()
-        }}
-        
+        {:ok,
+         %User{
+           id: Ecto.UUID.generate(),
+           email: "test@example.com",
+           inserted_at: DateTime.utc_now(),
+           updated_at: DateTime.utc_now()
+         }}
+
       "expired_token" ->
         {:error, :expired}
-        
+
       "invalid_token" ->
         {:error, :not_found}
-        
+
       _ ->
         case get_user_by_reset_token(token) do
           {:ok, user} ->
             reset_password(user, token, %{password: password})
-          
+
           error ->
             error
         end
@@ -506,9 +531,9 @@ defmodule Onelist.Accounts do
 
   @doc """
   Verifies a user's email using a verification token.
-  
+
   ## Examples
-  
+
       iex> verify_email("valid_verification_token")
       {:ok, %User{}}
       
@@ -520,13 +545,14 @@ defmodule Onelist.Accounts do
     # This will be properly implemented when email verification is tackled
     case token do
       "valid_verification_token" ->
-        {:ok, %User{
-          id: Ecto.UUID.generate(),
-          email: "test@example.com",
-          hashed_password: "placeholder_hash",
-          inserted_at: DateTime.utc_now(),
-          updated_at: DateTime.utc_now()
-        }}
+        {:ok,
+         %User{
+           id: Ecto.UUID.generate(),
+           email: "test@example.com",
+           hashed_password: "placeholder_hash",
+           inserted_at: DateTime.utc_now(),
+           updated_at: DateTime.utc_now()
+         }}
 
       "expired_token" ->
         {:error, :expired_token}
@@ -538,59 +564,64 @@ defmodule Onelist.Accounts do
 
   @doc """
   Creates a changeset for changing a user's password.
-  
+
   ## Examples
-  
+
       iex> change_user_password(user)
       %Ecto.Changeset{...}
   """
   def change_user_password(user \\ %User{}, params \\ %{})
+
   def change_user_password(user, params) do
     User.reset_password_changeset(user, params)
   end
 
   @doc """
   Gets a list of recent login attempts for a user.
-  
+
   ## Examples
-  
+
       iex> list_login_attempts_by_email("user@example.com", 10)
       [%LoginAttempt{}, ...]
   """
   def list_login_attempts_by_email(email, limit \\ 10) do
-    Repo.all(from a in LoginAttempt,
-      where: a.email == ^email,
-      order_by: [desc: a.inserted_at],
-      limit: ^limit)
+    Repo.all(
+      from a in LoginAttempt,
+        where: a.email == ^email,
+        order_by: [desc: a.inserted_at],
+        limit: ^limit
+    )
   end
 
   @doc """
   Deletes old login attempts based on retention policy.
-  
+
   ## Examples
-  
+
       iex> delete_old_login_attempts(90)
       {deleted_count, nil}
   """
   def delete_old_login_attempts(days \\ 90) do
     threshold = DateTime.add(DateTime.utc_now(), -days * 24 * 60 * 60, :second)
-    
-    Repo.delete_all(from a in LoginAttempt,
-      where: a.inserted_at < ^threshold)
+
+    Repo.delete_all(
+      from a in LoginAttempt,
+        where: a.inserted_at < ^threshold
+    )
   end
 
   @doc """
   Deletes a user account and all associated data.
-  
+
   ## Examples
-  
+
       iex> delete_user(user)
       {:ok, %User{}}
   """
   def delete_user(%User{} = user) do
     # Revoke all sessions first
     Sessions.revoke_all_sessions(user)
-    
+
     # Delete the user
     Repo.delete(user)
   end
@@ -599,29 +630,32 @@ defmodule Onelist.Accounts do
 
   @doc """
   Gets a user by their social account provider and provider ID.
-  
+
   ## Examples
-  
+
       iex> get_user_by_social_account("github", "12345")
       %User{}
       
       iex> get_user_by_social_account("github", "nonexistent")
       nil
   """
-  def get_user_by_social_account(provider, provider_id) when is_binary(provider) and is_binary(provider_id) do
-    query = from sa in SocialAccount,
-      where: sa.provider == ^provider and sa.provider_id == ^provider_id,
-      join: u in User, on: sa.user_id == u.id,
-      select: u
-    
+  def get_user_by_social_account(provider, provider_id)
+      when is_binary(provider) and is_binary(provider_id) do
+    query =
+      from sa in SocialAccount,
+        where: sa.provider == ^provider and sa.provider_id == ^provider_id,
+        join: u in User,
+        on: sa.user_id == u.id,
+        select: u
+
     Repo.one(query)
   end
 
   @doc """
   Creates a social account for a user.
-  
+
   ## Examples
-  
+
       iex> create_social_account(user, %{provider: "github", provider_id: "12345"})
       {:ok, %SocialAccount{}}
       
@@ -682,13 +716,20 @@ defmodule Onelist.Accounts do
       iex> update_social_account(user, "nonexistent", %{})
       {:error, :not_found}
   """
-  def update_social_account(%User{} = user, provider, provider_id, attrs) when is_binary(provider_id) do
+  def update_social_account(%User{} = user, provider, provider_id, attrs)
+      when is_binary(provider_id) do
     # Find the existing social account by provider_id
-    social_account = Repo.one(from sa in SocialAccount,
-      where: sa.user_id == ^user.id and sa.provider == ^provider and sa.provider_id == ^provider_id)
+    social_account =
+      Repo.one(
+        from sa in SocialAccount,
+          where:
+            sa.user_id == ^user.id and sa.provider == ^provider and sa.provider_id == ^provider_id
+      )
 
     case social_account do
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
+
       account ->
         # Update the account with the new profile information
         account
@@ -699,11 +740,16 @@ defmodule Onelist.Accounts do
 
   def update_social_account(%User{} = user, provider, attrs) do
     # Find the existing social account
-    social_account = Repo.one(from sa in SocialAccount,
-      where: sa.user_id == ^user.id and sa.provider == ^provider)
-    
+    social_account =
+      Repo.one(
+        from sa in SocialAccount,
+          where: sa.user_id == ^user.id and sa.provider == ^provider
+      )
+
     case social_account do
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
+
       account ->
         # Update the account with the new profile information
         account
@@ -711,12 +757,12 @@ defmodule Onelist.Accounts do
         |> Repo.update()
     end
   end
-  
+
   @doc """
   Updates a social account's token data.
-  
+
   ## Examples
-  
+
       iex> update_social_account_token(social_account, token_data)
       {:ok, %SocialAccount{}}
   """
@@ -725,31 +771,33 @@ defmodule Onelist.Accounts do
     |> SocialAccount.token_update_changeset(%{token_data: token_data})
     |> Repo.update()
   end
-  
+
   @doc """
   Lists all social accounts for a user.
-  
+
   ## Examples
-  
+
       iex> list_social_accounts(user)
       [%SocialAccount{}, ...]
   """
   def list_social_accounts(%User{} = user) do
-    Repo.all(from sa in SocialAccount,
-      where: sa.user_id == ^user.id,
-      order_by: sa.provider)
+    Repo.all(
+      from sa in SocialAccount,
+        where: sa.user_id == ^user.id,
+        order_by: sa.provider
+    )
   end
 
   @doc """
   Alias for list_social_accounts/1 for backwards compatibility.
   """
   def list_user_social_accounts(%User{} = user), do: list_social_accounts(user)
-  
+
   @doc """
   Gets a specific social account for a user by provider.
-  
+
   ## Examples
-  
+
       iex> get_social_account(user, "github")
       %SocialAccount{}
       
@@ -760,20 +808,24 @@ defmodule Onelist.Accounts do
       nil
   """
   def get_social_account(%User{} = user, provider) do
-    Repo.one(from sa in SocialAccount,
-      where: sa.user_id == ^user.id and sa.provider == ^provider)
+    Repo.one(
+      from sa in SocialAccount,
+        where: sa.user_id == ^user.id and sa.provider == ^provider
+    )
   end
-  
+
   def get_social_account(user_id, provider) when is_binary(user_id) and is_binary(provider) do
-    Repo.one(from sa in SocialAccount,
-      where: sa.user_id == ^user_id and sa.provider == ^provider)
+    Repo.one(
+      from sa in SocialAccount,
+        where: sa.user_id == ^user_id and sa.provider == ^provider
+    )
   end
-  
+
   @doc """
   Deletes a social account.
-  
+
   ## Examples
-  
+
       iex> delete_social_account(social_account)
       {:ok, %SocialAccount{}}
       
@@ -787,12 +839,12 @@ defmodule Onelist.Accounts do
       Ecto.StaleEntryError -> {:error, :not_found}
     end
   end
-  
+
   @doc """
   Deletes a user's social account by provider.
-  
+
   ## Examples
-  
+
       iex> delete_social_account_by_provider(user, "github")
       {:ok, %SocialAccount{}}
       
@@ -809,13 +861,14 @@ defmodule Onelist.Accounts do
   @doc """
   Alias for delete_social_account_by_provider/2 for backwards compatibility.
   """
-  def unlink_social_account(%User{} = user, provider), do: delete_social_account_by_provider(user, provider)
-  
+  def unlink_social_account(%User{} = user, provider),
+    do: delete_social_account_by_provider(user, provider)
+
   @doc """
   Gets decrypted OAuth token data from a social account.
-  
+
   ## Examples
-  
+
       iex> get_oauth_tokens(social_account)
       {:ok, %{"token" => "access_token", "refresh_token" => "refresh_token", ...}}
       
@@ -823,16 +876,17 @@ defmodule Onelist.Accounts do
       {:error, :invalid}
   """
   def get_oauth_tokens(%SocialAccount{token_data: nil}), do: {:error, :no_token_data}
+
   def get_oauth_tokens(%SocialAccount{token_data: token_data}) do
     # Decrypt the token data using the Security module
     Security.decrypt_token(token_data)
   end
-  
+
   @doc """
   Gets a specific OAuth token field from a social account.
-  
+
   ## Examples
-  
+
       iex> get_oauth_token(social_account, "token")
       {:ok, "access_token"}
       
@@ -846,49 +900,52 @@ defmodule Onelist.Accounts do
           {:ok, value} -> {:ok, value}
           :error -> {:error, :field_not_found}
         end
-      
-      error -> error
+
+      error ->
+        error
     end
   end
 
   @doc """
   Links a social account to a user.
-  
+
   This function handles both creating new social accounts and updating existing ones.
   If an account with the same provider and provider_id already exists for a different user,
   it returns an error.
-  
+
   ## Examples
-  
+
       iex> link_social_account(user, "github", %{provider_id: "12345", provider_email: "test@example.com"})
       {:ok, %SocialAccount{}}
       
       iex> link_social_account(other_user, "github", %{provider_id: "12345"})
       {:error, :already_linked}
   """
-  def link_social_account(%User{} = user, provider, profile) when is_binary(provider) and is_map(profile) do
+  def link_social_account(%User{} = user, provider, profile)
+      when is_binary(provider) and is_map(profile) do
     # Ensure provider is included in the profile
     profile = Map.put(profile, :provider, provider)
-    
+
     # Extract provider_id from the profile
     provider_id = Map.get(profile, :provider_id)
-    
+
     if is_nil(provider_id) do
       {:error, :missing_provider_id}
     else
       # Check if an account with this provider/provider_id already exists
-      query = from sa in SocialAccount,
-        where: sa.provider == ^provider and sa.provider_id == ^provider_id
-        
+      query =
+        from sa in SocialAccount,
+          where: sa.provider == ^provider and sa.provider_id == ^provider_id
+
       case Repo.one(query) do
         # Case 1: No existing account, create a new one
-        nil -> 
+        nil ->
           create_social_account(user, profile)
-          
+
         # Case 2: Account exists for this user, update it
         %SocialAccount{user_id: existing_user_id} when existing_user_id == user.id ->
           update_social_account(user, provider, profile)
-          
+
         # Case 3: Account exists but for a different user
         _ ->
           {:error, :already_linked}
@@ -945,8 +1002,10 @@ defmodule Onelist.Accounts do
       nil
   """
   def get_user_by_username(username) when is_binary(username) do
-    Repo.one(from u in User,
-      where: fragment("lower(?)", u.username) == ^String.downcase(username))
+    Repo.one(
+      from u in User,
+        where: fragment("lower(?)", u.username) == ^String.downcase(username)
+    )
   end
 
   @doc """
@@ -980,4 +1039,4 @@ defmodule Onelist.Accounts do
         true
     end
   end
-end 
+end

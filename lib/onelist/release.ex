@@ -45,44 +45,46 @@ defmodule Onelist.Release do
   """
   def setup_initial_user do
     load_app()
-    
+
     email = System.get_env("INITIAL_USER_EMAIL")
-    
+
     if is_nil(email) or email == "" do
       IO.puts("⚠️  INITIAL_USER_EMAIL not set, skipping user creation")
       :skip
     else
-      {:ok, _, _} = Ecto.Migrator.with_repo(Onelist.Repo, fn _repo ->
-        case Onelist.Accounts.get_user_by_email(email) do
-          nil ->
-            # Generate random password
-            password = :crypto.strong_rand_bytes(16) |> Base.url_encode64() |> binary_part(0, 16)
-            
-            case Onelist.Accounts.register_user(%{
-              email: email,
-              password: password,
-              password_confirmation: password
-            }) do
-              {:ok, user} ->
-                IO.puts("")
-                IO.puts("✅ Initial user created!")
-                IO.puts("   Email: #{user.email}")
-                IO.puts("   Password: #{password}")
-                IO.puts("")
-                IO.puts("   ⚠️  Save this password - it won't be shown again!")
-                IO.puts("")
-                {:ok, user}
-              
-              {:error, changeset} ->
-                IO.puts("❌ Failed to create user: #{inspect(changeset.errors)}")
-                {:error, changeset}
-            end
-          
-          _existing ->
-            IO.puts("ℹ️  User #{email} already exists")
-            :exists
-        end
-      end)
+      {:ok, _, _} =
+        Ecto.Migrator.with_repo(Onelist.Repo, fn _repo ->
+          case Onelist.Accounts.get_user_by_email(email) do
+            nil ->
+              # Generate random password
+              password =
+                :crypto.strong_rand_bytes(16) |> Base.url_encode64() |> binary_part(0, 16)
+
+              case Onelist.Accounts.register_user(%{
+                     email: email,
+                     password: password,
+                     password_confirmation: password
+                   }) do
+                {:ok, user} ->
+                  IO.puts("")
+                  IO.puts("✅ Initial user created!")
+                  IO.puts("   Email: #{user.email}")
+                  IO.puts("   Password: #{password}")
+                  IO.puts("")
+                  IO.puts("   ⚠️  Save this password - it won't be shown again!")
+                  IO.puts("")
+                  {:ok, user}
+
+                {:error, changeset} ->
+                  IO.puts("❌ Failed to create user: #{inspect(changeset.errors)}")
+                  {:error, changeset}
+              end
+
+            _existing ->
+              IO.puts("ℹ️  User #{email} already exists")
+              :exists
+          end
+        end)
     end
   end
 
@@ -92,16 +94,16 @@ defmodule Onelist.Release do
   def setup_local do
     IO.puts("🌊 Setting up Onelist Local...")
     IO.puts("")
-    
+
     IO.puts("📦 Creating extensions...")
     create_extensions()
-    
+
     IO.puts("🔄 Running migrations...")
     migrate()
-    
+
     IO.puts("👤 Setting up initial user...")
     setup_initial_user()
-    
+
     IO.puts("")
     IO.puts("✅ Setup complete!")
   end

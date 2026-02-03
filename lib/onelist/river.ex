@@ -41,7 +41,7 @@ defmodule Onelist.River do
   def list_conversations(user_id, opts \\ []) do
     import Ecto.Query
     limit = Keyword.get(opts, :limit, 20)
-    
+
     Onelist.Repo.all(
       from e in Onelist.Entries.Entry,
         where: e.user_id == ^user_id,

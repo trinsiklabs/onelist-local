@@ -16,17 +16,23 @@ defmodule Onelist.Entries.RepresentationVersion do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @max_diff_size 1_048_576  # 1MB
+  # 1MB
+  @max_diff_size 1_048_576
 
   schema "representation_versions" do
     belongs_to :representation, Onelist.Entries.Representation
     belongs_to :user, Onelist.Accounts.User
 
-    field :content, :string      # Full snapshot content
-    field :diff, :string         # Diff from previous version
-    field :version, :integer     # Version number before this change
-    field :version_type, :string # "snapshot" or "diff"
-    field :byte_size, :integer   # Size of content or diff
+    # Full snapshot content
+    field :content, :string
+    # Diff from previous version
+    field :diff, :string
+    # Version number before this change
+    field :version, :integer
+    # "snapshot" or "diff"
+    field :version_type, :string
+    # Size of content or diff
+    field :byte_size, :integer
 
     timestamps(type: :utc_datetime_usec, updated_at: false)
   end
@@ -42,7 +48,15 @@ defmodule Onelist.Entries.RepresentationVersion do
   """
   def changeset(version, attrs) do
     version
-    |> cast(attrs, [:representation_id, :user_id, :content, :diff, :version, :version_type, :byte_size])
+    |> cast(attrs, [
+      :representation_id,
+      :user_id,
+      :content,
+      :diff,
+      :version,
+      :version_type,
+      :byte_size
+    ])
     |> validate_required([:representation_id, :user_id, :version, :version_type])
     |> validate_inclusion(:version_type, ["snapshot", "diff"])
     |> validate_content_or_diff()

@@ -12,18 +12,20 @@ defmodule OnelistWeb.Account.UsernameSetupLive do
     user = socket.assigns.current_user
     changeset = Accounts.User.username_changeset(user, %{})
 
-    {:ok, assign(socket,
-      page_title: "Set Username",
-      changeset: changeset,
-      username: "",
-      availability: nil,
-      checking: false
-    )}
+    {:ok,
+     assign(socket,
+       page_title: "Set Username",
+       changeset: changeset,
+       username: "",
+       availability: nil,
+       checking: false
+     )}
   end
 
   @impl true
   def handle_event("validate", %{"username" => username}, socket) do
     user = socket.assigns.current_user
+
     changeset =
       user
       |> Accounts.User.username_changeset(%{username: username})
@@ -32,11 +34,12 @@ defmodule OnelistWeb.Account.UsernameSetupLive do
     # Check availability if username is valid format
     availability = check_availability(username, changeset)
 
-    {:noreply, assign(socket,
-      changeset: changeset,
-      username: username,
-      availability: availability
-    )}
+    {:noreply,
+     assign(socket,
+       changeset: changeset,
+       username: username,
+       availability: availability
+     )}
   end
 
   @impl true
@@ -46,9 +49,9 @@ defmodule OnelistWeb.Account.UsernameSetupLive do
     case Accounts.set_username(user, username) do
       {:ok, _updated_user} ->
         {:noreply,
-          socket
-          |> put_flash(:info, "Username set successfully!")
-          |> push_navigate(to: ~p"/app/entries")}
+         socket
+         |> put_flash(:info, "Username set successfully!")
+         |> push_navigate(to: ~p"/app/entries")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
@@ -120,14 +123,22 @@ defmodule OnelistWeb.Account.UsernameSetupLive do
                   <%= if @availability == :available do %>
                     <span data-testid="username-available" class="text-green-500">
                       <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        <path
+                          fill-rule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clip-rule="evenodd"
+                        />
                       </svg>
                     </span>
                   <% end %>
                   <%= if @availability == :taken do %>
                     <span data-testid="username-taken" class="text-red-500">
                       <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        <path
+                          fill-rule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clip-rule="evenodd"
+                        />
                       </svg>
                     </span>
                   <% end %>
@@ -158,8 +169,7 @@ defmodule OnelistWeb.Account.UsernameSetupLive do
 
             <div>
               <p class="text-sm text-gray-600 mb-4">
-                Your public entries will be available at:
-                <br />
+                Your public entries will be available at: <br />
                 <code class="text-indigo-600 bg-indigo-50 px-2 py-1 rounded text-sm">
                   onelist.my/<%= if @username != "", do: @username, else: "yourname" %>/entry-id
                 </code>
@@ -173,7 +183,8 @@ defmodule OnelistWeb.Account.UsernameSetupLive do
                 class={[
                   "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white",
                   if(@availability == :available,
-                    do: "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+                    do:
+                      "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
                     else: "bg-gray-400 cursor-not-allowed"
                   )
                 ]}
@@ -184,10 +195,7 @@ defmodule OnelistWeb.Account.UsernameSetupLive do
           </.form>
 
           <div class="mt-6">
-            <.link
-              navigate={~p"/app/entries"}
-              class="text-sm text-gray-600 hover:text-gray-900"
-            >
+            <.link navigate={~p"/app/entries"} class="text-sm text-gray-600 hover:text-gray-900">
               &larr; Back to entries
             </.link>
           </div>
@@ -199,6 +207,7 @@ defmodule OnelistWeb.Account.UsernameSetupLive do
 
   defp username_input_class(:available, _changeset), do: "border-green-300"
   defp username_input_class(:taken, _changeset), do: "border-red-300"
+
   defp username_input_class(nil, changeset) do
     if Keyword.has_key?(changeset.errors, :username) do
       "border-red-300"

@@ -3,30 +3,30 @@ defmodule OnelistWeb.Plugs.Authenticate do
   Plug for authenticating requests with session tokens.
   Ensures protected routes are only accessible to authenticated users.
   """
-  
+
   import Plug.Conn
   import Phoenix.Controller
   use OnelistWeb, :verified_routes
-  
+
   alias Onelist.Sessions
-  
+
   @doc """
   Authenticate the user from session token.
   """
   def init(opts), do: opts
-  
+
   def call(conn, _opts) do
     # Store connection info for login tracking
     # (IP address and user agent will be stored in process dictionary)
     store_connection_info(conn)
-    
+
     # In test environment, check for bypass configuration
-    if Application.get_env(:onelist, :env) == :test && 
-       Application.get_env(:onelist, :bypass_auth) do
+    if Application.get_env(:onelist, :env) == :test &&
+         Application.get_env(:onelist, :bypass_auth) do
       # Get test user and session from configuration
       test_user = get_test_user()
       test_session = get_test_session()
-      
+
       # If both are set, bypass authentication
       if test_user && test_session do
         conn
@@ -42,7 +42,7 @@ defmodule OnelistWeb.Plugs.Authenticate do
       # Check for test environment
       test_env = Application.get_env(:onelist, :env) == :test
       test_user = get_session(conn, :current_user)
-      
+
       # In test environment, use session user directly if available
       if test_env && test_user do
         conn
@@ -70,10 +70,11 @@ defmodule OnelistWeb.Plugs.Authenticate do
             |> put_flash(:error, get_error_message({:error, :account_locked}))
             |> redirect(to: ~p"/?login_required=true")
             |> halt()
-          error -> 
+
+          error ->
             # Log failure reason without exposing sensitive info
             log_authentication_failure(error)
-            
+
             # Redirect to login page with appropriate message
             conn
             |> clear_session()
@@ -84,7 +85,7 @@ defmodule OnelistWeb.Plugs.Authenticate do
       end
     end
   end
-  
+
   # Helper functions to get test user and session
   defp get_test_user do
     Application.get_env(:onelist, :test_user)
@@ -93,49 +94,52 @@ defmodule OnelistWeb.Plugs.Authenticate do
   defp get_test_session do
     Application.get_env(:onelist, :test_session)
   end
-  
+
   # Store connection info for login tracking and rate limiting
   defp store_connection_info(conn) do
     # Extract IP address (handle both proxied and direct connections)
     ip_address = get_client_ip(conn)
-    
+
     # Extract user agent
     user_agent = get_req_header(conn, "user-agent") |> List.first() || ""
-    
+
     # Store in process dictionary for use in other modules
     Process.put(:current_ip_address, ip_address)
     Process.put(:current_user_agent, user_agent)
   end
-  
+
   # Get client IP address, handling proxies correctly
   defp get_client_ip(conn) do
     forwarded = get_req_header(conn, "x-forwarded-for") |> List.first()
-    
+
     cond do
       # If we have X-Forwarded-For, use the first IP (client IP)
       forwarded && String.contains?(forwarded, ",") ->
         forwarded |> String.split(",") |> List.first() |> String.trim()
-      
+
       # Single IP in X-Forwarded-For
       forwarded ->
         String.trim(forwarded)
-      
+
       # Fall back to the remote_ip from the socket
       true ->
         conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
     end
   end
-  
+
   # Log authentication failure without exposing sensitive information
   defp log_authentication_failure(error) do
     # Get IP and user agent from process dictionary
     ip = Process.get(:current_ip_address) || "unknown"
-    
+
     # Log the failure but don't include sensitive details
     require Logger
-    Logger.info("Authentication failure: #{inspect(error)} from IP: #{Onelist.Security.anonymize_ip(ip)}")
+
+    Logger.info(
+      "Authentication failure: #{inspect(error)} from IP: #{Onelist.Security.anonymize_ip(ip)}"
+    )
   end
-  
+
   # Check if a user account is locked
   defp is_account_locked?(%{locked_at: nil}), do: false
   defp is_account_locked?(%{locked_at: _locked_at}), do: true
@@ -144,21 +148,21 @@ defmodule OnelistWeb.Plugs.Authenticate do
   # Get user-friendly error message based on error type
   defp get_error_message(error) do
     case error do
-      nil -> 
+      nil ->
         "You need to sign in to access this page."
-        
+
       {:error, :expired_token} ->
         "Your session has expired. Please sign in again."
-      
+
       {:error, :invalid_token} ->
         "You need to sign in to access this page."
-      
+
       {:error, :account_locked} ->
         "Your account has been locked due to too many failed attempts. " <>
-        "Please reset your password or contact support."
-      
+          "Please reset your password or contact support."
+
       _ ->
         "You must sign in to access this page."
     end
   end
-end 
+end

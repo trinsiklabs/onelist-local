@@ -4,7 +4,8 @@ defmodule Onelist.Repo.Migrations.AddWaitlistNumberToUsers do
   def change do
     alter table(:users) do
       add :waitlist_number, :integer
-      add :waitlist_tier, :string  # "headwaters", "tributaries", "public"
+      # "headwaters", "tributaries", "public"
+      add :waitlist_tier, :string
     end
 
     # Index for quick lookups by waitlist number

@@ -5,7 +5,10 @@ defmodule Onelist.Repo.Migrations.CreateAssets do
     create table(:assets, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :entry_id, references(:entries, type: :binary_id, on_delete: :delete_all), null: false
-      add :representation_id, references(:representations, type: :binary_id, on_delete: :nilify_all)
+
+      add :representation_id,
+          references(:representations, type: :binary_id, on_delete: :nilify_all)
+
       add :filename, :string, null: false, size: 255
       add :mime_type, :string, null: false, size: 127
       add :storage_path, :string, null: false, size: 500

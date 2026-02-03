@@ -23,7 +23,7 @@ defmodule Onelist.Storage.Mirror do
 
   alias Onelist.Repo
   alias Onelist.Entries.{Asset, AssetMirror}
-  
+
   import Ecto.Query
 
   require Logger
@@ -99,8 +99,13 @@ defmodule Onelist.Storage.Mirror do
       end
     else
       {:error, reason} ->
-        Logger.error("Mirror sync failed for asset #{asset.id} to #{mirror.backend}: #{inspect(reason)}")
-        {:ok, _updated_mirror} = update_mirror(mirror, AssetMirror.mark_failed(mirror, inspect(reason)))
+        Logger.error(
+          "Mirror sync failed for asset #{asset.id} to #{mirror.backend}: #{inspect(reason)}"
+        )
+
+        {:ok, _updated_mirror} =
+          update_mirror(mirror, AssetMirror.mark_failed(mirror, inspect(reason)))
+
         {:error, reason}
     end
   end
@@ -273,7 +278,9 @@ defmodule Onelist.Storage.Mirror do
         end
 
       {:error, reason} ->
-        {:ok, _failed_mirror} = update_mirror(mirror, AssetMirror.mark_failed(mirror, inspect(reason)))
+        {:ok, _failed_mirror} =
+          update_mirror(mirror, AssetMirror.mark_failed(mirror, inspect(reason)))
+
         {:error, reason}
     end
   end

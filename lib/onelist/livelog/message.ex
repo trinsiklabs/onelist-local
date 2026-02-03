@@ -1,7 +1,7 @@
 defmodule Onelist.Livelog.Message do
   @moduledoc """
   Ecto schema for redacted Livelog messages.
-  
+
   These are the messages displayed on the public /livelog page.
   All content has been processed through the redaction engine.
   """

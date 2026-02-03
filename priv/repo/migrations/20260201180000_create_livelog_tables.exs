@@ -34,7 +34,9 @@ defmodule Onelist.Repo.Migrations.CreateLivelogTables do
     # Redaction audit log
     create table(:livelog_audit_log, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :livelog_message_id, references(:livelog_messages, type: :binary_id, on_delete: :delete_all)
+
+      add :livelog_message_id,
+          references(:livelog_messages, type: :binary_id, on_delete: :delete_all)
 
       add :original_content_hash, :string, null: false
       add :redacted_content_hash, :string, null: false

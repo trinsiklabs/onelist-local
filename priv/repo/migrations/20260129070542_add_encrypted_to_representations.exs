@@ -8,7 +8,8 @@ defmodule Onelist.Repo.Migrations.AddEncryptedToRepresentations do
 
     # Index for quick lookup of html_public representations
     create index(:representations, [:entry_id, :type],
-      where: "type = 'html_public'",
-      name: :representations_html_public_idx)
+             where: "type = 'html_public'",
+             name: :representations_html_public_idx
+           )
   end
 end

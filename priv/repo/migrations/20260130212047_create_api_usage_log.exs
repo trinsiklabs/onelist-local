@@ -4,13 +4,16 @@ defmodule Onelist.Repo.Migrations.CreateApiUsageLog do
   def change do
     create table(:api_usage_log, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :provider, :string, null: false  # "openai", "anthropic"
+      # "openai", "anthropic"
+      add :provider, :string, null: false
       add :model, :string
-      add :operation, :string  # "memory_extraction", "embedding", "tag_suggestion", etc.
+      # "memory_extraction", "embedding", "tag_suggestion", etc.
+      add :operation, :string
       add :input_tokens, :integer, default: 0
       add :output_tokens, :integer, default: 0
       add :total_tokens, :integer, default: 0
-      add :cost_cents, :decimal, precision: 10, scale: 4  # Estimated cost
+      # Estimated cost
+      add :cost_cents, :decimal, precision: 10, scale: 4
       add :user_id, references(:users, type: :binary_id, on_delete: :nilify_all)
       add :entry_id, references(:entries, type: :binary_id, on_delete: :nilify_all)
       add :metadata, :map, default: %{}

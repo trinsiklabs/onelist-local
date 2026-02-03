@@ -17,7 +17,8 @@ defmodule Onelist.TrustedMemory.AuditLog do
   schema "memory_audit_log" do
     field :action, :string
     field :actor, :string
-    field :outcome, :string  # success, denied
+    # success, denied
+    field :outcome, :string
     field :details, :map, default: %{}
 
     belongs_to :user, Onelist.Accounts.User

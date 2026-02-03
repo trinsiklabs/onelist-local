@@ -52,7 +52,11 @@ defmodule OnelistWeb.Api.V1.RepresentationVersionController do
 
   POST /api/v1/entries/:entry_id/representations/:representation_id/versions/:version_id/revert
   """
-  def revert(conn, %{"entry_id" => entry_id, "representation_id" => rep_id, "version_id" => version_str}) do
+  def revert(conn, %{
+        "entry_id" => entry_id,
+        "representation_id" => rep_id,
+        "version_id" => version_str
+      }) do
     user = conn.assigns.current_user
 
     with {:ok, version} <- parse_version(version_str),
@@ -88,6 +92,7 @@ defmodule OnelistWeb.Api.V1.RepresentationVersionController do
   end
 
   defp parse_limit(nil), do: 50
+
   defp parse_limit(limit_str) do
     case Integer.parse(limit_str) do
       {limit, ""} when limit > 0 and limit <= 100 -> limit

@@ -2,13 +2,13 @@ defmodule OnelistWeb.LiveAuth do
   @moduledoc """
   LiveView authentication hooks for handling authentication in LiveView contexts.
   """
-  
+
   import Phoenix.LiveView
   import Phoenix.Component, only: [assign: 3]
-  
+
   # Import verified routes with proper endpoint configuration
   use OnelistWeb, :verified_routes
-  
+
   alias Onelist.Sessions
 
   @doc """
@@ -53,7 +53,7 @@ defmodule OnelistWeb.LiveAuth do
     else
       # Normal auth flow
       socket = assign_current_user(socket, session)
-    
+
       if socket.assigns.current_user do
         # If authenticated, proceed with the LiveView
         {:cont, socket}
@@ -66,17 +66,17 @@ defmodule OnelistWeb.LiveAuth do
 
   def on_mount(:ensure_admin, _params, _session, socket) do
     user = socket.assigns.current_user
-    
+
     if user && "admin" in (user.roles || []) do
       # If user is admin, proceed with the LiveView
       {:cont, socket}
     else
       # If not admin, redirect to home page
-      socket = 
+      socket =
         socket
         |> put_flash(:error, "You must be an admin to access this page.")
         |> redirect(to: "/")
-      
+
       {:halt, socket}
     end
   end
@@ -87,7 +87,7 @@ defmodule OnelistWeb.LiveAuth do
 
   def on_mount(:redirect_if_authenticated, _params, session, socket) do
     socket = assign_current_user(socket, session)
-    
+
     if socket.assigns.current_user do
       # If already authenticated, redirect to home page
       {:halt, redirect(socket, to: "/")}
@@ -102,7 +102,7 @@ defmodule OnelistWeb.LiveAuth do
   defp assign_current_user(socket, %{"session_token" => token}) when is_binary(token) do
     # Set process dictionary for authentication tracking
     store_connection_info(socket)
-    
+
     # Get session and user
     case Sessions.get_session_by_token(token) do
       {:ok, session} ->
@@ -110,19 +110,19 @@ defmodule OnelistWeb.LiveAuth do
         |> assign(:current_user, session.user)
         |> assign(:current_session, session)
         |> assign(:logged_in, true)
-      
+
       _error ->
         assign_default_values(socket)
     end
   end
-  
+
   defp assign_current_user(socket, _session) do
     # Set process dictionary for authentication tracking even if no session
     store_connection_info(socket)
-    
+
     assign_default_values(socket)
   end
-  
+
   defp assign_default_values(socket) do
     socket
     |> assign(:current_user, nil)
@@ -136,33 +136,34 @@ defmodule OnelistWeb.LiveAuth do
       # Extract IP - this depends on your setup, adjust as needed
       # This assumes you're using :peer_data in your socket assigns
       ip_address = get_client_ip(socket)
-      
+
       # Extract user agent - this depends on your setup, adjust as needed
       user_agent = get_user_agent(socket)
-      
+
       # Store in process dictionary for use in other modules
       Process.put(:current_ip_address, ip_address)
       Process.put(:current_user_agent, user_agent)
     end
   end
-  
+
   # Extract client IP - adjust based on your Socket setup
   defp get_client_ip(socket) do
-    socket.assigns[:ip_address] || 
-    (socket.assigns[:peer_data] && socket.assigns[:peer_data].address |> Tuple.to_list() |> Enum.join(".")) || 
-    "unknown"
+    socket.assigns[:ip_address] ||
+      (socket.assigns[:peer_data] &&
+         socket.assigns[:peer_data].address |> Tuple.to_list() |> Enum.join(".")) ||
+      "unknown"
   end
-  
+
   # Extract user agent - adjust based on your Socket setup
   defp get_user_agent(socket) do
     socket.assigns[:user_agent] || "unknown"
   end
-  
+
   @doc """
   Handles PubSub events related to session state.
-  
+
   ## Examples
-  
+
       # In your LiveView
       def mount(_params, session, socket) do
         # ... other mount logic ...
@@ -173,7 +174,7 @@ defmodule OnelistWeb.LiveAuth do
         end
         {:ok, socket}
       end
-  
+
       # Forward all session-related messages to LiveAuth
       def handle_info({:session_revoked, _} = msg, socket) do
         OnelistWeb.LiveAuth.handle_session_event(msg, socket)
@@ -188,7 +189,7 @@ defmodule OnelistWeb.LiveAuth do
         else
           {:noreply, socket}
         end
-      
+
       {:all_sessions_revoked, user_id} ->
         # If all sessions for current user were revoked, redirect to login
         if socket.assigns.current_user && socket.assigns.current_user.id == user_id do
@@ -196,18 +197,18 @@ defmodule OnelistWeb.LiveAuth do
         else
           {:noreply, socket}
         end
-      
+
       {:session_refreshed, _} ->
         # Session was refreshed, no action needed
         {:noreply, socket}
-        
+
       {:session_created, _} ->
         # New session was created, no action needed
         {:noreply, socket}
-        
+
       _ ->
         # Unknown message type, just pass through
         {:noreply, socket}
     end
   end
-end 
+end

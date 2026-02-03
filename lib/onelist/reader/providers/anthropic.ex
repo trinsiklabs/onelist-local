@@ -18,7 +18,8 @@ defmodule Onelist.Reader.Providers.Anthropic do
   require Logger
 
   @api_url "https://api.anthropic.com/v1/messages"
-  @model "claude-3-haiku-20240307"  # Fast and cheap for extraction
+  # Fast and cheap for extraction
+  @model "claude-3-haiku-20240307"
   @timeout_ms 60_000
   @api_version "2023-06-01"
 
@@ -405,7 +406,9 @@ defmodule Onelist.Reader.Providers.Anthropic do
 
   defp normalize_memories(_), do: []
 
-  defp normalize_memory_type(type) when type in ~w(fact preference event observation decision), do: type
+  defp normalize_memory_type(type) when type in ~w(fact preference event observation decision),
+    do: type
+
   defp normalize_memory_type(_), do: "fact"
 
   defp normalize_confidence(conf) when is_number(conf), do: max(0.0, min(1.0, conf))
@@ -453,7 +456,8 @@ defmodule Onelist.Reader.Providers.Anthropic do
   defp estimate_cost(input_tokens, output_tokens) do
     input = (input_tokens || 0) / 1_000_000 * @input_cost_per_million
     output = (output_tokens || 0) / 1_000_000 * @output_cost_per_million
-    Float.round((input + output) * 100, 4)  # Return cents
+    # Return cents
+    Float.round((input + output) * 100, 4)
   end
 
   defp get_api_key do

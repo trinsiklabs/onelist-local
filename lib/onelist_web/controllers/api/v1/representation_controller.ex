@@ -47,7 +47,8 @@ defmodule OnelistWeb.Api.V1.RepresentationController do
 
     with {:ok, _entry} <- get_user_entry(user, entry_id),
          {:ok, representation} <- get_representation(id),
-         {:ok, updated_rep} <- Entries.update_representation_with_version(representation, user, rep_params) do
+         {:ok, updated_rep} <-
+           Entries.update_representation_with_version(representation, user, rep_params) do
       render(conn, :show, representation: updated_rep)
     end
   end

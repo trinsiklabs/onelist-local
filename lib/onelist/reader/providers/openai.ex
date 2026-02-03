@@ -350,8 +350,9 @@ defmodule Onelist.Reader.Providers.OpenAI do
 
   defp normalize_memories(_), do: []
 
-  defp normalize_memory_type(type) when type in ["fact", "preference", "event", "observation", "decision"],
-    do: type
+  defp normalize_memory_type(type)
+       when type in ["fact", "preference", "event", "observation", "decision"],
+       do: type
 
   defp normalize_memory_type(_), do: "fact"
 

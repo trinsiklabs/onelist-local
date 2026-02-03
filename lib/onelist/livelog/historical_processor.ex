@@ -1,12 +1,12 @@
 defmodule Onelist.Livelog.HistoricalProcessor do
   @moduledoc """
   One-time processor for historical chat logs.
-  
+
   Run this ONCE to populate livelog_messages from existing ChatLogs data.
   Processes in batches to avoid memory issues with 73MB of data.
-  
+
   ## Usage
-  
+
       # In IEx:
       iex> Onelist.Livelog.HistoricalProcessor.process_all()
       
@@ -25,7 +25,7 @@ defmodule Onelist.Livelog.HistoricalProcessor do
 
   @doc """
   Process all historical chat logs for Stream.
-  
+
   Options:
   - `:batch_size` - Number of messages per transaction (default: 100)
   - `:dry_run` - If true, don't actually save (default: false)
@@ -55,7 +55,7 @@ defmodule Onelist.Livelog.HistoricalProcessor do
         )
 
         session_stats = process_session(user, session, batch_size, dry_run)
-        
+
         %{
           processed: acc.processed + session_stats.processed,
           blocked: acc.blocked + session_stats.blocked,
@@ -68,7 +68,7 @@ defmodule Onelist.Livelog.HistoricalProcessor do
 
     Logger.info("""
     [HistoricalProcessor] Migration complete!
-    
+
     Stats:
     - Processed: #{stats.processed}
     - Blocked: #{stats.blocked}
@@ -90,7 +90,7 @@ defmodule Onelist.Livelog.HistoricalProcessor do
         |> Enum.chunk_every(batch_size)
         |> Enum.reduce(%{processed: 0, blocked: 0, errors: 0, skipped: 0}, fn batch, acc ->
           batch_stats = process_batch(batch, session.entry_id, dry_run)
-          
+
           %{
             processed: acc.processed + batch_stats.processed,
             blocked: acc.blocked + batch_stats.blocked,
@@ -144,7 +144,7 @@ defmodule Onelist.Livelog.HistoricalProcessor do
         {:blocked, reason} ->
           # Log but don't save message
           Logger.debug("[HistoricalProcessor] Blocked: #{reason}")
-          
+
           %AuditLog{}
           |> AuditLog.changeset(%{
             original_content_hash: hash(content),
@@ -155,7 +155,7 @@ defmodule Onelist.Livelog.HistoricalProcessor do
             processing_time_us: 0
           })
           |> Repo.insert()
-          
+
           :blocked
 
         {:ok, redacted_content} ->

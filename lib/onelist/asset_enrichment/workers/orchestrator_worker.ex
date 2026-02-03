@@ -16,12 +16,12 @@ defmodule Onelist.AssetEnrichment.Workers.OrchestratorWorker do
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"asset_id" => asset_id} = args, inserted_at: inserted_at}) do
     max_tier = args["max_tier"]
-    
+
     # Record queue latency
     Telemetry.record_queue_latency(:orchestrate, inserted_at, %{asset_id: asset_id})
-    
+
     metadata = %{asset_id: asset_id, max_tier: max_tier}
-    
+
     Telemetry.span(:orchestrate, metadata, fn ->
       with {:ok, asset} <- get_asset(asset_id),
            {:ok, entry} <- get_entry(asset.entry_id),

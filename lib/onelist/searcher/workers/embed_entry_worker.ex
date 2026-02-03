@@ -49,7 +49,8 @@ defmodule Onelist.Searcher.Workers.EmbedEntryWorker do
 
       {:error, :entry_not_found} ->
         Logger.warning("Entry #{entry_id} not found, skipping embedding")
-        :ok  # Don't retry if entry doesn't exist
+        # Don't retry if entry doesn't exist
+        :ok
 
       {:error, :no_content} ->
         Logger.debug("Entry #{entry_id} has no embeddable content")
@@ -109,10 +110,11 @@ defmodule Onelist.Searcher.Workers.EmbedEntryWorker do
   defp chunk_text(text, user_id) do
     config = Searcher.get_search_config!(user_id)
 
-    chunks = Chunker.chunk(text,
-      max_tokens: config.max_chunk_tokens,
-      overlap_tokens: config.chunk_overlap_tokens
-    )
+    chunks =
+      Chunker.chunk(text,
+        max_tokens: config.max_chunk_tokens,
+        overlap_tokens: config.chunk_overlap_tokens
+      )
 
     {:ok, chunks}
   end

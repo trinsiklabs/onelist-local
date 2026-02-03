@@ -50,24 +50,17 @@ defmodule OnelistWeb.FeatureDemo do
           <% end %>
         </div>
       </div>
-
       <!-- API Demo Section -->
       <div class="bg-white p-6 rounded-lg shadow-sm" data-test-id="feature-demo-api">
         <h3 class="text-lg font-semibold mb-4">API Demo</h3>
         <div class="space-y-4">
           <div class="flex flex-col sm:flex-row gap-4">
-            <select
-              class="flex-1 p-2 border rounded-md"
-              data-test-id="endpoint-selector"
-            >
+            <select class="flex-1 p-2 border rounded-md" data-test-id="endpoint-selector">
               <option value="notes">/api/notes</option>
               <option value="tags">/api/tags</option>
               <option value="search">/api/search</option>
             </select>
-            <select
-              class="flex-1 p-2 border rounded-md"
-              data-test-id="method-selector"
-            >
+            <select class="flex-1 p-2 border rounded-md" data-test-id="method-selector">
               <option value="GET">GET</option>
               <option value="POST">POST</option>
               <option value="PUT">PUT</option>
@@ -92,7 +85,6 @@ defmodule OnelistWeb.FeatureDemo do
           </div>
         </div>
       </div>
-
       <!-- Error Handling Section -->
       <div class="bg-white p-6 rounded-lg shadow-sm" data-test-id="feature-demo-error">
         <h3 class="text-lg font-semibold mb-4">Error Handling</h3>
@@ -140,14 +132,18 @@ defmodule OnelistWeb.FeatureDemo do
   @impl true
   def handle_event("try_api", _, socket) do
     # Simulate API response
-    response = Jason.encode!(%{
-      status: "success",
-      data: %{
-        id: "123",
-        title: "Example Note",
-        content: "This is an example note"
-      }
-    }, pretty: true)
+    response =
+      Jason.encode!(
+        %{
+          status: "success",
+          data: %{
+            id: "123",
+            title: "Example Note",
+            content: "This is an example note"
+          }
+        },
+        pretty: true
+      )
 
     {:noreply, assign(socket, api_response: response)}
   end
@@ -161,4 +157,4 @@ defmodule OnelistWeb.FeatureDemo do
   def handle_event("cancel", _, socket) do
     {:noreply, assign(socket, error: nil)}
   end
-end 
+end

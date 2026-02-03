@@ -91,7 +91,7 @@ defmodule Onelist.Tags do
   def get_tag_by_name(%User{} = user, name) when is_binary(name) do
     Repo.one(
       from t in Tag,
-      where: t.user_id == ^user.id and fragment("lower(?)", t.name) == ^String.downcase(name)
+        where: t.user_id == ^user.id and fragment("lower(?)", t.name) == ^String.downcase(name)
     )
   end
 
@@ -106,8 +106,8 @@ defmodule Onelist.Tags do
   def list_user_tags(%User{} = user) do
     Repo.all(
       from t in Tag,
-      where: t.user_id == ^user.id,
-      order_by: [asc: t.name]
+        where: t.user_id == ^user.id,
+        order_by: [asc: t.name]
     )
   end
 
@@ -166,10 +166,11 @@ defmodule Onelist.Tags do
       {:ok, entry_tag_or_nil}
   """
   def remove_tag_from_entry(%Entry{} = entry, %Tag{} = tag) do
-    result = Repo.delete_all(
-      from et in EntryTag,
-      where: et.entry_id == ^entry.id and et.tag_id == ^tag.id
-    )
+    result =
+      Repo.delete_all(
+        from et in EntryTag,
+          where: et.entry_id == ^entry.id and et.tag_id == ^tag.id
+      )
 
     {:ok, result}
   end
@@ -185,9 +186,10 @@ defmodule Onelist.Tags do
   def list_entry_tags(%Entry{} = entry) do
     Repo.all(
       from t in Tag,
-      join: et in EntryTag, on: et.tag_id == t.id,
-      where: et.entry_id == ^entry.id,
-      order_by: [asc: t.name]
+        join: et in EntryTag,
+        on: et.tag_id == t.id,
+        where: et.entry_id == ^entry.id,
+        order_by: [asc: t.name]
     )
   end
 
@@ -202,9 +204,10 @@ defmodule Onelist.Tags do
   def list_entries_by_tag(%User{} = user, %Tag{} = tag) do
     Repo.all(
       from e in Entry,
-      join: et in EntryTag, on: et.entry_id == e.id,
-      where: e.user_id == ^user.id and et.tag_id == ^tag.id,
-      order_by: [desc: e.inserted_at]
+        join: et in EntryTag,
+        on: et.entry_id == e.id,
+        where: e.user_id == ^user.id and et.tag_id == ^tag.id,
+        order_by: [desc: e.inserted_at]
     )
   end
 
@@ -235,11 +238,12 @@ defmodule Onelist.Tags do
   def list_user_tags_with_counts(%User{} = user) do
     Repo.all(
       from t in Tag,
-      left_join: et in EntryTag, on: et.tag_id == t.id,
-      where: t.user_id == ^user.id,
-      group_by: t.id,
-      select: {t, count(et.entry_id)},
-      order_by: [asc: t.name]
+        left_join: et in EntryTag,
+        on: et.tag_id == t.id,
+        where: t.user_id == ^user.id,
+        group_by: t.id,
+        select: {t, count(et.entry_id)},
+        order_by: [asc: t.name]
     )
   end
 
@@ -256,9 +260,10 @@ defmodule Onelist.Tags do
     Repo.delete_all(from et in EntryTag, where: et.entry_id == ^entry.id)
 
     # Add new tags
-    results = Enum.map(tags, fn tag ->
-      add_tag_to_entry(entry, tag)
-    end)
+    results =
+      Enum.map(tags, fn tag ->
+        add_tag_to_entry(entry, tag)
+      end)
 
     {:ok, results}
   end

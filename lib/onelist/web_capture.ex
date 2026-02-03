@@ -119,14 +119,15 @@ defmodule Onelist.WebCapture do
         status = parse_job_status(job)
         result = if status == :completed, do: job.meta["result"], else: nil
 
-        {:ok, %{
-          status: status,
-          result: result,
-          error: job.meta["error"],
-          attempts: job.attempt,
-          inserted_at: job.inserted_at,
-          completed_at: job.completed_at
-        }}
+        {:ok,
+         %{
+           status: status,
+           result: result,
+           error: job.meta["error"],
+           attempts: job.attempt,
+           inserted_at: job.inserted_at,
+           completed_at: job.completed_at
+         }}
     end
   end
 
@@ -190,10 +191,12 @@ defmodule Onelist.WebCapture do
     case do_capture(url, opts) do
       {:ok, result} ->
         capture_time_ms = System.monotonic_time(:millisecond) - start_time
-        result_with_meta = Map.merge(result, %{
-          user_id: user_id,
-          capture_time_ms: capture_time_ms
-        })
+
+        result_with_meta =
+          Map.merge(result, %{
+            user_id: user_id,
+            capture_time_ms: capture_time_ms
+          })
 
         {:ok, result_with_meta}
 
@@ -216,13 +219,20 @@ defmodule Onelist.WebCapture do
   defp capture_with_fallback(url, tier, timeout_ms, extract_markdown, opts) do
     Logger.debug("WebCapture: Attempting capture with tier #{tier} for #{url}")
 
-    result = case tier do
-      :simple_fetch ->
-        Tier1SimpleFetch.capture(url, timeout_ms: timeout_ms, extract_markdown: extract_markdown)
+    result =
+      case tier do
+        :simple_fetch ->
+          Tier1SimpleFetch.capture(url,
+            timeout_ms: timeout_ms,
+            extract_markdown: extract_markdown
+          )
 
-      :intelligent_browser ->
-        Tier2IntelligentBrowser.capture(url, timeout_ms: timeout_ms, extract_markdown: extract_markdown)
-    end
+        :intelligent_browser ->
+          Tier2IntelligentBrowser.capture(url,
+            timeout_ms: timeout_ms,
+            extract_markdown: extract_markdown
+          )
+      end
 
     case result do
       {:ok, content} ->
@@ -231,7 +241,10 @@ defmodule Onelist.WebCapture do
       {:error, reason} when tier == :simple_fetch ->
         # Escalate to tier 2 if tier 1 failed
         if should_escalate?(reason) and TierSelector.tier_available?(:intelligent_browser) do
-          Logger.info("WebCapture: Escalating from tier 1 to tier 2 for #{url} due to #{inspect(reason)}")
+          Logger.info(
+            "WebCapture: Escalating from tier 1 to tier 2 for #{url} due to #{inspect(reason)}"
+          )
+
           capture_with_fallback(url, :intelligent_browser, timeout_ms, extract_markdown, opts)
         else
           {:error, {:tier1_failed, reason}}

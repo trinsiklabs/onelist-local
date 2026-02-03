@@ -18,8 +18,12 @@ defmodule Onelist.Repo.Migrations.CreateRiverSessions do
 
     create table(:river_messages, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :session_id, references(:river_sessions, type: :binary_id, on_delete: :delete_all), null: false
-      add :role, :string, null: false  # "user" or "river"
+
+      add :session_id, references(:river_sessions, type: :binary_id, on_delete: :delete_all),
+        null: false
+
+      # "user" or "river"
+      add :role, :string, null: false
       add :content, :text, null: false
       add :tokens_used, :integer
       add :metadata, :map, default: %{}

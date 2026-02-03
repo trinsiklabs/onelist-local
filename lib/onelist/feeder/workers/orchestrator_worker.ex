@@ -92,10 +92,12 @@ defmodule Onelist.Feeder.Workers.OrchestratorWorker do
 
       {:error, :unknown_source_type} ->
         Logger.error("Unknown source type: #{integration.source_type}")
+
         Feeder.update_sync_state(integration, %{
           status: :failed,
           error: "Unknown source type: #{integration.source_type}"
         })
+
         {:error, :unknown_source_type}
     end
   end
@@ -124,10 +126,12 @@ defmodule Onelist.Feeder.Workers.OrchestratorWorker do
 
       {:error, reason} ->
         Logger.error("Sync fetch failed: #{inspect(reason)}")
+
         Feeder.update_sync_state(integration, %{
           status: :failed,
           error: inspect(reason)
         })
+
         {:error, reason}
     end
   end
@@ -210,10 +214,11 @@ defmodule Onelist.Feeder.Workers.OrchestratorWorker do
     Logger.info("Starting import job #{import_job.id} (#{import_job.source_type})")
 
     # Mark as processing
-    {:ok, import_job} = Feeder.update_import_job(import_job, %{
-      status: "processing",
-      started_at: DateTime.utc_now()
-    })
+    {:ok, import_job} =
+      Feeder.update_import_job(import_job, %{
+        status: "processing",
+        started_at: DateTime.utc_now()
+      })
 
     case Feeder.get_adapter(import_job.source_type) do
       {:ok, adapter} ->
@@ -263,7 +268,8 @@ defmodule Onelist.Feeder.Workers.OrchestratorWorker do
 
     stream
     |> Stream.with_index()
-    |> Enum.reduce(%{created: 0, failed: 0, assets: 0, tags: 0, errors: []}, fn {item, index}, acc ->
+    |> Enum.reduce(%{created: 0, failed: 0, assets: 0, tags: 0, errors: []}, fn {item, index},
+                                                                                acc ->
       # Update progress every 10 items
       if rem(index, 10) == 0 do
         Feeder.update_import_progress(import_job, %{
@@ -275,16 +281,18 @@ defmodule Onelist.Feeder.Workers.OrchestratorWorker do
 
       case import_single_item(adapter, user_id, item) do
         {:ok, stats} ->
-          %{acc |
-            created: acc.created + 1,
-            assets: acc.assets + (stats[:assets] || 0),
-            tags: acc.tags + (stats[:tags] || 0)
+          %{
+            acc
+            | created: acc.created + 1,
+              assets: acc.assets + (stats[:assets] || 0),
+              tags: acc.tags + (stats[:tags] || 0)
           }
 
         {:error, reason} ->
-          %{acc |
-            failed: acc.failed + 1,
-            errors: [%{item: index, error: inspect(reason)} | acc.errors]
+          %{
+            acc
+            | failed: acc.failed + 1,
+              errors: [%{item: index, error: inspect(reason)} | acc.errors]
           }
       end
     end)

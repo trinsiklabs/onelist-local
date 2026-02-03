@@ -9,12 +9,13 @@ defmodule OnelistWeb.ApiKeys.ApiKeyListLive do
     if socket.assigns[:current_user] do
       api_keys = ApiKeys.list_user_api_keys(socket.assigns.current_user)
 
-      {:ok, assign(socket,
-        page_title: "API Keys",
-        api_keys: api_keys,
-        new_key_changeset: ApiKey.changeset(%ApiKey{}, %{}),
-        newly_created_key: nil
-      )}
+      {:ok,
+       assign(socket,
+         page_title: "API Keys",
+         api_keys: api_keys,
+         new_key_changeset: ApiKey.changeset(%ApiKey{}, %{}),
+         newly_created_key: nil
+       )}
     else
       {:ok, socket}
     end
@@ -25,11 +26,13 @@ defmodule OnelistWeb.ApiKeys.ApiKeyListLive do
     case ApiKeys.create_api_key(socket.assigns.current_user, key_params) do
       {:ok, %{api_key: _api_key, raw_key: raw_key}} ->
         api_keys = ApiKeys.list_user_api_keys(socket.assigns.current_user)
-        {:noreply, assign(socket,
-          api_keys: api_keys,
-          new_key_changeset: ApiKey.changeset(%ApiKey{}, %{}),
-          newly_created_key: raw_key
-        )}
+
+        {:noreply,
+         assign(socket,
+           api_keys: api_keys,
+           new_key_changeset: ApiKey.changeset(%ApiKey{}, %{}),
+           newly_created_key: raw_key
+         )}
 
       {:error, changeset} ->
         {:noreply, assign(socket, new_key_changeset: changeset)}
@@ -107,7 +110,12 @@ defmodule OnelistWeb.ApiKeys.ApiKeyListLive do
                   class="text-green-700 hover:text-green-900"
                   title="Copy to clipboard"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
                     <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                     <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                   </svg>
@@ -115,12 +123,18 @@ defmodule OnelistWeb.ApiKeys.ApiKeyListLive do
               </div>
               <input type="hidden" id="new-key-display" value={@newly_created_key} />
             </div>
-            <button
-              phx-click="dismiss_new_key"
-              class="text-green-700 hover:text-green-900"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            <button phx-click="dismiss_new_key" class="text-green-700 hover:text-green-900">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
               </svg>
             </button>
           </div>

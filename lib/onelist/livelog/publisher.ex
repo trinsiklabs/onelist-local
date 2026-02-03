@@ -1,7 +1,7 @@
 defmodule Onelist.Livelog.Publisher do
   @moduledoc """
   Publishes redacted messages to Livelog subscribers via Phoenix PubSub.
-  
+
   Flow:
   1. Receives raw message from ChatStreamController
   2. Runs through Redaction engine
@@ -21,7 +21,7 @@ defmodule Onelist.Livelog.Publisher do
   @doc """
   Process a new message from ChatLogs and publish if appropriate.
   Called after ChatStreamController.append succeeds.
-  
+
   Returns:
   - `{:ok, message}` - Message published successfully
   - `{:ok, :blocked}` - Message blocked (audit logged)

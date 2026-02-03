@@ -3,9 +3,9 @@ defmodule Onelist.AssetEnrichment.Telemetry do
   OpenTelemetry instrumentation for Asset Enrichment.
 
   Provides tracing, metrics, and observability for all enrichment operations.
-  
+
   ## Events Emitted
-  
+
   - `[:asset_enrichment, :orchestrate, :start | :stop | :exception]`
   - `[:asset_enrichment, :transcribe, :start | :stop | :exception]`
   - `[:asset_enrichment, :describe, :start | :stop | :exception]`
@@ -13,9 +13,9 @@ defmodule Onelist.AssetEnrichment.Telemetry do
   - `[:asset_enrichment, :extract_actions, :start | :stop | :exception]`
   - `[:asset_enrichment, :cost, :recorded]`
   - `[:asset_enrichment, :budget, :exceeded]`
-  
+
   ## Metrics Available
-  
+
   - Duration of each enrichment type
   - Cost per enrichment
   - Error rates by type and provider
@@ -26,65 +26,66 @@ defmodule Onelist.AssetEnrichment.Telemetry do
 
   @doc """
   Execute a function with telemetry span tracking.
-  
+
   Emits start/stop/exception events for the given enrichment type.
-  
+
   ## Examples
-  
+
       span(:transcribe, %{asset_id: "abc", entry_id: "xyz"}, fn ->
         OpenAIWhisper.transcribe(audio_path)
       end)
   """
   def span(enrichment_type, metadata, fun) when is_function(fun, 0) do
     start_time = System.monotonic_time()
-    
+
     :telemetry.execute(
       [:asset_enrichment, enrichment_type, :start],
       %{system_time: System.system_time()},
       metadata
     )
-    
+
     try do
       result = fun.()
-      
+
       duration = System.monotonic_time() - start_time
-      
-      status = case result do
-        {:ok, _} -> :ok
-        :ok -> :ok
-        {:error, _} -> :error
-        {:snooze, _} -> :snooze
-        _ -> :unknown
-      end
-      
+
+      status =
+        case result do
+          {:ok, _} -> :ok
+          :ok -> :ok
+          {:error, _} -> :error
+          {:snooze, _} -> :snooze
+          _ -> :unknown
+        end
+
       :telemetry.execute(
         [:asset_enrichment, enrichment_type, :stop],
         %{duration: duration},
         Map.merge(metadata, %{status: status, result: result})
       )
-      
+
       result
     rescue
       e ->
         duration = System.monotonic_time() - start_time
-        
+
         :telemetry.execute(
           [:asset_enrichment, enrichment_type, :exception],
           %{duration: duration},
           Map.merge(metadata, %{kind: :error, reason: e, stacktrace: __STACKTRACE__})
         )
-        
+
         reraise e, __STACKTRACE__
     catch
       kind, reason ->
         duration = System.monotonic_time() - start_time
-        
+
         :telemetry.execute(
           [:asset_enrichment, enrichment_type, :exception],
           %{duration: duration},
           Map.merge(metadata, %{kind: kind, reason: reason, stacktrace: __STACKTRACE__})
         )
-        
+
         :erlang.raise(kind, reason, __STACKTRACE__)
     end
   end
@@ -115,16 +116,16 @@ defmodule Onelist.AssetEnrichment.Telemetry do
   Record queue latency - time from job insertion to processing start.
   """
   def record_queue_latency(enrichment_type, inserted_at, metadata \\ %{})
-  
+
   def record_queue_latency(_enrichment_type, nil, _metadata) do
     # Skip if inserted_at is nil (e.g., in tests with inline Oban)
     :ok
   end
-  
+
   def record_queue_latency(enrichment_type, inserted_at, metadata) do
-    queue_latency_ms = 
+    queue_latency_ms =
       DateTime.diff(DateTime.utc_now(), inserted_at, :millisecond)
-    
+
     :telemetry.execute(
       [:asset_enrichment, :queue, :latency],
       %{latency_ms: queue_latency_ms},

@@ -21,7 +21,8 @@ defmodule Onelist.Searcher.Providers.Provider do
   Returns `{:ok, vectors}` where vectors is a list of lists of floats,
   or `{:error, reason}` on failure.
   """
-  @callback embed_batch(texts :: list(String.t())) :: {:ok, list(list(float()))} | {:error, term()}
+  @callback embed_batch(texts :: list(String.t())) ::
+              {:ok, list(list(float()))} | {:error, term()}
 
   @doc """
   Returns the model name used by this provider.

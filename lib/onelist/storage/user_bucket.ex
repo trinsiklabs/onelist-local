@@ -127,13 +127,13 @@ defmodule Onelist.Storage.UserBucket do
     # Try to list objects (limit 1) to verify access
     request =
       ExAws.S3.list_objects(config.bucket, max_keys: 1)
-      |> Map.put(:config, [
+      |> Map.put(:config,
         access_key_id: config.access_key_id,
         secret_access_key: config.secret_access_key,
         region: config.region,
         host: get_host(config.endpoint),
         scheme: get_scheme(config.endpoint)
-      ])
+      )
 
     case ExAws.request(request) do
       {:ok, _} ->

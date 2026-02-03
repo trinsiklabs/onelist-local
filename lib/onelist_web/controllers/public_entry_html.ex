@@ -10,9 +10,11 @@ defmodule OnelistWeb.PublicEntryHTML do
   Formats a datetime for display.
   """
   def format_date(nil), do: ""
+
   def format_date(%DateTime{} = dt) do
     Calendar.strftime(dt, "%B %d, %Y")
   end
+
   def format_date(%NaiveDateTime{} = dt) do
     Calendar.strftime(dt, "%B %d, %Y")
   end

@@ -114,13 +114,16 @@ defmodule Onelist.Feeder.ImportJob do
       end
 
     job
-    |> cast(%{
-      items_processed: processed,
-      items_succeeded: progress[:succeeded] || 0,
-      items_failed: progress[:failed] || 0,
-      items_total: total,
-      progress_percent: min(percent, 100)
-    }, [:items_processed, :items_succeeded, :items_failed, :items_total, :progress_percent])
+    |> cast(
+      %{
+        items_processed: processed,
+        items_succeeded: progress[:succeeded] || 0,
+        items_failed: progress[:failed] || 0,
+        items_total: total,
+        progress_percent: min(percent, 100)
+      },
+      [:items_processed, :items_succeeded, :items_failed, :items_total, :progress_percent]
+    )
   end
 
   @doc """
@@ -128,14 +131,24 @@ defmodule Onelist.Feeder.ImportJob do
   """
   def complete_changeset(job, stats) do
     job
-    |> cast(%{
-      status: "completed",
-      progress_percent: 100,
-      completed_at: DateTime.utc_now(),
-      entries_created: stats[:entries_created] || 0,
-      assets_uploaded: stats[:assets_uploaded] || 0,
-      tags_created: stats[:tags_created] || 0
-    }, [:status, :progress_percent, :completed_at, :entries_created, :assets_uploaded, :tags_created])
+    |> cast(
+      %{
+        status: "completed",
+        progress_percent: 100,
+        completed_at: DateTime.utc_now(),
+        entries_created: stats[:entries_created] || 0,
+        assets_uploaded: stats[:assets_uploaded] || 0,
+        tags_created: stats[:tags_created] || 0
+      },
+      [
+        :status,
+        :progress_percent,
+        :completed_at,
+        :entries_created,
+        :assets_uploaded,
+        :tags_created
+      ]
+    )
   end
 
   @doc """
@@ -143,11 +156,14 @@ defmodule Onelist.Feeder.ImportJob do
   """
   def fail_changeset(job, errors) do
     job
-    |> cast(%{
-      status: "failed",
-      completed_at: DateTime.utc_now(),
-      errors: errors
-    }, [:status, :completed_at, :errors])
+    |> cast(
+      %{
+        status: "failed",
+        completed_at: DateTime.utc_now(),
+        errors: errors
+      },
+      [:status, :completed_at, :errors]
+    )
   end
 
   @doc """

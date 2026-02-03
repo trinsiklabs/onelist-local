@@ -1,7 +1,7 @@
 defmodule Onelist.Livelog do
   @moduledoc """
   Context module for Livelog functionality.
-  
+
   Livelog is a real-time public display of Stream's conversations,
   with automatic privacy redaction.
   """
@@ -53,13 +53,14 @@ defmodule Onelist.Livelog do
         :count
       )
 
-    blocked = Repo.aggregate(AuditLog, :count, [where: [action: "blocked"]])
+    blocked = Repo.aggregate(AuditLog, :count, where: [action: "blocked"])
 
     %{
       total_messages: total || 0,
       redacted_count: redacted || 0,
       blocked_count: blocked || 0,
-      redaction_rate: if(total && total > 0, do: Float.round(redacted / total * 100, 1), else: 0.0)
+      redaction_rate:
+        if(total && total > 0, do: Float.round(redacted / total * 100, 1), else: 0.0)
     }
   end
 
@@ -138,7 +139,8 @@ defmodule Onelist.Livelog do
   @doc """
   Get audit entries for a specific action type.
   """
-  def list_audit_by_action(action, limit \\ 100) when action in ["redacted", "blocked", "allowed"] do
+  def list_audit_by_action(action, limit \\ 100)
+      when action in ["redacted", "blocked", "allowed"] do
     AuditLog
     |> where([a], a.action == ^action)
     |> order_by([a], desc: a.inserted_at)

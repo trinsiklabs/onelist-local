@@ -18,17 +18,19 @@ defmodule Onelist.AssetEnrichment.Workers.ImageWorker do
   require Logger
 
   @impl Oban.Worker
-  def perform(%Oban.Job{
-        args: %{"asset_id" => asset_id, "entry_id" => entry_id, "enrichment_type" => type},
-        inserted_at: inserted_at
-      } = _job) do
+  def perform(
+        %Oban.Job{
+          args: %{"asset_id" => asset_id, "entry_id" => entry_id, "enrichment_type" => type},
+          inserted_at: inserted_at
+        } = _job
+      ) do
     # Record queue latency
     Telemetry.record_queue_latency(
       String.to_atom(type),
       inserted_at,
       %{asset_id: asset_id, entry_id: entry_id}
     )
-    
+
     with {:ok, asset} <- get_asset(asset_id) do
       process_enrichment(asset, entry_id, type)
     end
@@ -43,7 +45,7 @@ defmodule Onelist.AssetEnrichment.Workers.ImageWorker do
 
   defp process_enrichment(asset, entry_id, "description") do
     metadata = %{asset_id: asset.id, entry_id: entry_id}
-    
+
     Telemetry.span(:describe, metadata, fn ->
       AssetEnrichment.mark_enrichment_processing(entry_id, "description", asset.id)
 
@@ -53,7 +55,7 @@ defmodule Onelist.AssetEnrichment.Workers.ImageWorker do
             {:ok, result} ->
               # Validate and sanitize the description output
               {:ok, validated_description} = Security.validate_description(result.description)
-              
+
               rep_metadata = %{
                 "enrichment" => %{
                   "provider" => "openai",
@@ -75,15 +77,23 @@ defmodule Onelist.AssetEnrichment.Workers.ImageWorker do
 
               # Record cost with telemetry
               entry = Entries.get_entry(entry_id)
+
               if entry do
                 Telemetry.record_cost(:describe, result.cost_cents, %{
                   user_id: entry.user_id,
                   provider: "openai"
                 })
-                Telemetry.record_token_usage("openai", result.input_tokens, result.output_tokens, %{
-                  operation: :describe,
-                  asset_id: asset.id
-                })
+
+                Telemetry.record_token_usage(
+                  "openai",
+                  result.input_tokens,
+                  result.output_tokens,
+                  %{
+                    operation: :describe,
+                    asset_id: asset.id
+                  }
+                )
+
                 AssetEnrichment.record_cost(entry.user_id, result.cost_cents)
               end
 
@@ -116,7 +126,7 @@ defmodule Onelist.AssetEnrichment.Workers.ImageWorker do
 
   defp process_enrichment(asset, entry_id, "ocr") do
     metadata = %{asset_id: asset.id, entry_id: entry_id}
-    
+
     Telemetry.span(:ocr, metadata, fn ->
       AssetEnrichment.mark_enrichment_processing(entry_id, "ocr", asset.id)
 
@@ -126,7 +136,7 @@ defmodule Onelist.AssetEnrichment.Workers.ImageWorker do
             {:ok, result} ->
               # Validate and sanitize the OCR output
               {:ok, validated_text} = Security.validate_ocr_text(result.text)
-              
+
               rep_metadata = %{
                 "enrichment" => %{
                   "provider" => "openai",
@@ -149,15 +159,23 @@ defmodule Onelist.AssetEnrichment.Workers.ImageWorker do
 
               # Record cost with telemetry
               entry = Entries.get_entry(entry_id)
+
               if entry do
                 Telemetry.record_cost(:ocr, result.cost_cents, %{
                   user_id: entry.user_id,
                   provider: "openai"
                 })
-                Telemetry.record_token_usage("openai", result.input_tokens, result.output_tokens, %{
-                  operation: :ocr,
-                  asset_id: asset.id
-                })
+
+                Telemetry.record_token_usage(
+                  "openai",
+                  result.input_tokens,
+                  result.output_tokens,
+                  %{
+                    operation: :ocr,
+                    asset_id: asset.id
+                  }
+                )
+
                 AssetEnrichment.record_cost(entry.user_id, result.cost_cents)
               end
 
@@ -195,7 +213,7 @@ defmodule Onelist.AssetEnrichment.Workers.ImageWorker do
       end
     end
   end
-  
+
   defp vision_provider do
     Application.get_env(:onelist, :vision_provider, OpenAIVision)
   end

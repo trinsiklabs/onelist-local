@@ -112,22 +112,24 @@ defmodule Onelist.Sprints do
         {:error, :not_found}
 
       _sprint ->
-        query = from(e in Entry,
-          join: l in EntryLink,
-          on: l.target_entry_id == e.id,
-          where: l.source_entry_id == ^sprint_id,
-          where: l.link_type == "contains",
-          where: e.user_id == ^user.id,
-          order_by: [asc: l.inserted_at],
-          limit: ^limit,
-          offset: ^offset
-        )
+        query =
+          from(e in Entry,
+            join: l in EntryLink,
+            on: l.target_entry_id == e.id,
+            where: l.source_entry_id == ^sprint_id,
+            where: l.link_type == "contains",
+            where: e.user_id == ^user.id,
+            order_by: [asc: l.inserted_at],
+            limit: ^limit,
+            offset: ^offset
+          )
 
-        query = if entry_types do
-          where(query, [e, _l], e.entry_type in ^entry_types)
-        else
-          query
-        end
+        query =
+          if entry_types do
+            where(query, [e, _l], e.entry_type in ^entry_types)
+          else
+            query
+          end
 
         {:ok, Repo.all(query)}
     end
@@ -166,38 +168,41 @@ defmodule Onelist.Sprints do
 
       _sprint ->
         # Get items in sprint that have blocked_by links
-        query = from(e in Entry,
-          join: sprint_link in EntryLink,
-          on: sprint_link.target_entry_id == e.id,
-          join: block_link in EntryLink,
-          on: block_link.source_entry_id == e.id,
-          where: sprint_link.source_entry_id == ^sprint_id,
-          where: sprint_link.link_type == "contains",
-          where: block_link.link_type == "blocked_by",
-          where: e.user_id == ^user.id,
-          distinct: e.id,
-          order_by: [asc: e.inserted_at],
-          limit: ^limit,
-          offset: ^offset
-        )
+        query =
+          from(e in Entry,
+            join: sprint_link in EntryLink,
+            on: sprint_link.target_entry_id == e.id,
+            join: block_link in EntryLink,
+            on: block_link.source_entry_id == e.id,
+            where: sprint_link.source_entry_id == ^sprint_id,
+            where: sprint_link.link_type == "contains",
+            where: block_link.link_type == "blocked_by",
+            where: e.user_id == ^user.id,
+            distinct: e.id,
+            order_by: [asc: e.inserted_at],
+            limit: ^limit,
+            offset: ^offset
+          )
 
         entries = Repo.all(query)
 
-        result = if include_blocker do
-          Enum.map(entries, fn entry ->
-            blockers = from(e in Entry,
-              join: l in EntryLink,
-              on: l.target_entry_id == e.id,
-              where: l.source_entry_id == ^entry.id,
-              where: l.link_type == "blocked_by"
-            )
-            |> Repo.all()
+        result =
+          if include_blocker do
+            Enum.map(entries, fn entry ->
+              blockers =
+                from(e in Entry,
+                  join: l in EntryLink,
+                  on: l.target_entry_id == e.id,
+                  where: l.source_entry_id == ^entry.id,
+                  where: l.link_type == "blocked_by"
+                )
+                |> Repo.all()
 
-            %{entry: entry, blocked_by: blockers}
-          end)
-        else
-          entries
-        end
+              %{entry: entry, blocked_by: blockers}
+            end)
+          else
+            entries
+          end
 
         {:ok, result}
     end
@@ -222,39 +227,42 @@ defmodule Onelist.Sprints do
 
       _sprint ->
         # Count items by type
-        items_by_type = from(e in Entry,
-          join: l in EntryLink,
-          on: l.target_entry_id == e.id,
-          where: l.source_entry_id == ^sprint_id,
-          where: l.link_type == "contains",
-          where: e.user_id == ^user.id,
-          group_by: e.entry_type,
-          select: {e.entry_type, count(e.id)}
-        )
-        |> Repo.all()
-        |> Map.new()
+        items_by_type =
+          from(e in Entry,
+            join: l in EntryLink,
+            on: l.target_entry_id == e.id,
+            where: l.source_entry_id == ^sprint_id,
+            where: l.link_type == "contains",
+            where: e.user_id == ^user.id,
+            group_by: e.entry_type,
+            select: {e.entry_type, count(e.id)}
+          )
+          |> Repo.all()
+          |> Map.new()
 
         total_items = items_by_type |> Map.values() |> Enum.sum()
 
         # Count blocked items
-        blocked_count = from(e in Entry,
-          join: sprint_link in EntryLink,
-          on: sprint_link.target_entry_id == e.id,
-          join: block_link in EntryLink,
-          on: block_link.source_entry_id == e.id,
-          where: sprint_link.source_entry_id == ^sprint_id,
-          where: sprint_link.link_type == "contains",
-          where: block_link.link_type == "blocked_by",
-          where: e.user_id == ^user.id,
-          select: count(e.id, :distinct)
-        )
-        |> Repo.one()
+        blocked_count =
+          from(e in Entry,
+            join: sprint_link in EntryLink,
+            on: sprint_link.target_entry_id == e.id,
+            join: block_link in EntryLink,
+            on: block_link.source_entry_id == e.id,
+            where: sprint_link.source_entry_id == ^sprint_id,
+            where: sprint_link.link_type == "contains",
+            where: block_link.link_type == "blocked_by",
+            where: e.user_id == ^user.id,
+            select: count(e.id, :distinct)
+          )
+          |> Repo.one()
 
-        {:ok, %{
-          total_items: total_items,
-          blocked_count: blocked_count,
-          items_by_type: items_by_type
-        }}
+        {:ok,
+         %{
+           total_items: total_items,
+           blocked_count: blocked_count,
+           items_by_type: items_by_type
+         }}
     end
   end
 end

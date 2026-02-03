@@ -31,7 +31,10 @@ defmodule Onelist.Tags.Tag do
     |> validate_length(:name, max: 255)
     |> normalize_name()
     |> unsafe_validate_unique([:name, :user_id], Onelist.Repo, message: "has already been taken")
-    |> unique_constraint(:name, name: :tags_user_id_name_unique, message: "has already been taken")
+    |> unique_constraint(:name,
+      name: :tags_user_id_name_unique,
+      message: "has already been taken"
+    )
   end
 
   defp normalize_name(changeset) do

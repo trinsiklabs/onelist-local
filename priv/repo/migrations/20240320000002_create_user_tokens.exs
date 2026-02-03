@@ -13,4 +13,4 @@ defmodule Onelist.Repo.Migrations.CreateUserTokens do
     create index(:user_tokens, [:user_id])
     create unique_index(:user_tokens, [:context, :token])
   end
-end 
+end

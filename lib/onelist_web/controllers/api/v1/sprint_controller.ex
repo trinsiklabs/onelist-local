@@ -112,11 +112,12 @@ defmodule OnelistWeb.Api.V1.SprintController do
     limit = min(params["limit"] || 100, 500)
     offset = params["offset"] || 0
 
-    entry_types = case params["entry_types"] do
-      nil -> nil
-      types when is_binary(types) -> String.split(types, ",")
-      types when is_list(types) -> types
-    end
+    entry_types =
+      case params["entry_types"] do
+        nil -> nil
+        types when is_binary(types) -> String.split(types, ",")
+        types when is_list(types) -> types
+      end
 
     opts = [limit: limit, offset: offset]
     opts = if entry_types, do: Keyword.put(opts, :entry_types, entry_types), else: opts
@@ -176,7 +177,11 @@ defmodule OnelistWeb.Api.V1.SprintController do
 
     case Sprints.list_blocked_items(user, sprint_id, opts) do
       {:ok, items} ->
-        render(conn, :blocked, blocked_items: items, count: length(items), include_blocker: include_blocker)
+        render(conn, :blocked,
+          blocked_items: items,
+          count: length(items),
+          include_blocker: include_blocker
+        )
 
       {:error, :not_found} ->
         {:error, :not_found}

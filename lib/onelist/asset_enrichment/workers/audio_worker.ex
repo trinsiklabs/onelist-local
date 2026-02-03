@@ -19,17 +19,19 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
   require Logger
 
   @impl Oban.Worker
-  def perform(%Oban.Job{
-        args: %{"asset_id" => asset_id, "entry_id" => entry_id, "enrichment_type" => type},
-        inserted_at: inserted_at
-      } = _job) do
+  def perform(
+        %Oban.Job{
+          args: %{"asset_id" => asset_id, "entry_id" => entry_id, "enrichment_type" => type},
+          inserted_at: inserted_at
+        } = _job
+      ) do
     # Record queue latency
     Telemetry.record_queue_latency(
-      String.to_atom(type), 
-      inserted_at, 
+      String.to_atom(type),
+      inserted_at,
       %{asset_id: asset_id, entry_id: entry_id}
     )
-    
+
     with {:ok, asset} <- get_asset(asset_id) do
       process_enrichment(asset, entry_id, type)
     end
@@ -44,7 +46,7 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
 
   defp process_enrichment(asset, entry_id, "transcript") do
     metadata = %{asset_id: asset.id, entry_id: entry_id}
-    
+
     Telemetry.span(:transcribe, metadata, fn ->
       # Mark as processing
       AssetEnrichment.mark_enrichment_processing(entry_id, "transcript", asset.id)
@@ -55,7 +57,7 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
           case whisper_provider().transcribe(audio_path, []) do
             {:ok, result} ->
               cost = estimate_whisper_cost(result.duration)
-              
+
               rep_metadata = %{
                 "enrichment" => %{
                   "provider" => "openai",
@@ -86,6 +88,7 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
                   provider: "openai",
                   duration_seconds: result.duration
                 })
+
                 AssetEnrichment.record_cost(entry.user_id, cost)
               end
 
@@ -104,7 +107,13 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
           end
 
         {:error, reason} ->
-          AssetEnrichment.mark_enrichment_failed(entry_id, "transcript", asset.id, "File not found")
+          AssetEnrichment.mark_enrichment_failed(
+            entry_id,
+            "transcript",
+            asset.id,
+            "File not found"
+          )
+
           {:error, reason}
       end
     end)
@@ -112,7 +121,7 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
 
   defp process_enrichment(asset, entry_id, "action_items") do
     metadata = %{asset_id: asset.id, entry_id: entry_id}
-    
+
     Telemetry.span(:extract_actions, metadata, fn ->
       # Need transcript first
       case AssetEnrichment.get_transcript(entry_id, asset.id) do
@@ -123,18 +132,19 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
               case ActionItemExtractor.extract(sanitized_text, segments) do
                 {:ok, items} ->
                   # Validate extracted items before storing
-                  {:ok, validated_items} = Security.validate_action_items(
-                    Enum.map(items, fn item -> 
-                      %{
-                        "text" => item.text,
-                        "owner" => item[:owner],
-                        "deadline" => item[:deadline],
-                        "confidence" => confidence_to_string(item[:confidence]),
-                        "source_quote" => item[:source_quote]
-                      }
-                    end)
-                  )
-                  
+                  {:ok, validated_items} =
+                    Security.validate_action_items(
+                      Enum.map(items, fn item ->
+                        %{
+                          "text" => item.text,
+                          "owner" => item[:owner],
+                          "deadline" => item[:deadline],
+                          "confidence" => confidence_to_string(item[:confidence]),
+                          "source_quote" => item[:source_quote]
+                        }
+                      end)
+                    )
+
                   # Create entries for each validated action item
                   entry = Entries.get_entry(entry_id)
 
@@ -143,7 +153,9 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
                       create_extracted_entry(entry, asset, item, "action_item")
                     end)
 
-                    Logger.info("Extracted #{length(validated_items)} action items from asset #{asset.id}")
+                    Logger.info(
+                      "Extracted #{length(validated_items)} action items from asset #{asset.id}"
+                    )
                   end
 
                   :ok
@@ -152,7 +164,7 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
                   Logger.error("Action item extraction failed: #{inspect(reason)}")
                   {:error, reason}
               end
-              
+
             {:error, reason} ->
               Logger.error("Transcript sanitization failed: #{inspect(reason)}")
               {:error, {:sanitization_failed, reason}}
@@ -241,14 +253,14 @@ defmodule Onelist.AssetEnrichment.Workers.AudioWorker do
 
   defp word_count(nil), do: 0
   defp word_count(text), do: text |> String.split() |> length()
-  
+
   defp confidence_to_string(nil), do: "medium"
   defp confidence_to_string(c) when is_float(c) and c >= 0.8, do: "high"
   defp confidence_to_string(c) when is_float(c) and c >= 0.6, do: "medium"
   defp confidence_to_string(c) when is_float(c), do: "low"
   defp confidence_to_string(c) when is_binary(c), do: c
   defp confidence_to_string(_), do: "medium"
-  
+
   defp whisper_provider do
     Application.get_env(:onelist, :whisper_provider, OpenAIWhisper)
   end

@@ -1,6 +1,6 @@
 defmodule OnelistWeb.MarkdownDemo do
   use OnelistWeb, :live_component
-  
+
   @default_content """
   # Welcome to Onelist
 
@@ -66,7 +66,6 @@ defmodule OnelistWeb.MarkdownDemo do
             phx-target={@myself}
           ><%= @content %></textarea>
         </div>
-
         <!-- Preview Section -->
         <div class="flex-1">
           <h3 class="text-lg font-semibold mb-2">Preview</h3>
@@ -88,7 +87,6 @@ defmodule OnelistWeb.MarkdownDemo do
           </div>
         </div>
       </div>
-
       <!-- Syntax Help Panel -->
       <%= if @show_syntax_help do %>
         <div class="mt-4 p-4 bg-gray-50 rounded-lg" data-test-id="syntax-help">
@@ -170,23 +168,27 @@ defmodule OnelistWeb.MarkdownDemo do
 
   @impl true
   def handle_event("copy_example", %{"example" => example}, socket) do
-    text = case example do
-      "basic" -> """
-      # Heading 1
-      ## Heading 2
-      **Bold text**
-      *Italic text*
-      [Link](https://example.com)
-      """
-      "lists" -> """
-      - Bullet point
-      1. Numbered list
-      > Blockquote
-      ```
-      Code block
-      ```
-      """
-    end
+    text =
+      case example do
+        "basic" ->
+          """
+          # Heading 1
+          ## Heading 2
+          **Bold text**
+          *Italic text*
+          [Link](https://example.com)
+          """
+
+        "lists" ->
+          """
+          - Bullet point
+          1. Numbered list
+          > Blockquote
+          ```
+          Code block
+          ```
+          """
+      end
 
     {:noreply, push_event(socket, "clipboard", %{text: text})}
   end
@@ -194,19 +196,23 @@ defmodule OnelistWeb.MarkdownDemo do
   defp render_markdown(content) do
     try do
       case Earmark.as_html(content, compact_output: true) do
-        {:ok, html, _} -> 
-          html = if String.contains?(content, "<script>") do
-            content
+        {:ok, html, _} ->
+          html =
+            if String.contains?(content, "<script>") do
+              content
               |> Phoenix.HTML.html_escape()
               |> Phoenix.HTML.safe_to_string()
-          else
-            html
-          end
+            else
+              html
+            end
+
           {:ok, html}
-        {:error, _, message} -> {:error, "Could not parse markdown: #{message}"}
+
+        {:error, _, message} ->
+          {:error, "Could not parse markdown: #{message}"}
       end
     rescue
       e in _ -> {:error, "Could not parse markdown: #{Exception.message(e)}"}
     end
   end
-end 
+end

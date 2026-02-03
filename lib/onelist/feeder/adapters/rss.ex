@@ -40,8 +40,12 @@ defmodule Onelist.Feeder.Adapters.RSS do
   @impl true
   def validate_credentials(credentials) do
     case Map.get(credentials, "feed_url") do
-      nil -> {:error, :missing_feed_url}
-      "" -> {:error, :missing_feed_url}
+      nil ->
+        {:error, :missing_feed_url}
+
+      "" ->
+        {:error, :missing_feed_url}
+
       url when is_binary(url) ->
         if valid_url?(url), do: :ok, else: {:error, :invalid_feed_url}
     end
@@ -127,7 +131,8 @@ defmodule Onelist.Feeder.Adapters.RSS do
     # RSS content is typically HTML, convert to markdown
     case Onelist.Feeder.Converters.HTMLConverter.convert(content, []) do
       {:ok, markdown} -> {:ok, markdown}
-      {:error, _} -> {:ok, content}  # Fallback to raw content
+      # Fallback to raw content
+      {:error, _} -> {:ok, content}
     end
   end
 
@@ -268,7 +273,8 @@ defmodule Onelist.Feeder.Adapters.RSS do
       author: text(entry, "author name"),
       published_at: parse_date(text(entry, "published") || text(entry, "updated")),
       categories: Floki.find(entry, "category") |> Enum.map(&attr_direct(&1, "term")),
-      enclosures: []  # Atom uses link[rel=enclosure]
+      # Atom uses link[rel=enclosure]
+      enclosures: []
     }
   end
 
@@ -320,6 +326,7 @@ defmodule Onelist.Feeder.Adapters.RSS do
 
   defp parse_date(nil), do: nil
   defp parse_date(""), do: nil
+
   defp parse_date(str) when is_binary(str) do
     # Try common date formats
     with {:error, _} <- DateTime.from_iso8601(str),
@@ -335,7 +342,9 @@ defmodule Onelist.Feeder.Adapters.RSS do
     # RFC 822 date format common in RSS
     # Example: "Mon, 15 Jan 2024 10:30:00 GMT"
     case Timex.parse(str, "{RFC822}") do
-      {:ok, dt} -> {:ok, DateTime.from_naive!(dt, "Etc/UTC")}
+      {:ok, dt} ->
+        {:ok, DateTime.from_naive!(dt, "Etc/UTC")}
+
       {:error, _} ->
         # Try without timezone
         case Timex.parse(str, "{WDshort}, {D} {Mshort} {YYYY} {h24}:{m}:{s}") do
@@ -348,6 +357,7 @@ defmodule Onelist.Feeder.Adapters.RSS do
   end
 
   defp parse_int(nil), do: nil
+
   defp parse_int(str) when is_binary(str) do
     case Integer.parse(str) do
       {n, _} -> n
@@ -363,8 +373,12 @@ defmodule Onelist.Feeder.Adapters.RSS do
     |> Enum.reject(fn item -> item[:guid] in last_guids end)
     |> Enum.filter(fn item ->
       case {item[:published_at], last_date} do
-        {nil, _} -> true
-        {_, nil} -> true
+        {nil, _} ->
+          true
+
+        {_, nil} ->
+          true
+
         {pub, last} ->
           case DateTime.from_iso8601(last) do
             {:ok, last_dt, _} -> DateTime.compare(pub, last_dt) == :gt
@@ -375,6 +389,7 @@ defmodule Onelist.Feeder.Adapters.RSS do
   end
 
   defp newest_date([]), do: nil
+
   defp newest_date(items) do
     items
     |> Enum.map(& &1[:published_at])
@@ -402,12 +417,14 @@ defmodule Onelist.Feeder.Adapters.RSS do
   end
 
   defp extract_filename(nil), do: "attachment"
+
   defp extract_filename(url) when is_binary(url) do
     uri = URI.parse(url)
     Path.basename(uri.path || "attachment")
   end
 
   defp normalize_tag(nil), do: ""
+
   defp normalize_tag(str) when is_binary(str) do
     str
     |> String.downcase()

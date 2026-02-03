@@ -1,7 +1,7 @@
 defmodule Onelist.ChatLogs do
   @moduledoc """
   Real-time chat log management.
-  
+
   Handles streaming messages from OpenClaw agents into Onelist entries.
   Each session becomes a single chat_log entry that grows over time.
   """
@@ -13,7 +13,7 @@ defmodule Onelist.ChatLogs do
 
   @doc """
   Append a message to a session's chat log.
-  
+
   Creates the entry if it doesn't exist, otherwise appends to existing.
   Queues memory extraction after debounce period.
   """
@@ -21,37 +21,42 @@ defmodule Onelist.ChatLogs do
     Repo.transaction(fn ->
       # Find or create the chat log entry for this session
       entry = get_or_create_session_entry(user, session_id)
-      
+
       # Parse existing messages
       existing_content = get_entry_content(entry)
-      
+
       # Append new message
       message_id = generate_message_id()
       timestamped_message = Map.put(message, "id", message_id)
       new_content = existing_content <> Jason.encode!(timestamped_message) <> "\n"
-      
+
       message_count = (entry.metadata["message_count"] || 0) + 1
-      
+
       # Update the representation directly (bypassing trusted memory check)
       representation = get_or_create_representation(entry)
-      {:ok, _} = representation
+
+      {:ok, _} =
+        representation
         |> Representation.changeset(%{content: new_content})
         |> Repo.update()
-      
+
       # Update entry metadata
-      {:ok, updated} = entry
+      {:ok, updated} =
+        entry
         |> Entry.update_changeset(%{
-          metadata: Map.merge(entry.metadata || %{}, %{
-            "message_count" => message_count,
-            "last_message_at" => message["timestamp"] || DateTime.utc_now() |> DateTime.to_iso8601(),
-            "last_role" => message["role"]
-          })
+          metadata:
+            Map.merge(entry.metadata || %{}, %{
+              "message_count" => message_count,
+              "last_message_at" =>
+                message["timestamp"] || DateTime.utc_now() |> DateTime.to_iso8601(),
+              "last_role" => message["role"]
+            })
         })
         |> Repo.update()
-      
+
       # Queue memory extraction (debounced - only if no recent job)
       maybe_queue_extraction(updated, message_count)
-      
+
       %{
         message_id: message_id,
         entry_id: updated.id,
@@ -59,7 +64,7 @@ defmodule Onelist.ChatLogs do
       }
     end)
   end
-  
+
   defp get_or_create_representation(entry) do
     # Handle both preloaded and not-preloaded cases
     case entry.representations do
@@ -69,46 +74,52 @@ defmodule Onelist.ChatLogs do
           nil -> create_representation(entry)
           rep -> rep
         end
-      [rep | _] -> rep
-      [] -> create_representation(entry)
+
+      [rep | _] ->
+        rep
+
+      [] ->
+        create_representation(entry)
     end
   end
-  
+
   defp create_representation(entry) do
-    {:ok, rep} = %Representation{entry_id: entry.id}
+    {:ok, rep} =
+      %Representation{entry_id: entry.id}
       |> Representation.changeset(%{
         mime_type: "application/jsonl",
         content: "",
         type: "chat_log"
       })
       |> Repo.insert()
+
     rep
   end
 
   @doc """
   Get recent messages across all sessions within a time window.
-  
+
   Returns messages from the last N hours, up to the specified limit.
   Messages are ordered by timestamp, most recent first.
   """
   def get_recent_messages_by_time(user, hours, limit \\ 100) do
     cutoff = DateTime.utc_now() |> DateTime.add(-hours * 3600, :second)
     cutoff_iso = DateTime.to_iso8601(cutoff)
-    
+
     # Get all chat_log entries for this user
-    entries = 
+    entries =
       Entry
       |> where([e], e.user_id == ^user.id)
       |> where([e], e.entry_type == "chat_log")
       |> preload(:representations)
       |> Repo.all()
-    
+
     # Extract and filter messages across all sessions
-    messages = 
+    messages =
       entries
       |> Enum.flat_map(fn entry ->
         session_id = entry.metadata["session_id"]
-        
+
         entry
         |> get_entry_content()
         |> String.split("\n", trim: true)
@@ -129,7 +140,7 @@ defmodule Onelist.ChatLogs do
       end)
       |> Enum.sort_by(fn msg -> msg["timestamp"] end, :desc)
       |> Enum.take(limit)
-    
+
     {:ok, messages}
   end
 
@@ -138,14 +149,18 @@ defmodule Onelist.ChatLogs do
   """
   def get_recent_messages(user, session_id, limit \\ 50) do
     case get_session_entry(user, session_id) do
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
+
       entry ->
         content = get_entry_content(entry)
-        messages = 
+
+        messages =
           content
           |> String.split("\n", trim: true)
           |> Enum.map(&Jason.decode!/1)
           |> Enum.take(-limit)
+
         {:ok, messages}
     end
   end
@@ -154,7 +169,7 @@ defmodule Onelist.ChatLogs do
   List all chat log sessions for a user.
   """
   def list_sessions(user, limit \\ 20) do
-    sessions = 
+    sessions =
       Entry
       |> where([e], e.user_id == ^user.id)
       |> where([e], e.entry_type == "chat_log")
@@ -173,7 +188,7 @@ defmodule Onelist.ChatLogs do
           inserted_at: entry.inserted_at
         }
       end)
-    
+
     {:ok, sessions}
   end
 
@@ -182,21 +197,25 @@ defmodule Onelist.ChatLogs do
   """
   def close_session(user, session_id) do
     case get_session_entry(user, session_id) do
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
+
       entry ->
         # Update metadata to mark as closed
-        {:ok, updated} = Entries.update_entry(entry, %{
-          metadata: Map.merge(entry.metadata || %{}, %{
-            "status" => "closed",
-            "closed_at" => DateTime.utc_now() |> DateTime.to_iso8601()
+        {:ok, updated} =
+          Entries.update_entry(entry, %{
+            metadata:
+              Map.merge(entry.metadata || %{}, %{
+                "status" => "closed",
+                "closed_at" => DateTime.utc_now() |> DateTime.to_iso8601()
+              })
           })
-        })
-        
+
         # Queue final memory extraction
         %{entry_id: updated.id}
         |> ProcessEntryWorker.new()
         |> Oban.insert()
-        
+
         {:ok, updated}
     end
   end
@@ -221,23 +240,26 @@ defmodule Onelist.ChatLogs do
 
   defp create_session_entry(user, session_id) do
     today = Date.utc_today() |> Date.to_iso8601()
-    
-    {:ok, entry} = Entries.create_entry(user, %{
-      title: "Chat Session: #{today}",
-      entry_type: "chat_log",
-      source_type: "openclaw",
-      metadata: %{
-        "session_id" => session_id,
-        "started_at" => DateTime.utc_now() |> DateTime.to_iso8601(),
-        "message_count" => 0,
-        "status" => "active"
-      },
-      representations: [%{
-        mime_type: "application/jsonl",
-        content: ""
-      }]
-    })
-    
+
+    {:ok, entry} =
+      Entries.create_entry(user, %{
+        title: "Chat Session: #{today}",
+        entry_type: "chat_log",
+        source_type: "openclaw",
+        metadata: %{
+          "session_id" => session_id,
+          "started_at" => DateTime.utc_now() |> DateTime.to_iso8601(),
+          "message_count" => 0,
+          "status" => "active"
+        },
+        representations: [
+          %{
+            mime_type: "application/jsonl",
+            content: ""
+          }
+        ]
+      })
+
     entry
   end
 
@@ -256,9 +278,11 @@ defmodule Onelist.ChatLogs do
     # Queue extraction every 10 messages, or if explicitly requested
     if rem(message_count, 10) == 0 do
       %{entry_id: entry.id, mode: "incremental"}
-      |> ProcessEntryWorker.new(schedule_in: 30)  # 30 second debounce
+      # 30 second debounce
+      |> ProcessEntryWorker.new(schedule_in: 30)
       |> Oban.insert()
     end
+
     :ok
   end
 end

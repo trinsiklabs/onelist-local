@@ -56,11 +56,12 @@ defmodule Onelist.WebCapture.Workers.CaptureWorker do
       {:ok, result} ->
         capture_time_ms = System.monotonic_time(:millisecond) - start_time
 
-        final_result = Map.merge(result, %{
-          user_id: user_id,
-          capture_time_ms: capture_time_ms,
-          job_id: job_id
-        })
+        final_result =
+          Map.merge(result, %{
+            user_id: user_id,
+            capture_time_ms: capture_time_ms,
+            job_id: job_id
+          })
 
         # Store result in job meta
         update_job_meta(job_id, %{
@@ -128,9 +129,17 @@ defmodule Onelist.WebCapture.Workers.CaptureWorker do
   defp serialize_result(result) do
     result
     |> Map.take([
-      :url, :final_url, :title, :description, :author,
-      :site_name, :image_url, :word_count, :language,
-      :tier_used, :capture_time_ms
+      :url,
+      :final_url,
+      :title,
+      :description,
+      :author,
+      :site_name,
+      :image_url,
+      :word_count,
+      :language,
+      :tier_used,
+      :capture_time_ms
     ])
     |> Map.new(fn {k, v} -> {to_string(k), v} end)
   end
@@ -205,7 +214,10 @@ defmodule Onelist.WebCapture.Workers.CaptureWorker do
   end
 
   defp format_error({:tier1_failed, reason}), do: "Tier 1 failed: #{format_error(reason)}"
-  defp format_error({:capture_failed, tier, reason}), do: "#{tier} failed: #{format_error(reason)}"
+
+  defp format_error({:capture_failed, tier, reason}),
+    do: "#{tier} failed: #{format_error(reason)}"
+
   defp format_error(:blocked), do: "Site blocked automated access"
   defp format_error(:rate_limited), do: "Rate limited by site"
   defp format_error(:timeout), do: "Request timed out"

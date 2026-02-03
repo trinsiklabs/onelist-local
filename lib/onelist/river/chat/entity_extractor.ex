@@ -87,6 +87,7 @@ defmodule Onelist.River.Chat.EntityExtractor do
   defp days_until_day(target_day) do
     today = Date.utc_today()
     day_of_week = Date.day_of_week(today)
+
     days =
       if day_of_week >= target_day do
         7 - day_of_week + target_day
@@ -110,7 +111,11 @@ defmodule Onelist.River.Chat.EntityExtractor do
         parse_us_date(result)
 
       # Month name format "Jan 15" or "January 15"
-      result = Regex.run(~r/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})\b/i, message) ->
+      result =
+          Regex.run(
+            ~r/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})\b/i,
+            message
+          ) ->
         parse_month_day(result)
 
       true ->
@@ -199,7 +204,10 @@ defmodule Onelist.River.Chat.EntityExtractor do
   defp extract_person(entities, message) do
     # Look for patterns like "call Sarah", "email John", etc.
     # This is a simple extraction - could be enhanced with NER
-    case Regex.run(~r/\b(?:call|email|text|message|meet(?:ing)?\s+with|ask|tell|remind)\s+([A-Z][a-z]+)\b/, message) do
+    case Regex.run(
+           ~r/\b(?:call|email|text|message|meet(?:ing)?\s+with|ask|tell|remind)\s+([A-Z][a-z]+)\b/,
+           message
+         ) do
       [_, person] ->
         Map.put(entities, :person, person)
 

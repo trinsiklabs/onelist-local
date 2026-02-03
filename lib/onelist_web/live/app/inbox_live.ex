@@ -9,23 +9,23 @@ defmodule OnelistWeb.App.InboxLive do
   @impl true
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
-    
+
     # Get unprocessed entries (no memories extracted yet)
-    entries = Entries.list_entries(user.id, 
-      limit: 50,
-      preload: [:tags]
-    )
-    
+    entries =
+      Entries.list_entries(user.id,
+        limit: 50,
+        preload: [:tags]
+      )
+
     # For MVP, show all entries in inbox
     # TODO: Filter to only unprocessed once Reader agent is integrated
-    
-    {:ok, 
-      socket
-      |> assign(:page_title, "Inbox")
-      |> assign(:current_path, "/app")
-      |> assign(:entries, entries)
-      |> assign(:inbox_count, length(entries))
-    }
+
+    {:ok,
+     socket
+     |> assign(:page_title, "Inbox")
+     |> assign(:current_path, "/app")
+     |> assign(:entries, entries)
+     |> assign(:inbox_count, length(entries))}
   end
 
   @impl true
@@ -40,7 +40,7 @@ defmodule OnelistWeb.App.InboxLive do
           New and unprocessed entries
         </p>
       </div>
-      
+
       <%= if Enum.empty?(@entries) do %>
         <div class="card" style="text-align: center; padding: var(--space-12);">
           <div style="font-size: 3rem; margin-bottom: var(--space-4);">📭</div>
@@ -67,7 +67,11 @@ defmodule OnelistWeb.App.InboxLive do
 
   defp entry_card(assigns) do
     ~H"""
-    <a href={~p"/app/library/#{@entry.id}"} class="card card-hover" style="display: block; text-decoration: none;">
+    <a
+      href={~p"/app/library/#{@entry.id}"}
+      class="card card-hover"
+      style="display: block; text-decoration: none;"
+    >
       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <div style="flex: 1;">
           <h3 style="font-size: var(--text-lg); font-weight: var(--font-semibold); color: var(--color-text); margin-bottom: var(--space-2);">
@@ -86,7 +90,7 @@ defmodule OnelistWeb.App.InboxLive do
           </span>
         </div>
       </div>
-      
+
       <%= if @entry.tags && length(@entry.tags) > 0 do %>
         <div style="display: flex; gap: var(--space-2); margin-top: var(--space-3); flex-wrap: wrap;">
           <%= for tag <- Enum.take(@entry.tags, 5) do %>
@@ -102,6 +106,7 @@ defmodule OnelistWeb.App.InboxLive do
 
   defp truncate_content(entry) do
     content = entry.content || ""
+
     if String.length(content) > 150 do
       String.slice(content, 0, 150) <> "..."
     else

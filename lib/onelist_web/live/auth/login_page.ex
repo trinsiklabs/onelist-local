@@ -10,11 +10,8 @@ defmodule OnelistWeb.Auth.LoginPage do
   def render(assigns) do
     ~H"""
     <div>
-      <.live_component
-        module={LoginComponent}
-        id="login"
-      />
+      <.live_component module={LoginComponent} id="login" />
     </div>
     """
   end
-end 
+end

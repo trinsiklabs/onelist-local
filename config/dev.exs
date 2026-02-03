@@ -23,7 +23,11 @@ config :onelist, OnelistWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: System.get_env("SECRET_KEY_BASE") || raise("SECRET_KEY_BASE environment variable is required. Generate one with: mix phx.gen.secret"),
+  secret_key_base:
+    System.get_env("SECRET_KEY_BASE") ||
+      raise(
+        "SECRET_KEY_BASE environment variable is required. Generate one with: mix phx.gen.secret"
+      ),
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:onelist, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:onelist, ~w(--watch)]}

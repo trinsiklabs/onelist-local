@@ -4,13 +4,21 @@ defmodule Onelist.Repo.Migrations.CreateRepresentationVersions do
   def change do
     create table(:representation_versions, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :representation_id, references(:representations, type: :binary_id, on_delete: :delete_all), null: false
+
+      add :representation_id,
+          references(:representations, type: :binary_id, on_delete: :delete_all), null: false
+
       add :user_id, references(:users, type: :binary_id, on_delete: :nilify_all), null: false
-      add :content, :text  # Full snapshot (null if diff)
-      add :diff, :text     # Diff from previous (null if snapshot)
-      add :version, :integer, null: false  # representations.version before this change
-      add :version_type, :string, null: false, default: "diff"  # "snapshot" or "diff"
-      add :byte_size, :integer  # Size of content or diff for tracking
+      # Full snapshot (null if diff)
+      add :content, :text
+      # Diff from previous (null if snapshot)
+      add :diff, :text
+      # representations.version before this change
+      add :version, :integer, null: false
+      # "snapshot" or "diff"
+      add :version_type, :string, null: false, default: "diff"
+      # Size of content or diff for tracking
+      add :byte_size, :integer
 
       timestamps(type: :utc_datetime_usec, updated_at: false)
     end
@@ -22,7 +30,8 @@ defmodule Onelist.Repo.Migrations.CreateRepresentationVersions do
 
     # Constraint: either content OR diff must be present, not both
     create constraint(:representation_versions, :content_or_diff_present,
-      check: "(content IS NOT NULL AND diff IS NULL) OR (content IS NULL AND diff IS NOT NULL)"
-    )
+             check:
+               "(content IS NOT NULL AND diff IS NULL) OR (content IS NULL AND diff IS NOT NULL)"
+           )
   end
 end

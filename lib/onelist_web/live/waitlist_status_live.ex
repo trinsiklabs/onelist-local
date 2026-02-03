@@ -16,18 +16,18 @@ defmodule OnelistWeb.WaitlistStatusLive do
           |> assign(:page_title, "Not Found")
           |> assign(:signup, nil)
           |> assign(:position_info, nil)
-        
+
         {:ok, socket}
-      
+
       signup ->
         position_info = Waitlist.get_position_info(signup)
-        
+
         socket =
           socket
           |> assign(:page_title, "Your Headwaters Status")
           |> assign(:signup, signup)
           |> assign(:position_info, position_info)
-        
+
         {:ok, socket}
     end
   end
@@ -37,13 +37,11 @@ defmodule OnelistWeb.WaitlistStatusLive do
     ~H"""
     <div class="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
       <div class="max-w-2xl mx-auto px-4 py-16 sm:py-24">
-        
         <%= if @signup do %>
           <.status_view signup={@signup} position_info={@position_info} />
         <% else %>
           <.not_found_view />
         <% end %>
-        
       </div>
     </div>
     """
@@ -56,18 +54,16 @@ defmodule OnelistWeb.WaitlistStatusLive do
       <div class="mb-8">
         <span class="text-5xl">🌊</span>
       </div>
-      
+
       <h1 class="text-3xl sm:text-4xl font-bold text-white mb-2">
         <%= status_title(@signup.status) %>
       </h1>
-      
+
       <p class="text-lg text-slate-400 mb-8">
         <%= if @signup.name, do: @signup.name, else: @signup.email %>
       </p>
-      
       <!-- Main Status Card -->
       <div class="bg-slate-800/50 rounded-2xl p-8 mb-8 border border-slate-700">
-        
         <%= case @signup.status do %>
           <% "waiting" -> %>
             <.waiting_status position_info={@position_info} />
@@ -78,15 +74,12 @@ defmodule OnelistWeb.WaitlistStatusLive do
           <% _ -> %>
             <p class="text-slate-400">Status: <%= @signup.status %></p>
         <% end %>
-        
       </div>
-      
       <!-- Timeline -->
       <div class="bg-slate-800/30 rounded-xl p-6">
         <h3 class="text-sm font-medium text-slate-400 mb-4">Your Journey</h3>
         <.timeline signup={@signup} />
       </div>
-      
     </div>
     """
   end
@@ -101,7 +94,6 @@ defmodule OnelistWeb.WaitlistStatusLive do
         </div>
         <div class="text-slate-400">of <%= @position_info.max_spots %> Headwaters</div>
       </div>
-      
       <!-- Stats Grid -->
       <div class="grid grid-cols-3 gap-4 py-6 border-y border-slate-700">
         <div>
@@ -117,13 +109,11 @@ defmodule OnelistWeb.WaitlistStatusLive do
           <div class="text-xs text-slate-500">Ahead of You</div>
         </div>
       </div>
-      
       <!-- Estimated Wait -->
       <div>
         <div class="text-slate-400 mb-1">Estimated wait</div>
         <div class="text-2xl font-semibold text-white"><%= @position_info.estimated_wait %></div>
       </div>
-      
       <!-- Progress Bar -->
       <div class="pt-4">
         <div class="flex justify-between text-xs text-slate-500 mb-2">
@@ -131,7 +121,7 @@ defmodule OnelistWeb.WaitlistStatusLive do
           <span><%= @position_info.activated_count %>/<%= @position_info.queue_number %></span>
         </div>
         <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
-          <div 
+          <div
             class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500"
             style={"width: #{progress_percent(@position_info)}%"}
           >
@@ -146,23 +136,23 @@ defmodule OnelistWeb.WaitlistStatusLive do
     ~H"""
     <div class="space-y-6">
       <div class="text-5xl mb-4">🎉</div>
-      
+
       <div>
         <div class="text-2xl font-bold text-emerald-400 mb-2">You're Invited!</div>
         <p class="text-slate-300">
           Check your email for instructions to create your account.
         </p>
       </div>
-      
+
       <div class="pt-4">
-        <a 
+        <a
           href="/signup"
           class="inline-block py-3 px-8 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-white font-semibold rounded-lg transition-all"
         >
           Create Your Account →
         </a>
       </div>
-      
+
       <p class="text-sm text-slate-500">
         Invited on <%= Calendar.strftime(@signup.invited_at, "%B %d, %Y") %>
       </p>
@@ -174,25 +164,28 @@ defmodule OnelistWeb.WaitlistStatusLive do
     ~H"""
     <div class="space-y-6">
       <div class="text-5xl mb-4">✨</div>
-      
+
       <div>
         <div class="text-2xl font-bold text-cyan-400 mb-2">Welcome, Headwater!</div>
         <p class="text-slate-300">
           Your account is active. Thanks for being an early believer.
         </p>
       </div>
-      
+
       <div class="pt-4">
-        <a 
+        <a
           href="/app"
           class="inline-block py-3 px-8 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-semibold rounded-lg transition-all"
         >
           Go to Onelist →
         </a>
       </div>
-      
+
       <p class="text-sm text-slate-500">
-        Headwater #<%= @signup.queue_number %> since <%= Calendar.strftime(@signup.activated_at, "%B %d, %Y") %>
+        Headwater #<%= @signup.queue_number %> since <%= Calendar.strftime(
+          @signup.activated_at,
+          "%B %d, %Y"
+        ) %>
       </p>
     </div>
     """
@@ -211,10 +204,10 @@ defmodule OnelistWeb.WaitlistStatusLive do
           </div>
         </div>
       </div>
-      
       <!-- Invited -->
       <div class="flex items-center gap-3">
-        <div class={"w-3 h-3 rounded-full #{if @signup.invited_at, do: "bg-emerald-500", else: "bg-slate-600"}"}></div>
+        <div class={"w-3 h-3 rounded-full #{if @signup.invited_at, do: "bg-emerald-500", else: "bg-slate-600"}"}>
+        </div>
         <div class="flex-1 text-left">
           <div class={"text-sm #{if @signup.invited_at, do: "text-white", else: "text-slate-500"}"}>
             Invitation Sent
@@ -228,10 +221,10 @@ defmodule OnelistWeb.WaitlistStatusLive do
           <% end %>
         </div>
       </div>
-      
       <!-- Activated -->
       <div class="flex items-center gap-3">
-        <div class={"w-3 h-3 rounded-full #{if @signup.activated_at, do: "bg-cyan-400", else: "bg-slate-600"}"}></div>
+        <div class={"w-3 h-3 rounded-full #{if @signup.activated_at, do: "bg-cyan-400", else: "bg-slate-600"}"}>
+        </div>
         <div class="flex-1 text-left">
           <div class={"text-sm #{if @signup.activated_at, do: "text-white", else: "text-slate-500"}"}>
             Account Activated
@@ -257,7 +250,7 @@ defmodule OnelistWeb.WaitlistStatusLive do
       <p class="text-slate-400 mb-8">
         This status link doesn't exist or may have expired.
       </p>
-      <a 
+      <a
         href="/waitlist"
         class="inline-block py-3 px-6 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
       >
@@ -275,5 +268,6 @@ defmodule OnelistWeb.WaitlistStatusLive do
   defp progress_percent(%{activated_count: activated, queue_number: number}) when number > 0 do
     min(round(activated / number * 100), 100)
   end
+
   defp progress_percent(_), do: 0
 end

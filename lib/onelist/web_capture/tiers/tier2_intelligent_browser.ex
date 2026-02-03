@@ -124,40 +124,45 @@ defmodule Onelist.WebCapture.Tiers.Tier2IntelligentBrowser do
   defp build_result(original_url, response, extract_markdown) do
     html = response["html"] || response["content"]
 
-    markdown = if extract_markdown and html do
-      case Markdown.from_html(html) do
-        {:ok, md} -> md
-        {:error, _} -> nil
+    markdown =
+      if extract_markdown and html do
+        case Markdown.from_html(html) do
+          {:ok, md} -> md
+          {:error, _} -> nil
+        end
+      else
+        nil
       end
-    else
-      nil
-    end
 
     # Try to extract metadata from the HTML if available
-    metadata = if html do
-      case Floki.parse_document(html) do
-        {:ok, doc} ->
-          case Metadata.extract(doc, response["final_url"] || original_url) do
-            {:ok, meta} -> meta
-            {:error, _} -> %{}
-          end
-        _ -> %{}
-      end
-    else
-      %{}
-    end
+    metadata =
+      if html do
+        case Floki.parse_document(html) do
+          {:ok, doc} ->
+            case Metadata.extract(doc, response["final_url"] || original_url) do
+              {:ok, meta} -> meta
+              {:error, _} -> %{}
+            end
 
-    {:ok, %{
-      url: original_url,
-      final_url: response["final_url"] || original_url,
-      title: response["title"] || metadata[:title],
-      description: metadata[:description],
-      content: response["text"] || response["extracted_content"],
-      html: html,
-      markdown: markdown,
-      metadata: metadata,
-      screenshots: response["screenshots"] || []
-    }}
+          _ ->
+            %{}
+        end
+      else
+        %{}
+      end
+
+    {:ok,
+     %{
+       url: original_url,
+       final_url: response["final_url"] || original_url,
+       title: response["title"] || metadata[:title],
+       description: metadata[:description],
+       content: response["text"] || response["extracted_content"],
+       html: html,
+       markdown: markdown,
+       metadata: metadata,
+       screenshots: response["screenshots"] || []
+     }}
   end
 
   # ============================================

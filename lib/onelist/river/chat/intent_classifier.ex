@@ -14,7 +14,8 @@ defmodule Onelist.River.Chat.IntentClassifier do
     message_lower = String.downcase(message)
 
     cond do
-      matches_greeting?(message_lower) -> :chat  # Greetings are chat, not queries
+      # Greetings are chat, not queries
+      matches_greeting?(message_lower) -> :chat
       matches_create_task?(message_lower) -> :create_task
       matches_complete_task?(message_lower) -> :complete_task
       matches_list_tasks?(message_lower) -> :list_tasks
@@ -35,7 +36,8 @@ defmodule Onelist.River.Chat.IntentClassifier do
       ~r/how\s+are\s+you/,
       ~r/^(thanks|thank\s+you)/,
       ~r/^(bye|goodbye|see\s+you|talk\s+later)/,
-      ~r/^river[,!?]?\s*$/  # Just saying "River"
+      # Just saying "River"
+      ~r/^river[,!?]?\s*$/
     ]
 
     Enum.any?(patterns, &Regex.match?(&1, msg))

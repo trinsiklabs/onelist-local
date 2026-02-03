@@ -31,9 +31,10 @@ defmodule Onelist.Repo.Migrations.CreateUserStorageConfigs do
 
     # Only one active storage config per user
     create unique_index(:user_storage_configs, [:user_id],
-      where: "is_active = true",
-      name: :user_storage_configs_active_user_unique
-    )
+             where: "is_active = true",
+             name: :user_storage_configs_active_user_unique
+           )
+
     # Index for finding configs by provider
     create index(:user_storage_configs, [:provider])
   end

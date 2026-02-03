@@ -31,12 +31,13 @@ defmodule Onelist.Searcher.Search do
     with {:ok, query_vector} <- embed_query(query) do
       results = do_semantic_search(user_id, query_vector, filters, limit, offset)
 
-      {:ok, %{
-        results: results,
-        total: length(results),
-        query: query,
-        search_type: "semantic"
-      }}
+      {:ok,
+       %{
+         results: results,
+         total: length(results),
+         query: query,
+         search_type: "semantic"
+       }}
     end
   end
 
@@ -55,12 +56,13 @@ defmodule Onelist.Searcher.Search do
 
     results = do_keyword_search(user_id, query, filters, limit, offset)
 
-    {:ok, %{
-      results: results,
-      total: length(results),
-      query: query,
-      search_type: "keyword"
-    }}
+    {:ok,
+     %{
+       results: results,
+       total: length(results),
+       query: query,
+       search_type: "keyword"
+     }}
   end
 
   @doc """
@@ -74,18 +76,20 @@ defmodule Onelist.Searcher.Search do
 
     base_query =
       from e in Entry,
-        join: emb in Embedding, on: emb.entry_id == e.id,
+        join: emb in Embedding,
+        on: emb.entry_id == e.id,
         where: emb.model_name == ^OpenAI.model_name(),
         where: e.id not in ^exclude,
         select: %{
           entry_id: e.id,
           title: e.title,
           entry_type: e.entry_type,
-          score: fragment(
-            "1 - (? <=> ?)",
-            emb.vector,
-            ^Pgvector.new(query_vector)
-          )
+          score:
+            fragment(
+              "1 - (? <=> ?)",
+              emb.vector,
+              ^Pgvector.new(query_vector)
+            )
         },
         order_by: [asc: fragment("? <=> ?", emb.vector, ^Pgvector.new(query_vector))],
         limit: ^limit
@@ -98,18 +102,20 @@ defmodule Onelist.Searcher.Search do
   def do_semantic_search(user_id, query_vector, filters, limit, offset) do
     base_query =
       from e in Entry,
-        join: emb in Embedding, on: emb.entry_id == e.id,
+        join: emb in Embedding,
+        on: emb.entry_id == e.id,
         where: e.user_id == ^user_id,
         where: emb.model_name == ^OpenAI.model_name(),
         select: %{
           entry_id: e.id,
           title: e.title,
           entry_type: e.entry_type,
-          score: fragment(
-            "1 - (? <=> ?)",
-            emb.vector,
-            ^Pgvector.new(query_vector)
-          )
+          score:
+            fragment(
+              "1 - (? <=> ?)",
+              emb.vector,
+              ^Pgvector.new(query_vector)
+            )
         },
         order_by: [asc: fragment("? <=> ?", emb.vector, ^Pgvector.new(query_vector))],
         limit: ^limit,
@@ -130,26 +136,31 @@ defmodule Onelist.Searcher.Search do
       base_query =
         from e in Entry,
           where: e.user_id == ^user_id,
-          where: fragment(
-            "to_tsvector('english', coalesce(?, '')) @@ to_tsquery('english', ?)",
-            e.title,
-            ^tsquery
-          ),
+          where:
+            fragment(
+              "to_tsvector('english', coalesce(?, '')) @@ to_tsquery('english', ?)",
+              e.title,
+              ^tsquery
+            ),
           select: %{
             entry_id: e.id,
             title: e.title,
             entry_type: e.entry_type,
-            score: fragment(
-              "ts_rank(to_tsvector('english', coalesce(?, '')), to_tsquery('english', ?))",
-              e.title,
-              ^tsquery
-            )
+            score:
+              fragment(
+                "ts_rank(to_tsvector('english', coalesce(?, '')), to_tsquery('english', ?))",
+                e.title,
+                ^tsquery
+              )
           },
-          order_by: [desc: fragment(
-            "ts_rank(to_tsvector('english', coalesce(?, '')), to_tsquery('english', ?))",
-            e.title,
-            ^tsquery
-          )],
+          order_by: [
+            desc:
+              fragment(
+                "ts_rank(to_tsvector('english', coalesce(?, '')), to_tsquery('english', ?))",
+                e.title,
+                ^tsquery
+              )
+          ],
           limit: ^limit,
           offset: ^offset
 
@@ -192,26 +203,33 @@ defmodule Onelist.Searcher.Search do
 
   defp maybe_filter_entry_types(query, nil), do: query
   defp maybe_filter_entry_types(query, []), do: query
+
   defp maybe_filter_entry_types(query, types) when is_list(types) do
     where(query, [e], e.entry_type in ^types)
   end
 
   defp maybe_filter_tags(query, nil), do: query
   defp maybe_filter_tags(query, []), do: query
+
   defp maybe_filter_tags(query, tags) when is_list(tags) do
     from e in query,
-      join: et in "entry_tags", on: et.entry_id == e.id,
-      join: t in "tags", on: t.id == et.tag_id,
+      join: et in "entry_tags",
+      on: et.entry_id == e.id,
+      join: t in "tags",
+      on: t.id == et.tag_id,
       where: t.name in ^tags,
       distinct: true
   end
 
   defp maybe_filter_date_range(query, nil), do: query
+
   defp maybe_filter_date_range(query, %{"from" => from, "to" => to}) do
     where(query, [e], e.inserted_at >= ^from and e.inserted_at <= ^to)
   end
+
   defp maybe_filter_date_range(query, %{from: from, to: to}) do
     where(query, [e], e.inserted_at >= ^from and e.inserted_at <= ^to)
   end
+
   defp maybe_filter_date_range(query, _), do: query
 end

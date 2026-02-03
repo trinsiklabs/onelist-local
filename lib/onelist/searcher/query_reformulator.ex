@@ -187,7 +187,8 @@ defmodule Onelist.Searcher.QueryReformulator do
           syns -> Enum.map(syns, fn syn -> String.replace(query, keyword, syn) end)
         end
       end)
-      |> Enum.take(2)  # Limit synonym variants
+      # Limit synonym variants
+      |> Enum.take(2)
 
     [query | synonym_variants] |> Enum.uniq()
   end

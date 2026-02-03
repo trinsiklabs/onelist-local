@@ -86,8 +86,10 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
     document
     |> Floki.find("meta[name^='twitter:'], meta[property^='twitter:']")
     |> Enum.reduce(%{}, fn element, acc ->
-      name = (Floki.attribute(element, "name") |> List.first()) ||
-             (Floki.attribute(element, "property") |> List.first()) || ""
+      name =
+        Floki.attribute(element, "name") |> List.first() ||
+          Floki.attribute(element, "property") |> List.first() || ""
+
       content = Floki.attribute(element, "content") |> List.first()
 
       key = String.replace_prefix(name, "twitter:", "")
@@ -145,7 +147,9 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
 
   defp extract_keywords(document) do
     case get_meta_content(document, "keywords") do
-      nil -> []
+      nil ->
+        []
+
       keywords ->
         keywords
         |> String.split(",")
@@ -160,7 +164,9 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
 
   defp extract_author_from_jsonld(document) do
     case parse_jsonld(document) do
-      nil -> nil
+      nil ->
+        nil
+
       data ->
         case get_in(data, ["author"]) do
           %{"name" => name} -> name
@@ -173,7 +179,9 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
 
   defp extract_date_from_jsonld(document) do
     case parse_jsonld(document) do
-      nil -> nil
+      nil ->
+        nil
+
       data ->
         data["datePublished"] || data["dateCreated"]
     end
@@ -184,6 +192,7 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
     |> Floki.find("script[type='application/ld+json']")
     |> Enum.find_value(fn script ->
       text = Floki.text(script)
+
       case Jason.decode(text) do
         {:ok, data} when is_map(data) ->
           # Look for Article or NewsArticle types
@@ -192,7 +201,9 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
           else
             nil
           end
-        _ -> nil
+
+        _ ->
+          nil
       end
     end)
   rescue
@@ -212,7 +223,9 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
 
     Enum.find_value(selectors, fn selector ->
       case Floki.find(document, selector) do
-        [] -> nil
+        [] ->
+          nil
+
         [elem | _] ->
           content = Floki.attribute(elem, "content") |> List.first()
           if content && content != "", do: String.trim(content), else: nil
@@ -222,7 +235,9 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
 
   defp get_element_text(document, selector) do
     case Floki.find(document, selector) do
-      [] -> nil
+      [] ->
+        nil
+
       [elem | _] ->
         text = Floki.text(elem) |> String.trim()
         if text != "", do: text, else: nil
@@ -231,7 +246,9 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
 
   defp get_element_attr(document, selector, attr) do
     case Floki.find(document, selector) do
-      [] -> nil
+      [] ->
+        nil
+
       [elem | _] ->
         Floki.attribute(elem, attr) |> List.first()
     end
@@ -245,6 +262,7 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
   end
 
   defp make_absolute(nil, _base_url), do: nil
+
   defp make_absolute(url, base_url) do
     uri = URI.parse(url)
 
@@ -257,19 +275,24 @@ defmodule Onelist.WebCapture.Extractors.Metadata do
   end
 
   defp parse_datetime(nil), do: nil
+
   defp parse_datetime(str) when is_binary(str) do
     # Try ISO8601 first
     case DateTime.from_iso8601(str) do
-      {:ok, dt, _} -> dt
+      {:ok, dt, _} ->
+        dt
+
       _ ->
         # Try date-only format
         case Date.from_iso8601(str) do
           {:ok, date} ->
             DateTime.new!(date, ~T[00:00:00], "Etc/UTC")
+
           _ ->
             nil
         end
     end
   end
+
   defp parse_datetime(_), do: nil
 end

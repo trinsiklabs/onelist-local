@@ -1,7 +1,7 @@
 defmodule OnelistWeb.Api.V1.ChatStreamController do
   @moduledoc """
   Real-time chat log streaming endpoint.
-  
+
   Receives individual messages from OpenClaw agents and:
   1. Appends to the session's chat log entry
   2. Queues background memory extraction
@@ -17,9 +17,9 @@ defmodule OnelistWeb.Api.V1.ChatStreamController do
 
   @doc """
   Append a message to a chat session.
-  
+
   POST /api/v1/chat-stream/append
-  
+
   Body:
   {
     "session_id": "abc-123",
@@ -29,7 +29,7 @@ defmodule OnelistWeb.Api.V1.ChatStreamController do
       "timestamp": "2026-01-30T23:15:00Z"
     }
   }
-  
+
   Response:
   { "ok": true, "message_id": "xyz-789" }
   """
@@ -68,7 +68,7 @@ defmodule OnelistWeb.Api.V1.ChatStreamController do
 
   @doc """
   Get recent messages from a chat session.
-  
+
   GET /api/v1/chat-stream?session_id=abc&last=50
   """
   def index(conn, %{"session_id" => session_id} = params) do
@@ -95,7 +95,7 @@ defmodule OnelistWeb.Api.V1.ChatStreamController do
 
   @doc """
   List all chat log sessions for the current user.
-  
+
   GET /api/v1/chat-logs
   """
   def list_logs(conn, params) do
@@ -116,13 +116,13 @@ defmodule OnelistWeb.Api.V1.ChatStreamController do
 
   @doc """
   Get recent messages across all sessions within a time window.
-  
+
   GET /api/v1/chat-stream/recent?hours=N&limit=M
-  
+
   Query params:
   - hours: Number of hours to look back (default: 24, max: 168)
   - limit: Maximum messages to return (default: 100, max: 1000)
-  
+
   Response:
   { 
     "ok": true, 
@@ -156,7 +156,7 @@ defmodule OnelistWeb.Api.V1.ChatStreamController do
 
   @doc """
   Close a chat session (marks it as complete, triggers final processing).
-  
+
   POST /api/v1/chat-stream/close
   """
   def close(conn, %{"session_id" => session_id}) do

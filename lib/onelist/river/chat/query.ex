@@ -1,7 +1,7 @@
 defmodule Onelist.River.Chat.Query do
   @moduledoc """
   Direct query execution for River.
-  
+
   Used for programmatic queries outside of the chat flow.
   """
 
@@ -12,7 +12,7 @@ defmodule Onelist.River.Chat.Query do
 
   @doc """
   Execute a query and return structured results.
-  
+
   ## Options
     * `:limit` - Max results (default: 10)
     * `:search_type` - Type of search (default: :hybrid)
@@ -23,21 +23,23 @@ defmodule Onelist.River.Chat.Query do
 
     case Searcher.search(user_id, query_text, limit: limit, search_type: search_type) do
       {:ok, %{results: results}} when is_list(results) ->
-        {:ok, %{
-          query: query_text,
-          results: results,
-          count: length(results),
-          message: format_results(query_text, results)
-        }}
-        
+        {:ok,
+         %{
+           query: query_text,
+           results: results,
+           count: length(results),
+           message: format_results(query_text, results)
+         }}
+
       {:ok, _} ->
-        {:ok, %{
-          query: query_text,
-          results: [],
-          count: 0,
-          message: ResponseGenerator.no_results(query_text)
-        }}
-        
+        {:ok,
+         %{
+           query: query_text,
+           results: [],
+           count: 0,
+           message: ResponseGenerator.no_results(query_text)
+         }}
+
       {:error, reason} ->
         Logger.error("Query failed: #{inspect(reason)}")
         {:error, reason}

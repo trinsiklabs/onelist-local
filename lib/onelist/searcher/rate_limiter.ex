@@ -224,7 +224,8 @@ defmodule Onelist.Searcher.RateLimiter do
 
   defp cleanup_expired_entries do
     now = System.monotonic_time(:millisecond)
-    max_window_ms = 3_600_000  # 1 hour - longest possible window
+    # 1 hour - longest possible window
+    max_window_ms = 3_600_000
 
     # Delete entries older than the longest window
     :ets.select_delete(@table_name, [

@@ -78,7 +78,6 @@ defmodule Onelist.Searcher.HybridSearch do
          {:ok, combined_results} <- search_all_variants(user_id, queries, opts),
          {:ok, reranked} <- maybe_rerank(query, combined_results, opts),
          {:ok, verified} <- maybe_verify(query, reranked, opts) do
-
       duration_ms = System.monotonic_time(:millisecond) - start_time
 
       Telemetry.track_search(query, verified.results, %{
@@ -88,15 +87,16 @@ defmodule Onelist.Searcher.HybridSearch do
         model: OpenAI.model_name()
       })
 
-      {:ok, %{
-        results: verified.results,
-        total: length(verified.results),
-        query: query,
-        search_type: "enhanced_hybrid",
-        confidence: verified.confidence,
-        query_variants: length(queries),
-        duration_ms: duration_ms
-      }}
+      {:ok,
+       %{
+         results: verified.results,
+         total: length(verified.results),
+         query: query,
+         search_type: "enhanced_hybrid",
+         confidence: verified.confidence,
+         query_variants: length(queries),
+         duration_ms: duration_ms
+       }}
     end
   end
 
@@ -112,26 +112,28 @@ defmodule Onelist.Searcher.HybridSearch do
     fetch_limit = limit * 3
 
     with {:ok, query_embedding} <- embed_query(query),
-         {:ok, semantic_results} <- semantic_search(user_id, query_embedding, filters, fetch_limit),
+         {:ok, semantic_results} <-
+           semantic_search(user_id, query_embedding, filters, fetch_limit),
          {:ok, keyword_results} <- keyword_search(user_id, query, filters, fetch_limit) do
-
       # Combine and re-rank
-      combined = combine_results(
-        semantic_results,
-        keyword_results,
-        semantic_weight,
-        keyword_weight
-      )
+      combined =
+        combine_results(
+          semantic_results,
+          keyword_results,
+          semantic_weight,
+          keyword_weight
+        )
 
       # Optional reranking
-      reranked = if Keyword.get(opts, :rerank, Reranker.enabled?()) do
-        case Reranker.rerank(query, combined, top_k: limit) do
-          {:ok, results} -> results
-          {:error, _} -> combined
+      reranked =
+        if Keyword.get(opts, :rerank, Reranker.enabled?()) do
+          case Reranker.rerank(query, combined, top_k: limit) do
+            {:ok, results} -> results
+            {:error, _} -> combined
+          end
+        else
+          combined
         end
-      else
-        combined
-      end
 
       # Apply pagination
       results =
@@ -148,14 +150,15 @@ defmodule Onelist.Searcher.HybridSearch do
         model: OpenAI.model_name()
       })
 
-      {:ok, %{
-        results: results,
-        total: length(combined),
-        query: query,
-        search_type: "hybrid",
-        weights: %{semantic: semantic_weight, keyword: keyword_weight},
-        duration_ms: duration_ms
-      }}
+      {:ok,
+       %{
+         results: results,
+         total: length(combined),
+         query: query,
+         search_type: "hybrid",
+         weights: %{semantic: semantic_weight, keyword: keyword_weight},
+         duration_ms: duration_ms
+       }}
     end
   end
 
@@ -185,7 +188,7 @@ defmodule Onelist.Searcher.HybridSearch do
     # Get all unique entry IDs
     all_ids =
       (Enum.map(semantic_normalized, & &1.entry_id) ++
-       Enum.map(keyword_normalized, & &1.entry_id))
+         Enum.map(keyword_normalized, & &1.entry_id))
       |> Enum.uniq()
 
     # Calculate combined scores
@@ -197,7 +200,7 @@ defmodule Onelist.Searcher.HybridSearch do
       semantic_score = if semantic_result, do: semantic_result.score, else: 0.0
       keyword_score = if keyword_result, do: keyword_result.score, else: 0.0
 
-      combined_score = (semantic_score * semantic_weight) + (keyword_score * keyword_weight)
+      combined_score = semantic_score * semantic_weight + keyword_score * keyword_weight
 
       # Use the first available result for metadata
       base = semantic_result || keyword_result
@@ -215,6 +218,7 @@ defmodule Onelist.Searcher.HybridSearch do
   end
 
   defp normalize_scores(results) when results == [], do: []
+
   defp normalize_scores(results) do
     scores = Enum.map(results, & &1.score)
     max_score = Enum.max(scores)
@@ -259,12 +263,20 @@ defmodule Onelist.Searcher.HybridSearch do
     # Search with all query variants in parallel
     results =
       queries
-      |> Task.async_stream(fn q ->
-        case do_search(user_id, q, Keyword.put(opts, :rerank, false), System.monotonic_time(:millisecond)) do
-          {:ok, %{results: r}} -> r
-          _ -> []
-        end
-      end, timeout: 30_000)
+      |> Task.async_stream(
+        fn q ->
+          case do_search(
+                 user_id,
+                 q,
+                 Keyword.put(opts, :rerank, false),
+                 System.monotonic_time(:millisecond)
+               ) do
+            {:ok, %{results: r}} -> r
+            _ -> []
+          end
+        end,
+        timeout: 30_000
+      )
       |> Enum.flat_map(fn
         {:ok, results} -> results
         _ -> []

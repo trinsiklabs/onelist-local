@@ -54,18 +54,20 @@ defmodule Onelist.Searcher.Verifier do
 
     cond do
       not enabled ->
-        {:ok, %{
-          results: results,
-          confidence: :skipped,
-          suggestion: nil
-        }}
+        {:ok,
+         %{
+           results: results,
+           confidence: :skipped,
+           suggestion: nil
+         }}
 
       results == [] ->
-        {:ok, %{
-          results: [],
-          confidence: :insufficient,
-          suggestion: suggest_reformulation(query, [])
-        }}
+        {:ok,
+         %{
+           results: [],
+           confidence: :insufficient,
+           suggestion: suggest_reformulation(query, [])
+         }}
 
       true ->
         do_verify(query, results, opts)
@@ -77,7 +79,8 @@ defmodule Onelist.Searcher.Verifier do
   """
   def enabled? do
     Application.get_env(:onelist, :searcher, [])
-    |> Keyword.get(:verification_enabled, false)  # Disabled by default (post-MVP)
+    # Disabled by default (post-MVP)
+    |> Keyword.get(:verification_enabled, false)
   end
 
   @doc """
@@ -197,26 +200,30 @@ defmodule Onelist.Searcher.Verifier do
     filtered = filter_by_relevance(assessed, threshold)
 
     # Generate suggestion if confidence is low
-    suggestion = if should_retry?(confidence) do
-      suggest_reformulation(query, filtered)
-    else
-      nil
-    end
+    suggestion =
+      if should_retry?(confidence) do
+        suggest_reformulation(query, filtered)
+      else
+        nil
+      end
 
-    {:ok, %{
-      results: filtered,
-      confidence: confidence,
-      suggestion: suggestion,
-      original_count: length(results),
-      filtered_count: length(filtered)
-    }}
+    {:ok,
+     %{
+       results: filtered,
+       confidence: confidence,
+       suggestion: suggestion,
+       original_count: length(results),
+       filtered_count: length(filtered)
+     }}
   end
 
   defp build_text(result) do
     title = Map.get(result, :title, "")
-    content = Map.get(result, :content, "") ||
-              Map.get(result, :chunk_text, "") ||
-              Map.get(result, :content_preview, "")
+
+    content =
+      Map.get(result, :content, "") ||
+        Map.get(result, :chunk_text, "") ||
+        Map.get(result, :content_preview, "")
 
     "#{title} #{content}"
   end

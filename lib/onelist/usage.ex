@@ -23,23 +23,25 @@ defmodule Onelist.Usage do
     since = Keyword.get(opts, :since, DateTime.add(DateTime.utc_now(), -24, :hour))
     provider = Keyword.get(opts, :provider)
 
-    query = from l in ApiUsageLog,
-      where: l.inserted_at >= ^since,
-      group_by: l.provider,
-      select: %{
-        provider: l.provider,
-        total_input_tokens: sum(l.input_tokens),
-        total_output_tokens: sum(l.output_tokens),
-        total_tokens: sum(l.total_tokens),
-        total_cost_cents: sum(l.cost_cents),
-        call_count: count(l.id)
-      }
+    query =
+      from l in ApiUsageLog,
+        where: l.inserted_at >= ^since,
+        group_by: l.provider,
+        select: %{
+          provider: l.provider,
+          total_input_tokens: sum(l.input_tokens),
+          total_output_tokens: sum(l.output_tokens),
+          total_tokens: sum(l.total_tokens),
+          total_cost_cents: sum(l.cost_cents),
+          call_count: count(l.id)
+        }
 
-    query = if provider do
-      from l in query, where: l.provider == ^provider
-    else
-      query
-    end
+    query =
+      if provider do
+        from l in query, where: l.provider == ^provider
+      else
+        query
+      end
 
     Repo.all(query)
   end
@@ -71,6 +73,7 @@ defmodule Onelist.Usage do
       summaries
       |> Enum.map(fn s ->
         cost = if s.total_cost_cents, do: Decimal.to_float(s.total_cost_cents) / 100, else: 0
+
         """
         #{String.upcase(s.provider)}:
           Calls: #{s.call_count}

@@ -9,11 +9,12 @@ defmodule OnelistWeb.Entries.Components.PublicToggleComponent do
 
   @impl true
   def mount(socket) do
-    {:ok, assign(socket,
-      show_dialog: false,
-      assets: [],
-      public_url_preview: nil
-    )}
+    {:ok,
+     assign(socket,
+       show_dialog: false,
+       assets: [],
+       public_url_preview: nil
+     )}
   end
 
   @impl true
@@ -44,16 +45,18 @@ defmodule OnelistWeb.Entries.Components.PublicToggleComponent do
       case Entries.make_entry_public(entry) do
         {:ok, updated_entry} ->
           send(self(), {:entry_updated, updated_entry})
-          {:noreply, assign(socket,
-            entry: updated_entry,
-            show_dialog: false
-          )}
+
+          {:noreply,
+           assign(socket,
+             entry: updated_entry,
+             show_dialog: false
+           )}
 
         {:error, _reason} ->
           {:noreply,
-            socket
-            |> assign(show_dialog: false)
-            |> send_flash_to_parent(:error, "Failed to publish entry")}
+           socket
+           |> assign(show_dialog: false)
+           |> send_flash_to_parent(:error, "Failed to publish entry")}
       end
     else
       # Redirect to username setup
@@ -78,11 +81,12 @@ defmodule OnelistWeb.Entries.Components.PublicToggleComponent do
     # Get publish preview info
     {:ok, preview} = Entries.get_publish_preview(entry)
 
-    {:noreply, assign(socket,
-      show_dialog: true,
-      assets: preview.assets,
-      public_url_preview: preview.public_url_preview
-    )}
+    {:noreply,
+     assign(socket,
+       show_dialog: true,
+       assets: preview.assets,
+       public_url_preview: preview.public_url_preview
+     )}
   end
 
   defp make_private(socket) do
@@ -137,7 +141,6 @@ defmodule OnelistWeb.Entries.Components.PublicToggleComponent do
           <span class="text-gray-500">- Only you can view</span>
         <% end %>
       </span>
-
       <!-- Copy URL button for public entries -->
       <%= if @entry.public do %>
         <button
@@ -152,12 +155,16 @@ defmodule OnelistWeb.Entries.Components.PublicToggleComponent do
           class="ml-4 inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+            />
           </svg>
           Copy URL
         </button>
       <% end %>
-
       <!-- Publish Confirmation Dialog -->
       <%= if @show_dialog do %>
         <div
@@ -173,15 +180,25 @@ defmodule OnelistWeb.Entries.Components.PublicToggleComponent do
               class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
               phx-click="cancel_publish"
               phx-target={@myself}
-            ></div>
-
+            >
+            </div>
             <!-- Dialog panel -->
             <div class="relative inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
               <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                   <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      class="h-6 w-6 text-indigo-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                   </div>
                   <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
@@ -199,13 +216,17 @@ defmodule OnelistWeb.Entries.Components.PublicToggleComponent do
                       <%= if Enum.any?(@assets) do %>
                         <div class="mt-4">
                           <p class="text-sm text-gray-500 mb-2">
-                            The following assets will be <span class="font-semibold text-amber-600">DECRYPTED</span> and made publicly accessible:
+                            The following assets will be
+                            <span class="font-semibold text-amber-600">DECRYPTED</span>
+                            and made publicly accessible:
                           </p>
                           <ul class="text-sm space-y-1 bg-amber-50 p-3 rounded-md">
                             <%= for asset <- @assets do %>
                               <li class="flex justify-between items-center">
                                 <span class="text-gray-700"><%= asset.filename %></span>
-                                <span class="text-gray-500 text-xs"><%= format_file_size(asset.size) %></span>
+                                <span class="text-gray-500 text-xs">
+                                  <%= format_file_size(asset.size) %>
+                                </span>
                               </li>
                             <% end %>
                           </ul>
@@ -245,10 +266,12 @@ defmodule OnelistWeb.Entries.Components.PublicToggleComponent do
 
   defp format_file_size(nil), do: "0 B"
   defp format_file_size(bytes) when bytes < 1024, do: "#{bytes} B"
+
   defp format_file_size(bytes) when bytes < 1024 * 1024 do
     kb = Float.round(bytes / 1024, 1)
     "#{kb} KB"
   end
+
   defp format_file_size(bytes) do
     mb = Float.round(bytes / (1024 * 1024), 1)
     "#{mb} MB"

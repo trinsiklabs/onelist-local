@@ -1,16 +1,18 @@
 defmodule OnelistWeb.SessionController do
   use OnelistWeb, :controller
-  
+
   alias Onelist.Accounts
   alias Onelist.Sessions
-  
+
   @doc """
   Handles user login.
-  
+
   This action processes the login form submission, authenticates the user,
   and creates a session if successful.
   """
-  def create(conn, %{"user" => %{"email" => email, "password" => password, "remember_me" => remember_me}}) do
+  def create(conn, %{
+        "user" => %{"email" => email, "password" => password, "remember_me" => remember_me}
+      }) do
     # Extract and store connection info (needed by Accounts context for tracking)
     {ip_address, user_agent} = extract_connection_info(conn)
     store_connection_info(ip_address, user_agent)
@@ -25,19 +27,25 @@ defmodule OnelistWeb.SessionController do
           "context" => "web",
           "remember_me" => remember_me == "true"
         })
-        
+
       {:error, {:rate_limited, timeout}} ->
         # Rate limited - inform the user
         conn
-        |> put_flash(:error, "Too many login attempts. Please try again in #{div(timeout, 60)} minutes.")
+        |> put_flash(
+          :error,
+          "Too many login attempts. Please try again in #{div(timeout, 60)} minutes."
+        )
         |> redirect(to: ~p"/login?rate_limited=true")
-        
+
       {:error, :account_locked} ->
         # Account is locked - direct user to reset password
         conn
-        |> put_flash(:error, "Your account has been locked due to too many failed attempts. Please reset your password to unlock your account.")
+        |> put_flash(
+          :error,
+          "Your account has been locked due to too many failed attempts. Please reset your password to unlock your account."
+        )
         |> redirect(to: ~p"/forgot-password?account_locked=true")
-        
+
       {:error, :invalid_credentials} ->
         # Invalid credentials - generic error message
         conn
@@ -45,19 +53,21 @@ defmodule OnelistWeb.SessionController do
         |> redirect(to: ~p"/login")
     end
   end
-  
+
   # Handle case where remember_me isn't present
   def create(conn, %{"user" => %{"email" => email, "password" => password}}) do
-    create(conn, %{"user" => %{"email" => email, "password" => password, "remember_me" => "false"}})
+    create(conn, %{
+      "user" => %{"email" => email, "password" => password, "remember_me" => "false"}
+    })
   end
-  
+
   # Handle case where params don't match expected format
   def create(conn, _params) do
     conn
     |> put_flash(:error, "Invalid login attempt")
     |> redirect(to: ~p"/login")
   end
-  
+
   @doc """
   Logs out the user by invalidating the current session.
   """
@@ -85,7 +95,7 @@ defmodule OnelistWeb.SessionController do
     |> put_flash(:info, "You have been logged out")
     |> redirect(to: ~p"/")
   end
-  
+
   # Store connection info in Process dictionary for Accounts context tracking
   # TODO: Refactor Accounts context to accept ip/user_agent as explicit params
   defp store_connection_info(ip_address, user_agent) do
@@ -99,38 +109,48 @@ defmodule OnelistWeb.SessionController do
     user_agent = get_req_header(conn, "user-agent") |> List.first() || ""
 
     # Check for X-Forwarded-For header (for proxied requests)
-    ip_address = case get_req_header(conn, "x-forwarded-for") do
-      [forwarded | _] when is_binary(forwarded) ->
-        # Take the first IP if there are multiple
-        if String.contains?(forwarded, ",") do
-          forwarded |> String.split(",") |> List.first() |> String.trim()
-        else
-          String.trim(forwarded)
-        end
-      _ -> ip_address
-    end
+    ip_address =
+      case get_req_header(conn, "x-forwarded-for") do
+        [forwarded | _] when is_binary(forwarded) ->
+          # Take the first IP if there are multiple
+          if String.contains?(forwarded, ",") do
+            forwarded |> String.split(",") |> List.first() |> String.trim()
+          else
+            String.trim(forwarded)
+          end
+
+        _ ->
+          ip_address
+      end
 
     {ip_address, user_agent}
   end
 
   # Create a session for the authenticated user
-  defp create_session_for_user(conn, user, %{"ip_address" => ip_address, "user_agent" => user_agent, "context" => context, "remember_me" => remember_me}) do
+  defp create_session_for_user(conn, user, %{
+         "ip_address" => ip_address,
+         "user_agent" => user_agent,
+         "context" => context,
+         "remember_me" => remember_me
+       }) do
     # Determine session expiry based on remember_me
-    expiry = if remember_me do
-      # Longer expiry for remember_me (e.g., 30 days)
-      60 * 60 * 24 * 30
-    else
-      # Shorter expiry for regular session (e.g., 24 hours)
-      60 * 60 * 24
-    end
+    expiry =
+      if remember_me do
+        # Longer expiry for remember_me (e.g., 30 days)
+        60 * 60 * 24 * 30
+      else
+        # Shorter expiry for regular session (e.g., 24 hours)
+        60 * 60 * 24
+      end
 
     # Create session
-    {:ok, %{session: _session, token: token}} = Sessions.create_session(user, %{
-      "ip_address" => ip_address,
-      "user_agent" => user_agent,
-      "context" => context
-    })
-    
+    {:ok, %{session: _session, token: token}} =
+      Sessions.create_session(user, %{
+        "ip_address" => ip_address,
+        "user_agent" => user_agent,
+        "context" => context
+      })
+
     # Store token in session
     conn
     |> put_session(:session_token, token)
@@ -138,4 +158,4 @@ defmodule OnelistWeb.SessionController do
     |> put_flash(:info, "Welcome back!")
     |> redirect(to: ~p"/app/entries")
   end
-end 
+end

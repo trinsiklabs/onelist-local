@@ -24,7 +24,10 @@ defmodule OnelistWeb.DocumentationPage do
       <div class="py-16 sm:py-24">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <div class="mx-auto max-w-3xl lg:mx-0">
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl" data-test-id="documentation-title">
+            <h1
+              class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+              data-test-id="documentation-title"
+            >
               Onelist Documentation
             </h1>
             <p class="mt-2 text-lg leading-8 text-gray-600">
@@ -54,7 +57,6 @@ defmodule OnelistWeb.DocumentationPage do
                 </div>
               </div>
             </section>
-
             <!-- API Reference Section -->
             <section class="py-10" data-test-id="api-reference-section">
               <h2 class="text-2xl font-bold tracking-tight text-gray-900">API Reference</h2>
@@ -89,17 +91,16 @@ defmodule OnelistWeb.DocumentationPage do
                 </p>
               </div>
             </section>
-
             <!-- Examples Section -->
             <section class="py-10" data-test-id="examples-section">
               <h2 class="text-2xl font-bold tracking-tight text-gray-900">Examples</h2>
-              
+
               <div class="mt-6">
                 <h3 class="text-lg font-medium text-gray-900">Task Management</h3>
                 <p class="mt-2 text-gray-600">
                   Learn how to use Onelist for effective task management and productivity.
                 </p>
-                
+
                 <div class="mt-4 bg-white p-6 shadow rounded-lg">
                   <ul class="list-disc pl-5 space-y-2">
                     <li>Create a daily to-do list</li>
@@ -115,7 +116,7 @@ defmodule OnelistWeb.DocumentationPage do
                 <p class="mt-2 text-gray-600">
                   Discover how to use Onelist for organizing your notes and ideas.
                 </p>
-                
+
                 <div class="mt-4 bg-white p-6 shadow rounded-lg">
                   <p class="text-gray-700">
                     Onelist supports rich Markdown formatting for your notes:
@@ -145,11 +146,8 @@ defmodule OnelistWeb.DocumentationPage do
         </div>
       </div>
 
-      <.live_component
-        module={Footer}
-        id="main-footer"
-      />
+      <.live_component module={Footer} id="main-footer" />
     </div>
     """
   end
-end 
+end

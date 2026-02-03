@@ -185,7 +185,8 @@ defmodule Onelist.Reader.Extractors.AtomicMemory do
       s1_chars = String.graphemes(s1)
       s2_chars = String.graphemes(s2)
 
-      {matches, transpositions} = find_matches_and_transpositions(s1_chars, s2_chars, match_distance)
+      {matches, transpositions} =
+        find_matches_and_transpositions(s1_chars, s2_chars, match_distance)
 
       if matches == 0 do
         0.0

@@ -67,23 +67,25 @@ defmodule Onelist.WebCapture.Extractors.Readability do
     cleaned = clean_document(content_element || document)
 
     # Score and select best content block if no semantic element found
-    best_block = if content_element do
-      content_element
-    else
-      score_and_select(cleaned)
-    end
+    best_block =
+      if content_element do
+        content_element
+      else
+        score_and_select(cleaned)
+      end
 
     if best_block do
       text = extract_text(best_block)
       html = Floki.raw_html(best_block)
       title = extract_title(document)
 
-      {:ok, %{
-        title: title,
-        text: text,
-        html: html,
-        excerpt: String.slice(text, 0, 200) |> String.trim()
-      }}
+      {:ok,
+       %{
+         title: title,
+         text: text,
+         html: html,
+         excerpt: String.slice(text, 0, 200) |> String.trim()
+       }}
     else
       {:error, :no_content_found}
     end
@@ -113,7 +115,9 @@ defmodule Onelist.WebCapture.Extractors.Readability do
           # Verify it has enough content
           text = Floki.text(elem)
           if String.length(text) > 200, do: elem, else: nil
-        [] -> nil
+
+        [] ->
+          nil
       end
     end)
   end
@@ -128,7 +132,9 @@ defmodule Onelist.WebCapture.Extractors.Readability do
       |> Enum.sort_by(fn {_elem, score} -> score end, :desc)
 
     case candidates do
-      [{elem, _score} | _] -> elem
+      [{elem, _score} | _] ->
+        elem
+
       [] ->
         # Fallback: return body content
         case Floki.find(document, "body") do
@@ -158,28 +164,31 @@ defmodule Onelist.WebCapture.Extractors.Readability do
     # Score based on class/id
     class_id = get_class_id(element)
 
-    base_score = if Regex.match?(@positive_patterns, class_id) do
-      base_score + 25
-    else
-      base_score
-    end
+    base_score =
+      if Regex.match?(@positive_patterns, class_id) do
+        base_score + 25
+      else
+        base_score
+      end
 
-    base_score = if Regex.match?(@negative_patterns, class_id) do
-      base_score - 50
-    else
-      base_score
-    end
+    base_score =
+      if Regex.match?(@negative_patterns, class_id) do
+        base_score - 50
+      else
+        base_score
+      end
 
     # Bonus for links ratio (low link density = good)
     links = Floki.find(element, "a")
     link_text = links |> Enum.map(&Floki.text/1) |> Enum.join("")
     link_density = String.length(link_text) / max(text_length, 1)
 
-    base_score = if link_density < 0.3 do
-      base_score + 10
-    else
-      base_score - round(link_density * 20)
-    end
+    base_score =
+      if link_density < 0.3 do
+        base_score + 10
+      else
+        base_score - round(link_density * 20)
+      end
 
     base_score
   end
@@ -217,22 +226,28 @@ defmodule Onelist.WebCapture.Extractors.Readability do
       [elem | _] ->
         text = Floki.text(elem) |> String.trim()
         if text != "", do: text, else: nil
-      [] -> nil
+
+      [] ->
+        nil
     end
   end
 
   defp get_class_id(element) do
     {_tag, attrs, _children} = element
 
-    class = attrs |> Enum.find_value("", fn
-      {"class", val} -> val
-      _ -> nil
-    end)
+    class =
+      attrs
+      |> Enum.find_value("", fn
+        {"class", val} -> val
+        _ -> nil
+      end)
 
-    id = attrs |> Enum.find_value("", fn
-      {"id", val} -> val
-      _ -> nil
-    end)
+    id =
+      attrs
+      |> Enum.find_value("", fn
+        {"id", val} -> val
+        _ -> nil
+      end)
 
     "#{class} #{id}"
   end

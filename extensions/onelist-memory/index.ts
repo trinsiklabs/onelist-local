@@ -1,17 +1,24 @@
 /**
- * Onelist Memory Sync Plugin v1.0.0
+ * Onelist Memory Sync Plugin v1.1.0
  *
- * QUERY-BASED RETRIEVAL EDITION
+ * INVISIBLE COMPACTION RECOVERY EDITION
+ *
+ * v1.1.0 INVISIBLE COMPACTION RECOVERY:
+ *   - NEW: after_compaction hook for seamless context recovery
+ *   - NEW: Bot never notices compaction - memories restored automatically
+ *   - NEW: Compaction recovery bypasses rate limits (critical for continuity)
+ *   - NEW: Stats track totalCompactionRecoveries separately
+ *   - KEPT: All v1.0.0 smart retrieval functionality
  *
  * v1.0.0 MAJOR UPGRADE (Smart Retrieval):
- *   - NEW: Query-based context retrieval from Onelist Search API
- *   - NEW: Semantic + keyword hybrid search for relevant memories
- *   - NEW: Extracts query intent from recent conversation
- *   - NEW: Retrieves atomic memories instead of raw messages
- *   - NEW: 95%+ token savings vs dumb injection
- *   - KEPT: All livelog sync functionality from v0.5.7
- *   - KEPT: Feedback loop protection (simplified - search API is bounded)
- *   - KEPT: Circuit breaker, main session filtering
+ *   - Query-based context retrieval from Onelist Search API
+ *   - Semantic + keyword hybrid search for relevant memories
+ *   - Extracts query intent from recent conversation
+ *   - Retrieves atomic memories instead of raw messages
+ *   - 95%+ token savings vs dumb injection
+ *   - All livelog sync functionality from v0.5.7
+ *   - Feedback loop protection (simplified - search API is bounded)
+ *   - Circuit breaker, main session filtering
  *
  * v0.5.7 and earlier: See git history
  */
@@ -234,6 +241,7 @@ interface PersistentState {
     totalSearches: number;      // v1.0
     totalSearchHits: number;    // v1.0
     totalFallbacks: number;     // v1.0
+    totalCompactionRecoveries: number;  // v1.1
     startupTime: number;
   };
 }
@@ -291,6 +299,7 @@ function loadPersistentState(): PersistentState {
       totalSearches: 0,
       totalSearchHits: 0,
       totalFallbacks: 0,
+      totalCompactionRecoveries: 0,
       startupTime: Date.now(),
     },
   };
@@ -536,7 +545,7 @@ function logStartupHealth(logger: Logger): void {
   const state = loadPersistentState();
   const sessionCount = Object.keys(state.sessionInjectionCounts).length;
 
-  logger.info(`=== HEALTH: v1.0.0 | Sessions: ${sessionCount} | Injections: ${state.stats.totalInjections} | Searches: ${state.stats.totalSearches} | Hits: ${state.stats.totalSearchHits} | Fallbacks: ${state.stats.totalFallbacks} ===`);
+  logger.info(`=== HEALTH: v1.1.0 | Sessions: ${sessionCount} | Injections: ${state.stats.totalInjections} | Searches: ${state.stats.totalSearches} | Hits: ${state.stats.totalSearchHits} | Fallbacks: ${state.stats.totalFallbacks} | CompactionRecoveries: ${state.stats.totalCompactionRecoveries || 0} ===`);
 }
 
 let lastHealthLog = 0;
@@ -1092,7 +1101,7 @@ function formatFallbackContext(
 // MAIN PLUGIN REGISTRATION
 // =============================================================================
 
-console.log(`[onelist-memory] Plugin file loaded (v1.0.0 - query-based retrieval) | OPENCLAW_HOME=${OPENCLAW_HOME}`);
+console.log(`[onelist-memory] Plugin file loaded (v1.1.0 - invisible compaction recovery) | OPENCLAW_HOME=${OPENCLAW_HOME}`);
 
 // =============================================================================
 // MAIN SESSION FILTERING (kept from v0.5.4)
@@ -1163,7 +1172,7 @@ function isMainSessionFile(filename: string, sessionsDir: string, logger: Logger
 export default function register(api: any) {
   const logger: Logger = api?.logger ?? createFallbackLogger();
 
-  logger.info('Register function called (v1.0.0)');
+  logger.info('Register function called (v1.1.0)');
 
   const pluginId = 'onelist-memory';
   let config: PluginConfig;
@@ -1270,6 +1279,86 @@ export default function register(api: any) {
 
     } catch (err) {
       logger.error(`Failed to register hook: ${String(err)}`);
+    }
+
+    // =========================================================================
+    // v1.1: INVISIBLE COMPACTION RECOVERY HOOK
+    // =========================================================================
+
+    try {
+      api.on('after_compaction', async (event: any, ctx: any): Promise<{ prependContext?: string } | undefined> => {
+        logger.info('Compaction detected - retrieving fresh context');
+
+        const sessionsDir = findSessionsDirectory(logger);
+        if (!sessionsDir) {
+          return undefined;
+        }
+
+        const currentSession = findCurrentSessionFile(sessionsDir);
+        const sessionPath = currentSession?.path ?? null;
+
+        // IMPORTANT: Skip rate limiting for post-compaction recovery
+        // The bot just lost context, we MUST restore it regardless of limits
+
+        let result: MemoryRetrievalResult | null = null;
+
+        // Try smart retrieval first
+        if (smartRetrievalEnabled && config.apiUrl && config.apiKey) {
+          try {
+            result = await retrieveRelevantMemories(config, sessionPath, logger);
+          } catch (err) {
+            logger.error(`Post-compaction retrieval failed: ${String(err)}`);
+          }
+        }
+
+        // Fallback to session file recovery if smart retrieval failed
+        if (!result && fallbackEnabled) {
+          try {
+            const fallbackResult = await fallbackRecoverContext(config, logger);
+            if (fallbackResult && fallbackResult.content) {
+              result = {
+                content: fallbackResult.content,
+                memoriesRetrieved: fallbackResult.messageCount,
+                searchQuery: 'N/A (post-compaction fallback)',
+                searchType: 'file_scan',
+                source: 'fallback_files',
+              };
+            }
+          } catch (err) {
+            logger.error(`Post-compaction fallback failed: ${String(err)}`);
+          }
+        }
+
+        if (!result) {
+          logger.warn('Post-compaction: No context available to restore');
+          return undefined;
+        }
+
+        // Add compaction-specific header to distinguish from regular injection
+        const header = `## 🔄 Post-Compaction Context Recovery
+
+**Recovered:** ${new Date().toISOString()}
+**Reason:** Context window compacted - restoring relevant memories
+
+---
+
+`;
+
+        logger.info(`POST-COMPACTION INJECT: ${result.memoriesRetrieved} items restored via ${result.source}`);
+
+        // Track as special compaction recovery (not counted against session limits)
+        const state = loadPersistentState();
+        state.stats.totalCompactionRecoveries = (state.stats.totalCompactionRecoveries || 0) + 1;
+        savePersistentState(state);
+
+        return { prependContext: header + result.content };
+
+      }, { priority: 100 });
+
+      logger.info('Compaction recovery hook registered');
+
+    } catch (err) {
+      logger.error(`Failed to register compaction hook: ${String(err)}`);
     }
   }
 

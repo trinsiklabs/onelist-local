@@ -9,8 +9,10 @@ defmodule Onelist.Searcher.Chunker do
 
   @default_max_tokens 500
   @default_overlap_tokens 50
-  @approx_chars_per_token 4  # Rough estimate for English text
-  @min_chunk_chars 20  # Minimum chunk size to prevent infinite loops
+  # Rough estimate for English text
+  @approx_chars_per_token 4
+  # Minimum chunk size to prevent infinite loops
+  @min_chunk_chars 20
 
   defstruct [:text, :start_offset, :end_offset, :token_count]
 
@@ -51,12 +53,14 @@ defmodule Onelist.Searcher.Chunker do
 
     if String.length(text) <= max_chars do
       # Single chunk
-      [%__MODULE__{
-        text: text,
-        start_offset: 0,
-        end_offset: String.length(text),
-        token_count: estimate_tokens(text)
-      }]
+      [
+        %__MODULE__{
+          text: text,
+          start_offset: 0,
+          end_offset: String.length(text),
+          token_count: estimate_tokens(text)
+        }
+      ]
     else
       # Multiple chunks with overlap
       chunk_with_overlap(text, max_chars, overlap_chars, 0, [])
@@ -74,6 +78,7 @@ defmodule Onelist.Searcher.Chunker do
         end_offset: offset + text_length,
         token_count: estimate_tokens(text)
       }
+
       Enum.reverse([chunk | acc])
     else
       # Find good break point (end of sentence or word)
@@ -105,7 +110,10 @@ defmodule Onelist.Searcher.Chunker do
       if String.length(remaining) >= text_length do
         # Force progress by taking at least half
         remaining = String.slice(text, div(text_length, 2), text_length)
-        chunk_with_overlap(remaining, max_chars, overlap_chars, offset + div(text_length, 2), [chunk | acc])
+
+        chunk_with_overlap(remaining, max_chars, overlap_chars, offset + div(text_length, 2), [
+          chunk | acc
+        ])
       else
         chunk_with_overlap(remaining, max_chars, overlap_chars, offset + next_start, [chunk | acc])
       end
@@ -114,7 +122,8 @@ defmodule Onelist.Searcher.Chunker do
 
   defp find_break_point(text) do
     len = String.length(text)
-    min_pos = div(len, 2)  # Don't break before halfway point
+    # Don't break before halfway point
+    min_pos = div(len, 2)
 
     # Look for break points in the second half of the text only
     search_text = String.slice(text, min_pos, len - min_pos)

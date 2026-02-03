@@ -10,27 +10,25 @@ defmodule OnelistWeb.App.EntryDetailLive do
   @impl true
   def mount(%{"id" => id}, _session, socket) do
     user = socket.assigns.current_user
-    
+
     case Entries.get_entry(user.id, id, preload: [:tags]) do
       nil ->
-        {:ok, 
-          socket
-          |> put_flash(:error, "Entry not found")
-          |> push_navigate(to: ~p"/app/library")
-        }
-      
+        {:ok,
+         socket
+         |> put_flash(:error, "Entry not found")
+         |> push_navigate(to: ~p"/app/library")}
+
       entry ->
         # Load memories for this entry
         memories = Reader.get_memories_for_entry(entry.id)
-        
-        {:ok, 
-          socket
-          |> assign(:page_title, entry.title || "Untitled")
-          |> assign(:current_path, "/app/library/#{id}")
-          |> assign(:entry, entry)
-          |> assign(:active_tab, "content")
-          |> assign(:memories, memories)
-        }
+
+        {:ok,
+         socket
+         |> assign(:page_title, entry.title || "Untitled")
+         |> assign(:current_path, "/app/library/#{id}")
+         |> assign(:entry, entry)
+         |> assign(:active_tab, "content")
+         |> assign(:memories, memories)}
     end
   end
 
@@ -41,7 +39,10 @@ defmodule OnelistWeb.App.EntryDetailLive do
       <!-- Header -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-6);">
         <div>
-          <a href={~p"/app/library"} style="color: var(--color-text-muted); text-decoration: none; font-size: var(--text-sm); display: inline-flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+          <a
+            href={~p"/app/library"}
+            style="color: var(--color-text-muted); text-decoration: none; font-size: var(--text-sm); display: inline-flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);"
+          >
             ← Back to Library
           </a>
           <h1 style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--color-text);">
@@ -57,25 +58,29 @@ defmodule OnelistWeb.App.EntryDetailLive do
           <a href={~p"/app/entries/#{@entry.id}/edit"} class="btn btn-ghost">
             ✏️ Edit
           </a>
-          <button class="btn btn-ghost" style="color: var(--color-error);" phx-click="delete" data-confirm="Are you sure you want to delete this entry?">
+          <button
+            class="btn btn-ghost"
+            style="color: var(--color-error);"
+            phx-click="delete"
+            data-confirm="Are you sure you want to delete this entry?"
+          >
             🗑️ Delete
           </button>
         </div>
       </div>
-      
       <!-- Tabs -->
       <div style="display: flex; gap: var(--space-1); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-6);">
-        <button 
+        <button
           class={["tab-button", @active_tab == "content" && "active"]}
-          phx-click="switch_tab" 
+          phx-click="switch_tab"
           phx-value-tab="content"
           style={tab_style(@active_tab == "content")}
         >
           📄 Content
         </button>
-        <button 
+        <button
           class={["tab-button", @active_tab == "memories" && "active"]}
-          phx-click="switch_tab" 
+          phx-click="switch_tab"
           phx-value-tab="memories"
           style={tab_style(@active_tab == "memories")}
         >
@@ -84,24 +89,23 @@ defmodule OnelistWeb.App.EntryDetailLive do
             <%= length(@memories) %>
           </span>
         </button>
-        <button 
+        <button
           class={["tab-button", @active_tab == "assets" && "active"]}
-          phx-click="switch_tab" 
+          phx-click="switch_tab"
           phx-value-tab="assets"
           style={tab_style(@active_tab == "assets")}
         >
           📎 Assets
         </button>
-        <button 
+        <button
           class={["tab-button", @active_tab == "history" && "active"]}
-          phx-click="switch_tab" 
+          phx-click="switch_tab"
           phx-value-tab="history"
           style={tab_style(@active_tab == "history")}
         >
           📜 History
         </button>
       </div>
-      
       <!-- Tab Content -->
       <div class="tab-content">
         <%= case @active_tab do %>
@@ -120,7 +124,9 @@ defmodule OnelistWeb.App.EntryDetailLive do
   end
 
   defp tab_style(active) do
-    base = "padding: var(--space-3) var(--space-4); border: none; background: transparent; cursor: pointer; font-size: var(--text-sm); font-weight: var(--font-medium); display: inline-flex; align-items: center; border-bottom: 2px solid transparent; margin-bottom: -1px;"
+    base =
+      "padding: var(--space-3) var(--space-4); border: none; background: transparent; cursor: pointer; font-size: var(--text-sm); font-weight: var(--font-medium); display: inline-flex; align-items: center; border-bottom: 2px solid transparent; margin-bottom: -1px;"
+
     if active do
       base <> " color: var(--color-primary); border-bottom-color: var(--color-primary);"
     else
@@ -135,7 +141,6 @@ defmodule OnelistWeb.App.EntryDetailLive do
         <%= @entry.content || "No content" %>
       </div>
     </div>
-    
     <!-- Tags -->
     <%= if @entry.tags && length(@entry.tags) > 0 do %>
       <div class="card" style="margin-top: var(--space-4);">
@@ -242,15 +247,14 @@ defmodule OnelistWeb.App.EntryDetailLive do
   def handle_event("delete", _params, socket) do
     entry = socket.assigns.entry
     user = socket.assigns.current_user
-    
+
     case Entries.delete_entry(user.id, entry.id) do
       {:ok, _} ->
-        {:noreply, 
-          socket
-          |> put_flash(:info, "Entry deleted")
-          |> push_navigate(to: ~p"/app/library")
-        }
-      
+        {:noreply,
+         socket
+         |> put_flash(:info, "Entry deleted")
+         |> push_navigate(to: ~p"/app/library")}
+
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Failed to delete entry")}
     end

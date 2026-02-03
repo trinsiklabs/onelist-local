@@ -94,5 +94,4 @@ config :onelist, Onelist.Storage,
   enable_e2ee: false,
   enable_tiered_sync: false
 
-config :onelist, Onelist.Storage.Backends.Local,
-  root_path: "priv/static/uploads/test"
+config :onelist, Onelist.Storage.Backends.Local, root_path: "priv/static/uploads/test"

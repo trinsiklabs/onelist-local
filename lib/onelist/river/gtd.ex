@@ -124,7 +124,9 @@ defmodule Onelist.River.GTD do
     cond do
       action == :delete ->
         case RiverEntries.get_task(task_id) do
-          nil -> {:error, :not_found}
+          nil ->
+            {:error, :not_found}
+
           task ->
             Entries.delete_entry(task)
             {:ok, :deleted}
@@ -186,7 +188,7 @@ defmodule Onelist.River.GTD do
 
   @doc """
   Get GTD state summary for a user.
-  
+
   Returns the same structure as Onelist.GTD.state_summary/1.
   """
   def get_gtd_state(user_id) do

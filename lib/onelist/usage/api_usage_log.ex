@@ -27,7 +27,18 @@ defmodule Onelist.Usage.ApiUsageLog do
 
   def changeset(log, attrs) do
     log
-    |> cast(attrs, [:provider, :model, :operation, :input_tokens, :output_tokens, :total_tokens, :cost_cents, :user_id, :entry_id, :metadata])
+    |> cast(attrs, [
+      :provider,
+      :model,
+      :operation,
+      :input_tokens,
+      :output_tokens,
+      :total_tokens,
+      :cost_cents,
+      :user_id,
+      :entry_id,
+      :metadata
+    ])
     |> validate_required([:provider, :operation])
     |> calculate_total_tokens()
   end

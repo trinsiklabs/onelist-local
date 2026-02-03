@@ -10,12 +10,8 @@ defmodule OnelistWeb.Auth.PasswordResetPage do
   def render(assigns) do
     ~H"""
     <div>
-      <.live_component
-        module={PasswordResetComponent}
-        id="password-reset"
-      />
+      <.live_component module={PasswordResetComponent} id="password-reset" />
     </div>
     """
   end
 end
-

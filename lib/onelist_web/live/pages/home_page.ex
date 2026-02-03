@@ -29,16 +29,10 @@ defmodule OnelistWeb.HomePage do
         current_page={@current_page}
       />
 
-      <.live_component
-        module={HeroSection}
-        id="main-hero"
-      />
+      <.live_component module={HeroSection} id="main-hero" />
 
-      <.live_component
-        module={Footer}
-        id="main-footer"
-      />
+      <.live_component module={Footer} id="main-footer" />
     </div>
     """
   end
-end 
+end

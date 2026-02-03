@@ -46,9 +46,17 @@ defmodule Onelist.Entries.Entry do
   def changeset(entry, attrs) do
     entry
     |> cast(attrs, [
-      :title, :entry_type, :source_type, :public, :content_created_at, :metadata,
+      :title,
+      :entry_type,
+      :source_type,
+      :public,
+      :content_created_at,
+      :metadata,
       # Trusted memory fields
-      :sequence_number, :previous_entry_hash, :entry_hash, :canonical_timestamp
+      :sequence_number,
+      :previous_entry_hash,
+      :entry_hash,
+      :canonical_timestamp
     ])
     |> validate_required([:entry_type])
     |> validate_inclusion(:entry_type, @entry_types)

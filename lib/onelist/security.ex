@@ -18,11 +18,12 @@ defmodule Onelist.Security do
     # Base64 encoding increases length by approximately 4/3, but tests expect double length
     # We'll generate enough bytes to ensure we have at least double the requested length
     bytes_needed = length * 2
-    
+
     # Generate random bytes, encode, and then take exactly 2*length characters
-    token = :crypto.strong_rand_bytes(bytes_needed)
+    token =
+      :crypto.strong_rand_bytes(bytes_needed)
       |> Base.url_encode64(padding: false)
-    
+
     # Make sure our result is at least twice the requested length
     if String.length(token) >= length * 2 do
       String.slice(token, 0, length * 2)
@@ -51,7 +52,7 @@ defmodule Onelist.Security do
 
   @doc """
   Creates a code challenge from a code verifier using the S256 method (SHA256).
-  
+
   ## Examples
 
       iex> create_code_challenge("kS7-OYcJ0eJ4KGI1asj3wer9YnS3AdyD-8fKlbDeP7h_S0jIasWE89fPa1jDc032")
@@ -70,7 +71,7 @@ defmodule Onelist.Security do
   @doc """
   Encrypts OAuth token data for secure storage.
   Uses AES-256-GCM for authenticated encryption with associated data (AEAD).
-  
+
   ## Examples
 
       iex> encrypt_token(%{"access_token" => "xyz", "refresh_token" => "abc"})
@@ -80,35 +81,36 @@ defmodule Onelist.Security do
   def encrypt_token(token_data) when is_map(token_data) do
     encrypt_token(Jason.encode!(token_data))
   end
-  
+
   def encrypt_token(token_data) when is_binary(token_data) do
     # Get encryption key from application config
     secret = get_encryption_key()
-    
+
     # Generate a random IV (Initialization Vector)
     iv = :crypto.strong_rand_bytes(16)
-    
+
     # Generate a random authentication tag (AAD)
     aad = :crypto.strong_rand_bytes(16)
-    
+
     # Encrypt the token data
-    {cipher_text, tag} = :crypto.crypto_one_time_aead(
-      :aes_256_gcm,
-      secret,
-      iv,
-      token_data,
-      aad,
-      true
-    )
-    
+    {cipher_text, tag} =
+      :crypto.crypto_one_time_aead(
+        :aes_256_gcm,
+        secret,
+        iv,
+        token_data,
+        aad,
+        true
+      )
+
     # Combine IV, AAD, tag, and cipher text for storage
-    iv <> aad <> tag <> cipher_text
+    (iv <> aad <> tag <> cipher_text)
     |> Base.encode64()
   end
-  
+
   @doc """
   Decrypts previously encrypted OAuth token data.
-  
+
   ## Examples
 
       iex> decrypt_token("encrypted_token_data")
@@ -126,29 +128,29 @@ defmodule Onelist.Security do
           {:ok, data} -> data
           :error -> raise "Invalid base64 encoding"
         end
-      
+
       # Extract the components
       <<iv::binary-16, aad::binary-16, tag::binary-16, cipher_text::binary>> = decoded
-      
+
       # Get encryption key from application config
       secret = get_encryption_key()
-      
+
       # Decrypt the token data
       case :crypto.crypto_one_time_aead(
-        :aes_256_gcm,
-        secret,
-        iv,
-        cipher_text,
-        aad,
-        tag,
-        false
-      ) do
+             :aes_256_gcm,
+             secret,
+             iv,
+             cipher_text,
+             aad,
+             tag,
+             false
+           ) do
         plain_text when is_binary(plain_text) ->
           case Jason.decode(plain_text) do
             {:ok, token_map} -> {:ok, token_map}
             {:error, _} -> {:error, :invalid_json}
           end
-        
+
         :error ->
           {:error, :decryption_failed}
       end
@@ -156,7 +158,7 @@ defmodule Onelist.Security do
       _ -> {:error, :invalid}
     end
   end
-  
+
   # Static salt for key derivation (derived from app name for consistency)
   @kdf_salt "onelist_encryption_key_v1"
   # PBKDF2 iterations - higher is more secure but slower
@@ -164,8 +166,9 @@ defmodule Onelist.Security do
 
   defp get_encryption_key do
     # Get encryption key from config, or derive from secret_key_base
-    key = Application.get_env(:onelist, Onelist.Security)[:encryption_key] ||
-          Application.get_env(:onelist, :secret_key_base)
+    key =
+      Application.get_env(:onelist, Onelist.Security)[:encryption_key] ||
+        Application.get_env(:onelist, :secret_key_base)
 
     # Use PBKDF2 to derive a 32-byte (256-bit) key for AES-256
     # This provides better protection against brute-force attacks than simple SHA256
@@ -215,6 +218,7 @@ defmodule Onelist.Security do
   """
   @spec hash_token(binary | nil) :: binary | nil
   def hash_token(nil), do: nil
+
   def hash_token(token) when is_binary(token) do
     # Use deterministic hashing so tokens can be looked up
     # The token itself should already be cryptographically random
@@ -243,11 +247,12 @@ defmodule Onelist.Security do
       Plug.Crypto.secure_compare(left, String.slice(right, 0, byte_size(left)))
     end
   end
+
   def secure_compare(_, _), do: false
 
   @doc """
   Anonymizes an IP address for privacy.
-  
+
   For IPv4, the last octet is replaced with zeroes.
   For IPv6, the last 80 bits (last 5 segments) are replaced with zeroes.
   Returns an empty string for nil or empty string inputs.
@@ -269,49 +274,51 @@ defmodule Onelist.Security do
   @spec anonymize_ip(binary | nil) :: binary
   def anonymize_ip(nil), do: ""
   def anonymize_ip(""), do: ""
+
   def anonymize_ip(ip) when is_binary(ip) do
     cond do
       # IPv4 address
       String.match?(ip, ~r/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) ->
         parts = String.split(ip, ".")
         length = length(parts)
-        
+
         if length == 4 do
           # Replace the last octet with 0
-          Enum.take(parts, 3) ++ ["0"] |> Enum.join(".")
+          (Enum.take(parts, 3) ++ ["0"]) |> Enum.join(".")
         else
           # Invalid IPv4 format, return as is
           ip
         end
-      
+
       # IPv6 address (simplified regex check)
       String.match?(ip, ~r/^[0-9a-fA-F:]+$/) && String.contains?(ip, ":") ->
         case :inet.parse_address(to_charlist(ip)) do
           {:ok, _} ->
             # Replace the last 5 segments with zeroes
             parts = String.split(ip, ":")
-            
+
             # Make sure we handle the :: shorthand notation
-            expanded_parts = if Enum.member?(parts, "") do
-              # Handle shorthand notation by expanding it
-              idx = Enum.find_index(parts, &(&1 == ""))
-              prefix = Enum.take(parts, idx)
-              suffix = Enum.drop(parts, idx + 1)
-              missing_count = 8 - length(prefix) - length(suffix)
-              prefix ++ List.duplicate("0", missing_count) ++ suffix
-            else
-              parts
-            end
-            
+            expanded_parts =
+              if Enum.member?(parts, "") do
+                # Handle shorthand notation by expanding it
+                idx = Enum.find_index(parts, &(&1 == ""))
+                prefix = Enum.take(parts, idx)
+                suffix = Enum.drop(parts, idx + 1)
+                missing_count = 8 - length(prefix) - length(suffix)
+                prefix ++ List.duplicate("0", missing_count) ++ suffix
+              else
+                parts
+              end
+
             # Take the first 3 segments and append 5 zeroes
             sanitized = Enum.take(expanded_parts, 3) ++ List.duplicate("0", 5)
             Enum.join(sanitized, ":")
-          
+
           _ ->
             # Failed to parse, return as is
             ip
         end
-      
+
       # Not recognized as IP address
       true ->
         "0.0.0.0"
@@ -332,6 +339,7 @@ defmodule Onelist.Security do
   @spec extract_device_info(binary | nil) :: binary
   def extract_device_info(nil), do: "Unknown Device"
   def extract_device_info(""), do: "Unknown Device"
+
   def extract_device_info(user_agent) when is_binary(user_agent) do
     # Check for bots first
     if is_bot?(user_agent) do
@@ -360,7 +368,7 @@ defmodule Onelist.Security do
       # Windows 11 reports as Windows NT 10.0 but with a different build number
       String.contains?(user_agent, "Windows NT 10.0") ->
         if String.contains?(user_agent, "Windows NT 10.0; Win64; x64") &&
-           Regex.match?(~r/build\/(\d+)/i, user_agent) do
+             Regex.match?(~r/build\/(\d+)/i, user_agent) do
           case Regex.run(~r/build\/(\d+)/i, user_agent) do
             [_, build] when build >= "22000" -> "Windows 11"
             _ -> "Windows 10"
@@ -369,25 +377,41 @@ defmodule Onelist.Security do
           "Windows 10"
         end
 
-      String.contains?(user_agent, "Windows NT 6.3") -> "Windows 8.1"
-      String.contains?(user_agent, "Windows NT 6.2") -> "Windows 8"
-      String.contains?(user_agent, "Windows NT 6.1") -> "Windows 7"
-      String.contains?(user_agent, "Windows NT 6.0") -> "Windows Vista"
-      String.contains?(user_agent, "Windows NT 5.1") -> "Windows XP"
+      String.contains?(user_agent, "Windows NT 6.3") ->
+        "Windows 8.1"
+
+      String.contains?(user_agent, "Windows NT 6.2") ->
+        "Windows 8"
+
+      String.contains?(user_agent, "Windows NT 6.1") ->
+        "Windows 7"
+
+      String.contains?(user_agent, "Windows NT 6.0") ->
+        "Windows Vista"
+
+      String.contains?(user_agent, "Windows NT 5.1") ->
+        "Windows XP"
 
       # macOS
       String.contains?(user_agent, "Mac OS X") ->
         "Mac " <> extract_macos_version(user_agent)
 
       # Chrome OS
-      String.contains?(user_agent, "CrOS") -> "Chrome OS"
+      String.contains?(user_agent, "CrOS") ->
+        "Chrome OS"
 
       # Linux variants
-      String.contains?(user_agent, "Ubuntu") -> "Ubuntu Linux"
-      String.contains?(user_agent, "Fedora") -> "Fedora Linux"
-      String.contains?(user_agent, "Linux") -> "Linux"
+      String.contains?(user_agent, "Ubuntu") ->
+        "Ubuntu Linux"
 
-      true -> "Unknown OS"
+      String.contains?(user_agent, "Fedora") ->
+        "Fedora Linux"
+
+      String.contains?(user_agent, "Linux") ->
+        "Linux"
+
+      true ->
+        "Unknown OS"
     end
   end
 
@@ -418,10 +442,22 @@ defmodule Onelist.Security do
   # Check if user agent is a bot/crawler
   defp is_bot?(user_agent) do
     bot_patterns = [
-      "bot", "crawl", "spider", "slurp", "search", "fetch",
-      "Googlebot", "Bingbot", "Yahoo", "DuckDuckBot", "Baiduspider",
-      "facebookexternalhit", "Twitterbot", "LinkedInBot"
+      "bot",
+      "crawl",
+      "spider",
+      "slurp",
+      "search",
+      "fetch",
+      "Googlebot",
+      "Bingbot",
+      "Yahoo",
+      "DuckDuckBot",
+      "Baiduspider",
+      "facebookexternalhit",
+      "Twitterbot",
+      "LinkedInBot"
     ]
+
     String.downcase(user_agent)
     |> then(fn ua -> Enum.any?(bot_patterns, &String.contains?(ua, String.downcase(&1))) end)
   end
@@ -455,20 +491,20 @@ defmodule Onelist.Security do
     cond do
       String.contains?(user_agent, "Firefox/") ->
         "Firefox"
-      
+
       String.contains?(user_agent, "Edg/") || String.contains?(user_agent, "Edge/") ->
         "Edge"
-      
+
       String.contains?(user_agent, "Chrome/") && !String.contains?(user_agent, "Chromium") ->
         "Chrome"
-      
+
       String.contains?(user_agent, "Chromium/") ->
         "Chromium"
-      
+
       String.contains?(user_agent, "Safari/") && !String.contains?(user_agent, "Chrome") &&
           !String.contains?(user_agent, "Chromium") ->
         "Safari"
-      
+
       String.contains?(user_agent, "OPR/") || String.contains?(user_agent, "Opera/") ->
         "Opera"
 
@@ -479,11 +515,12 @@ defmodule Onelist.Security do
         "Unknown Browser"
     end
   end
+
   def extract_browser(_), do: "Unknown Browser"
 
   @doc """
   Checks if a password reset token is expired.
-  
+
   Reset tokens are considered expired if they were created more than 24 hours ago
   or if the reset_token_created_at field is nil.
 
@@ -503,6 +540,7 @@ defmodule Onelist.Security do
   """
   @spec is_expired_reset_token?(map()) :: boolean()
   def is_expired_reset_token?(%{reset_token_created_at: nil}), do: true
+
   def is_expired_reset_token?(%{reset_token_created_at: timestamp}) do
     # Reset tokens expire after 24 hours
     max_age = 24 * 60 * 60
@@ -519,9 +557,10 @@ defmodule Onelist.Security do
   """
   @spec encrypt_data(any) :: binary
   def encrypt_data(data) do
-    secret = Application.get_env(:onelist, Onelist.Security, [])[:encryption_key] ||
-             Application.get_env(:onelist, :secret_key_base)
-    
+    secret =
+      Application.get_env(:onelist, Onelist.Security, [])[:encryption_key] ||
+        Application.get_env(:onelist, :secret_key_base)
+
     # Use Phoenix's build-in encryption
     Phoenix.Token.encrypt(OnelistWeb.Endpoint, secret, data)
   end
@@ -539,12 +578,13 @@ defmodule Onelist.Security do
   """
   @spec decrypt_data(binary) :: {:ok, any} | {:error, :invalid}
   def decrypt_data(encrypted) do
-    secret = Application.get_env(:onelist, Onelist.Security, [])[:encryption_key] ||
-             Application.get_env(:onelist, :secret_key_base)
-    
+    secret =
+      Application.get_env(:onelist, Onelist.Security, [])[:encryption_key] ||
+        Application.get_env(:onelist, :secret_key_base)
+
     case Phoenix.Token.decrypt(OnelistWeb.Endpoint, secret, encrypted) do
       {:ok, data} -> {:ok, data}
       {:error, _reason} -> {:error, :invalid}
     end
   end
-end 
+end

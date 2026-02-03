@@ -8,14 +8,15 @@ defmodule OnelistWeb.Entries.EntryEditorLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket,
-      entry: nil,
-      changeset: nil,
-      content: "",
-      tags: [],
-      available_tags: [],
-      saving: false
-    )}
+    {:ok,
+     assign(socket,
+       entry: nil,
+       changeset: nil,
+       content: "",
+       tags: [],
+       available_tags: [],
+       saving: false
+     )}
   end
 
   @impl true
@@ -29,20 +30,21 @@ defmodule OnelistWeb.Entries.EntryEditorLive do
       tags = Tags.list_entry_tags(entry)
       available_tags = Tags.list_user_tags(user)
 
-      {:noreply, assign(socket,
-        page_title: "Edit Entry",
-        entry: entry,
-        changeset: Entry.update_changeset(entry, %{}),
-        content: content,
-        tags: tags,
-        available_tags: available_tags,
-        action: :edit
-      )}
+      {:noreply,
+       assign(socket,
+         page_title: "Edit Entry",
+         entry: entry,
+         changeset: Entry.update_changeset(entry, %{}),
+         content: content,
+         tags: tags,
+         available_tags: available_tags,
+         action: :edit
+       )}
     else
       {:noreply,
-        socket
-        |> put_flash(:error, "Entry not found")
-        |> push_navigate(to: ~p"/app/entries")}
+       socket
+       |> put_flash(:error, "Entry not found")
+       |> push_navigate(to: ~p"/app/entries")}
     end
   end
 
@@ -51,15 +53,16 @@ defmodule OnelistWeb.Entries.EntryEditorLive do
     user = socket.assigns.current_user
     available_tags = Tags.list_user_tags(user)
 
-    {:noreply, assign(socket,
-      page_title: "New Entry",
-      entry: %Entry{entry_type: "note"},
-      changeset: Entry.changeset(%Entry{}, %{entry_type: "note"}),
-      content: "",
-      tags: [],
-      available_tags: available_tags,
-      action: :new
-    )}
+    {:noreply,
+     assign(socket,
+       page_title: "New Entry",
+       entry: %Entry{entry_type: "note"},
+       changeset: Entry.changeset(%Entry{}, %{entry_type: "note"}),
+       content: "",
+       tags: [],
+       available_tags: available_tags,
+       action: :new
+     )}
   end
 
   @impl true
@@ -151,9 +154,9 @@ defmodule OnelistWeb.Entries.EntryEditorLive do
         end)
 
         {:noreply,
-          socket
-          |> put_flash(:info, "Entry created successfully")
-          |> push_navigate(to: ~p"/app/entries")}
+         socket
+         |> put_flash(:info, "Entry created successfully")
+         |> push_navigate(to: ~p"/app/entries")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
@@ -177,9 +180,9 @@ defmodule OnelistWeb.Entries.EntryEditorLive do
         end
 
         {:noreply,
-          socket
-          |> put_flash(:info, "Entry updated successfully")
-          |> push_navigate(to: ~p"/app/entries")}
+         socket
+         |> put_flash(:info, "Entry updated successfully")
+         |> push_navigate(to: ~p"/app/entries")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
@@ -227,7 +230,10 @@ defmodule OnelistWeb.Entries.EntryEditorLive do
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           >
             <%= for type <- ~w(note memory photo video) do %>
-              <option value={type} selected={(@changeset.changes[:entry_type] || @entry.entry_type) == type}>
+              <option
+                value={type}
+                selected={(@changeset.changes[:entry_type] || @entry.entry_type) == type}
+              >
                 <%= String.capitalize(type) %>
               </option>
             <% end %>
@@ -235,7 +241,9 @@ defmodule OnelistWeb.Entries.EntryEditorLive do
         </div>
 
         <div>
-          <label for="entry_content" class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+          <label for="entry_content" class="block text-sm font-medium text-gray-700 mb-1">
+            Content
+          </label>
           <!-- Hidden input for form submission -->
           <input type="hidden" name="entry[content]" id="entry-content-input" value={@content} />
           <!-- Toast UI Editor container -->
@@ -307,10 +315,7 @@ defmodule OnelistWeb.Entries.EntryEditorLive do
         <% end %>
 
         <div class="flex justify-end gap-4">
-          <.link
-            navigate={~p"/app/entries"}
-            class="px-4 py-2 text-gray-700 hover:text-gray-900"
-          >
+          <.link navigate={~p"/app/entries"} class="px-4 py-2 text-gray-700 hover:text-gray-900">
             Cancel
           </.link>
           <button

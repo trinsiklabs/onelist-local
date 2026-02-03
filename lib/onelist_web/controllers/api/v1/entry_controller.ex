@@ -157,12 +157,14 @@ defmodule OnelistWeb.Api.V1.EntryController do
   end
 
   defp parse_positive_int(nil, default), do: default
+
   defp parse_positive_int(value, default) when is_binary(value) do
     case Integer.parse(value) do
       {int, _} when int > 0 -> int
       _ -> default
     end
   end
+
   defp parse_positive_int(_, default), do: default
 
   defp parse_boolean("true"), do: true
@@ -173,10 +175,12 @@ defmodule OnelistWeb.Api.V1.EntryController do
   defp maybe_add_filter(opts, key, value), do: Keyword.put(opts, key, value)
 
   defp maybe_add_content(entry, nil), do: {:ok, entry}
+
   defp maybe_add_content(entry, "") do
     entry = Onelist.Repo.preload(entry, :representations)
     {:ok, entry}
   end
+
   defp maybe_add_content(entry, content) when is_binary(content) do
     case Entries.add_representation(entry, %{type: "markdown", content: content}) do
       {:ok, _rep} ->
@@ -189,6 +193,7 @@ defmodule OnelistWeb.Api.V1.EntryController do
   end
 
   defp maybe_update_content(entry, nil), do: {:ok, entry}
+
   defp maybe_update_content(entry, content) when is_binary(content) do
     case Entries.get_primary_representation(entry) do
       nil ->

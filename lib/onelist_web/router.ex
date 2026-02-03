@@ -17,7 +17,7 @@ defmodule OnelistWeb.Router do
 
   defp require_admin_user(conn, _opts) do
     user = conn.assigns[:current_user]
-    
+
     if user && "admin" in (user.roles || []) do
       conn
     else
@@ -27,7 +27,7 @@ defmodule OnelistWeb.Router do
       |> halt()
     end
   end
-  
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -64,7 +64,9 @@ defmodule OnelistWeb.Router do
 
   # Protected workspace docs with HTTP Basic Auth (stronger password)
   pipeline :workspace_auth do
-    plug OnelistWeb.Plugs.BasicAuth, username: "splntrb", password: "slLEcft0LCpFuPOjHWluFfzdcblmhYM9FzZKCvmD"
+    plug OnelistWeb.Plugs.BasicAuth,
+      username: "splntrb",
+      password: "slLEcft0LCpFuPOjHWluFfzdcblmhYM9FzZKCvmD"
   end
 
   scope "/workspace", OnelistWeb do
@@ -98,9 +100,9 @@ defmodule OnelistWeb.Router do
       live "/pricing", PricingPage
       live "/documentation", DocumentationPage
     end
-    
+
     # Headwaters waitlist - standalone pages without app chrome
-    live_session :waitlist, 
+    live_session :waitlist,
       on_mount: [{OnelistWeb.LiveAuth, :maybe_authenticated}],
       layout: {OnelistWeb.Layouts, :public} do
       live "/waitlist", WaitlistLive
@@ -115,7 +117,8 @@ defmodule OnelistWeb.Router do
     end
 
     # Auth routes - redirect if already authenticated
-    live_session :redirect_if_authenticated, on_mount: [{OnelistWeb.LiveAuth, :redirect_if_authenticated}] do
+    live_session :redirect_if_authenticated,
+      on_mount: [{OnelistWeb.LiveAuth, :redirect_if_authenticated}] do
       live "/register", Auth.RegistrationPage
       live "/login", Auth.LoginPage
       live "/forgot-password", Auth.PasswordResetPage
@@ -133,7 +136,7 @@ defmodule OnelistWeb.Router do
   # Account routes - authentication required
   scope "/account", OnelistWeb do
     pipe_through :browser
-    
+
     # Account management LiveView routes (requires authentication)
     live_session :account_management, on_mount: [{OnelistWeb.LiveAuth, :ensure_authenticated}] do
       live "/sessions", SessionManagementLive
@@ -144,15 +147,16 @@ defmodule OnelistWeb.Router do
   # OAuth routes
   scope "/auth", OnelistWeb do
     pipe_through :browser
-    
+
     # OAuth request and callback routes
     get "/:provider", Auth.OAuthController, :request
     get "/:provider/callback", Auth.OAuthController, :callback
-    post "/:provider/callback", Auth.OAuthController, :callback # For Apple POST callback
-    
+    # For Apple POST callback
+    post "/:provider/callback", Auth.OAuthController, :callback
+
     # Special test routes
     get "/:provider/link", Auth.OAuthController, :handle_github_link
-    
+
     # Account linking
     live_session :link_account, on_mount: [{OnelistWeb.LiveAuth, :maybe_authenticated}] do
       live "/link-account", Auth.LinkAccountLive
@@ -174,7 +178,7 @@ defmodule OnelistWeb.Router do
       # ============================================
       # NEW APP UI ROUTES
       # ============================================
-      
+
       # Main app views (new UI)
       live "/", App.InboxLive, :index
       live "/library", App.LibraryLive, :index
@@ -185,7 +189,7 @@ defmodule OnelistWeb.Router do
       live "/activity", App.ActivityLive, :index
       live "/settings", App.SettingsLive, :index
       live "/settings/:section", App.SettingsLive, :section
-      
+
       # ============================================
       # LEGACY ROUTES (keep for backwards compat)
       # ============================================
@@ -204,16 +208,16 @@ defmodule OnelistWeb.Router do
       # Account username setup
       live "/account/username", Account.UsernameSetupLive
     end
-    
+
     # Session management routes - controller-based
     get "/sessions", UserSessionController, :index
     delete "/sessions/all", UserSessionController, :delete_all
     delete "/sessions/:id", UserSessionController, :delete
-    
+
     # Privacy and data routes
     get "/account/export-data", PrivacyController, :export_data
     post "/account/delete-account", PrivacyController, :delete_account
-    
+
     # Account management LiveView routes
     live_session :account_settings, on_mount: [{OnelistWeb.LiveAuth, :ensure_authenticated}] do
       live "/settings", Account.AccountSettingsPage
@@ -272,6 +276,11 @@ defmodule OnelistWeb.Router do
     get "/chat-stream/recent", ChatStreamController, :recent
     get "/chat-logs", ChatStreamController, :list_logs
 
+    # OpenClaw session import (historical transcripts)
+    post "/openclaw/import", OpenClawImportController, :create
+    get "/openclaw/import/preview", OpenClawImportController, :preview
+    post "/openclaw/import/file", OpenClawImportController, :import_file
+
     # Embedding management
     get "/embeddings/config", EmbeddingController, :config
     patch "/embeddings/config", EmbeddingController, :update_config
@@ -296,18 +305,18 @@ defmodule OnelistWeb.Router do
     post "/river/sessions/:id/close", RiverController, :close_session
     get "/river/gtd-state", RiverController, :gtd_state
     post "/river/weekly-review/complete", RiverController, :complete_review
-    
+
     # River conversations
     get "/river/conversations", RiverController, :list_conversations
     get "/river/conversations/:id", RiverController, :show_conversation
-    
+
     # River tasks (GTD)
     get "/river/tasks", RiverController, :list_tasks
     post "/river/tasks", RiverController, :create_task
     get "/river/tasks/:id", RiverController, :show_task
     patch "/river/tasks/:id", RiverController, :update_task
     post "/river/tasks/:id/complete", RiverController, :complete_task
-    
+
     # River briefings
     get "/river/briefing", RiverController, :briefing
 
@@ -322,7 +331,11 @@ defmodule OnelistWeb.Router do
   scope "/admin", OnelistWeb.Admin, as: :admin do
     pipe_through [:browser, :require_authenticated_user, :require_admin_user]
 
-    live_session :live_admin, on_mount: [{OnelistWeb.LiveAuth, :ensure_authenticated}, {OnelistWeb.LiveAuth, :ensure_admin}] do
+    live_session :live_admin,
+      on_mount: [
+        {OnelistWeb.LiveAuth, :ensure_authenticated},
+        {OnelistWeb.LiveAuth, :ensure_admin}
+      ] do
       live("/admin_roles", AdminRolesLive, :index)
       # add other admin live routes as needed
     end

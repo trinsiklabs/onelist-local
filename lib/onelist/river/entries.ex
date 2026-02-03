@@ -27,17 +27,21 @@ defmodule Onelist.River.Entries do
     user = Accounts.get_user!(user_id)
 
     # Skip auto-processing for River internal entries (conversations don't need Reader/Searcher)
-    Entries.create_entry(user, %{
-      entry_type: "conversation",
-      title: "Conversation - #{Date.utc_today()}",
-      metadata: %{
-        "conversation_type" => "river",
-        "status" => "active",
-        "message_count" => 0,
-        "started_at" => now,
-        "last_message_at" => nil
-      }
-    }, skip_auto_processing: true)
+    Entries.create_entry(
+      user,
+      %{
+        entry_type: "conversation",
+        title: "Conversation - #{Date.utc_today()}",
+        metadata: %{
+          "conversation_type" => "river",
+          "status" => "active",
+          "message_count" => 0,
+          "started_at" => now,
+          "last_message_at" => nil
+        }
+      },
+      skip_auto_processing: true
+    )
   end
 
   @doc """
@@ -229,12 +233,16 @@ defmodule Onelist.River.Entries do
       |> Map.new()
 
     # Skip auto-processing for tasks (they don't need Reader/Searcher by default)
-    Entries.create_entry(user, %{
-      entry_type: "task",
-      title: title,
-      content: Map.get(attrs, :description) || Map.get(attrs, "description"),
-      metadata: gtd_metadata
-    }, skip_auto_processing: true)
+    Entries.create_entry(
+      user,
+      %{
+        entry_type: "task",
+        title: title,
+        content: Map.get(attrs, :description) || Map.get(attrs, "description"),
+        metadata: gtd_metadata
+      },
+      skip_auto_processing: true
+    )
   end
 
   @doc """
@@ -370,10 +378,26 @@ defmodule Onelist.River.Entries do
       metadata_updates =
         attrs
         |> Enum.filter(fn {k, _v} ->
-          k in [:gtd_bucket, :gtd_context, :priority, :due_date, :due_time,
-                :effort_estimate, :effort_minutes, :waiting_on, :status,
-                "gtd_bucket", "gtd_context", "priority", "due_date", "due_time",
-                "effort_estimate", "effort_minutes", "waiting_on", "status"]
+          k in [
+            :gtd_bucket,
+            :gtd_context,
+            :priority,
+            :due_date,
+            :due_time,
+            :effort_estimate,
+            :effort_minutes,
+            :waiting_on,
+            :status,
+            "gtd_bucket",
+            "gtd_context",
+            "priority",
+            "due_date",
+            "due_time",
+            "effort_estimate",
+            "effort_minutes",
+            "waiting_on",
+            "status"
+          ]
         end)
         |> Enum.map(fn {k, v} -> {to_string(k), v} end)
         |> Map.new()

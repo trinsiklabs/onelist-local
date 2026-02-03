@@ -1,27 +1,28 @@
 defmodule OnelistWeb.PrivacyController do
   use OnelistWeb, :controller
-  
+
   alias Onelist.Accounts
   alias Onelist.Privacy
-  
+
   @doc """
   Download user data in machine-readable format (GDPR right to data portability)
   """
   def export_data(conn, _params) do
     user = conn.assigns.current_user
-    
+
     if user do
       # Collect user data
       user_data = %{
         email: user.email,
         account_created: user.inserted_at,
-        sessions: Onelist.Sessions.list_active_sessions(user)
-                  |> Enum.map(&Privacy.anonymize_session_data/1)
+        sessions:
+          Onelist.Sessions.list_active_sessions(user)
+          |> Enum.map(&Privacy.anonymize_session_data/1)
       }
-      
+
       # Log data export
       Privacy.log_privacy_action(:data_exported, %{user_id: user.id})
-      
+
       # Return as JSON file
       conn
       |> put_resp_content_type("application/json")
@@ -33,23 +34,23 @@ defmodule OnelistWeb.PrivacyController do
       |> redirect(to: ~p"/login")
     end
   end
-  
+
   @doc """
   Delete user account and all associated data
   """
   def delete_account(conn, %{"confirmation" => confirmation}) do
     user = conn.assigns.current_user
-    
+
     if user && confirmation == "DELETE" do
       # Log deletion request
       Privacy.log_privacy_action(:account_deleted, %{user_id: user.id})
-      
+
       # Clean up user data
       Privacy.cleanup_user_data(user.id)
-      
+
       # Delete the user account
       Accounts.delete_user(user)
-      
+
       # Clear session and redirect
       conn
       |> clear_session()
@@ -61,4 +62,4 @@ defmodule OnelistWeb.PrivacyController do
       |> redirect(to: ~p"/account/settings")
     end
   end
-end 
+end

@@ -9,17 +9,16 @@ defmodule OnelistWeb.App.MemoriesLive do
   @impl true
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
-    
+
     # Load current (non-superseded) memories
     memories = Reader.get_current_memories(user.id, limit: 100)
-    
-    {:ok, 
-      socket
-      |> assign(:page_title, "Memories")
-      |> assign(:current_path, "/app/memories")
-      |> assign(:memories, memories)
-      |> assign(:filter_type, "all")
-    }
+
+    {:ok,
+     socket
+     |> assign(:page_title, "Memories")
+     |> assign(:current_path, "/app/memories")
+     |> assign(:memories, memories)
+     |> assign(:filter_type, "all")}
   end
 
   @impl true
@@ -34,31 +33,54 @@ defmodule OnelistWeb.App.MemoriesLive do
           Atomic facts extracted from your entries by the Reader agent
         </p>
       </div>
-      
       <!-- Filters -->
       <div class="card" style="margin-bottom: var(--space-4); padding: var(--space-3);">
         <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
-          <button class={["btn", @filter_type == "all" && "btn-secondary" || "btn-ghost"]} phx-click="filter" phx-value-type="all">
+          <button
+            class={["btn", (@filter_type == "all" && "btn-secondary") || "btn-ghost"]}
+            phx-click="filter"
+            phx-value-type="all"
+          >
             All
           </button>
-          <button class={["btn", @filter_type == "fact" && "btn-secondary" || "btn-ghost"]} phx-click="filter" phx-value-type="fact">
+          <button
+            class={["btn", (@filter_type == "fact" && "btn-secondary") || "btn-ghost"]}
+            phx-click="filter"
+            phx-value-type="fact"
+          >
             Facts
           </button>
-          <button class={["btn", @filter_type == "preference" && "btn-secondary" || "btn-ghost"]} phx-click="filter" phx-value-type="preference">
+          <button
+            class={["btn", (@filter_type == "preference" && "btn-secondary") || "btn-ghost"]}
+            phx-click="filter"
+            phx-value-type="preference"
+          >
             Preferences
           </button>
-          <button class={["btn", @filter_type == "event" && "btn-secondary" || "btn-ghost"]} phx-click="filter" phx-value-type="event">
+          <button
+            class={["btn", (@filter_type == "event" && "btn-secondary") || "btn-ghost"]}
+            phx-click="filter"
+            phx-value-type="event"
+          >
             Events
           </button>
-          <button class={["btn", @filter_type == "observation" && "btn-secondary" || "btn-ghost"]} phx-click="filter" phx-value-type="observation">
+          <button
+            class={["btn", (@filter_type == "observation" && "btn-secondary") || "btn-ghost"]}
+            phx-click="filter"
+            phx-value-type="observation"
+          >
             Observations
           </button>
-          <button class={["btn", @filter_type == "decision" && "btn-secondary" || "btn-ghost"]} phx-click="filter" phx-value-type="decision">
+          <button
+            class={["btn", (@filter_type == "decision" && "btn-secondary") || "btn-ghost"]}
+            phx-click="filter"
+            phx-value-type="decision"
+          >
             Decisions
           </button>
         </div>
       </div>
-      
+
       <%= if Enum.empty?(@memories) do %>
         <div class="card" style="text-align: center; padding: var(--space-12);">
           <div style="font-size: 3rem; margin-bottom: var(--space-4);">🧠</div>
@@ -98,7 +120,10 @@ defmodule OnelistWeb.App.MemoriesLive do
         <%= @memory.content %>
       </p>
       <div style="display: flex; justify-content: space-between; align-items: center; padding-top: var(--space-3); border-top: 1px solid var(--color-border-light);">
-        <a href={~p"/app/library/#{@memory.entry_id}"} style="color: var(--color-primary); font-size: var(--text-sm); text-decoration: none;">
+        <a
+          href={~p"/app/library/#{@memory.entry_id}"}
+          style="color: var(--color-primary); font-size: var(--text-sm); text-decoration: none;"
+        >
           View source entry →
         </a>
         <span style="color: var(--color-text-subtle); font-size: var(--text-xs);">
@@ -119,17 +144,17 @@ defmodule OnelistWeb.App.MemoriesLive do
   @impl true
   def handle_event("filter", %{"type" => type}, socket) do
     user = socket.assigns.current_user
-    
-    memories = if type == "all" do
-      Reader.get_current_memories(user.id, limit: 100)
-    else
-      Reader.get_current_memories(user.id, limit: 100, memory_type: type)
-    end
-    
-    {:noreply, 
-      socket
-      |> assign(:filter_type, type)
-      |> assign(:memories, memories)
-    }
+
+    memories =
+      if type == "all" do
+        Reader.get_current_memories(user.id, limit: 100)
+      else
+        Reader.get_current_memories(user.id, limit: 100, memory_type: type)
+      end
+
+    {:noreply,
+     socket
+     |> assign(:filter_type, type)
+     |> assign(:memories, memories)}
   end
 end
