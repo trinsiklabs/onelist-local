@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Triangle Chat Dashboard Tests
+ * Trio Chat Dashboard Tests
  * PLAN-050: Playwright Testing Framework
  *
  * Tests the real-time chat between splntrb, Keystone, and Stream
@@ -12,7 +12,7 @@ const TEST_USER = process.env.TEST_USER || 'splntrb';
 const TEST_PASS = process.env.TEST_PASS || 'test_password';
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:4000';
 
-test.describe('Triangle Chat Dashboard', () => {
+test.describe('Trio Chat Dashboard', () => {
   test.beforeEach(async ({ page }) => {
     // Login first
     await page.goto(`${BASE_URL}/login`);
@@ -30,7 +30,7 @@ test.describe('Triangle Chat Dashboard', () => {
     await page.goto(`${BASE_URL}/dashboard`);
 
     // Wait for the chat UI to load
-    await page.waitForSelector('.triangle-chat');
+    await page.waitForSelector('.trio-chat');
 
     // Should have 3 DM panes
     const dmPanes = await page.locator('.dm-pane').count();
@@ -42,7 +42,7 @@ test.describe('Triangle Chat Dashboard', () => {
 
   test('pane headers are correct', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard`);
-    await page.waitForSelector('.triangle-chat');
+    await page.waitForSelector('.trio-chat');
 
     // Check DM pane headers
     await expect(page.locator('.pane-header:has-text("splntrb ↔ Key")')).toBeVisible();
@@ -50,12 +50,12 @@ test.describe('Triangle Chat Dashboard', () => {
     await expect(page.locator('.pane-header:has-text("Key ↔ Stream")')).toBeVisible();
 
     // Check group pane header
-    await expect(page.locator('.pane-header:has-text("The Triangle")')).toBeVisible();
+    await expect(page.locator('.pane-header:has-text("The Trio")')).toBeVisible();
   });
 
   test('Key ↔ Stream pane is read-only for splntrb', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard`);
-    await page.waitForSelector('.triangle-chat');
+    await page.waitForSelector('.trio-chat');
 
     // The Key ↔ Stream pane should show read-only notice
     await expect(page.locator('.dm-pane.readonly')).toBeVisible();
@@ -64,7 +64,7 @@ test.describe('Triangle Chat Dashboard', () => {
 
   test('can type in group chat input', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard`);
-    await page.waitForSelector('.triangle-chat');
+    await page.waitForSelector('.trio-chat');
 
     const input = page.locator('.group-pane input[name="content"]');
     await expect(input).toBeVisible();
@@ -75,7 +75,7 @@ test.describe('Triangle Chat Dashboard', () => {
 
   test('send button exists for writable panes', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard`);
-    await page.waitForSelector('.triangle-chat');
+    await page.waitForSelector('.trio-chat');
 
     // Group pane should have send button
     await expect(page.locator('.group-pane button[type="submit"]')).toBeVisible();
@@ -86,7 +86,7 @@ test.describe('Triangle Chat Dashboard', () => {
   });
 });
 
-test.describe('Triangle Chat - Message Flow', () => {
+test.describe('Trio Chat - Message Flow', () => {
   test.skip('can send message to group', async ({ page }) => {
     // Skip this test in CI as it modifies data
     // Run manually: npx playwright test --grep "can send message"
@@ -98,7 +98,7 @@ test.describe('Triangle Chat - Message Flow', () => {
     await page.waitForURL(/\/(app|dashboard|watch)/);
 
     await page.goto(`${BASE_URL}/dashboard`);
-    await page.waitForSelector('.triangle-chat');
+    await page.waitForSelector('.trio-chat');
 
     const testMessage = `Playwright test ${Date.now()}`;
 

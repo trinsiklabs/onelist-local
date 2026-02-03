@@ -99,14 +99,14 @@ defmodule OnelistWeb.Router do
     end
   end
 
-  # Triangle Chat Dashboard (PLAN-048) - protected by watch access
+  # Trio Chat Dashboard (PLAN-048) - protected by watch access
   scope "/dashboard", OnelistWeb do
     pipe_through [:browser]
 
-    live_session :triangle_chat,
+    live_session :trio_chat,
       on_mount: [{OnelistWeb.LiveAuth, :ensure_watch_access}],
       layout: {OnelistWeb.Layouts, :public} do
-      live "/", Dashboard.TriangleChatLive
+      live "/", Dashboard.TrioChatLive
     end
   end
 
@@ -310,13 +310,13 @@ defmodule OnelistWeb.Router do
     get "/chat-stream/recent", ChatStreamController, :recent
     get "/chat-logs", ChatStreamController, :list_logs
 
-    # Triangle Chat (PLAN-048) - splntrb, Key, Stream communication
-    post "/chat/send", TriangleChatController, :send
-    get "/chat/messages", TriangleChatController, :messages
-    get "/chat/unread", TriangleChatController, :unread
-    post "/chat/mark_read", TriangleChatController, :mark_read
-    get "/chat/channels", TriangleChatController, :channels
-    get "/chat/status", TriangleChatController, :status
+    # Trio Chat (PLAN-048) - splntrb, Key, Stream communication
+    post "/chat/send", TrioChatController, :send
+    get "/chat/messages", TrioChatController, :messages
+    get "/chat/unread", TrioChatController, :unread
+    post "/chat/mark_read", TrioChatController, :mark_read
+    get "/chat/channels", TrioChatController, :channels
+    get "/chat/status", TrioChatController, :status
 
     # OpenClaw session import (historical transcripts)
     post "/openclaw/import", OpenClawImportController, :create

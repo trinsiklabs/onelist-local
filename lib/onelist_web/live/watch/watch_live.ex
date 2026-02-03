@@ -96,7 +96,7 @@ defmodule OnelistWeb.Watch.WatchLive do
       </div>
 
       <div class="endpoint">
-        <h2><a href="/dashboard">Triangle Chat</a></h2>
+        <h2><a href="/dashboard">Trio Chat</a></h2>
         <p>Real-time chat between splntrb, Keystone, and Stream.</p>
         <div class="status">LiveView - Real-time messaging</div>
       </div>

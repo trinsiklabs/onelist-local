@@ -1,6 +1,6 @@
-defmodule OnelistWeb.Api.V1.TriangleChatController do
+defmodule OnelistWeb.Api.V1.TrioChatController do
   @moduledoc """
-  API endpoints for the Triangle Chat system.
+  API endpoints for the Trio Chat system.
 
   Used by Keystone (Claude Code on Mac) to send/receive messages.
   Stream calls Onelist.Chat directly (internal).

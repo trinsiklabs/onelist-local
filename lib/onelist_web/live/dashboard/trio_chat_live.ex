@@ -1,6 +1,6 @@
-defmodule OnelistWeb.Dashboard.TriangleChatLive do
+defmodule OnelistWeb.Dashboard.TrioChatLive do
   @moduledoc """
-  The Triangle Chat Dashboard - unified communication between splntrb, Key, and Stream.
+  The Trio Chat Dashboard - unified communication between splntrb, Key, and Stream.
 
   Layout:
   ┌─────────────────────┬─────────────────────┬─────────────────────────────┐
@@ -35,15 +35,14 @@ defmodule OnelistWeb.Dashboard.TriangleChatLive do
      socket
      |> assign(:current_user, @current_user)
      |> assign(:messages, messages)
-     |> assign(:inputs, %{group: "", dm_splntrb_key: "", dm_splntrb_stream: ""})
      |> assign(:unread_counts, load_unread_counts())}
   end
 
   def render(assigns) do
     ~H"""
-    <div class="triangle-chat">
+    <div class="trio-chat">
       <style>
-        .triangle-chat {
+        .trio-chat {
           display: flex;
           flex-direction: column;
           height: 100vh;
@@ -186,11 +185,8 @@ defmodule OnelistWeb.Dashboard.TriangleChatLive do
               <input
                 type="text"
                 name="content"
-                value={@inputs[:dm_splntrb_key]}
                 placeholder="Message Key..."
                 autocomplete="off"
-                phx-change="update_input"
-                phx-value-channel="dm_splntrb_key"
               />
               <button type="submit">Send</button>
             </form>
@@ -215,11 +211,8 @@ defmodule OnelistWeb.Dashboard.TriangleChatLive do
               <input
                 type="text"
                 name="content"
-                value={@inputs[:dm_splntrb_stream]}
                 placeholder="Message Stream..."
                 autocomplete="off"
-                phx-change="update_input"
-                phx-value-channel="dm_splntrb_stream"
               />
               <button type="submit">Send</button>
             </form>
@@ -246,7 +239,7 @@ defmodule OnelistWeb.Dashboard.TriangleChatLive do
       <!-- Group Chat -->
       <div class="group-pane">
         <div class="pane-header">
-          <span>🔺 The Triangle — Group Chat</span>
+          <span>🔺 The Trio — Group Chat</span>
           <%= if @unread_counts[:group] > 0 do %>
             <span class="badge"><%= @unread_counts[:group] %></span>
           <% end %>
@@ -261,11 +254,8 @@ defmodule OnelistWeb.Dashboard.TriangleChatLive do
             <input
               type="text"
               name="content"
-              value={@inputs[:group]}
-              placeholder="Message the Triangle..."
+              placeholder="Message the Trio..."
               autocomplete="off"
-              phx-change="update_input"
-              phx-value-channel="group"
             />
             <button type="submit">Send</button>
           </form>
@@ -295,7 +285,7 @@ defmodule OnelistWeb.Dashboard.TriangleChatLive do
 
   def handle_event("send_group", %{"content" => content}, socket) when content != "" do
     Chat.send_message(:group, socket.assigns.current_user, content)
-    {:noreply, assign(socket, :inputs, Map.put(socket.assigns.inputs, :group, ""))}
+    {:noreply, socket}
   end
 
   def handle_event("send_group", _, socket), do: {:noreply, socket}
@@ -303,15 +293,11 @@ defmodule OnelistWeb.Dashboard.TriangleChatLive do
   def handle_event("send_dm", %{"content" => content, "channel" => channel}, socket) when content != "" do
     channel_atom = String.to_existing_atom(channel)
     Chat.send_message(channel_atom, socket.assigns.current_user, content)
-    {:noreply, assign(socket, :inputs, Map.put(socket.assigns.inputs, channel_atom, ""))}
+    {:noreply, socket}
   end
 
   def handle_event("send_dm", _, socket), do: {:noreply, socket}
 
-  def handle_event("update_input", %{"content" => content, "channel" => channel}, socket) do
-    channel_atom = String.to_existing_atom(channel)
-    {:noreply, assign(socket, :inputs, Map.put(socket.assigns.inputs, channel_atom, content))}
-  end
 
   # ============================================
   # PUBSUB HANDLERS
