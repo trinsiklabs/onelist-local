@@ -49,17 +49,22 @@ defmodule OnelistWeb.Dashboard.TrioChatLive do
           background: #0a0a0a;
           color: #e0e0e0;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          overflow: hidden;
         }
         .dm-row {
           display: flex;
           height: 35%;
+          min-height: 200px;
           border-bottom: 1px solid #2a2a2a;
+          flex-shrink: 0;
         }
         .dm-pane {
           flex: 1;
           display: flex;
           flex-direction: column;
           border-right: 1px solid #2a2a2a;
+          min-width: 0;
+          overflow: hidden;
         }
         .dm-pane:last-child {
           border-right: none;
@@ -88,11 +93,14 @@ defmodule OnelistWeb.Dashboard.TrioChatLive do
           flex: 1;
           overflow-y: auto;
           padding: 0.5rem;
+          min-height: 0;
+          background: #0a0a0a;
         }
         .message {
           padding: 0.5rem 0.75rem;
           margin-bottom: 0.25rem;
           border-radius: 6px;
+          background: #0a0a0a;
         }
         .message:hover {
           background: #1a1a1a;
@@ -152,6 +160,8 @@ defmodule OnelistWeb.Dashboard.TrioChatLive do
           flex: 1;
           display: flex;
           flex-direction: column;
+          min-height: 0;
+          overflow: hidden;
         }
         .group-pane .pane-header {
           background: #1a1a1a;
@@ -175,7 +185,7 @@ defmodule OnelistWeb.Dashboard.TrioChatLive do
               <span class="badge"><%= @unread_counts[:dm_splntrb_key] %></span>
             <% end %>
           </div>
-          <div class="message-list" id="dm-splntrb-key-messages">
+          <div class="message-list" id="dm-splntrb-key-messages" phx-hook="ScrollToBottom">
             <%= for message <- @messages[:dm_splntrb_key] || [] do %>
               <.message_item message={message} />
             <% end %>
@@ -201,7 +211,7 @@ defmodule OnelistWeb.Dashboard.TrioChatLive do
               <span class="badge"><%= @unread_counts[:dm_splntrb_stream] %></span>
             <% end %>
           </div>
-          <div class="message-list" id="dm-splntrb-stream-messages">
+          <div class="message-list" id="dm-splntrb-stream-messages" phx-hook="ScrollToBottom">
             <%= for message <- @messages[:dm_splntrb_stream] || [] do %>
               <.message_item message={message} />
             <% end %>
@@ -225,7 +235,7 @@ defmodule OnelistWeb.Dashboard.TrioChatLive do
             <span>Key ↔ Stream</span>
             <span style="color: #666; font-size: 0.75rem;">read-only</span>
           </div>
-          <div class="message-list" id="dm-key-stream-messages">
+          <div class="message-list" id="dm-key-stream-messages" phx-hook="ScrollToBottom">
             <%= for message <- @messages[:dm_key_stream] || [] do %>
               <.message_item message={message} />
             <% end %>
@@ -244,7 +254,7 @@ defmodule OnelistWeb.Dashboard.TrioChatLive do
             <span class="badge"><%= @unread_counts[:group] %></span>
           <% end %>
         </div>
-        <div class="message-list" id="group-messages">
+        <div class="message-list" id="group-messages" phx-hook="ScrollToBottom">
           <%= for message <- @messages[:group] || [] do %>
             <.message_item message={message} />
           <% end %>
