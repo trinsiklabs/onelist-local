@@ -39,6 +39,22 @@ defmodule Onelist.Reader.Memory do
     field :source_text, :string
     field :chunk_index, :integer
 
+    # Agent attribution
+    field :source_agent_id, :string
+    field :source_agent_version, :string
+    field :content_hash, :string
+
+    # Memory chain integrity (all nullable - unchained memories valid)
+    field :memory_sequence, :integer
+    field :previous_memory_hash, :string
+    field :memory_hash, :string
+    field :chain_id, :string
+    field :source_entry_hash, :string
+    field :canonical_timestamp, :utc_datetime_usec
+
+    # Current version tracking
+    field :is_current, :boolean, default: true
+
     # Entities and metadata
     field :entities, :map, default: %{}
     field :metadata, :map, default: %{}
@@ -56,8 +72,9 @@ defmodule Onelist.Reader.Memory do
     timestamps(type: :utc_datetime_usec)
   end
 
-  @required_fields [:content, :memory_type, :entry_id, :user_id]
+  @required_fields [:content, :memory_type, :user_id]
   @optional_fields [
+    :entry_id,
     :confidence,
     :embedding,
     :valid_from,
@@ -69,7 +86,20 @@ defmodule Onelist.Reader.Memory do
     :supersedes_id,
     :refines_id,
     :entities,
-    :metadata
+    :metadata,
+    # Agent attribution
+    :source_agent_id,
+    :source_agent_version,
+    :content_hash,
+    # Memory chain integrity
+    :memory_sequence,
+    :previous_memory_hash,
+    :memory_hash,
+    :chain_id,
+    :source_entry_hash,
+    :canonical_timestamp,
+    # Current version tracking
+    :is_current
   ]
 
   @doc """
